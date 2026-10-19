@@ -78,3 +78,18 @@ npm run build
 - Use `.env.example` as the checked-in configuration template and keep fixtures synthetic.
 - Treat old Polaris data as an external migration source: import, stage, validate, then promote it into current LocalData rows.
 - Tool changes must close the full loop: model visibility, execution, UI evidence, next-turn replay, and focused tests.
+
+---
+
+## Conflux fork — Android / Web 融合工程
+
+此仓库是 Polaris 的个人融合开发 fork。目标是**同一套 React/TypeScript 业务代码**构建 Android APK 与 Web/PWA，选择性融合 InternalBeyond-Mobile 功能，并在后期增加可选的 Aru Host 接入。**当前仍是 Polaris 基线，不能把规划能力视为已完成。**
+
+开发与 Codex 交接入口：
+- [系统架构书](docs/CONFLUX_ARCHITECTURE.md)
+- [功能迁移矩阵](docs/CONFLUX_MIGRATION_MATRIX.md)
+- [Codex 开发任务书（P0–P6）](docs/CONFLUX_CODEX_HANDOFF.md)
+- [Codex 仓库规则](AGENTS.md)
+
+当前任务：**P0 源码审计和双端基线构建**。验证通过后才进入 P1（Web/PWA、Android、Grok provider）；不要一开始复制 IB 整套 HTML 或重写 Polaris 聊天核心。此 fork 的 GitHub Issues 当前关闭，因此以开发任务书为准。
+
