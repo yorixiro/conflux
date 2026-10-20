@@ -2,8 +2,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
-  appId: 'com.alyssa.polaris',
-  appName: 'Polaris',
+  appId: 'com.yorixiro.conflux',
+  appName: 'Conflux',
   webDir: 'dist',
   server: {
     iosScheme: 'http',
