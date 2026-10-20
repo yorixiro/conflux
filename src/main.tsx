@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { registerConfluxServiceWorker } from './app/bootstrap/confluxServiceWorker';
 import { installBootRescueSurface } from './app/bootstrap/bootRescueSurface';
 import { installClientDiagnosticsReporter } from './app/bootstrap/clientDiagnosticsReporter';
 import { installGlobalClientErrorLogging } from './app/bootstrap/clientErrorLog';
@@ -38,4 +39,5 @@ async function startApplication() {
   bootRescueSurface.watchReactRoot();
 }
 
+registerConfluxServiceWorker();
 void startApplication();
