@@ -2,6 +2,8 @@
 
 分支：`feat/conflux-shell-pwa`
 
+> 下文记录首批实现时的状态。后续复核、修复和实际命令结果见 [PR #1 构建与代码复核](CONFLUX_PR1_REVIEW.md)。SW 现已改为构建期精确白名单与版本化完整预缓存，不再采用下述目录级运行时缓存；Android 构建仍被本机 SDK/JDK 环境阻塞。
+
 ## 这次确实改了代码
 - Web: 浏览器 tab、应用 metadata、分享标题使用 Conflux。
 - Web: 补全原本指向不存在文件的 `/manifest.webmanifest`；使用仓库已有的 192/512 像素 Polaris 图标作为**临时图标**，不能说已经设计了 Conflux logo。

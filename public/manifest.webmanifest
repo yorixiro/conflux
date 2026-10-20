@@ -2,21 +2,21 @@
   "name": "Conflux",
   "short_name": "Conflux",
   "description": "本地优先的 AI 对话与个人工作空间",
-  "id": "/",
+  "id": "./",
   "lang": "zh-CN",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#090b14",
   "theme_color": "#090b14",
   "icons": [
     {
-      "src": "/icons/polaris-icon-192.png",
+      "src": "./icons/polaris-icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icons/polaris-icon-512.png",
+      "src": "./icons/polaris-icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
