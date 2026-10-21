@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
+import { confluxPwaPlugin } from './tools/confluxPwaPlugin';
 
 function resolveManualChunk(id: string) {
   if (!id.includes('node_modules')) return undefined;
@@ -32,7 +33,7 @@ export default defineConfig(({ mode }) => {
   const apiOrigin = env.VITE_POLARIS_API_ORIGIN?.trim();
 
   return {
-    plugins: [react()],
+    plugins: [react(), confluxPwaPlugin()],
     server: apiOrigin
       ? {
         proxy: {

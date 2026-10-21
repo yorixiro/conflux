@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Polaris</string>
-    <string name="title_activity_main">Polaris</string>
-    <string name="package_name">com.alyssa.polaris</string>
-    <string name="custom_url_scheme">com.alyssa.polaris</string>
+    <string name="app_name">Conflux</string>
+    <string name="title_activity_main">Conflux</string>
+    <string name="package_name">com.yorixiro.conflux</string>
+    <string name="custom_url_scheme">com.yorixiro.conflux</string>
 </resources>

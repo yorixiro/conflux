@@ -1,25 +1,25 @@
 {
-	"appId": "com.alyssa.polaris",
-	"appName": "Polaris",
-	"webDir": "dist",
-	"server": {
-		"iosScheme": "http",
-		"hostname": "localhost"
-	},
-	"plugins": {
-		"CapacitorHttp": {
-			"enabled": false
-		},
-		"Keyboard": {
-			"resize": "none"
-		},
-		"LocalNotifications": {
-			"presentationOptions": [
-				"badge",
-				"sound",
-				"banner",
-				"list"
-			]
-		}
-	}
+  "appId": "com.yorixiro.conflux",
+  "appName": "Conflux",
+  "webDir": "dist",
+  "server": {
+    "iosScheme": "http",
+    "hostname": "localhost"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    },
+    "Keyboard": {
+      "resize": "none"
+    },
+    "LocalNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "banner",
+        "list"
+      ]
+    }
+  }
 }
