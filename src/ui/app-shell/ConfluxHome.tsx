@@ -58,7 +58,7 @@ export function ConfluxHome({
         </button>
       </header>
 
-      <main className="conflux-home-content">
+      <div className="conflux-home-content">
         <div className="conflux-home-primary">
           <header className="conflux-home-intro">
             <p className="conflux-home-eyebrow">PERSONAL SPACE <span aria-hidden="true">—</span> 001</p>
@@ -146,7 +146,7 @@ export function ConfluxHome({
             <p>这里仅显示已接入的功能。日记、书信、记忆星图与主题工坊将在迁移后出现，不会放置无法使用的空入口。</p>
           </footer>
         </aside>
-      </main>
+      </div>
     </section>
   );
 }
