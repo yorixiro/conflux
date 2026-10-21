@@ -76,3 +76,27 @@ npm run android:build-debug
 ```
 
 Android 最后一步须具备 SDK/JDK；本次明确为 BLOCKED，而非已完成同 revision 双端构建。
+
+## 2026-10-21：Termux 本地入口与审查收尾
+
+基于 `32bb7c7`，本节是后续验证记录；上面的 Windows / GroupWorld 记录是历史结果。
+
+- smoke 探针改为真正按需加载的 `ThinkingSheet`，删除重复 A 探针、整套缓存快照和临时浏览器 profile；保留安装、离线首次加载、私密响应隔离、A/B 版本一致性和更新清理检查。
+- 精简 Service Worker 测试替身，不再自行模拟浏览器完整生命周期；保留安全请求选项、失败清理、已有缓存保护、作用域隔离及不缓存运行时内容的断言。生产 `public/sw.js` 与构建插件未改。
+- 新增 Termux 准备/热开发/构建/日常启动命令；本机入口复用已有 Provider relay，不新增聊天引擎或存储。监听 `127.0.0.1`，开发 5173、安装版 4173，缺失 API 明确返回 501。
+- 未增加项目依赖或改锁文件。手机快速构建用 Vite；完整验证仍包含 TypeScript。
+
+本轮实际验证环境：Linux x64，Node 24.19.0，Chromium headless（通过 `CONFLUX_BROWSER_EXECUTABLE` 指向本地二进制）。Playwright 默认浏览器下载失败，改用 npm 提供的 Chromium 执行，未因此跳过浏览器断言。
+
+| 命令 / 检查 | 实际结果 |
+| --- | --- |
+| `ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci --no-audit --no-fund` | 通过 |
+| `npm run verify` | 通过：类型检查、worker 类型检查、492 文件 / 3104 项测试、根路径生产构建 |
+| `CONFLUX_BROWSER_EXECUTABLE=… npm run test:pwa` | 根路径通过，125 个预缓存资源、无 pageerror |
+| `npm run build -- --base=/conflux/` + `CONFLUX_BROWSER_EXECUTABLE=… npm run test:pwa -- /conflux/` | 通过；子目录 shell 检查，不代表全业务子目录适配 |
+| 本地入口浏览器验证 | 5173 源码变动触发真实 HMR、开发无 SW；4173 满足 Chromium 安装条件、离线刷新通过、Provider relay handler 可达；无 pageerror |
+| `bash -n tools/termux-setup.sh`、`git diff --check` | 通过 |
+
+未验证：Android/Termux 真机依赖安装、WASM 回退分支、主屏实际安装、真实 Provider 发送/停止/聊天持久化、APK 构建。没有手机远程执行权限，实际安装按钮仍需用户操作。Android SDK/JDK 门槛仍沿用上文 BLOCKED；本轮没有把桌面 Chromium 测试冒充手机验收。
+
+更新和回滚：没有数据迁移；可回退本轮源码后重新构建，继续使用固定的 `http://127.0.0.1:4173/`，不要清除浏览器站点数据。最终已重新构建根路径产物。

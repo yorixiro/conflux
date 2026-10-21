@@ -1,5 +1,7 @@
 # Polaris
 
+Conflux fork：安卓手机本地开发和 PWA 安装见 [Termux 使用说明](docs/CONFLUX_TERMUX.md)。
+
 Polaris is a local-first AI workspace for sustained work with models, collaborators, saved materials, tools, and personal project context.
 
 Most AI chat clients treat a conversation as a single message stream. Polaris treats it as a workspace: conversations survive restarts, collaborators keep identity and memory boundaries, useful outputs become cards or project materials, and model-visible tools leave evidence that the next request can use.

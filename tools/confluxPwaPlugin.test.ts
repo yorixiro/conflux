@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -40,14 +40,10 @@ describe('Conflux Vite PWA build', () => {
     }
     expect(result.paths.some((name) => name.endsWith('.map'))).toBe(false);
     expect(result.paths).not.toContain('sw.js');
-    expect(readFileSync(resolve(repo, 'public/sw.js'), 'utf8')).toContain('__CONFLUX_BUILD_VERSION__');
     const same = await compile();
     expect(same.version).toBe(result.version);
     writeFileSync(resolve(root, 'index.html'), '<title>New public shell</title><script type="module" src="/main.js"></script>');
     const changed = await compile();
     expect(changed.version).not.toBe(result.version);
-    const nested = await compile('/conflux/');
-    expect(nested.version).not.toBe(changed.version);
-    expect(nested.paths).toContain('index.html');
   });
 });

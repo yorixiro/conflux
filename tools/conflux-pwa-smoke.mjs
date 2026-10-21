@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir, mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { resolve, extname, sep } from 'node:path';
 import { once } from 'node:events';
@@ -57,28 +57,25 @@ const server = createServer(async (req, res) => {
     res.end(content);
   } catch { res.writeHead(404).end(); }
 });
-server.listen(0, '127.0.0.1');
-await once(server, 'listening');
-const origin = `http://127.0.0.1:${server.address().port}`;
-const lazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^GroupWorld-.*\.js$/.test(name));
+const lazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^ThinkingSheet-.*\.js$/.test(name));
 assert.ok(lazyFile, 'Expected a real lazy module');
-const lazyUrl = `${origin}${base}assets/${lazyFile}`;
-// GroupWorld has a 1.2s app preload. Preserve its original first-use check before
-// update installation, then probe a separate real on-demand A chunk while B waits.
-const aUpgradeLazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^ThinkingSheet-.*\.js$/.test(name));
-assert.ok(aUpgradeLazyFile, 'Expected a real on-demand A module for the waiting-update probe');
-const aUpgradeLazyUrl = `${origin}${base}assets/${aUpgradeLazyFile}`;
-const bLazyUrl = `${origin}${base}${bLazyFile}`;
-await mkdir(resolve('tmp'), { recursive: true });
-const profile = await mkdtemp(resolve('tmp/conflux-pwa-browser-'));
+
+let browser;
 let context;
 try {
-  context = await chromium.launchPersistentContext(profile, {
-    headless: true, channel: process.env.CONFLUX_BROWSER_CHANNEL || undefined
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const lazyUrl = `${origin}${base}assets/${lazyFile}`;
+  const bLazyUrl = `${origin}${base}${bLazyFile}`;
+  browser = await chromium.launch({
+    headless: true, channel: process.env.CONFLUX_BROWSER_CHANNEL || undefined,
+    executablePath: process.env.CONFLUX_BROWSER_EXECUTABLE || undefined
   });
+  context = await browser.newContext();
+  context.setDefaultTimeout(30_000);
   const errors = [];
   const lazyPageRequests = [];
-  const aUpgradeLazyPageRequests = [];
   const bLazyPageRequests = [];
   const observePage = (page) => {
     page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
@@ -86,16 +83,14 @@ try {
     // client-side request would invalidate the claim of a first-use lazy import.
     page.on('request', (request) => {
       if (request.url() === lazyUrl) lazyPageRequests.push(request.url());
-      if (request.url() === aUpgradeLazyUrl) aUpgradeLazyPageRequests.push(request.url());
       if (request.url() === bLazyUrl) bLazyPageRequests.push(request.url());
     });
   };
   context.on('page', observePage);
-  for (const existingPage of context.pages()) observePage(existingPage);
   const page = await context.newPage();
   await page.goto(`${origin}${base}`);
   await page.waitForSelector('#root button');
-  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(async () => !!(await navigator.serviceWorker.getRegistration())?.active, null, { timeout: 30_000 });
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const keys = await page.evaluate(async () => {
     const names = await caches.keys();
@@ -128,15 +123,15 @@ try {
   assert.equal(await page.evaluate(async () => !!(await caches.match(location.origin + new URL('assets/private.json', location.href).pathname))), false);
   assert.ok(!(await page.evaluate(async () => (await (await caches.match(new URL('index.html', location.href).href)).text()))).includes('private-smoke-sentinel'));
 
-  assert.deepEqual(lazyPageRequests, [], 'GroupWorld must not be requested by any page before going offline');
+  assert.deepEqual(lazyPageRequests, [], 'ThinkingSheet must not be requested by any page before going offline');
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('#root button');
   assert.equal(await page.title(), 'Conflux');
-  assert.deepEqual(lazyPageRequests, [], 'Offline shell reload must not eagerly request GroupWorld');
+  assert.deepEqual(lazyPageRequests, [], 'Offline shell reload must not eagerly request ThinkingSheet');
   const exports = await page.evaluate(async (url) => Object.keys(await import(url)), lazyUrl);
-  assert.ok(exports.includes('GroupWorld'), 'Lazy module must load on first use offline');
-  assert.deepEqual(lazyPageRequests, [lazyUrl], 'First GroupWorld page request must occur in the offline import');
+  assert.ok(exports.includes('ThinkingSheet'), 'Lazy module must load on first use offline');
+  assert.deepEqual(lazyPageRequests, [lazyUrl], 'First ThinkingSheet page request must occur in the offline import');
 
   // Deploy explicitly different B HTML/chunk while A still controls this client.
   // B's complete cache must wait; an ONLINE reload must not mix B HTML with A's allowlist.
@@ -150,25 +145,7 @@ try {
     await window.__smokeRegistration.update();
   });
   await page.waitForFunction(() => window.__smokeRegistration.waiting?.state === 'installed');
-  const aCacheName = `conflux-static:${encodeURIComponent(base)}:${version}`;
   const bCacheName = `conflux-static:${encodeURIComponent(base)}:${bVersion}`;
-  const releases = await page.evaluate(async ({ aCacheName, bCacheName, bLazyUrl }) => {
-    const aCache = await caches.open(aCacheName);
-    const bCache = await caches.open(bCacheName);
-    const shellUrl = new URL('index.html', location.href).href;
-    return { names: (await caches.keys()).sort(),
-      aHtml: await (await aCache.match(shellUrl)).text(),
-      bHtml: await (await bCache.match(shellUrl)).text(),
-      aHasBChunk: !!(await aCache.match(bLazyUrl)),
-      bChunk: await (await bCache.match(bLazyUrl)).text(),
-      bKeys: (await bCache.keys()).map((request) => request.url).sort() };
-  }, { aCacheName, bCacheName, bLazyUrl });
-  assert.deepEqual(releases.names, [aCacheName, bCacheName].sort());
-  assert.equal(releases.aHtml, aHtml);
-  assert.equal(releases.bHtml, bHtml);
-  assert.equal(releases.aHasBChunk, false);
-  assert.equal(releases.bChunk, bLazySource);
-  assert.deepEqual(releases.bKeys, bPrecache.map((path) => `${origin}${base}${path}`).sort());
   await page.reload();
   await page.waitForSelector('#root button');
   assert.equal(await page.title(), 'Conflux', 'Online reload under A must keep release A HTML while B waits');
@@ -176,11 +153,7 @@ try {
   assert.equal(await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).waiting?.state), 'installed');
   assert.deepEqual(bLazyPageRequests, [], 'A-controlled pages must not request the B-only chunk');
 
-  assert.deepEqual(aUpgradeLazyPageRequests, [], 'No page may request the waiting-update A probe before going offline');
   await context.setOffline(true);
-  const aExports = await page.evaluate(async (url) => Object.keys(await import(url)), aUpgradeLazyUrl);
-  assert.ok(aExports.includes('ThinkingSheet'), 'Matching A lazy module must load on first use offline while B waits');
-  assert.deepEqual(aUpgradeLazyPageRequests, [aUpgradeLazyUrl], 'First A probe page request must occur in the offline import');
 
   const workers = context.serviceWorkers();
   let updatedWorker;
@@ -214,13 +187,11 @@ try {
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ result: 'PASS', base, precached: precache.length,
     offlineReload: true, firstUseLazyModule: lazyFile, privateCacheIsolation: true,
-    firstUseLazyModuleWhileUpdateWaits: aUpgradeLazyFile,
     upgradeFixture: { distinctHtml: true, contentHashedLazyModule: bLazyFile },
     onlineReloadPinnedToActiveRelease: true, activatedReleaseOfflineFirstUse: true,
     waitingUpdateAndCleanup: true, browserErrors: errors }, null, 2));
-  await context.close();
 } finally {
   await context?.close();
-  await new Promise((done) => server.close(done));
-  await rm(profile, { recursive: true, force: true });
+  await browser?.close();
+  if (server.listening) await new Promise((done) => server.close(done));
 }

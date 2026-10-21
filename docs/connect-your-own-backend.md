@@ -65,6 +65,8 @@ The remaining missing handler rows mark routes that need implementation before u
 
 ### Node Selfhost Status
 
+Conflux adds a **loopback-only personal entrypoint** for Termux: `npm run termux:dev` (Vite HMR, port 5173) and `npm run termux:start` (built PWA, port 4173). Both reuse the existing provider-relay, embeddings, images, audio and client-diagnostics handlers on the same origin. It is not a complete public selfhost server: built-in free chat, search, model discovery and material sharing are not exposed by this entrypoint. See [Termux setup](CONFLUX_TERMUX.md).
+
 The current `server/` directory contains shared relay-target validators used by API surfaces. It is a responsibility area, not a complete standalone Node selfhost application. The `selfhost:*` scripts are kept for the release-channel server build shape, but public readers should treat the Vercel-style `api/` handlers and the Worker package below as the concrete backend surfaces currently present here.
 
 ### Cloudflare Worker Example

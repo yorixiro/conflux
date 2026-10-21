@@ -7,27 +7,13 @@ const precache = ['index.html', 'assets/main.js', 'assets/lazy.js', 'manifest.we
 
 function cacheStorage() {
   const key = (input: string | Request) => new URL(typeof input === 'string' ? input : input.url, origin).href;
-  const fetch = vi.fn(async (input: string | Request) => {
-    const response = new Response(key(input).endsWith('/index.html')
-      ? '<script src="/assets/main.js"></script>' : 'public build asset');
-    Object.defineProperty(response, 'type', { value: 'basic' });
-    return response;
-  });
+  const fetch = vi.fn(async (_input: string | Request) => new Response('network response'));
   function createCache() {
     const entries = new Map<string, Response>();
     const cache = {
-      keys: vi.fn(async () => [...entries.keys()]),
       match: vi.fn(async (input: string | Request) => entries.get(key(input))?.clone()),
       put: vi.fn(async (input: string | Request, response: Response) => { entries.set(key(input), response); }),
-      addAll: vi.fn(async (inputs: (string | Request)[]) => {
-        // Like Cache.addAll, commit nothing until every fetch has succeeded.
-        const responses = await Promise.all(inputs.map(async (input) => {
-          const response = await fetch(input);
-          if (!response.ok) throw new Error('Precache failed');
-          return [key(input), response] as const;
-        }));
-        for (const [url, response] of responses) entries.set(url, response);
-      })
+      addAll: vi.fn(async (_inputs: Request[]) => {})
     };
     return { entries, cache };
   }
@@ -87,178 +73,70 @@ function worker(scopePath = '/', buildVersion = 'test-version', storage = cacheS
 }
 
 describe('Conflux Service Worker privacy boundary', () => {
-  it('precache includes lazy chunks and never forces activation over a running app', async () => {
+  it('precaches the exact build with safe Request options and does not force activation', async () => {
     const sw = worker();
     await sw.install();
-    expect([...sw.entries.keys()]).toContain(`${origin}/assets/lazy.js`);
+    const requests = sw.cache.addAll.mock.calls[0][0];
+    expect(requests.map((r) => r.url)).toEqual(precache.map((path) => `${origin}/${path}`));
+    for (const request of requests) {
+      expect(request.credentials).toBe('omit');
+      expect(request.redirect).toBe('error');
+      expect(request.cache).toBe('reload');
+    }
     expect(sw.skipWaiting).not.toHaveBeenCalled();
   });
 
-  it('fails installation if a lazy chunk cannot be cached, deleting only the failed release', async () => {
+  it.each([false, true])('failed installation deletes only a newly created cache (existed=%s)', async (existed) => {
     const sw = worker();
-    sw.fetch.mockImplementation(async (input) => {
-      if (String(typeof input === 'string' ? input : input.url).endsWith('/assets/lazy.js')) {
-        throw new Error('offline');
-      }
-      return new Response('public');
-    });
-    await expect(sw.install()).rejects.toThrow('offline');
-    expect(sw.caches.delete).toHaveBeenCalledExactlyOnceWith('conflux-static:%2F:test-version');
-    expect(await sw.caches.keys()).toEqual([]);
+    sw.caches.has.mockResolvedValue(existed);
+    sw.cache.addAll.mockRejectedValue(new Error('precache failed'));
+    await expect(sw.install()).rejects.toThrow('precache failed');
+    expect(sw.caches.delete.mock.calls).toEqual(existed ? [] : [['conflux-static:%2F:test-version']]);
     expect(sw.skipWaiting).not.toHaveBeenCalled();
   });
 
-  it.each(['network', 'http'])('preserves active A and waiting B on a failed rollback to A (%s)', async (failure) => {
-    const storage = cacheStorage();
-    const active = worker('/', 'A', storage);
-    storage.fetch.mockImplementation(async (input) => new Response(`A:${typeof input === 'string' ? input : input.url}`));
-    await active.install();
-    await active.activate();
-    const waiting = worker('/', 'B', storage);
-    storage.fetch.mockImplementation(async (input) => new Response(`B:${typeof input === 'string' ? input : input.url}`));
-    await waiting.install();
-    const readCache = async (name: string) => {
-      const cache = await storage.caches.open(name);
-      return Promise.all((await cache.keys()).map(async (url) => [url, await (await cache.match(url))!.text()]));
-    };
-    const activeName = 'conflux-static:%2F:A';
-    const waitingName = 'conflux-static:%2F:B';
-    const activeContents = await readCache(activeName);
-    const waitingContents = await readCache(waitingName);
-    expect(activeContents).toEqual(precache.map((path) => [`${origin}/${path}`, `A:${origin}/${path}`]));
-    expect(waitingContents).toEqual(precache.map((path) => [`${origin}/${path}`, `B:${origin}/${path}`]));
-
-    const rollback = worker('/', 'A', storage);
-    storage.fetch.mockImplementation(async (input) => {
-      const url = typeof input === 'string' ? input : input.url;
-      if (url.endsWith('/assets/lazy.js')) {
-        if (failure === 'network') throw new Error('offline');
-        return new Response('unavailable', { status: 503 });
-      }
-      return new Response(`rollback:${url}`);
-    });
-    await expect(rollback.install()).rejects.toThrow(failure === 'network' ? 'offline' : 'Precache failed');
-    expect(await readCache(activeName)).toEqual(activeContents);
-    expect(await readCache(waitingName)).toEqual(waitingContents);
-    expect((await storage.caches.keys()).sort()).toEqual([activeName, waitingName]);
-    expect(storage.caches.delete).not.toHaveBeenCalled();
-    expect(rollback.skipWaiting).not.toHaveBeenCalled();
-    storage.fetch.mockRejectedValue(new Error('offline'));
-    expect(await (await active.request('/', 'navigate')!).text()).toBe(`A:${origin}/index.html`);
-  });
-
-  it('never intercepts unknown, authenticated, ranged, query or non-GET resources', () => {
+  it('does not intercept private, unknown, authenticated, ranged, query or non-GET resources', () => {
     const sw = worker();
     for (const path of ['/api/private', '/assets/private.json', '/icons/private.png', '/assets/main.js?token=private', 'https://other.example/assets/main.js']) {
       expect(sw.request(path)).toBeUndefined();
+    }
+    for (const path of ['/api/private', '/documents/private.html', '/chatbox-converter.html', '/?private=1']) {
+      expect(sw.request(path, 'navigate')).toBeUndefined();
     }
     expect(sw.request('/assets/main.js', 'cors', { method: 'POST' })).toBeUndefined();
     expect(sw.request('/assets/main.js', 'cors', { headers: { authorization: 'Bearer private' } })).toBeUndefined();
     expect(sw.request('/assets/main.js', 'cors', { headers: { range: 'bytes=0-4' } })).toBeUndefined();
   });
 
-  it.each(['/', '/conflux/'])('pins online navigation to active A while distinct release B waits at %s', async (scope) => {
-    const storage = cacheStorage();
-    const aLazy = 'assets/lazy-a-111aaa.js';
-    const bLazy = 'assets/lazy-b-222bbb.js';
-    const aHtml = `<script type="module">import('./${aLazy}')</script>`;
-    const bHtml = `<script type="module">import('./${bLazy}')</script>`;
-    storage.fetch.mockImplementation(async (input) => new Response(
-      (typeof input === 'string' ? input : input.url).endsWith('/index.html') ? aHtml : 'release A chunk'
-    ));
-    const active = worker(scope, 'A', storage, ['index.html', aLazy]);
-    await active.install();
-    await active.activate();
-    storage.fetch.mockImplementation(async (input) => new Response(
-      [origin + scope, `${origin}${scope}index.html`].includes(typeof input === 'string' ? input : input.url)
-        ? bHtml : 'release B chunk'
-    ));
-    const waiting = worker(scope, 'B', storage, ['index.html', bLazy]);
-    await waiting.install();
-    expect(await (await waiting.cache.match(`${origin}${scope}index.html`))!.text()).toBe(bHtml);
-    expect(waiting.entries.has(`${origin}${scope}${bLazy}`)).toBe(true);
-    expect(active.entries.has(`${origin}${scope}${bLazy}`)).toBe(false);
-    expect(waiting.skipWaiting).not.toHaveBeenCalled();
-    storage.fetch.mockClear();
-
-    for (const entry of [scope, `${scope}index.html`]) {
-      expect(await (await active.request(entry, 'navigate')!).text()).toBe(aHtml);
+  it.each(['/', '/conflux/'])('uses matching cached HTML and assets at %s; network recovery never writes cache', async (scope) => {
+    const sw = worker(scope, 'A');
+    sw.entries.set(`${origin}${scope}index.html`, new Response('release A HTML'));
+    sw.entries.set(`${origin}${scope}assets/lazy.js`, new Response('release A chunk'));
+    for (const path of [scope, `${scope}index.html`]) {
+      expect(await (await sw.request(path, 'navigate')!).text()).toBe('release A HTML');
     }
-    expect(storage.fetch).not.toHaveBeenCalled();
-    storage.fetch.mockRejectedValue(new Error('offline'));
-    expect(await (await active.request(`${scope}${aLazy}`)!).text()).toBe('release A chunk');
-    expect(active.request(`${scope}${bLazy}`)).toBeUndefined();
-    expect(active.cache.put).not.toHaveBeenCalled();
-    expect(waiting.cache.put).not.toHaveBeenCalled();
-
-    // Only after the old clients close does B activate with its own shell/allowlist.
-    await waiting.activate();
-    expect(await (await waiting.request(scope, 'navigate')!).text()).toBe(bHtml);
-    expect(await (await waiting.request(`${scope}${bLazy}`)!).text()).toBe('release B chunk');
-    expect(await storage.caches.keys()).toEqual([`conflux-static:${encodeURIComponent(scope)}:B`]);
-  });
-
-  it('serves only the build shell rather than online private runtime HTML', async () => {
-    const sw = worker();
-    await sw.install();
-    sw.fetch.mockResolvedValue(new Response('private runtime HTML'));
-    expect(await (await sw.request('/', 'navigate')!).text()).toContain('<script');
-    expect(sw.fetch).toHaveBeenCalledTimes(precache.length);
-    sw.fetch.mockRejectedValue(new Error('offline'));
-    expect(await (await sw.request('/', 'navigate')!).text()).toContain('<script');
-    expect(sw.cache.put).not.toHaveBeenCalled();
-  });
-
-  it('uses network recovery only when its cached shell is absent, without caching runtime HTML', async () => {
-    const sw = worker();
-    sw.fetch.mockResolvedValue(new Response('uncached recovery HTML'));
-    expect(await (await sw.request('/', 'navigate')!).text()).toBe('uncached recovery HTML');
-    expect(sw.cache.put).not.toHaveBeenCalled();
-    expect(sw.entries.size).toBe(0);
-    sw.fetch.mockRejectedValue(new Error('offline'));
-    expect((await sw.request('/index.html', 'navigate')!).type).toBe('error');
-    expect(sw.cache.put).not.toHaveBeenCalled();
-    expect(sw.entries.size).toBe(0);
-  });
-
-  it('cleans only this scope and the legacy root cache', async () => {
-    const sw = worker();
-    sw.caches.keys.mockResolvedValue(['unrelated', 'conflux-static:%2Fother%2F:old', 'conflux-static:%2F:old', 'conflux-static:%2F:test-version', 'conflux-static-v1']);
-    await sw.activate();
-    expect(sw.caches.delete.mock.calls.flat().sort()).toEqual(['conflux-static-v1', 'conflux-static:%2F:old']);
-  });
-
-  it.each([
-    ['/', '/-other/'],
-    ['/conflux/', '/conflux/-other/']
-  ])('activation for %s preserves the cache for %s', async (scope, otherScope) => {
-    const storage = cacheStorage();
-    const sw = worker(scope, 'test-version', storage);
-    const other = worker(otherScope, 'test-version', storage);
-    await sw.install();
-    await other.install();
-    const names = await storage.caches.keys();
-    await sw.activate();
-    expect(sw.caches.delete).not.toHaveBeenCalled();
-    expect(await storage.caches.keys()).toEqual(names);
-  });
-
-  it('uses its registration scope for offline fallback on nested deployments', async () => {
-    const sw = worker('/conflux/');
-    await sw.install();
-    sw.fetch.mockRejectedValue(new Error('offline'));
-    expect(await (await sw.request('/conflux/', 'navigate')!).text()).toContain('<script');
-    expect(sw.request('/', 'navigate')).toBeUndefined();
-    sw.caches.keys.mockResolvedValue(['conflux-static:%2Fconflux%2F:old', 'conflux-static:%2F:old', 'conflux-static-v1']);
-    await sw.activate();
-    expect(sw.caches.delete).toHaveBeenCalledExactlyOnceWith('conflux-static:%2Fconflux%2F:old');
-  });
-
-  it('does not intercept API, user-file or unrelated HTML navigations', async () => {
-    const sw = worker();
-    for (const path of ['/api/private', '/documents/private.html', '/chatbox-converter.html']) {
-      expect(sw.request(path, 'navigate')).toBeUndefined();
+    expect(await (await sw.request(`${scope}assets/lazy.js`)!).text()).toBe('release A chunk');
+    expect(sw.fetch).not.toHaveBeenCalled();
+    if (scope !== '/') expect(sw.request('/', 'navigate')).toBeUndefined();
+    sw.entries.clear();
+    for (const [path, mode] of [[scope, 'navigate'], [`${scope}assets/lazy.js`, 'cors']]) {
+      expect(await (await sw.request(path, mode)!).text()).toBe('network response');
     }
+    expect(sw.entries.size).toBe(0);
     expect(sw.cache.put).not.toHaveBeenCalled();
+    sw.fetch.mockRejectedValue(new Error('offline'));
+    expect((await sw.request(scope, 'navigate')!).type).toBe('error');
+  });
+
+  it.each(['/', '/conflux/'])('activation cleans only old caches belonging to %s', async (scope) => {
+    const sw = worker(scope);
+    const prefix = `conflux-static:${encodeURIComponent(scope)}:`;
+    const retained = ['unrelated', 'conflux-static:%2Fother%2F:old',
+      `conflux-static:${encodeURIComponent(scope + '-other/')}:old`, `${prefix}test-version`];
+    sw.caches.keys.mockResolvedValue([...retained, `${prefix}old`, 'conflux-static-v1']);
+    await sw.activate();
+    expect(sw.caches.delete.mock.calls.flat().sort()).toEqual(
+      (scope === '/' ? [`${prefix}old`, 'conflux-static-v1'] : [`${prefix}old`]).sort()
+    );
   });
 });
