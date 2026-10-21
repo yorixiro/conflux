@@ -1,6 +1,8 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
+import { ConfluxHome } from './ConfluxHome';
+import type { CollectionShelf } from '../../types/domain';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
 import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
@@ -61,6 +63,24 @@ export function AppShellView({
   chatFrameInteractive,
   groupFrameInteractive
 }: AppShellViewProps) {
+  const [homeOpen, setHomeOpen] = useState(true);
+  const onOpenHomeConversation = (id: string) => {
+    desktopSidebarProps.onOpenConversation(id);
+    setHomeOpen(false);
+  };
+  const onOpenHomeShelf = (shelf: CollectionShelf) => {
+    desktopSidebarProps.onSelectShelf(shelf);
+    setHomeOpen(false);
+  };
+  const onOpenHomeGroup = () => {
+    desktopSidebarProps.onOpenGroupWorld();
+    setHomeOpen(false);
+  };
+  const onNewHomeConversation = () => {
+    desktopSidebarProps.onCreateConversation();
+    setHomeOpen(false);
+  };
+
   const worldStack = (
     <section className="world-stack">
       {worldPresence.renderCollection && (
@@ -149,18 +169,34 @@ export function AppShellView({
       <div className="theme-transition-veil" aria-hidden="true" />
       <div className="collaborator-transition-veil" aria-hidden="true" />
       {!startupThemeReady ? <div className="startup-theme-veil" aria-hidden="true" /> : null}
-      {showDesktopSidebar ? (
+      {homeOpen ? (
+        <ConfluxHome
+          conversations={desktopSidebarProps.conversations}
+          activeConversationId={desktopSidebarProps.activeConversationId}
+          collaboratorCount={desktopSidebarProps.collaborators.length}
+          onOpenConversation={onOpenHomeConversation}
+          onNewConversation={onNewHomeConversation}
+          onOpenShelf={onOpenHomeShelf}
+          onOpenGroup={onOpenHomeGroup}
+        />
+      ) : showDesktopSidebar ? (
         <DesktopAppShellFrame
           desktopSidebarProps={{
             ...desktopSidebarProps,
             collapsed: effectiveDesktopSidebarCollapsed,
-            onToggleCollapsed: toggleDesktopSidebarCollapsed
+            onToggleCollapsed: toggleDesktopSidebarCollapsed,
+            onOpenHome: () => setHomeOpen(true)
           }}
         >
           {worldStack}
         </DesktopAppShellFrame>
       ) : (
-        <MobileAppShellFrame topbarProps={topbarProps}>
+        <MobileAppShellFrame
+          topbarProps={{
+            ...topbarProps,
+            actions: { ...topbarProps.actions, onOpenHome: () => setHomeOpen(true) }
+          }}
+        >
           {worldStack}
         </MobileAppShellFrame>
       )}
