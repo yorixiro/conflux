@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
@@ -9,9 +9,14 @@ import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
 import { WorldFrameBoundary, WorldFrameFallback } from './WorldFrameBoundary';
 import type { useAppShellViewController } from './useAppShellViewController';
 
-type AppShellViewProps = ReturnType<typeof useAppShellViewController>;
+type AppShellViewProps = ReturnType<typeof useAppShellViewController> & {
+  homeOpen: boolean;
+  onHomeOpenChange: (open: boolean) => void;
+};
 
 export function AppShellView({
+  homeOpen,
+  onHomeOpenChange,
   activeWorld,
   shellWorld,
   activeChatDensity,
@@ -63,22 +68,21 @@ export function AppShellView({
   chatFrameInteractive,
   groupFrameInteractive
 }: AppShellViewProps) {
-  const [homeOpen, setHomeOpen] = useState(true);
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
-    setHomeOpen(false);
+    onHomeOpenChange(false);
   };
   const onOpenHomeShelf = (shelf: CollectionShelf) => {
     desktopSidebarProps.onSelectShelf(shelf);
-    setHomeOpen(false);
+    onHomeOpenChange(false);
   };
   const onOpenHomeGroup = () => {
     desktopSidebarProps.onOpenGroupWorld();
-    setHomeOpen(false);
+    onHomeOpenChange(false);
   };
   const onNewHomeConversation = () => {
     desktopSidebarProps.onCreateConversation();
-    setHomeOpen(false);
+    onHomeOpenChange(false);
   };
 
   const worldStack = (
@@ -185,7 +189,7 @@ export function AppShellView({
             ...desktopSidebarProps,
             collapsed: effectiveDesktopSidebarCollapsed,
             onToggleCollapsed: toggleDesktopSidebarCollapsed,
-            onOpenHome: () => setHomeOpen(true)
+            onOpenHome: () => onHomeOpenChange(true)
           }}
         >
           {worldStack}
@@ -194,7 +198,7 @@ export function AppShellView({
         <MobileAppShellFrame
           topbarProps={{
             ...topbarProps,
-            actions: { ...topbarProps.actions, onOpenHome: () => setHomeOpen(true) }
+            actions: { ...topbarProps.actions, onOpenHome: () => onHomeOpenChange(true) }
           }}
         >
           {worldStack}
