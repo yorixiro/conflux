@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
+import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
@@ -146,7 +147,7 @@ export function AppShellView({
 
   return (
     <main
-      className={`app-shell app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${showDesktopSidebar ? 'has-desktop-sidebar' : ''} ${showDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
+      className={`app-shell ${!showDesktopSidebar ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${showDesktopSidebar ? 'has-desktop-sidebar' : ''} ${showDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >
       {backgroundUrl ? (
@@ -204,6 +205,40 @@ export function AppShellView({
           {worldStack}
         </MobileAppShellFrame>
       )}
+
+      {!showDesktopSidebar ? (
+        <MobileBottomNavigation
+          activeWorld={activeWorld}
+          collectionShelf={topbarProps.state.collectionShelf}
+          homeOpen={homeOpen}
+          settingsOpen={topbarProps.state.menuOpen}
+          onOpenChat={() => {
+            if (activeWorld !== 'chat') topbarProps.actions.onOpenPreviewChat();
+            onHomeOpenChange(false);
+          }}
+          onOpenGroup={() => {
+            if (activeWorld !== 'group') desktopSidebarProps.onOpenGroupWorld();
+            onHomeOpenChange(false);
+          }}
+          onOpenHome={() => onHomeOpenChange(true)}
+          onOpenArchive={() => {
+            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf !== 'info') {
+              desktopSidebarProps.onSelectShelf('info');
+            }
+            onHomeOpenChange(false);
+          }}
+          onOpenWorkshop={() => {
+            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf === 'info') {
+              desktopSidebarProps.onSelectShelf('project');
+            }
+            onHomeOpenChange(false);
+          }}
+          onOpenSettings={() => {
+            onHomeOpenChange(false);
+            topbarProps.actions.onOpenSettings();
+          }}
+        />
+      ) : null}
 
       <AppReplyNotificationStack {...replyNotificationProps} />
       <PersistenceReadFailureNotice
