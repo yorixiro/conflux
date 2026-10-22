@@ -24,6 +24,29 @@ const mime: Record<string, string> = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
   '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.wasm': 'application/wasm',
 };
+// In HMR mode, replace any previously installed offline worker with a one-shot
+// handoff worker. An old production page still registers /sw.js on load, so the
+// installed PWA can leave its cached shell automatically on the next launch.
+// Only the registration changes: user databases and settings are untouched.
+const DEV_SERVICE_WORKER = `
+self.addEventListener('install', (event) => {
+  event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    await self.registration.unregister();
+    const scope = new URL(self.registration.scope);
+    for (const client of windows) {
+      const page = new URL(client.url);
+      if (page.origin !== scope.origin || (page.pathname !== scope.pathname && page.pathname !== new URL('index.html', scope).pathname)) continue;
+      await client.navigate(new URL('?conflux-dev=1', scope).href).catch(() => {});
+    }
+  })());
+});
+`;
+
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const maxBodyBytes = 32 * 1024 * 1024;
 
@@ -50,6 +73,17 @@ export async function startLocalServer({ dev = false, port = 4173, root = resolv
         json(res, 403, { error: 'Only the local device may access this server.' }); return;
       }
       const url = new URL(req.url || '/', `http://${host}`);
+      // A production PWA opened against the hot-dev port will update its old
+      // worker to this tiny handoff worker, then continue to live Vite assets.
+      if (dev && url.pathname === '/sw.js') {
+        res.writeHead(200, {
+          'Content-Type': 'text/javascript; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'Service-Worker-Allowed': '/'
+        });
+        res.end(DEV_SERVICE_WORKER);
+        return;
+      }
       // One-time bridge from an installed offline PWA to the same-origin HMR server.
       // The old worker does not intercept this path. Only its registration is removed;
       // Cache Storage, localStorage, IndexedDB and chat data are untouched.
@@ -157,7 +191,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   try {
     const app = await startLocalServer({ dev });
     console.log(`Conflux ${dev ? '热开发' : 'PWA'}：http://127.0.0.1:4173`);
-    console.log(dev ? '首次从旧 PWA 切换：先访问 http://127.0.0.1:4173/__conflux_dev，之后安装版可热更新（开发期间不提供离线缓存）。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
+    console.log(dev ? '热开发已启动：已安装的 PWA 再次打开后会自动接管旧离线缓存（开发期间需保持此服务运行）。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
     for (const signal of ['SIGINT', 'SIGTERM'] as const) {
       process.once(signal, () => { void app.close().then(() => process.exit(0)); });
     }
