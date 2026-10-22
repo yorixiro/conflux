@@ -32,6 +32,7 @@ export type AppTopbarState = {
 export type AppTopbarActions = {
   onToggleWorld: () => void;
   onOpenHome?: () => void;
+  onOpenSidebar?: () => void;
   onToggleCollaboratorSwitch: () => void;
   onCreateConversation: () => void;
   onToggleSearch: () => void;
@@ -156,6 +157,7 @@ export function AppTopbar({
           ) : null}
 
           <div className="topbar-actions">
+            {actions.onOpenSidebar ? <button type="button" className="action-btn icon-btn" onClick={actions.onOpenSidebar} aria-label="打开聊天侧栏" aria-haspopup="dialog"><Icon name="sidebar" size={18} /></button> : null}
             {actions.onOpenHome ? (
               <button
                 type="button"

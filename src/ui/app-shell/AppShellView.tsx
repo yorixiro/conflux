@@ -84,7 +84,8 @@ export function AppShellView({
     onHomeOpenChange(false);
   };
   const onNewHomeConversation = () => {
-    desktopSidebarProps.onCreateConversation();
+    if (desktopSidebarProps.collaborators.length) desktopSidebarProps.onCreateConversation();
+    else desktopSidebarProps.onCreateCustomCollaborator();
     onHomeOpenChange(false);
   };
 
@@ -200,6 +201,7 @@ export function AppShellView({
         </DesktopAppShellFrame>
       ) : (
         <MobileAppShellFrame
+          sidebarProps={{ ...desktopSidebarProps, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
             actions: { ...topbarProps.actions, onOpenHome: undefined }

@@ -1,3 +1,4 @@
+import { useSpaceStore } from '../../stores/spaceStore';
 import { useMemo } from 'react';
 import { buildConversationCardSummary } from '../../app/collection/conversationCardSummary';
 import { resolveCollectionRenderItemCount } from '../../app/shell/collectionRenderLoad';
@@ -270,12 +271,13 @@ export function useAppShellController() {
       setCollectionShelf(shelf);
       setWorld('collection');
     },
-    onOpenConversation: (conversationId: string) => {
+    onOpenConversation: (conversationId: string, messageId?: string) => {
       if (conversationId !== activeConversationId) {
         clearPendingAttachments();
         clearPendingCardReference();
       }
       setActiveConversation(conversationId);
+      useSpaceStore.getState().setFocusedMessageTarget(messageId ? { conversationId, messageId } : null);
       setWorld('chat');
     },
     onRenameConversation: renameConversation,

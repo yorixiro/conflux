@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type PointerEvent } from 'react';
 import type { CollectionShelf, Persona, World } from '../../types/domain';
 import type { ConversationCardSummary } from '../../app/collection/conversationCardSummary';
-import { Icon, type IconName } from '../Icon';
+import { Icon } from '../Icon';
+import { useConversationLibrarySearch } from './useConversationLibrarySearch';
+import './ConfluxSidebar.css';
 import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { collectionRelativeDateLabel } from '../collection/collectionUtils';
 import { useI18n } from '../../i18n';
@@ -28,7 +30,7 @@ export type DesktopAppSidebarProps = {
   onCreateCollaboratorFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
   onSelectShelf: (shelf: CollectionShelf) => void;
-  onOpenConversation: (conversationId: string) => void;
+  onOpenConversation: (conversationId: string, messageId?: string) => void;
   onRenameConversation: (conversationId: string, title: string) => void;
   onToggleConversationPinned: (conversationId: string) => void;
   onDeleteConversation: (conversationId: string, title: string) => void;
@@ -36,14 +38,6 @@ export type DesktopAppSidebarProps = {
   onOpenGroupWorld: () => void;
   onOpenSettings: () => void;
 };
-
-const SHELF_ICON_BY_ID = {
-  project: 'navWorkspace',
-  code: 'navCard',
-  image: 'navImage',
-  info: 'navInfo',
-  dialogue: 'navDialogue'
-} satisfies Record<CollectionShelf, IconName>;
 
 function sortSidebarConversations(conversations: ConversationCardSummary[]) {
   return [...conversations].sort((left, right) => {
@@ -88,6 +82,9 @@ export function DesktopAppSidebar({
   onOpenSettings
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
+  const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>('library');
+  const [searchQuery, setSearchQuery] = useState('');
+  const librarySearch = useConversationLibrarySearch(conversations, sidebarTab === 'library' ? searchQuery : '');
   const [collaboratorPickerOpen, setCollaboratorPickerOpen] = useState(false);
   const [collaboratorCreatePickerOpen, setCollaboratorCreatePickerOpen] = useState(false);
   const [actionMenuConversationId, setActionMenuConversationId] = useState<string | null>(null);
@@ -95,7 +92,7 @@ export function DesktopAppSidebar({
   const [conversationTitleDraft, setConversationTitleDraft] = useState('');
   const longPressTimerRef = useRef<number | null>(null);
   const suppressNextThreadClickRef = useRef(false);
-  const sortedConversations = sortSidebarConversations(conversations);
+  const sortedConversations = sortSidebarConversations(librarySearch.results);
   const sortedCollaborators = sortSidebarCollaborators(collaborators);
   const hasRoomyCollaboratorPicker = sortedCollaborators.length >= 2;
   const collaboratorName = currentCollaborator?.name.trim() || (collaboratorScopeId ? t('common.collaborator') : t('common.allCollaborators'));
@@ -111,6 +108,8 @@ export function DesktopAppSidebar({
       setConversationTitleDraft('');
     }
   }, [actionMenuConversationId, conversations, editingConversationId]);
+
+  useEffect(() => () => { if (longPressTimerRef.current !== null) window.clearTimeout(longPressTimerRef.current); }, []);
 
   const clearLongPress = () => {
     if (longPressTimerRef.current === null) return;
@@ -199,6 +198,12 @@ export function DesktopAppSidebar({
         ) : null}
       </div>
 
+      <div className="conflux-sidebar-tabs" role="tablist" aria-label="侧栏内容">
+        <button type="button" id="conflux-profile-tab" role="tab" aria-selected={sidebarTab === 'profile'} aria-controls="conflux-profile-panel" onClick={() => setSidebarTab('profile')}>个人资料</button>
+        <button type="button" id="conflux-library-tab" role="tab" aria-selected={sidebarTab === 'library'} aria-controls="conflux-library-panel" onClick={() => setSidebarTab('library')}>对话库</button>
+      </div>
+      {sidebarTab === 'profile' ? (
+      <div id="conflux-profile-panel" role="tabpanel" aria-labelledby="conflux-profile-tab" className="conflux-sidebar-panel">
       <button
         type="button"
         className={`desktop-sidebar-collaborator-root ${collaboratorPickerOpen ? 'active' : ''}`}
@@ -313,54 +318,39 @@ export function DesktopAppSidebar({
         </div>
       ) : null}
 
-      <nav className="desktop-sidebar-section" aria-label={t('desktop.roomArea')}>
-        <p className="desktop-sidebar-section-label">{t('common.room')}</p>
-        <button
-          type="button"
-          className={`desktop-sidebar-nav-item ${activeWorld === 'group' ? 'active' : ''}`}
-          onClick={onOpenGroupWorld}
-        >
-          <Icon name="navGroup" size={18} />
-          <span>群聊</span>
-        </button>
-        {shelfItems.map((item) => {
-          const active = activeWorld === 'collection' && collectionShelf === item.shelf;
-          return (
-            <button
-              key={item.shelf}
-              type="button"
-              className={`desktop-sidebar-nav-item ${active ? 'active' : ''}`}
-              onClick={() => onSelectShelf(item.shelf)}
-            >
-              <Icon name={SHELF_ICON_BY_ID[item.shelf]} size={18} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      <section className="desktop-sidebar-section desktop-sidebar-threads" aria-label={t('desktop.conversationThreads')}>
-        <div className="desktop-sidebar-section-head">
-          <p className="desktop-sidebar-section-label">{t('common.conversation')}</p>
-          <button
-            type="button"
-            className="desktop-sidebar-thread-create"
-            onClick={onCreateConversation}
-            aria-label={t('common.newConversation')}
-            title={t('common.newConversation')}
-          >
-            <Icon name="plus" size={15} />
+        <section className="conflux-sidebar-profile" aria-label="当前角色资料">
+          <h2>{currentCollaborator?.name || '个人资料'}</h2>
+          <p>{currentCollaborator?.description || '选择一位角色查看资料。'}</p>
+          {currentCollaborator?.userName ? <p>我的称呼：{currentCollaborator.userName}</p> : null}
+          <button type="button" className="desktop-sidebar-nav-item" onClick={() => onSelectShelf('info')}>
+            <Icon name="navInfo" size={18} /><span>聊天资料与设置</span>
           </button>
-        </div>
+        </section>
+      </div>
+      ) : null}
+
+      {sidebarTab === 'library' ? (
+      <section id="conflux-library-panel" role="tabpanel" aria-labelledby="conflux-library-tab" className="desktop-sidebar-section desktop-sidebar-threads conflux-sidebar-panel">
+        <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
+          {collaborators.length ? '新建对话' : '创建角色并开始聊天'}
+        </button>
+        <label className="conflux-sidebar-search">
+          <span>搜索聊天记录</span>
+          <input type="search" placeholder="搜索对话标题、聊天内容" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} />
+        </label>
+        {librarySearch.busy ? <p className="conflux-sidebar-status" role="status">正在搜索聊天记录…</p> : null}
+        {librarySearch.failedCount ? <p className="conflux-sidebar-status" role="status">{librarySearch.failedCount} 个对话未能读取，结果可能不完整。<button type="button" onClick={librarySearch.retry}>重试</button></p> : null}
         <div className="desktop-sidebar-thread-list">
           {sortedConversations.length > 0 ? (
-            sortedConversations.map((conversation) => {
+            sortedConversations.map((conversation, index) => {
               const active = conversation.id === activeConversationId;
               const menuOpen = actionMenuConversationId === conversation.id;
               const editing = editingConversationId === conversation.id;
+              const startsGroup = index === 0 || (!searchQuery.trim() && Boolean(conversation.pinnedAt) !== Boolean(sortedConversations[index - 1].pinnedAt));
               return (
+                <Fragment key={conversation.id}>
+                  {startsGroup ? <h3 className="desktop-sidebar-section-label">{searchQuery.trim() ? '搜索结果' : conversation.pinnedAt ? '置顶对话' : '对话列表'}</h3> : null}
                 <div
-                  key={conversation.id}
                   className={`desktop-sidebar-thread-row ${active ? 'active' : ''} ${conversation.pinnedAt ? 'pinned' : ''} ${menuOpen ? 'menu-open' : ''} ${editing ? 'editing' : ''}`}
                   onContextMenu={(event) => {
                     event.preventDefault();
@@ -445,6 +435,11 @@ export function DesktopAppSidebar({
                       </button>
                     </div>
                   )}
+                  {conversation.searchMatches?.matches[0] ? (
+                    <button type="button" className="conflux-sidebar-hit" onClick={() => onOpenConversation(conversation.id, conversation.searchMatches!.matches[0].messageId)}>
+                      <span>{conversation.searchMatches.total} 条内容匹配</span>{conversation.searchMatches.matches[0].excerpt}
+                    </button>
+                  ) : null}
                   {menuOpen && !editing ? (
                     <div className="desktop-sidebar-thread-menu">
                       <button
@@ -477,13 +472,15 @@ export function DesktopAppSidebar({
                     </div>
                   ) : null}
                 </div>
+                </Fragment>
               );
             })
           ) : (
-            <p className="desktop-sidebar-thread-empty">{t('desktop.noChats')}</p>
+            <p className="desktop-sidebar-thread-empty">{librarySearch.busy ? '正在读取记录' : searchQuery.trim() ? '没有找到匹配的对话' : t('desktop.noChats')}</p>
           )}
         </div>
       </section>
+      ) : null}
 
       <footer className="desktop-sidebar-footer">
         <button
@@ -496,7 +493,7 @@ export function DesktopAppSidebar({
           <Icon name="settings" size={17} />
           <span>{t('common.settings')}</span>
         </button>
-        <p className="desktop-sidebar-collaborator-note">{collaboratorDescription}</p>
+
       </footer>
     </aside>
   );

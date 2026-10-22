@@ -1,0 +1,27 @@
+/* Structural hooks for the user's existing theme. No new decoration or motion. */
+.conflux-sidebar-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; flex:none; }
+.conflux-sidebar-tabs button { min-height:44px; border:1px solid var(--border); background:transparent; color:var(--text-soft); font:inherit; font-size:13px; }
+.conflux-sidebar-tabs button[aria-selected="true"] { color:var(--text); border-color:currentColor; font-weight:650; }
+.conflux-sidebar-panel { display:flex; flex-direction:column; flex:1; min-height:0; gap:12px; }
+.conflux-sidebar-profile { display:flex; flex-direction:column; gap:16px; min-height:0; overflow-y:auto; }
+.conflux-sidebar-profile h2 { margin:0; font-size:19px; overflow-wrap:anywhere; }
+.conflux-sidebar-profile p { margin:0; font-size:13px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--text-soft); }
+.conflux-sidebar-profile > .desktop-sidebar-nav-item { width:100%; flex:none; }
+.conflux-sidebar-search { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text-soft); }
+.conflux-sidebar-search input { width:100%; min-width:0; min-height:44px; box-sizing:border-box; border:1px solid var(--border); background:transparent; color:var(--text); border-radius:0; padding:10px; font:inherit; font-size:16px; }
+.conflux-sidebar-create { min-height:44px; flex:none; border:1px solid var(--border); background:transparent; color:var(--text); font:inherit; font-size:13px; }
+.conflux-sidebar-thread-group { display:flex; flex-direction:column; gap:4px; }
+.conflux-sidebar-thread-group h3 { margin:10px 8px 4px; color:var(--text-soft); font-size:12px; font-weight:500; }
+.conflux-sidebar-status { margin:0; font-size:12px; line-height:1.6; color:var(--text-soft); }
+.conflux-sidebar-hit { border:0; padding:6px 8px; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; line-height:1.6; text-align:left; overflow-wrap:anywhere; }
+.conflux-sidebar-hit span { display:block; color:var(--text); }
+.conflux-sidebar-tabs button:focus-visible,.conflux-sidebar-create:focus-visible,.conflux-sidebar-hit:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.desktop-app-sidebar.collapsed .conflux-sidebar-tabs,.desktop-app-sidebar.collapsed .conflux-sidebar-search,.desktop-app-sidebar.collapsed .conflux-sidebar-profile,.desktop-app-sidebar.collapsed .conflux-sidebar-status { display:none; }
+.desktop-app-sidebar.collapsed .conflux-sidebar-create { font-size:0; }
+.desktop-app-sidebar.collapsed .conflux-sidebar-create::after { content:'+'; font-size:20px; }
+.desktop-app-sidebar.collapsed .conflux-sidebar-thread-group h3 { display:none; }
+.conflux-sidebar-dialog { position:fixed; inset:0 auto 0 0; margin:0; padding:0; width:min(86vw,360px); max-width:none; height:100%; height:100dvh; max-height:100%; border:0; color:var(--text); background:var(--surface-solid,var(--bg)); overflow:hidden; }
+.conflux-sidebar-dialog::backdrop { background:rgba(0,0,0,.28); }
+.conflux-sidebar-dialog .desktop-app-sidebar { position:relative; display:flex; flex-direction:column; width:100%; height:100%; gap:12px; padding:16px; padding-top:max(16px,env(safe-area-inset-top)); padding-bottom:max(16px,env(safe-area-inset-bottom)); box-sizing:border-box; border:0; background:var(--surface-solid,var(--bg)); box-shadow:none; transition:none; }
+.conflux-sidebar-dialog .desktop-sidebar-thread-body { grid-template-columns:minmax(0,1fr) 44px; }
+.conflux-sidebar-dialog .desktop-sidebar-thread-more { opacity:1; transform:none; min-width:44px; min-height:44px; }
