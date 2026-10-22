@@ -12,11 +12,11 @@ type ConfluxHomeProps = {
   onOpenGroup: () => void;
 };
 
-const sections: { title: string; description: string; shelf: CollectionShelf; number: string }[] = [
-  { title: '项目与工作区', description: '继续已有项目、整理资料', shelf: 'project', number: '01' },
-  { title: '代码与卡片', description: '查看保存的代码片段', shelf: 'code', number: '02' },
-  { title: '图像收藏', description: '集中管理图片素材', shelf: 'image', number: '03' },
-  { title: '角色资料', description: '查看与编辑协作者', shelf: 'info', number: '04' }
+const modules: { label: string; detail: string; shelf: CollectionShelf }[] = [
+  { label: '角色档案', detail: '协作者资料与编辑', shelf: 'info' },
+  { label: '项目工作区', detail: '项目与相关资料', shelf: 'project' },
+  { label: '代码卡片', detail: '保存的代码片段', shelf: 'code' },
+  { label: '图片素材', detail: '图片和收藏', shelf: 'image' }
 ];
 
 function timeLabel(timestamp: number): string {
@@ -26,10 +26,6 @@ function timeLabel(timestamp: number): string {
   }).format(new Date(timestamp));
 }
 
-/**
- * Presentation only. Never duplicates the chat store or chat request pipeline.
- * Every conversation and action comes from the existing AppShell controller.
- */
 export function ConfluxHome({
   conversations,
   activeConversationId,
@@ -44,107 +40,79 @@ export function ConfluxHome({
 
   return (
     <section className="conflux-home" aria-label="Conflux 首页">
-      <div className="conflux-home-noise" aria-hidden="true" />
-      <header className="conflux-home-masthead">
-        <div className="conflux-home-brand">
-          <span className="conflux-home-brand-mark" aria-hidden="true">✧</span>
-          <div>
-            <span className="conflux-home-brand-name">Conflux</span>
-            <span className="conflux-home-brand-caption">私人空间 / HOME</span>
-          </div>
+      <header className="conflux-home-header">
+        <div className="conflux-home-heading">
+          <h1>主页</h1>
+          <span>Conflux</span>
         </div>
         <button type="button" className="conflux-home-create" onClick={onNewConversation} disabled={collaboratorCount === 0}>
-          <span aria-hidden="true">＋</span> 新建对话
+          新建对话
         </button>
       </header>
 
-      <div className="conflux-home-content">
-        <div className="conflux-home-primary">
-          <header className="conflux-home-intro">
-            <p className="conflux-home-eyebrow">PERSONAL SPACE <span aria-hidden="true">—</span> 001</p>
-            <h1>你的空间，<em>继续生长。</em></h1>
-            <p className="conflux-home-intro-caption">从上一次对话继续，或进入你的收藏与工作区。</p>
-          </header>
-
-          <section className="conflux-home-continue" aria-labelledby="conflux-continue-title">
-            <div className="conflux-home-section-label">
-              <h2 id="conflux-continue-title">上次停留</h2>
-              <span>CONTINUE</span>
-            </div>
+      <div className="conflux-home-layout">
+        <div className="conflux-home-main">
+          <section className="conflux-home-section" aria-labelledby="conflux-home-resume-title">
+            <h2 id="conflux-home-resume-title">继续对话</h2>
             {resume ? (
               <button type="button" className="conflux-home-resume" onClick={() => onOpenConversation(resume.id)}>
-                <span className="conflux-home-resume-marker" aria-hidden="true">✧</span>
-                <span className="conflux-home-resume-main">
+                <span className="conflux-home-item-content">
                   <strong>{resume.displayTitle || resume.title || '未命名对话'}</strong>
-                  <small>{resume.latestExcerpt}</small>
-                  <span>{timeLabel(resume.updatedAt)} · {resume.messageCount} 条消息</span>
+                  <small>{resume.latestExcerpt || '暂无消息'}</small>
                 </span>
-                <span className="conflux-home-resume-arrow" aria-hidden="true">↗</span>
+                <span className="conflux-home-meta">{timeLabel(resume.updatedAt)}</span>
+                <span aria-hidden="true" className="conflux-home-arrow">→</span>
               </button>
             ) : (
               <div className="conflux-home-empty">
-                <p>这里还没有对话。</p>
-                <button type="button" onClick={onNewConversation} disabled={collaboratorCount === 0}>开始第一段对话 ↗</button>
-                {collaboratorCount === 0 ? <small>请先在角色资料中创建协作者</small> : null}
+                <p>暂无对话记录</p>
+                <button type="button" onClick={onNewConversation} disabled={collaboratorCount === 0}>开始对话</button>
+                {collaboratorCount === 0 ? <small>请先创建协作者</small> : null}
               </div>
             )}
           </section>
 
-          <section className="conflux-home-recent" aria-labelledby="conflux-recent-title">
-            <div className="conflux-home-section-label">
-              <h2 id="conflux-recent-title">最近的对话</h2>
-              <span>RECENT / {conversations.length}</span>
-            </div>
-            {recent.length > 0 ? (
-              <div className="conflux-home-threads">
-                {recent.map((conversation, index) => (
-                  <button
-                    type="button"
-                    className="conflux-home-thread"
-                    key={conversation.id}
-                    onClick={() => onOpenConversation(conversation.id)}
-                  >
-                    <span className="conflux-home-thread-index">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="conflux-home-thread-text">
+          <section className="conflux-home-section" aria-labelledby="conflux-home-recent-title">
+            <h2 id="conflux-home-recent-title">最近的对话</h2>
+            {recent.length ? (
+              <div className="conflux-home-list">
+                {recent.map((conversation) => (
+                  <button type="button" className="conflux-home-conversation" key={conversation.id} onClick={() => onOpenConversation(conversation.id)}>
+                    <span className="conflux-home-item-content">
                       <strong>{conversation.displayTitle || conversation.title || '未命名对话'}</strong>
-                      <small>{conversation.latestExcerpt}</small>
+                      <small>{conversation.latestExcerpt || '暂无消息'}</small>
                     </span>
-                    <time>{timeLabel(conversation.updatedAt)}</time>
-                    <span aria-hidden="true">↗</span>
+                    <time className="conflux-home-meta">{timeLabel(conversation.updatedAt)}</time>
                   </button>
                 ))}
               </div>
-            ) : <p className="conflux-home-muted">对话记录会在这里出现，不使用演示假数据。</p>}
+            ) : <p className="conflux-home-muted">暂无对话记录</p>}
           </section>
         </div>
 
-        <aside className="conflux-home-secondary" aria-label="功能导航">
-          <div className="conflux-home-section-label">
-            <h2>空间目录</h2><span>INDEX</span>
-          </div>
-          <nav className="conflux-home-module-list" aria-label="已有功能">
-            {sections.map((section) => (
-              <button type="button" className="conflux-home-module" key={section.shelf} onClick={() => onOpenShelf(section.shelf)}>
-                <span className="conflux-home-module-num">{section.number}</span>
-                <span className="conflux-home-module-copy">
-                  <strong>{section.title}</strong>
-                  <small>{section.description}</small>
-                </span>
-                <span aria-hidden="true">↗</span>
+        <aside className="conflux-home-side" aria-label="功能模块">
+          <section className="conflux-home-section" aria-labelledby="conflux-home-modules-title">
+            <h2 id="conflux-home-modules-title">功能模块</h2>
+            <div className="conflux-home-modules">
+              {modules.map((module) => (
+                <button type="button" className="conflux-home-module" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>
+                  <strong>{module.label}</strong>
+                  <small>{module.detail}</small>
+                </button>
+              ))}
+              <button type="button" className="conflux-home-module" onClick={onOpenGroup}>
+                <strong>群组</strong>
+                <small>多人对话</small>
               </button>
-            ))}
-            <button type="button" className="conflux-home-module" onClick={onOpenGroup}>
-              <span className="conflux-home-module-num">05</span>
-              <span className="conflux-home-module-copy">
-                <strong>群聊</strong><small>进入现有多人对话空间</small>
-              </span>
-              <span aria-hidden="true">↗</span>
-            </button>
-          </nav>
-          <footer className="conflux-home-footer">
-            <span className="conflux-home-footer-star" aria-hidden="true">✳</span>
-            <p>这里仅显示已接入的功能。日记、书信、记忆星图与主题工坊将在迁移后出现，不会放置无法使用的空入口。</p>
-          </footer>
+            </div>
+          </section>
+          <section className="conflux-home-section" aria-labelledby="conflux-home-summary-title">
+            <h2 id="conflux-home-summary-title">数据概览</h2>
+            <div className="conflux-home-summary">
+              <div><strong>{conversations.length}</strong><span>对话</span></div>
+              <div><strong>{collaboratorCount}</strong><span>协作者</span></div>
+            </div>
+          </section>
         </aside>
       </div>
     </section>
