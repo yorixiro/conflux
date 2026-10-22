@@ -191,12 +191,17 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   try {
     const app = await startLocalServer({ dev });
     console.log(`Conflux ${dev ? '热开发' : 'PWA'}：http://127.0.0.1:4173`);
-    console.log(dev ? '热开发已启动：已安装的 PWA 再次打开后会自动接管旧离线缓存（开发期间需保持此服务运行）。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
+    console.log(dev ? '开发服务已启动。网页和 PWA 均使用原来的 4173 地址；已有页面请刷新一次，随后界面修改由热更新接管。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
     for (const signal of ['SIGINT', 'SIGTERM'] as const) {
       process.once(signal, () => { void app.close().then(() => process.exit(0)); });
     }
   } catch (error) {
-    console.error(error instanceof Error ? error.message : '启动失败。');
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'EADDRINUSE') {
+      console.error('新服务未启动：4173 已有服务在运行。');
+      console.error('请回到原来运行 Conflux 的 Termux 窗口，按 Ctrl+C 停止旧服务，再运行 npm run termux:dev。');
+    } else {
+      console.error(error instanceof Error ? error.message : '启动失败。');
+    }
     process.exitCode = 1;
   }
 }
