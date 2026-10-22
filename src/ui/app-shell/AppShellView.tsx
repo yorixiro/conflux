@@ -226,7 +226,7 @@ export function AppShellView({
           onOpenHome={() => onHomeOpenChange(true)}
           onOpenArchive={() => {
             if (activeWorld !== 'collection' || !['info', 'dialogue'].includes(topbarProps.state.collectionShelf)) {
-              desktopSidebarProps.onSelectShelf('info');
+              desktopSidebarProps.onSelectShelf('dialogue');
             }
             onHomeOpenChange(false);
           }}
