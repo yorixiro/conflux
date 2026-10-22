@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { AppShellView } from './app-shell/AppShellView';
 import { useAppRuntime } from './app-shell/useAppRuntime';
 import { useAppShellController } from './app-shell/useAppShellController';
@@ -15,6 +15,7 @@ const AssetGovernanceDebugLayer = lazy(() =>
 );
 
 export function AppShell() {
+  const [homeOpen, setHomeOpen] = useState(true);
   const controller = useAppShellController();
   const appLanguage = useSpaceStore((state) => state.appLanguage);
   const screenshotDebugOverlayEnabled = useSpaceStore((state) => state.screenshotDebugOverlayEnabled);
@@ -34,8 +35,8 @@ export function AppShell() {
 
   return (
     <>
-      <AppShellView {...appShellView} />
-      {shouldShowWorldSwitchVeil(controller.activeWorld) ? (
+      <AppShellView {...appShellView} homeOpen={homeOpen} onHomeOpenChange={setHomeOpen} />
+      {!homeOpen && shouldShowWorldSwitchVeil(controller.activeWorld) ? (
         <WorldSwitchVeil
           activeWorld={controller.activeWorld}
           canReviveTheme={controller.canReviveTheme}

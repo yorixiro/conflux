@@ -31,6 +31,7 @@ export type AppTopbarState = {
 
 export type AppTopbarActions = {
   onToggleWorld: () => void;
+  onOpenHome?: () => void;
   onToggleCollaboratorSwitch: () => void;
   onCreateConversation: () => void;
   onToggleSearch: () => void;
@@ -155,6 +156,17 @@ export function AppTopbar({
           ) : null}
 
           <div className="topbar-actions">
+            {actions.onOpenHome ? (
+              <button
+                type="button"
+                className="action-btn icon-btn"
+                onClick={(event) => handleSelectionAction(actions.onOpenHome!, event.currentTarget)}
+                title="回到 Conflux 首页"
+                aria-label="返回首页"
+              >
+                <Icon name="navWorkspace" size={18} />
+              </button>
+            ) : null}
             {canOpenCollectionInfoSettings && (
               <button
                 type="button"

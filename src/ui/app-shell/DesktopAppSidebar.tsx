@@ -23,6 +23,7 @@ export type DesktopAppSidebarProps = {
   shelfItems: DesktopAppSidebarShelfItem[];
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  onOpenHome?: () => void;
   onSelectCollaborator: (collaboratorId: string | null) => void;
   onCreateCollaboratorFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
@@ -73,6 +74,7 @@ export function DesktopAppSidebar({
   shelfItems,
   collapsed,
   onToggleCollapsed,
+  onOpenHome,
   onSelectCollaborator,
   onCreateCollaboratorFromBuilder,
   onCreateCustomCollaborator,
@@ -184,6 +186,17 @@ export function DesktopAppSidebar({
         >
           <Icon name="sidebar" size={17} />
         </button>
+        {onOpenHome ? (
+          <button
+            type="button"
+            className="desktop-sidebar-collapse-toggle"
+            onClick={onOpenHome}
+            aria-label="回到 Conflux 首页"
+            title="返回首页"
+          >
+            <Icon name="navWorkspace" size={17} />
+          </button>
+        ) : null}
       </div>
 
       <button
