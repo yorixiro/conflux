@@ -32,7 +32,7 @@ function json(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
-export async function startLocalServer({ dev = false, port = dev ? 5173 : 4173, root = resolve(repo, 'dist') }: {
+export async function startLocalServer({ dev = false, port = 4173, root = resolve(repo, 'dist') }: {
   dev?: boolean; port?: number; root?: string;
 } = {}) {
   const dist = dev ? root : await realpath(root);
@@ -50,6 +50,26 @@ export async function startLocalServer({ dev = false, port = dev ? 5173 : 4173, 
         json(res, 403, { error: 'Only the local device may access this server.' }); return;
       }
       const url = new URL(req.url || '/', `http://${host}`);
+      // One-time bridge from an installed offline PWA to the same-origin HMR server.
+      // The old worker does not intercept this path. Only its registration is removed;
+      // Cache Storage, localStorage, IndexedDB and chat data are untouched.
+      if (dev && url.pathname === '/__conflux_dev') {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+        res.end(`<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<title>Conflux 热开发</title><body>正在切换到实时开发版…
+<script>
+(async () => {
+  if ('serviceWorker' in navigator) {
+    const registration = await navigator.serviceWorker.getRegistration('/');
+    if (registration) await registration.unregister();
+  }
+  window.location.replace('/');
+})().catch((error) => {
+  document.body.textContent = '切换失败：' + (error.message || String(error));
+});
+</script></body></html>`);
+        return;
+      }
       if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
         if ((req.headers.origin && req.headers.origin !== `http://${host}`)
           || req.headers['sec-fetch-site'] === 'cross-site') {
@@ -136,8 +156,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const dev = process.argv.includes('--dev');
   try {
     const app = await startLocalServer({ dev });
-    console.log(`Conflux ${dev ? '热开发' : 'PWA'}：http://127.0.0.1:${dev ? 5173 : 4173}`);
-    console.log(dev ? '保存源码后自动更新。正式安装请运行 npm run termux:pwa。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
+    console.log(`Conflux ${dev ? '热开发' : 'PWA'}：http://127.0.0.1:4173`);
+    console.log(dev ? '首次从旧 PWA 切换：先访问 http://127.0.0.1:4173/__conflux_dev，之后安装版可热更新（开发期间不提供离线缓存）。' : '用同一部手机的 Chrome 打开上述地址，再从菜单安装。');
     for (const signal of ['SIGINT', 'SIGTERM'] as const) {
       process.once(signal, () => { void app.close().then(() => process.exit(0)); });
     }
