@@ -204,7 +204,7 @@ export function AppShellView({
           sidebarProps={{ ...desktopSidebarProps, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
-            actions: { ...topbarProps.actions, onOpenHome: undefined }
+            actions: { ...topbarProps.actions, onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined }
           }}
         >
           {worldStack}

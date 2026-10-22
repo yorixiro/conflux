@@ -117,15 +117,34 @@ export function AppTopbar({
   const collectionSearchLabel = collectionSearchTitle;
   const collectionSearchIcon = collectionCardsEditable ? 'editList' : 'search';
   const showCollaboratorGate = state.activeWorld === 'collection';
+  const showChatNavigation = state.activeWorld === 'chat' && (actions.onOpenHome || actions.onOpenSidebar);
 
   if (!state.showShell) {
     return null;
   }
 
   return (
-    <header className="topbar chat-topbar-shell topbar--mirrored topbar--centered-context">
+    <header className={`topbar chat-topbar-shell topbar--mirrored topbar--centered-context ${showChatNavigation ? 'topbar--chat-navigation' : ''}`}>
       <div className="topbar-surface">
         <div className="topbar-main">
+          {showChatNavigation ? (
+            <div className="topbar-actions topbar-actions--leading">
+              {actions.onOpenHome ? (
+                <button type="button" className="action-btn icon-btn topbar-back-btn"
+                  onClick={(event) => handleSelectionAction(actions.onOpenHome!, event.currentTarget)}
+                  title="返回首页" aria-label="返回首页">
+                  <Icon name="chevron" size={18} />
+                </button>
+              ) : null}
+              {actions.onOpenSidebar ? (
+                <button type="button" className="action-btn icon-btn"
+                  onClick={actions.onOpenSidebar} title="打开对话库"
+                  aria-label="打开聊天侧栏" aria-haspopup="dialog">
+                  <Icon name="sidebar" size={18} />
+                </button>
+              ) : null}
+            </div>
+          ) : null}
           <WorldAnchor
             activeWorld={state.activeWorld}
             title={state.title}
@@ -157,8 +176,7 @@ export function AppTopbar({
           ) : null}
 
           <div className="topbar-actions">
-            {actions.onOpenSidebar ? <button type="button" className="action-btn icon-btn" onClick={actions.onOpenSidebar} aria-label="打开聊天侧栏" aria-haspopup="dialog"><Icon name="sidebar" size={18} /></button> : null}
-            {actions.onOpenHome ? (
+            {actions.onOpenHome && state.activeWorld !== 'chat' ? (
               <button
                 type="button"
                 className="action-btn icon-btn"
