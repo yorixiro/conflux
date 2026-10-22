@@ -181,7 +181,7 @@ describe('useAppShellCollaboratorActions', () => {
     expect(setCollaboratorBuilderTargetId).toHaveBeenCalledWith(null);
   });
 
-  it('returns to collection before opening a collaborator info page from retired group world state', () => {
+  it('opens existing and newly created collaborator settings from retired group world state', () => {
     const setActiveCollaborator = vi.fn();
     const setEditingCollaboratorId = vi.fn();
     const setFrontstageCollaboratorId = vi.fn();
@@ -236,6 +236,14 @@ describe('useAppShellCollaboratorActions', () => {
     expect(setFrontstageCollaboratorId).toHaveBeenCalledWith('pharos');
     expect(setCollectionShelf).toHaveBeenCalledWith('info');
     expect(setWorld).toHaveBeenCalledWith('collection');
+
+    actions.createCustomCollaborator();
+
+    expect(setActiveCollaborator).toHaveBeenLastCalledWith('persona-new');
+    expect(setEditingCollaboratorId).toHaveBeenLastCalledWith('persona-new');
+    expect(setFrontstageCollaboratorId).toHaveBeenLastCalledWith('persona-new');
+    expect(setCollectionShelf).toHaveBeenLastCalledWith('info');
+    expect(setWorld).toHaveBeenLastCalledWith('collection');
   });
 
   it('ignores a missing conversation owner instead of creating a collaborator for deletion', () => {

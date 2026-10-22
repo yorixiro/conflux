@@ -7,7 +7,6 @@ import './ConfluxSidebar.css';
 import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { collectionRelativeDateLabel } from '../collection/collectionUtils';
 import { useI18n } from '../../i18n';
-import { CollaboratorCreatePicker } from '../worlds/chat/collaborator/CollaboratorCreatePicker';
 
 export type DesktopAppSidebarShelfItem = {
   shelf: CollectionShelf;
@@ -29,6 +28,9 @@ export type DesktopAppSidebarProps = {
   onSelectCollaborator: (collaboratorId: string | null) => void;
   onCreateCollaboratorFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
+  onEditCollaborator: () => void;
+  onOpenCollaboratorMemory: () => void;
+  onOpenProviderSettings: () => void;
   onSelectShelf: (shelf: CollectionShelf) => void;
   onOpenConversation: (conversationId: string, messageId?: string) => void;
   onRenameConversation: (conversationId: string, title: string) => void;
@@ -72,6 +74,9 @@ export function DesktopAppSidebar({
   onSelectCollaborator,
   onCreateCollaboratorFromBuilder,
   onCreateCustomCollaborator,
+  onEditCollaborator,
+  onOpenCollaboratorMemory,
+  onOpenProviderSettings,
   onSelectShelf,
   onOpenConversation,
   onRenameConversation,
@@ -86,7 +91,6 @@ export function DesktopAppSidebar({
   const [searchQuery, setSearchQuery] = useState('');
   const librarySearch = useConversationLibrarySearch(conversations, sidebarTab === 'library' ? searchQuery : '');
   const [collaboratorPickerOpen, setCollaboratorPickerOpen] = useState(false);
-  const [collaboratorCreatePickerOpen, setCollaboratorCreatePickerOpen] = useState(false);
   const [actionMenuConversationId, setActionMenuConversationId] = useState<string | null>(null);
   const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
   const [conversationTitleDraft, setConversationTitleDraft] = useState('');
@@ -94,9 +98,7 @@ export function DesktopAppSidebar({
   const suppressNextThreadClickRef = useRef(false);
   const sortedConversations = sortSidebarConversations(librarySearch.results);
   const sortedCollaborators = sortSidebarCollaborators(collaborators);
-  const hasRoomyCollaboratorPicker = sortedCollaborators.length >= 2;
-  const collaboratorName = currentCollaborator?.name.trim() || (collaboratorScopeId ? t('common.collaborator') : t('common.allCollaborators'));
-  const collaboratorDescription = currentCollaborator?.description.trim() || t('desktop.switchCollaboratorHint');
+  const collaboratorName = currentCollaborator?.name.trim() || '尚未选择角色';
 
   useEffect(() => {
     const liveConversationIds = new Set(conversations.map((conversation) => conversation.id));
@@ -120,14 +122,12 @@ export function DesktopAppSidebar({
   const handleSelectCollaborator = (collaboratorId: string | null) => {
     onSelectCollaborator(collaboratorId);
     setCollaboratorPickerOpen(false);
-    setCollaboratorCreatePickerOpen(false);
     setActionMenuConversationId(null);
     setEditingConversationId(null);
     setConversationTitleDraft('');
   };
   const openConversationMenu = (conversationId: string) => {
     setCollaboratorPickerOpen(false);
-    setCollaboratorCreatePickerOpen(false);
     setActionMenuConversationId((current) => (current === conversationId ? null : conversationId));
   };
   const beginConversationRename = (conversation: ConversationCardSummary) => {
@@ -176,7 +176,6 @@ export function DesktopAppSidebar({
           className="desktop-sidebar-collapse-toggle"
           onClick={() => {
             setCollaboratorPickerOpen(false);
-            setCollaboratorCreatePickerOpen(false);
             onToggleCollapsed();
           }}
           aria-label={collapsed ? t('desktop.expandSidebar') : t('desktop.collapseSidebar')}
@@ -203,130 +202,90 @@ export function DesktopAppSidebar({
         <button type="button" id="conflux-library-tab" role="tab" aria-selected={sidebarTab === 'library'} aria-controls="conflux-library-panel" onClick={() => setSidebarTab('library')}>对话库</button>
       </div>
       {sidebarTab === 'profile' ? (
-      <div id="conflux-profile-panel" role="tabpanel" aria-labelledby="conflux-profile-tab" className="conflux-sidebar-panel">
-      <button
-        type="button"
-        className={`desktop-sidebar-collaborator-root ${collaboratorPickerOpen ? 'active' : ''}`}
-        onClick={() => {
-          if (collaboratorPickerOpen) {
-            setCollaboratorCreatePickerOpen(false);
-          }
-          setCollaboratorPickerOpen((open) => !open);
-        }}
-        aria-expanded={collaboratorPickerOpen}
-      >
-        {currentCollaborator ? (
-          <PersonaAvatar
-            role="assistant"
-            seed={currentCollaborator.id}
-            assetId={currentCollaborator.assistantAvatarAssetId}
-            shape={currentCollaborator.assistantAvatarShape}
-            size={28}
-          />
-        ) : (
-          <span className="desktop-sidebar-root-icon" aria-hidden="true">
-            <Icon name="persona" size={18} />
-          </span>
-        )}
-        <span className="desktop-sidebar-root-copy">
-          <strong>{t('desktop.currentCollaborator')}</strong>
-          <small>{collaboratorName}</small>
-        </span>
-        <Icon name="chevron" size={15} />
-      </button>
-      {collaboratorPickerOpen ? (
-        <div
-          className={`desktop-sidebar-collaborator-picker ${hasRoomyCollaboratorPicker ? 'desktop-sidebar-collaborator-picker--roomy' : ''}`}
-          role="listbox"
-          aria-label={t('desktop.switchCollaborator')}
+        <section
+          id="conflux-profile-panel"
+          role="tabpanel"
+          aria-labelledby="conflux-profile-tab"
+          className="conflux-sidebar-panel conflux-sidebar-profile"
         >
-          <button
-            type="button"
-            className={`desktop-sidebar-collaborator-option ${collaboratorScopeId === null ? 'active' : ''}`}
-            onClick={() => handleSelectCollaborator(null)}
-            role="option"
-            aria-selected={collaboratorScopeId === null}
-          >
-            <span className="desktop-sidebar-root-icon" aria-hidden="true">
-              <Icon name="persona" size={16} />
-            </span>
-            <span className="desktop-sidebar-collaborator-option-copy">
-              <strong>{t('common.allCollaborators')}</strong>
-              <small>{t('desktop.allRooms')}</small>
-            </span>
-          </button>
-          {sortedCollaborators.map((collaborator) => (
-            <button
-              key={collaborator.id}
-              type="button"
-              className={`desktop-sidebar-collaborator-option ${collaboratorScopeId === collaborator.id ? 'active' : ''}`}
-              onClick={() => handleSelectCollaborator(collaborator.id)}
-              role="option"
-              aria-selected={collaboratorScopeId === collaborator.id}
-            >
+          <div className="conflux-profile-heading">
+            {currentCollaborator ? (
               <PersonaAvatar
                 role="assistant"
-                seed={collaborator.id}
-                assetId={collaborator.assistantAvatarAssetId}
-                shape={collaborator.assistantAvatarShape}
-                size={26}
+                seed={currentCollaborator.id}
+                assetId={currentCollaborator.assistantAvatarAssetId}
+                iconId={currentCollaborator.assistantAvatarIconId}
+                shape={currentCollaborator.assistantAvatarShape}
+                size={44}
               />
-              <span className="desktop-sidebar-collaborator-option-copy">
-                <strong>{collaborator.name}</strong>
-                <small>{collaborator.description.trim() || t('desktop.noCollaboratorImpression')}</small>
-              </span>
-              {collaborator.pinnedAt ? <Icon name="polarisStar" size={11} /> : null}
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`desktop-sidebar-collaborator-option desktop-sidebar-collaborator-create ${collaboratorCreatePickerOpen ? 'active' : ''}`}
-            onClick={() => {
-              setActionMenuConversationId(null);
-              setEditingConversationId(null);
-              setConversationTitleDraft('');
-              setCollaboratorCreatePickerOpen((open) => !open);
-            }}
-            aria-expanded={collaboratorCreatePickerOpen}
-          >
-            <span className="desktop-sidebar-root-icon" aria-hidden="true">
-              <Icon name="personaCreate" size={16} />
-            </span>
-            <span className="desktop-sidebar-collaborator-option-copy">
-              <strong>{t('desktop.createCollaborator')}</strong>
-              <small>{t('desktop.createCollaboratorDetail')}</small>
-            </span>
-          </button>
-          {collaboratorCreatePickerOpen ? (
-            <div className="desktop-sidebar-collaborator-create-picker">
-              <CollaboratorCreatePicker
-                showCloseButton={false}
-                onCloseCreatePicker={() => setCollaboratorCreatePickerOpen(false)}
-                onCreateFromBuilder={() => {
-                  setCollaboratorPickerOpen(false);
-                  setCollaboratorCreatePickerOpen(false);
-                  onCreateCollaboratorFromBuilder();
-                }}
-                onCreateCustomCollaborator={() => {
-                  setCollaboratorPickerOpen(false);
-                  setCollaboratorCreatePickerOpen(false);
-                  onCreateCustomCollaborator();
-                }}
-              />
+            ) : <Icon name="persona" size={28} />}
+            <div>
+              <h2>{collaboratorName}</h2>
+              <p>{currentCollaborator?.description.trim() || '选择或新建一个角色。'}</p>
+            </div>
+          </div>
+          {currentCollaborator?.userName ? <p>我的称呼：{currentCollaborator.userName}</p> : null}
+          <div className="conflux-profile-actions">
+            <button type="button" onClick={onEditCollaborator} disabled={!currentCollaborator}>编辑人设</button>
+            <button
+              type="button"
+              onClick={() => setCollaboratorPickerOpen(open => !open)}
+              aria-expanded={collaboratorPickerOpen}
+              aria-controls="conflux-role-picker"
+            >切换角色</button>
+            <button type="button" onClick={onCreateCustomCollaborator}>新建角色</button>
+          </div>
+          {collaboratorPickerOpen ? (
+            <div id="conflux-role-picker" className="desktop-sidebar-collaborator-picker" role="listbox" aria-label="切换角色">
+              <button
+                type="button"
+                className={`desktop-sidebar-collaborator-option ${collaboratorScopeId === null ? 'active' : ''}`}
+                onClick={() => handleSelectCollaborator(null)}
+                role="option"
+                aria-selected={collaboratorScopeId === null}
+              >
+                <Icon name="persona" size={16} />
+                <span className="desktop-sidebar-collaborator-option-copy">
+                  <strong>全部角色</strong><small>查看所有对话</small>
+                </span>
+              </button>
+              {sortedCollaborators.map(collaborator => (
+                <button
+                  key={collaborator.id}
+                  type="button"
+                  className={`desktop-sidebar-collaborator-option ${collaboratorScopeId === collaborator.id ? 'active' : ''}`}
+                  onClick={() => handleSelectCollaborator(collaborator.id)}
+                  role="option"
+                  aria-selected={collaboratorScopeId === collaborator.id}
+                >
+                  <PersonaAvatar
+                    role="assistant"
+                    seed={collaborator.id}
+                    assetId={collaborator.assistantAvatarAssetId}
+                    iconId={collaborator.assistantAvatarIconId}
+                    shape={collaborator.assistantAvatarShape}
+                    size={26}
+                  />
+                  <span className="desktop-sidebar-collaborator-option-copy">
+                    <strong>{collaborator.name}</strong>
+                    <small>{collaborator.description.trim() || '暂无角色简介'}</small>
+                  </span>
+                  {collaborator.pinnedAt ? <Icon name="polarisStar" size={11} /> : null}
+                </button>
+              ))}
             </div>
           ) : null}
-        </div>
-      ) : null}
-
-        <section className="conflux-sidebar-profile" aria-label="当前角色资料">
-          <h2>{currentCollaborator?.name || '个人资料'}</h2>
-          <p>{currentCollaborator?.description || '选择一位角色查看资料。'}</p>
-          {currentCollaborator?.userName ? <p>我的称呼：{currentCollaborator.userName}</p> : null}
-          <button type="button" className="desktop-sidebar-nav-item" onClick={() => onSelectShelf('info')}>
-            <Icon name="navInfo" size={18} /><span>聊天资料与设置</span>
+          <button type="button" className="desktop-sidebar-nav-item" onClick={onOpenProviderSettings}>
+            <Icon name="settings" size={18} /><span>模型线路</span>
           </button>
+          <button type="button" className="desktop-sidebar-nav-item" onClick={onOpenCollaboratorMemory} disabled={!currentCollaborator}>
+            <Icon name="navInfo" size={18} /><span>记忆设置</span>
+          </button>
+          <details className="conflux-profile-more">
+            <summary>更多创建方式</summary>
+            <button type="button" className="desktop-sidebar-nav-item" onClick={onCreateCollaboratorFromBuilder}>AI 生成人设</button>
+          </details>
         </section>
-      </div>
       ) : null}
 
       {sidebarTab === 'library' ? (

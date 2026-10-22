@@ -6,12 +6,13 @@ import { CollectionFloatingCreateAction } from '../collection/grid/CollectionFlo
 import { CollectionShelfTabs } from '../collection/grid/CollectionShelfTabs';
 import { buildVisibleCollectionShelfNavItems } from '../collection/grid/collectionShelfNav';
 import { DialogueCollectionShelf } from '../collection/grid/DialogueCollectionShelf';
-import { CollaboratorInfoShelf } from '../collection/info/CollaboratorInfoShelf';
+import { CollaboratorInfoShelf, type CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 import { ImageCollectionShelf } from '../collection/images/ImageCollectionShelf';
 import { CodeProjectCollectionShelfPages } from './collection/CodeProjectCollectionShelfPages';
 import { useI18n } from '../../i18n';
 
 type CollectionWorldProps = {
+  infoPageRequest?: CollaboratorInfoPageRequest | null;
   searchOpen: boolean;
   collaboratorSwitchOpen: boolean;
   onCollaboratorSwitchOpenChange: (open: boolean) => void;
@@ -28,6 +29,7 @@ type CollectionWorldProps = {
 };
 
 export function CollectionWorld({
+  infoPageRequest,
   searchOpen,
   collaboratorSwitchOpen,
   onCollaboratorSwitchOpenChange,
@@ -191,6 +193,7 @@ export function CollectionWorld({
             >
               <div className="collection-shelf-page-body collection-shelf-page-body--info">
                 <CollaboratorInfoShelf
+                  pageRequest={infoPageRequest}
                   isAggregateScope={controller.isAggregateScope}
                   currentCollaboratorId={controller.currentCollaboratorId}
                   currentCollaborator={controller.currentCollaborator}

@@ -29,6 +29,7 @@ export function AppShellView({
   collectionCollaboratorSwitchOpen,
   setCollectionCollaboratorSwitchOpen,
   collectionInfoFullscreenOpen,
+  collectionInfoPageRequest,
   setCollectionInfoFullscreenOpen,
   collectionDetailOpen,
   setCollectionDetailOpen,
@@ -102,6 +103,7 @@ export function AppShellView({
           >
             <Suspense fallback={<WorldFrameFallback world="collection" />}>
               <CollectionWorld
+                infoPageRequest={collectionInfoPageRequest}
                 searchOpen={collectionSearchOpen}
                 collaboratorSwitchOpen={collectionScopeDrawerOpen}
                 onCollaboratorSwitchOpenChange={setCollectionCollaboratorSwitchOpen}

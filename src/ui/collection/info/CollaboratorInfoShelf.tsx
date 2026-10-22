@@ -17,6 +17,10 @@ import type { I18nKey } from '../../../i18n/messages';
 import { useI18n } from '../../../i18n/useI18n';
 const INFO_TABS = ['identity', 'prompt', 'memory', 'room', 'automation', 'request'] as const;
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
+export type CollaboratorInfoPageRequest = {
+  collaboratorId: string | null;
+  tab: 'identity' | 'memory';
+};
 const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'prompt' && tab !== 'automation' && tab !== 'request');
 const INFO_TAB_LABEL_KEYS = {
   identity: 'collaborator.info.tab.identity',
@@ -28,6 +32,7 @@ const INFO_TAB_LABEL_KEYS = {
 } satisfies Record<CollaboratorInfoTab, I18nKey>;
 
 type CollaboratorInfoShelfProps = {
+  pageRequest?: CollaboratorInfoPageRequest | null;
   isAggregateScope: boolean;
   currentCollaboratorId: string | null;
   currentCollaborator: Persona | null;
@@ -66,6 +71,7 @@ type CollaboratorInfoShelfProps = {
 };
 
 export function CollaboratorInfoShelf({
+  pageRequest,
   isAggregateScope,
   currentCollaboratorId,
   currentCollaborator,
@@ -103,8 +109,8 @@ export function CollaboratorInfoShelf({
   const collaboratorName = currentCollaborator?.name.trim() || t('collaborator.info.fallbackName');
 
   useEffect(() => {
-    setActiveTab('identity');
-  }, [currentCollaboratorId]);
+    setActiveTab(pageRequest?.collaboratorId === currentCollaboratorId ? pageRequest.tab : 'identity');
+  }, [currentCollaboratorId, pageRequest]);
 
   useEffect(() => {
     if (!visibleTabs.some((tab) => tab === activeTab)) {

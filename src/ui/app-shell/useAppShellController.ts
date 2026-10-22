@@ -4,7 +4,7 @@ import { buildConversationCardSummary } from '../../app/collection/conversationC
 import { resolveCollectionRenderItemCount } from '../../app/shell/collectionRenderLoad';
 import { deriveAppShellState } from '../../app/shell/deriveAppShellState';
 import { useAppShellStoreBindings } from '../../app/shell/useAppShellStoreBindings';
-import { createCompanionPersonaProjection, isCompanionCollaboratorId } from '../../engines/companion';
+import { createCompanionPersonaProjection } from '../../engines/companion';
 import {
   conversationMatchesCollaboratorScope,
   resolveConversationCollaboratorId
@@ -15,7 +15,6 @@ import { useCollaboratorFrontstageSync } from './useCollaboratorFrontstageSync';
 import { useEditingCollaboratorFrontstageSync } from './useEditingCollaboratorFrontstageSync';
 import { useAppShellOverlayController } from './useAppShellOverlayController';
 import { useAppShellWorldController } from './useAppShellWorldController';
-import { enterCollaboratorCollectionScope } from '../../app/shell/frontstageNavigation';
 import { useThemeSessionActions } from '../../app/theme/useThemeSessionActions';
 import { useAbortStreamingCleanupEffect } from '../worlds/chat/effects/useAbortStreamingCleanupEffect';
 import { useChatUiState } from '../worlds/chat/context/ChatUiState';
@@ -245,25 +244,27 @@ export function useAppShellController() {
     conversations: desktopSidebarConversations,
     shelfItems: desktopSidebarShelfItems,
     onSelectCollaborator: (collaboratorId: string | null) => {
-      enterCollaboratorCollectionScope({
-        activeWorld,
-        setFrontstageCollaboratorId,
-        setCollectionShelf,
-        setWorld
-      }, collaboratorId);
-      if (collaboratorId && !isCompanionCollaboratorId(collaboratorId)) {
-        stores.collaborator.setActiveCollaborator(collaboratorId);
-        setEditingCollaboratorId(collaboratorId);
-      }
+      if (collaboratorId) overlays.collaboratorActions.talkToCollaborator(collaboratorId);
+      else setFrontstageCollaboratorId(null);
     },
     onCreateCollaboratorFromBuilder: () => {
       setWorld('collection');
       overlays.collectionOpenCollaboratorBuilderForCreate();
     },
     onCreateCustomCollaborator: () => {
+      collection.setInfoPageRequest(null);
       setWorld('collection');
       overlays.collectionCreateCustomCollaborator();
     },
+    onEditCollaborator: () => {
+      collection.setInfoPageRequest({ collaboratorId: frontstageCollaboratorId, tab: 'identity' });
+      overlays.collaboratorActions.openCollaboratorInfo(frontstageCollaboratorId);
+    },
+    onOpenCollaboratorMemory: () => {
+      collection.setInfoPageRequest({ collaboratorId: frontstageCollaboratorId, tab: 'memory' });
+      overlays.collaboratorActions.openCollaboratorInfo(frontstageCollaboratorId);
+    },
+    onOpenProviderSettings: overlays.collectionOpenProviderSettings,
     onSelectShelf: (shelf: typeof collectionShelf) => {
       if (shelf === 'info' && frontstageCollaboratorId) {
         setEditingCollaboratorId(frontstageCollaboratorId);
@@ -321,6 +322,7 @@ export function useAppShellController() {
     collectionCollaboratorSwitchOpen: collection.collaboratorSwitchOpen,
     setCollectionCollaboratorSwitchOpen: collection.setCollaboratorSwitchOpen,
     collectionInfoFullscreenOpen: collection.infoFullscreenOpen,
+    collectionInfoPageRequest: collection.infoPageRequest,
     setCollectionInfoFullscreenOpen: collection.setInfoFullscreenOpen,
     collectionDetailOpen: collection.detailOpen,
     setCollectionDetailOpen: collection.setDetailOpen,
