@@ -13,6 +13,7 @@ type ConfluxHomeProps = {
 };
 
 const modules: { label: string; detail: string; shelf: CollectionShelf }[] = [
+  { label: '对话档案', detail: '历史、检索与整理', shelf: 'dialogue' },
   { label: '角色档案', detail: '协作者资料与编辑', shelf: 'info' },
   { label: '项目工作区', detail: '项目与相关资料', shelf: 'project' },
   { label: '代码卡片', detail: '保存的代码片段', shelf: 'code' },

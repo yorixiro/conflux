@@ -24,6 +24,7 @@ type CollectionWorldProps = {
   onCreateCustomCollaborator: () => void;
   onOpenProviderSettings: () => void;
   onOpenDesktopLocalSettings: () => void;
+  sectionNavigation?: boolean;
 };
 
 export function CollectionWorld({
@@ -38,7 +39,8 @@ export function CollectionWorld({
   onOpenCollaboratorBuilderForCreate,
   onCreateCustomCollaborator,
   onOpenProviderSettings,
-  onOpenDesktopLocalSettings
+  onOpenDesktopLocalSettings,
+  sectionNavigation = false
 }: CollectionWorldProps) {
   const { t } = useI18n();
   const controller = useCollectionWorldController({
@@ -79,6 +81,12 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue';
+  const sectionNavItems = visibleShelfItems.filter((item) => (
+    archiveShelfActive
+      ? item.shelf === 'info' || item.shelf === 'dialogue'
+      : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
+  ));
   useEffect(() => {
     if (visibleShelfSet.has(activeShelf)) return;
     setCollectionShelf(visibleShelfItems[0]?.shelf ?? 'dialogue');
@@ -113,6 +121,23 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
+        {sectionNavigation ? (
+          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '档案分类' : '工坊分类'}>
+            {sectionNavItems.map((item) => (
+              <button
+                key={item.shelf}
+                type="button"
+                aria-current={activeShelf === item.shelf ? 'page' : undefined}
+                onClick={() => setCollectionShelf(item.shelf)}
+              >
+                {item.shelf === 'info' ? '角色资料'
+                  : item.shelf === 'dialogue' ? '对话档案'
+                    : item.shelf === 'project' ? '项目'
+                      : item.shelf === 'code' ? '代码卡片' : '图片素材'}
+              </button>
+            ))}
+          </nav>
+        ) : null}
         {searchOpen && controller.collectionShelf !== 'info' ? (
           <div className="collection-shelf-controls">
               <div className="search-wrap">
@@ -264,11 +289,13 @@ export function CollectionWorld({
             onPress={controller.onCreateConversation}
           />
         ) : null}
-        <CollectionShelfTabs
-          collectionShelf={controller.collectionShelf}
-          navItems={visibleShelfItems}
-          onSetCollectionShelf={controller.setCollectionShelf}
-        />
+        {!sectionNavigation ? (
+          <CollectionShelfTabs
+            collectionShelf={controller.collectionShelf}
+            navItems={visibleShelfItems}
+            onSetCollectionShelf={controller.setCollectionShelf}
+          />
+        ) : null}
       </div>
     </section>
   );

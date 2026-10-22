@@ -113,6 +113,7 @@ export function AppShellView({
                 onCreateCustomCollaborator={collectionCreateCustomCollaborator}
                 onOpenProviderSettings={collectionOpenProviderSettings}
                 onOpenDesktopLocalSettings={collectionOpenDesktopLocalSettings}
+                sectionNavigation={useBottomNavigation}
               />
             </Suspense>
           </WorldFrameBoundary>
@@ -224,13 +225,13 @@ export function AppShellView({
           }}
           onOpenHome={() => onHomeOpenChange(true)}
           onOpenArchive={() => {
-            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf !== 'info') {
+            if (activeWorld !== 'collection' || !['info', 'dialogue'].includes(topbarProps.state.collectionShelf)) {
               desktopSidebarProps.onSelectShelf('info');
             }
             onHomeOpenChange(false);
           }}
           onOpenWorkshop={() => {
-            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf === 'info') {
+            if (activeWorld !== 'collection' || !['project', 'code', 'image'].includes(topbarProps.state.collectionShelf)) {
               desktopSidebarProps.onSelectShelf('project');
             }
             onHomeOpenChange(false);
