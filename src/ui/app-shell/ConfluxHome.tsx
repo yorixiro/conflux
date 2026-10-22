@@ -45,20 +45,20 @@ export function ConfluxHome({
         </button>
       </header>
       <div className="conflux-home-layout">
-        <div className="conflux-home-first-row">
-          <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
-            <h2>时钟</h2>
-            <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
-          </section>
+        <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
+          <h2>时钟</h2>
+          <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
+        </section>
+        <div className="conflux-home-secondary-row">
           <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
             <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
             <div className="conflux-home-placeholder">待办列表区域</div>
           </section>
+          <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
+            <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
+            <div className="conflux-home-placeholder">日历与日程区域</div>
+          </section>
         </div>
-        <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
-          <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
-          <div className="conflux-home-placeholder">日历与日程区域</div>
-        </section>
         <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
           <h2>小功能</h2>
           <div className="conflux-home-module-grid">

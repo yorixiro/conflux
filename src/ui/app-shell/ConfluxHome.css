@@ -1,4 +1,4 @@
-/* Structural layout only: 45/55 top row, full-width calendar, aligned function grid. */
+/* Structural layout only: large clock panel, paired widgets, aligned function grid. */
 .conflux-home { --home-text:var(--text,#242424); --home-muted:var(--text-soft,#737373); --home-line:var(--border,rgba(127,127,127,.22)); box-sizing:border-box; position:relative; width:100%; height:100%; min-height:0; overflow-y:auto; overscroll-behavior:contain; color:var(--home-text); background:var(--shell-bg,var(--bg,#fff)); font-family:var(--font-ui,system-ui,sans-serif); text-align:left; }
 .conflux-home * { box-sizing:border-box; }
 .conflux-home button { font:inherit; color:inherit; cursor:pointer; }
@@ -7,18 +7,18 @@
 .conflux-home h1 { margin:0; font-size:18px; font-weight:650; }
 .conflux-home-chat { min-height:44px; padding:8px 14px; background:transparent; border:1px solid var(--home-line); font-size:13px !important; }
 .conflux-home-layout { width:100%; max-width:1040px; margin-inline:auto; padding:20px clamp(16px,3vw,32px) 32px; display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
-.conflux-home-first-row { display:grid; grid-template-columns:minmax(0,.45fr) minmax(0,.55fr); gap:16px; align-items:stretch; }
+.conflux-home-secondary-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:stretch; }
 .conflux-home-slot { min-width:0; padding:20px; border:1px solid var(--home-line); background:transparent; border-radius:0; box-shadow:none; }
 .conflux-home-slot h2 { margin:0; font-size:14px; font-weight:600; }
 .conflux-home-slot > header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .conflux-home-slot-label { color:var(--home-muted); font-size:11px; }
-.conflux-home-clock,.conflux-home-todo { min-height:200px; display:flex; flex-direction:column; }
-.conflux-home-clock time { display:flex; flex:1; flex-direction:column; justify-content:center; gap:12px; min-width:0; }
-.conflux-home-clock time strong { font-size:clamp(32px,5.8vw,64px); font-weight:500; line-height:1.1; letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
+.conflux-home-clock { position:relative; min-height:clamp(280px,42svh,520px); display:flex; flex-direction:column; }
+.conflux-home-clock time { display:flex; flex:1; flex-direction:column; justify-content:flex-end; gap:12px; min-width:0; padding-top:80px; }
+.conflux-home-clock time strong { font-size:clamp(48px,8vw,84px); font-weight:500; line-height:1.1; letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
 .conflux-home-clock time span { color:var(--home-muted); font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
-.conflux-home-calendar { min-height:240px; display:flex; flex-direction:column; }
+.conflux-home-todo,.conflux-home-calendar { min-height:200px; display:flex; flex-direction:column; }
 .conflux-home-placeholder { display:grid; flex:1; place-items:center; min-height:100px; padding:20px 4px; color:var(--home-muted); font-size:12px; text-align:center; }
 .conflux-home-module-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:16px; }
 .conflux-home-module-grid button { min-width:0; min-height:64px; padding:12px 8px; border:1px solid var(--home-line); background:transparent; font-size:13px; overflow-wrap:anywhere; }
-@media(max-width:600px) { .conflux-home-layout { gap:12px; padding-top:16px; } .conflux-home-first-row { gap:12px; } .conflux-home-slot { padding:14px; } .conflux-home-clock,.conflux-home-todo { min-height:170px; } .conflux-home-calendar { min-height:220px; } .conflux-home-module-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } }
+@media(max-width:600px) { .conflux-home-layout { gap:12px; padding-top:16px; } .conflux-home-secondary-row { gap:12px; } .conflux-home-slot { padding:14px; } .conflux-home-todo,.conflux-home-calendar { min-height:180px; } .conflux-home-module-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } }
 @media(prefers-reduced-motion:reduce) { .conflux-home * { scroll-behavior:auto; } }
