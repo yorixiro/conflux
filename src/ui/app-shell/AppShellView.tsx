@@ -69,6 +69,8 @@ export function AppShellView({
   chatFrameInteractive,
   groupFrameInteractive
 }: AppShellViewProps) {
+  const useBottomNavigation = appLayoutSurface !== 'desktop';
+  const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     onHomeOpenChange(false);
@@ -147,7 +149,7 @@ export function AppShellView({
 
   return (
     <main
-      className={`app-shell ${!showDesktopSidebar ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${showDesktopSidebar ? 'has-desktop-sidebar' : ''} ${showDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
+      className={`app-shell ${useBottomNavigation ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >
       {backgroundUrl ? (
@@ -184,7 +186,7 @@ export function AppShellView({
           onOpenShelf={onOpenHomeShelf}
           onOpenGroup={onOpenHomeGroup}
         />
-      ) : showDesktopSidebar ? (
+      ) : useDesktopSidebar ? (
         <DesktopAppShellFrame
           desktopSidebarProps={{
             ...desktopSidebarProps,
@@ -206,7 +208,7 @@ export function AppShellView({
         </MobileAppShellFrame>
       )}
 
-      {!showDesktopSidebar ? (
+      {useBottomNavigation ? (
         <MobileBottomNavigation
           activeWorld={activeWorld}
           collectionShelf={topbarProps.state.collectionShelf}
