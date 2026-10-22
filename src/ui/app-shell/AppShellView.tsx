@@ -201,7 +201,7 @@ export function AppShellView({
         <MobileAppShellFrame
           topbarProps={{
             ...topbarProps,
-            actions: { ...topbarProps.actions, onOpenHome: () => onHomeOpenChange(true) }
+            actions: { ...topbarProps.actions, onOpenHome: undefined }
           }}
         >
           {worldStack}
