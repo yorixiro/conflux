@@ -81,6 +81,11 @@
   outline-offset: -3px;
 }
 
+/* Conflux has its own main navigation: never stack Polaris's five-item shelf bar beneath it. */
+.app-shell.has-mobile-bottom-navigation .world-collection .collection-shelf-tabs {
+  display: none !important;
+}
+
 .app-shell.has-mobile-bottom-navigation .app-stage {
   height: calc(100% - 66px - env(safe-area-inset-bottom, 0px));
 }
