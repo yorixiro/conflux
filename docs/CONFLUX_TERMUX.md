@@ -2,19 +2,36 @@
 
 网页和已安装的 PWA 继续使用原来的 4173 地址。保留安装时的主机名：`localhost` 和 `127.0.0.1` 属于不同来源，不要互换。
 
-首次切换到本分支的开发服务：
+首次切换到六入口开发分支：
 
 1. 回到原来挂着 Conflux 的 Termux 窗口，按 Ctrl+C，等命令提示符出现。
-2. 执行：
+2. 先查看本地状态：
 
 ```bash
-cd ~/my_st_termux/conflux &&
-git fetch origin feat/conflux-bottom-navigation &&
-git merge --ff-only FETCH_HEAD &&
+git -C ~/my_st_termux/conflux status --short --branch
+```
+
+如果出现 `M`、`A`、`D` 或 `??` 等本地修改/新文件，**先停下保留这些改动**，不要强制切分支或清理目录。需要先确认哪些属于正在编辑的 UI。
+3. 如果工作区干净，而且还在旧的 `feat/conflux-shell-pwa` 分支，依次执行：
+
+```bash
+cd ~/my_st_termux/conflux
+git fetch origin feat/conflux-bottom-navigation
+git switch --track -c feat/conflux-bottom-navigation origin/feat/conflux-bottom-navigation
 npm run termux:dev
 ```
 
-3. 看到“开发服务已启动”后，刷新原网页；从系统最近任务划掉 PWA，再点原图标打开。此后界面修改通过 Vite 热更新。Termux 服务需要保持运行；修改本地服务本身后，仍需 Ctrl+C 再运行 `npm run termux:dev`。
+旧 PWA 分支与六入口分支已分叉，**不能**使用 `git merge --ff-only FETCH_HEAD` 从旧分支直接升级；也不要用强制重置覆盖手机上的工作。
+
+如果本地已经存在 `feat/conflux-bottom-navigation`，工作区干净时改用：
+
+```bash
+git switch feat/conflux-bottom-navigation
+git pull --ff-only origin feat/conflux-bottom-navigation
+npm run termux:dev
+```
+
+4. 看到“开发服务已启动”后，刷新原网页；从系统最近任务划掉 PWA，再点原图标打开。此后界面修改通过 Vite 热更新。Termux 服务需要保持运行；修改本地服务本身后，仍需 Ctrl+C 再运行 `npm run termux:dev`。
 
 出现“新服务未启动：4173 已有服务在运行”，说明原服务还没停。回到占用端口的 Conflux 窗口按 Ctrl+C；不要换端口或反复新开服务。
 
