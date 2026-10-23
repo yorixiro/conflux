@@ -1,6 +1,5 @@
 import type { ChatMessage } from '../../../../types/domain';
 import { Icon } from '../../../Icon';
-import { formatTokenCount } from '../chatTokenCount';
 import { useI18n } from '../../../../i18n';
 
 type MessageMetaProps = {
@@ -26,17 +25,12 @@ export function MessageMeta({
   showThinking = true,
   splitIdentityLines = false
 }: MessageMetaProps) {
-  const { formatNumber, t } = useI18n();
-  const tokenLabel = formatTokenCount(message.tokenCount, message.tokenUsage, {
-    formatNumber,
-    totalLabel: (count) => t('chat.messageMeta.totalTokens', { count })
-  });
+  const { t } = useI18n();
   const identityName = message.assistantName || fallbackAssistantName;
-  const showIdentityDetail = showDetails && Boolean(message.model || tokenLabel);
+  const showIdentityDetail = showDetails && Boolean(message.model);
   const identityDetail = (
     <>
       {message.model && <span className="message-identity-pill">{message.model}</span>}
-      {tokenLabel && <span className="message-identity-pill">{tokenLabel}</span>}
     </>
   );
 

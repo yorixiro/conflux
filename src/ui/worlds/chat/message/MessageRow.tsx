@@ -18,6 +18,7 @@ import { MessageCardReference } from './MessageCardReference';
 import { MessageContent } from './MessageContent';
 import { MessageEditInline } from './MessageEditInline';
 import { MessageMeta } from './MessageMeta';
+import { MessageTokenUsage } from './MessageTokenUsage';
 import { MessageGeneratedImages } from './MessageGeneratedImages';
 import { MessageToolEvent } from './MessageToolEvent';
 import { isProjectedCodeToolName } from './projectedCodeTools';
@@ -481,6 +482,7 @@ function MessageRowComponent({
                 </div>
               ) : null}
               {messageActions}
+              {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
             </div>
           </div>
         </div>
@@ -490,6 +492,7 @@ function MessageRowComponent({
             <div className="message-turn-stack user">
               {messageBubble}
               {messageActions}
+              {!state.editing ? <MessageTokenUsage message={message} /> : null}
             </div>
             {showChatAvatars ? (
               <div className="message-avatar-slot user">
