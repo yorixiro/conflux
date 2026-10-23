@@ -25,7 +25,7 @@ export const collection = {
   'collection.nav.project': '工作区',
   'collection.nav.code': '卡片',
   'collection.nav.image': '图片',
-  'collection.nav.info': '信息',
+  'collection.nav.info': '通讯录',
   'collection.nav.tabListAria': '房间视图切换',
   'collection.world.searchCode': '搜索卡片标题、语言、标签或内容...',
   'collection.world.searchProject': '搜索工作区标题或文件路径...',

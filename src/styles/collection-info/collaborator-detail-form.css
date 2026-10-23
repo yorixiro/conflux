@@ -7,6 +7,11 @@
   border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 42%, transparent);
 }
 
+.conflux-role-navigation { display:flex; align-items:center; gap:12px; flex:none; padding:4px 10px 10px; }
+.conflux-role-navigation button { min-height:44px; flex:none; }
+.conflux-role-navigation > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-soft); font-size:13px; }
+.conflux-role-back-icon { display:inline-flex; transform:rotate(180deg); }
+
 .collaborator-info-name-input {
   font-size: 20px;
   color: var(--text);

@@ -112,10 +112,9 @@ export function useAppShellController() {
     () => [
       { shelf: 'project' as const, label: t('common.workspace') },
       { shelf: 'code' as const, label: t('desktop.navCards') },
-      { shelf: 'image' as const, label: t('desktop.navImages') },
-      { shelf: 'info' as const, label: frontstageCollaboratorName ?? t('desktop.collaboratorSettings') }
+      { shelf: 'image' as const, label: t('desktop.navImages') }
     ],
-    [frontstageCollaboratorName, t]
+    [t]
   );
   const collectionRenderItemCount = useMemo(
     () => resolveCollectionRenderItemCount({
@@ -247,10 +246,6 @@ export function useAppShellController() {
       if (collaboratorId) overlays.collaboratorActions.talkToCollaborator(collaboratorId);
       else setFrontstageCollaboratorId(null);
     },
-    onCreateCollaboratorFromBuilder: () => {
-      setWorld('collection');
-      overlays.collectionOpenCollaboratorBuilderForCreate();
-    },
     onCreateCustomCollaborator: () => {
       collection.setInfoPageRequest(null);
       setWorld('collection');
@@ -260,14 +255,10 @@ export function useAppShellController() {
       collection.setInfoPageRequest({ collaboratorId: frontstageCollaboratorId, tab: 'identity' });
       overlays.collaboratorActions.openCollaboratorInfo(frontstageCollaboratorId);
     },
-    onOpenCollaboratorMemory: () => {
-      collection.setInfoPageRequest({ collaboratorId: frontstageCollaboratorId, tab: 'memory' });
-      overlays.collaboratorActions.openCollaboratorInfo(frontstageCollaboratorId);
-    },
-    onOpenProviderSettings: overlays.collectionOpenProviderSettings,
     onSelectShelf: (shelf: typeof collectionShelf) => {
-      if (shelf === 'info' && frontstageCollaboratorId) {
-        setEditingCollaboratorId(frontstageCollaboratorId);
+      if (shelf === 'info') {
+        collection.setInfoPageRequest(null);
+        setFrontstageCollaboratorId(null);
       }
       setCollectionShelf(shelf);
       setWorld('collection');

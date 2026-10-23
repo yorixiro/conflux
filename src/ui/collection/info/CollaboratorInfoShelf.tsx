@@ -8,12 +8,11 @@ import { RoomSettingsTab } from '../../shell/persona/settings/RoomSettingsTab';
 import { AutomationRulesPanel } from '../../shell/menu/AutomationRulesPanel';
 import type { PersonaUpdatePatch } from '../../shell/persona/personaUiShared';
 import { CollaboratorOverviewRail } from './CollaboratorOverviewRail';
-import { CollaboratorCreatePicker } from '../../worlds/chat/collaborator/CollaboratorCreatePicker';
-import { CollectionFloatingCreateAction } from '../grid/CollectionFloatingCreateAction';
 import { isCompanionCollaboratorId } from '../../../engines/companion';
 import { isProductGuidePersona } from '../../../engines/personaBuiltin';
 import type { I18nKey } from '../../../i18n/messages';
 import { useI18n } from '../../../i18n/useI18n';
+import { Icon } from '../../Icon';
 const INFO_TABS = ['identity', 'request', 'memory', 'room', 'automation'] as const;
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
 export type CollaboratorInfoPageRequest = {
@@ -45,7 +44,8 @@ type CollaboratorInfoShelfProps = {
   collaboratorOverviewItems: CollaboratorInfoOverviewItem[];
   editing: boolean;
   onUpdateCollaborator: (patch: PersonaUpdatePatch) => void;
-  onSelectCollaborator: (collaboratorId: string) => void;
+  onSelectCollaborator: (collaboratorId: string | null) => void;
+  onTalkToCollaborator: (collaboratorId: string) => void;
   onToggleCollaboratorPinned: (collaboratorId: string) => void;
   onDeleteCollaborator: (collaboratorId: string) => void;
   onSelectCollaboratorAvatar: (role: 'assistant' | 'user', files: FileList | File[]) => Promise<void>;
@@ -86,6 +86,7 @@ export function CollaboratorInfoShelf({
   editing,
   onUpdateCollaborator,
   onSelectCollaborator,
+  onTalkToCollaborator,
   onToggleCollaboratorPinned,
   onDeleteCollaborator,
   onSelectCollaboratorAvatar,
@@ -103,7 +104,6 @@ export function CollaboratorInfoShelf({
 }: CollaboratorInfoShelfProps) {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<CollaboratorInfoTab>('identity');
-  const [createPickerOpen, setCreatePickerOpen] = useState(false);
   const visibleTabs = isProductGuidePersona(currentCollaborator) ? PRODUCT_GUIDE_INFO_TABS : INFO_TABS;
   const isCompanionCollaborator = isCompanionCollaboratorId(currentCollaboratorId);
   const collaboratorName = currentCollaborator?.name.trim() || t('collaborator.info.fallbackName');
@@ -124,7 +124,8 @@ export function CollaboratorInfoShelf({
         <CollaboratorOverviewRail
           items={collaboratorOverviewItems}
           editing={editing}
-          onSelectCollaborator={onSelectCollaborator}
+          onSelectCollaborator={onTalkToCollaborator}
+          onEditCollaborator={onSelectCollaborator}
           onToggleCollaboratorPinned={onToggleCollaboratorPinned}
           onCreateFromBuilder={onCreateFromBuilder}
           onCreateCustomCollaborator={onCreateCustomCollaborator}
@@ -140,26 +141,7 @@ export function CollaboratorInfoShelf({
         <div className="empty-state-floating">
           <p className="empty-state-title">{t('collaborator.info.emptyTitle')}</p>
           <p className="empty-state-hint">{t('collaborator.info.emptyHint')}</p>
-          <CollectionFloatingCreateAction
-            label={createPickerOpen ? t('collaborator.info.closeCreateAction') : t('collaborator.info.createAction')}
-            expanded={createPickerOpen}
-            onPress={() => setCreatePickerOpen((current) => !current)}
-          >
-            {createPickerOpen ? (
-              <CollaboratorCreatePicker
-                showCloseButton={false}
-                onCloseCreatePicker={() => setCreatePickerOpen(false)}
-                onCreateFromBuilder={() => {
-                  setCreatePickerOpen(false);
-                  onCreateFromBuilder();
-                }}
-                onCreateCustomCollaborator={() => {
-                  setCreatePickerOpen(false);
-                  onCreateCustomCollaborator();
-                }}
-              />
-            ) : null}
-          </CollectionFloatingCreateAction>
+          <button type="button" className="btn-secondary" onClick={() => onSelectCollaborator(null)}>{t('collaborator.overview.back')}</button>
         </div>
       </section>
     );
@@ -168,6 +150,12 @@ export function CollaboratorInfoShelf({
   return (
     <section className={`collaborator-info-shelf ${fullscreenOpen ? 'collaborator-info-shelf--fullscreen' : ''}`.trim()}>
       <div className={`collaborator-info-detail-shell ${fullscreenOpen ? 'collaborator-info-detail-shell--fullscreen' : ''}`.trim()}>
+        <div className="conflux-role-navigation">
+          <button type="button" className="btn-secondary" onClick={() => onSelectCollaborator(null)}>
+            <span className="conflux-role-back-icon"><Icon name="chevron" size={16} /></span>{t('collaborator.overview.back')}
+          </button>
+          <span>{collaboratorName}</span>
+        </div>
         <div className="ps-nav collaborator-info-nav" role="tablist" aria-label="角色设置">
           {visibleTabs.map((tab) => (
             <button

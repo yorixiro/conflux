@@ -114,6 +114,7 @@ export function AppShellView({
                 onDetailOpenChange={setCollectionDetailOpen}
                 onOpenCollaboratorBuilderForCreate={collectionOpenCollaboratorBuilderForCreate}
                 onCreateCustomCollaborator={collectionCreateCustomCollaborator}
+                onTalkToCollaborator={desktopSidebarProps.onSelectCollaborator}
                 onOpenProviderSettings={collectionOpenProviderSettings}
                 onOpenDesktopLocalSettings={collectionOpenDesktopLocalSettings}
                 sectionNavigation={useBottomNavigation}

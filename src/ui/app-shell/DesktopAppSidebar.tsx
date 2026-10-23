@@ -26,11 +26,8 @@ export type DesktopAppSidebarProps = {
   onToggleCollapsed: () => void;
   onOpenHome?: () => void;
   onSelectCollaborator: (collaboratorId: string | null) => void;
-  onCreateCollaboratorFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
   onEditCollaborator: () => void;
-  onOpenCollaboratorMemory: () => void;
-  onOpenProviderSettings: () => void;
   onSelectShelf: (shelf: CollectionShelf) => void;
   onOpenConversation: (conversationId: string, messageId?: string) => void;
   onRenameConversation: (conversationId: string, title: string) => void;
@@ -72,11 +69,8 @@ export function DesktopAppSidebar({
   onToggleCollapsed,
   onOpenHome,
   onSelectCollaborator,
-  onCreateCollaboratorFromBuilder,
   onCreateCustomCollaborator,
   onEditCollaborator,
-  onOpenCollaboratorMemory,
-  onOpenProviderSettings,
   onSelectShelf,
   onOpenConversation,
   onRenameConversation,
@@ -252,40 +246,22 @@ export function DesktopAppSidebar({
           <div className="conflux-profile-heading">
             {currentCollaborator ? (
               <PersonaAvatar
-                role="assistant"
+                role="user"
                 seed={currentCollaborator.id}
-                assetId={currentCollaborator.assistantAvatarAssetId}
-                iconId={currentCollaborator.assistantAvatarIconId}
-                shape={currentCollaborator.assistantAvatarShape}
+                assetId={currentCollaborator.userAvatarAssetId}
+                iconId={currentCollaborator.userAvatarIconId}
+                shape={currentCollaborator.userAvatarShape}
                 size={44}
               />
             ) : <Icon name="persona" size={28} />}
             <div>
-              <h2>{collaboratorName}</h2>
-              <p>{currentCollaborator?.description.trim() || '选择或新建一个角色。'}</p>
+              <h2>{currentCollaborator?.userName.trim() || '我'}</h2>
+              <p>{currentCollaborator ? `与${collaboratorName}聊天时使用的称呼和头像` : '先从通讯录选择聊天角色，再查看自己的资料。'}</p>
             </div>
           </div>
-          {currentCollaborator?.userName ? <p>我的称呼：{currentCollaborator.userName}</p> : null}
-          <div className="conflux-profile-actions">
-            <button
-              type="button"
-              onClick={() => setCollaboratorPickerOpen(open => !open)}
-              aria-expanded={collaboratorPickerOpen}
-              aria-controls="conflux-role-picker"
-            >切换角色</button>
-            <button type="button" onClick={onCreateCustomCollaborator}>新建角色</button>
-          </div>
-          {rolePicker}
-          <button type="button" className="desktop-sidebar-nav-item" onClick={onOpenProviderSettings}>
-            <Icon name="settings" size={18} /><span>模型线路</span>
+          <button type="button" className="desktop-sidebar-nav-item" onClick={onEditCollaborator} disabled={!currentCollaborator}>
+            <Icon name="persona" size={18} /><span>编辑我的称呼与头像</span>
           </button>
-          <button type="button" className="desktop-sidebar-nav-item" onClick={onOpenCollaboratorMemory} disabled={!currentCollaborator}>
-            <Icon name="navInfo" size={18} /><span>记忆设置</span>
-          </button>
-          <details className="conflux-profile-more">
-            <summary>更多创建方式</summary>
-            <button type="button" className="desktop-sidebar-nav-item" onClick={onCreateCollaboratorFromBuilder}>AI 生成人设</button>
-          </details>
         </section>
       ) : null}
 
@@ -300,6 +276,9 @@ export function DesktopAppSidebar({
           <button type="button" className="conflux-library-role-settings" onClick={onEditCollaborator} disabled={!currentCollaborator} aria-label={`设置${collaboratorName}`} title="角色设置"><Icon name="settings" size={18} /></button>
         </div>
         {rolePicker}
+        <button type="button" className="desktop-sidebar-nav-item conflux-sidebar-contacts" onClick={() => onSelectShelf('info')}>
+          <Icon name="persona" size={18} /><span>通讯录</span>
+        </button>
         <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
           {collaborators.length ? '新建对话' : '创建角色并开始聊天'}
         </button>

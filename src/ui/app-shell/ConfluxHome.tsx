@@ -15,7 +15,7 @@ type ConfluxHomeProps = {
 
 const modules: { label: string; shelf: CollectionShelf }[] = [
   { label: '对话档案', shelf: 'dialogue' },
-  { label: '角色资料', shelf: 'info' },
+  { label: '通讯录', shelf: 'info' },
   { label: '项目文件', shelf: 'project' },
   { label: '代码卡片', shelf: 'code' },
   { label: '图片素材', shelf: 'image' }

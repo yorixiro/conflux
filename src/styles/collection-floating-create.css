@@ -90,11 +90,6 @@
   display: none;
 }
 
-.collaborator-info-shelf-overview,
-.collaborator-info-shelf-empty .empty-state-floating {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-}
-
 .code-collection-shelf .code-collection-view-page-scroll,
 .project-collection-shelf .code-collection-view-page-scroll {
   padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
