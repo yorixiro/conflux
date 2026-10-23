@@ -269,10 +269,17 @@ export function DesktopAppSidebar({
               <h2>{profileName}</h2>
               <p>{chatCollaborator?.description.trim() || '从对话库的通讯录里选择一个聊天角色。'}</p>
             </div>
+            <button
+              type="button"
+              className="conflux-profile-edit"
+              onClick={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)}
+              disabled={!chatCollaborator}
+              aria-label="角色设置"
+              title="编辑当前聊天角色"
+            >
+              <Icon name="settings" size={17} />
+            </button>
           </div>
-          <button type="button" className="desktop-sidebar-nav-item" onClick={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} disabled={!chatCollaborator}>
-            <Icon name="settings" size={18} /><span>角色设置</span>
-          </button>
           <SidebarCalendar />
         </section>
       ) : null}
