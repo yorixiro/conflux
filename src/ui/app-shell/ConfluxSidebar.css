@@ -12,7 +12,7 @@
 .conflux-profile-heading > div { min-width:0; }
 .conflux-profile-heading .persona-avatar { flex-shrink:0; }
 .conflux-profile-heading p { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.conflux-profile-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.conflux-profile-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
 .conflux-profile-actions button { min-height:44px; padding:8px 2px; border:1px solid var(--border); background:transparent; color:var(--text); font:inherit; font-size:12px; }
 .conflux-sidebar-profile button:disabled { opacity:.45; cursor:default; }
 .conflux-sidebar-profile .desktop-sidebar-collaborator-picker { min-height:0; max-height:none; overflow:visible; }
@@ -23,6 +23,15 @@
 .conflux-sidebar-search { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text-soft); }
 .conflux-sidebar-search input { width:100%; min-width:0; min-height:44px; box-sizing:border-box; border:1px solid var(--border); background:transparent; color:var(--text); border-radius:0; padding:10px; font:inherit; font-size:16px; }
 .conflux-sidebar-create { min-height:44px; flex:none; border:1px solid var(--border); background:transparent; color:var(--text); font:inherit; font-size:13px; }
+.conflux-library-role { display:flex; align-items:center; gap:8px; flex:none; }
+.conflux-library-role button { min-height:44px; border:0; background:transparent; color:var(--text); font:inherit; cursor:pointer; }
+.conflux-library-role-select { display:flex; align-items:center; gap:10px; flex:1; min-width:0; text-align:left; }
+.conflux-library-role-select span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.conflux-library-role-select .persona-avatar { flex:none; }
+.conflux-library-role-settings { display:grid; place-items:center; width:44px; flex:none; }
+.conflux-library-role-settings:disabled { opacity:.45; }
+.conflux-sidebar-panel > .desktop-sidebar-collaborator-picker { flex:none; min-height:0; max-height:40vh; overflow-y:auto; }
+.desktop-app-sidebar.collapsed .conflux-library-role { display:none; }
 .conflux-sidebar-thread-group { display:flex; flex-direction:column; gap:4px; }
 .conflux-sidebar-thread-group h3 { margin:10px 8px 4px; color:var(--text-soft); font-size:12px; font-weight:500; }
 .conflux-sidebar-status { margin:0; font-size:12px; line-height:1.6; color:var(--text-soft); }

@@ -215,6 +215,7 @@ export function CollectionWorld({
                   onCreateFromBuilder={onOpenCollaboratorBuilderForCreate}
                   onCreateCustomCollaborator={onCreateCustomCollaborator}
                   onOpenProviderSettings={onOpenProviderSettings}
+                  onUpdateProvider={controller.onUpdateProvider}
                   onCreateTriggerRule={controller.onCreateAutomationRule}
                   onUpdateTriggerRule={controller.onUpdateAutomationRule}
                   onDeleteTriggerRule={controller.onDeleteAutomationRule}

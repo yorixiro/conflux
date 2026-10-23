@@ -3,7 +3,6 @@ import type { CollaboratorInfoOverviewItem } from '../../../app/collection/build
 import type { Conversation, McpServerConfig, Persona, PolarisTriggerRule, PolarisTriggerSchedule, ProviderProfile } from '../../../types/domain';
 import { BasicSettingsTab } from '../../shell/persona/settings/BasicSettingsTab';
 import { MemorySettingsTab } from '../../shell/persona/settings/MemorySettingsTab';
-import { PromptSettingsTab } from '../../shell/persona/settings/PromptSettingsTab';
 import { RequestSettingsTab } from '../../shell/persona/settings/RequestSettingsTab';
 import { RoomSettingsTab } from '../../shell/persona/settings/RoomSettingsTab';
 import { AutomationRulesPanel } from '../../shell/menu/AutomationRulesPanel';
@@ -15,16 +14,15 @@ import { isCompanionCollaboratorId } from '../../../engines/companion';
 import { isProductGuidePersona } from '../../../engines/personaBuiltin';
 import type { I18nKey } from '../../../i18n/messages';
 import { useI18n } from '../../../i18n/useI18n';
-const INFO_TABS = ['identity', 'prompt', 'memory', 'room', 'automation', 'request'] as const;
+const INFO_TABS = ['identity', 'request', 'memory', 'room', 'automation'] as const;
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
 export type CollaboratorInfoPageRequest = {
   collaboratorId: string | null;
   tab: 'identity' | 'memory';
 };
-const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'prompt' && tab !== 'automation' && tab !== 'request');
+const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'automation' && tab !== 'request');
 const INFO_TAB_LABEL_KEYS = {
   identity: 'collaborator.info.tab.identity',
-  prompt: 'collaborator.info.tab.prompt',
   memory: 'collaborator.info.tab.memory',
   room: 'collaborator.info.tab.room',
   automation: 'collaborator.info.tab.automation',
@@ -54,6 +52,7 @@ type CollaboratorInfoShelfProps = {
   onCreateFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
   onOpenProviderSettings: () => void;
+  onUpdateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
   onCreateTriggerRule: (seed: {
     collaboratorId: string;
     conversationMode?: PolarisTriggerRule['target']['conversationMode'];
@@ -93,6 +92,7 @@ export function CollaboratorInfoShelf({
   onCreateFromBuilder,
   onCreateCustomCollaborator,
   onOpenProviderSettings,
+  onUpdateProvider,
   onCreateTriggerRule,
   onUpdateTriggerRule,
   onDeleteTriggerRule,
@@ -168,11 +168,13 @@ export function CollaboratorInfoShelf({
   return (
     <section className={`collaborator-info-shelf ${fullscreenOpen ? 'collaborator-info-shelf--fullscreen' : ''}`.trim()}>
       <div className={`collaborator-info-detail-shell ${fullscreenOpen ? 'collaborator-info-detail-shell--fullscreen' : ''}`.trim()}>
-        <div className="ps-nav collaborator-info-nav">
+        <div className="ps-nav collaborator-info-nav" role="tablist" aria-label="角色设置">
           {visibleTabs.map((tab) => (
             <button
               key={tab}
               type="button"
+              role="tab"
+              aria-selected={activeTab === tab}
               className={`ps-nav-item ${activeTab === tab ? 'ps-nav-item--active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
@@ -183,6 +185,13 @@ export function CollaboratorInfoShelf({
 
         <div className="ps-content collaborator-info-content">
           <div className="ps-section">
+            {isProductGuidePersona(currentCollaborator) ? (
+              <div className="conflux-role-notice">
+                <strong>内置使用向导</strong>
+                <p>小助手的人设和线路由程序固定。要设置自己的聊天角色，请新建一个；原有对话会保留。</p>
+                <button type="button" className="btn-secondary" onClick={onCreateCustomCollaborator}>新建可编辑角色</button>
+              </div>
+            ) : <p className="ps-footnote">正在设置：{collaboratorName} · 修改自动保存</p>}
             {activeTab === 'identity' && (
               <BasicSettingsTab
                 activeCollaboratorId={currentCollaboratorId}
@@ -238,14 +247,6 @@ export function CollaboratorInfoShelf({
                   )}
               />
             )}
-            {activeTab === 'prompt' && (
-              <PromptSettingsTab
-                activeCollaboratorId={currentCollaboratorId}
-                activePersona={currentCollaborator}
-                onUpdatePersona={onUpdateCollaborator}
-                expandedUsesPageScroll={fullscreenOpen}
-              />
-            )}
             {activeTab === 'memory' && (
               <MemorySettingsTab
                 activeCollaboratorId={currentCollaboratorId}
@@ -278,6 +279,7 @@ export function CollaboratorInfoShelf({
                 activeProviderId={activeProviderId}
                 onUpdatePersona={onUpdateCollaborator}
                 onOpenProviderSettings={onOpenProviderSettings}
+                onUpdateProvider={onUpdateProvider}
                 mcpServers={mcpServers}
                 mcpToolTimeoutSeconds={mcpToolTimeoutSeconds}
                 onCreateMcpServer={onCreateMcpServer}

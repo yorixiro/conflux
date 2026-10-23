@@ -1,7 +1,7 @@
 import type { collaborator as zhCollaborator } from '../zh-CN/collaborator';
 
 export const collaborator = {
-  'collaborator.info.tab.identity': 'Identity',
+  'collaborator.info.tab.identity': 'Profile & persona',
   'collaborator.info.tab.prompt': 'Prompt',
   'collaborator.info.tab.memory': 'Memory',
   'collaborator.info.tab.room': 'Room',
