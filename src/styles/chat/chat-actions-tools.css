@@ -30,6 +30,7 @@
 .message-token-model { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .message-token-note summary { padding:4px 0; cursor:pointer; }
 .message-token-note p { margin:6px 0 0; }
+.message-token-empty { margin:8px 0; font-size:12px; line-height:1.5; color:var(--text-soft); }
 .assistant-leading-tool-list {
   display: flex;
   flex-direction: column;

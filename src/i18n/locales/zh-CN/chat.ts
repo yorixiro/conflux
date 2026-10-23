@@ -76,6 +76,7 @@ export const chat = {
   'chat.messageMeta.openTokenUsage': '查看这条消息的 Token 用量',
   'chat.messageMeta.tokenUsage': 'Token 用量',
   'chat.messageMeta.tokenUsageAbout': '用量说明',
+  'chat.messageMeta.noTokenUsage': '这条消息没有记录 Token 用量。',
   'chat.messageMeta.closeTokenUsage': '关闭 Token 用量',
   'chat.messageMeta.tokenUsageNote': '显示这条消息保存的接口用量。输入包含随请求发送的人设、历史消息等上下文；未记录的字段不作估算。',
   'chat.messageRow.generatingAria': '正在生成',

@@ -23,6 +23,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
     ['settings.usage.cacheWrite', usage?.cacheCreationInputTokens],
     ['settings.usage.reasoning', usage?.reasoningTokens]
   ] as const;
+  const hasUsage = metrics.some(([, value]) => typeof value === 'number');
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -31,16 +32,26 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
 
     const position = () => {
       const anchor = trigger.getBoundingClientRect();
-      const card = dialog.getBoundingClientRect();
       const viewport = window.visualViewport;
+      const flow = trigger.closest('.chat-flow')?.getBoundingClientRect();
       const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
-      const topEdge = (viewport?.offsetTop ?? 0) + 8;
+      const topEdge = Math.max((viewport?.offsetTop ?? 0) + 8, (flow?.top ?? 0) + 8);
       const rightEdge = leftEdge + (viewport?.width ?? window.innerWidth) - 16;
-      const bottomEdge = topEdge + (viewport?.height ?? window.innerHeight) - 16;
-      const above = anchor.top - card.height - 6;
-      const top = above >= topEdge ? above : anchor.bottom + 6;
-      dialog.style.left = `${Math.max(leftEdge, Math.min(anchor.left, rightEdge - card.width))}px`;
-      dialog.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - card.height))}px`;
+      const bottomEdge = Math.min(
+        (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8,
+        (flow?.bottom ?? window.innerHeight) - 8
+      );
+      dialog.style.maxHeight = `${bottomEdge - topEdge}px`;
+      const card = dialog.getBoundingClientRect();
+      const below = Math.max(0, bottomEdge - anchor.bottom - 8);
+      const above = Math.max(0, anchor.top - topEdge - 8);
+      const placeBelow = card.height <= below || (card.height > above && below >= above);
+      dialog.style.maxHeight = `${placeBelow ? below : above}px`;
+      const height = dialog.getBoundingClientRect().height;
+      const left = message.role === 'user' ? anchor.right - card.width : anchor.left;
+      const top = placeBelow ? anchor.bottom + 8 : anchor.top - height - 8;
+      dialog.style.left = `${Math.max(leftEdge, Math.min(left, rightEdge - card.width))}px`;
+      dialog.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - height))}px`;
     };
 
     dialog.showModal();
@@ -58,7 +69,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
       window.visualViewport?.removeEventListener('resize', position);
       window.visualViewport?.removeEventListener('scroll', position);
     };
-  }, [open]);
+  }, [open, message.role]);
 
   const close = () => {
     dialogRef.current?.close();
@@ -91,18 +102,18 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
             <button type="button" onClick={close} aria-label={t('chat.messageMeta.closeTokenUsage')}><Icon name="x" size={18} /></button>
           </header>
           {message.model ? <p className="message-token-model">{[message.providerName, message.model].filter(Boolean).join(' · ')}</p> : null}
-          <dl>
+          {hasUsage ? <dl>
             {metrics.map(([label, value]) => (
               <div key={label}>
                 <dt>{t(label)}</dt>
                 <dd>{typeof value === 'number' ? formatNumber(value) : t('settings.usage.notRecorded')}</dd>
               </div>
             ))}
-          </dl>
-          <details className="message-token-note">
+          </dl> : <p className="message-token-empty">{t('chat.messageMeta.noTokenUsage')}</p>}
+          {hasUsage ? <details className="message-token-note">
             <summary>{t('chat.messageMeta.tokenUsageAbout')}</summary>
             <p>{t('chat.messageMeta.tokenUsageNote')}</p>
-          </details>
+          </details> : null}
         </dialog>
       ) : null}
     </div>
