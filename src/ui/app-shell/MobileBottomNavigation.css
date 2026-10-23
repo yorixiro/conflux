@@ -6,7 +6,7 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   height: calc(66px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
-  padding: 5px max(7px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(7px, env(safe-area-inset-left, 0px));
+  padding: 5px max(7px, env(safe-area-inset-right, 0px), calc((100% - 560px) / 2)) calc(6px + env(safe-area-inset-bottom, 0px)) max(7px, env(safe-area-inset-left, 0px), calc((100% - 560px) / 2));
   color: color-mix(in srgb, var(--text) 63%, var(--text-soft) 37%);
   background: color-mix(in srgb, var(--surface-solid, var(--shell-bg, var(--bg))) 73%, transparent);
   -webkit-backdrop-filter: blur(18px) saturate(0.82);
@@ -70,7 +70,7 @@
 }
 
 .mobile-bottom-navigation__label {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.2;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -103,7 +103,7 @@ html[data-keyboard-open="true"] .app-shell.has-mobile-bottom-navigation > .confl
 
 @media (max-width: 360px) {
   .mobile-bottom-navigation__icon { width: 31px; }
-  .mobile-bottom-navigation__label { font-size: 9px; }
+  .mobile-bottom-navigation__label { font-size: 10px; }
   .mobile-bottom-navigation__icon svg { width: 21px; height: 21px; }
 }
 @media (prefers-reduced-motion: reduce) {
