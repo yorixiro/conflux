@@ -30,6 +30,14 @@
 .menu-language-option:hover, .menu-language-option:focus-visible { color: var(--sheet-readable-text); outline: none; }
 .menu-language-option.active { background: color-mix(in srgb, var(--accent-soft) 84%, rgba(255,255,255,0.18)); color: var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.24); }
 .menu-language-note { margin-top: 4px; }
+.conflux-settings-extensions > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; list-style:none; cursor:pointer; }
+.conflux-settings-extensions > summary::-webkit-details-marker { display:none; }
+.conflux-settings-extensions > summary:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.conflux-settings-extensions-copy { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.conflux-settings-extensions-copy strong { font:600 var(--type-small) var(--font-ui); color:var(--sheet-readable-text); }
+.conflux-settings-extensions-copy small { font:var(--type-caption) var(--font-ui); line-height:1.5; color:var(--sheet-readable-muted); }
+.conflux-settings-extensions > summary > svg { flex-shrink:0; transform:rotate(90deg); }
+.conflux-settings-extensions[open] > summary > svg { transform:rotate(-90deg); }
 @media (max-width: 430px) {
   .menu-language-selector { align-items: flex-start; flex-direction: column; }
   .menu-language-options { width: 100%; }

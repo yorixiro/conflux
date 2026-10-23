@@ -2,6 +2,11 @@ import type { settings as zhSettings } from '../zh-CN/settings';
 
 export const settings = {
   'settings.title': 'Settings',
+  'settings.section.chat': 'Chat & models',
+  'settings.section.dataBackup': 'Data & backup',
+  'settings.section.extensions': 'Extensions',
+  'settings.extensions.detail': 'Toolbox, MCP, images, and request routing',
+  'settings.section.general': 'Language & help',
   'settings.section.service': 'Service',
   'settings.section.capabilities': 'Capabilities',
   'settings.section.appearance': 'Appearance',
