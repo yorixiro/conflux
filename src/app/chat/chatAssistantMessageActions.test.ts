@@ -76,7 +76,9 @@ function createHandlersForConversation(params: {
     ...params.space
   };
 
+  const runReply = vi.fn(() => Promise.resolve());
   return {
+    runReply,
     chat,
     space,
     ui,
@@ -109,14 +111,14 @@ function createHandlersForConversation(params: {
         codeCardActionModeByMessageId: {},
         ...params.derived
       },
-      runReply: vi.fn(() => Promise.resolve()),
+      runReply,
       submitToolCommand: vi.fn(() => Promise.resolve(false)),
       activeSubmitFingerprintRef: { current: null }
     })
   };
 }
 
-describe('assistant message actions', () => {
+describe('message actions', () => {
   it('edits an assistant message in place', async () => {
     const assistantMessage = message('assistant-1', 'assistant', '旧回答', 1000);
     const conversation: Conversation = {
@@ -170,5 +172,62 @@ describe('assistant message actions', () => {
     expect(space.clearPendingAttachments).toHaveBeenCalled();
     expect(space.clearPendingCardReference).toHaveBeenCalled();
     expect(chat.setActiveConversation).toHaveBeenCalledWith('conv-branch');
+  });
+});
+
+
+describe('message deletion and resend confirmation', () => {
+  const messages = [message('u1', 'user', '问题', 1), message('a1', 'assistant', '回答', 2), message('u2', 'user', '后续', 3)];
+  const conversation: Conversation = {
+    id: 'conv-delete', title: '删除检查', collaboratorId: 'pharos', messages,
+    pinnedAt: null, updatedAt: 3
+  };
+
+  it.each(['user', 'assistant'] as const)('deletes only the selected %s message without requesting a reply', async (role) => {
+    const target = messages.find(entry => entry.role === role)!;
+    const { handlers, chat, ui, runReply } = createHandlersForConversation({ conversation });
+    await handlers.deleteMessage(target);
+    expect(ui.confirm).toHaveBeenCalledOnce();
+    expect(chat.replaceConversationMessages).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: conversation.id }), messages.filter(entry => entry.id !== target.id)
+    );
+    expect(runReply).not.toHaveBeenCalled();
+  });
+
+  it('removes associated tool receipts but preserves other messages', async () => {
+    const receipt = { ...message('tool1', 'system', '工具回执', 2), origin: 'tool-runtime',
+      toolInvocation: { kind: 'runCode', originMessageId: 'a1' } } as ChatMessage;
+    const otherReceipt = { ...receipt, id: 'tool2', toolInvocation: { ...receipt.toolInvocation!, originMessageId: 'other' } };
+    const source = { ...conversation, messages: [...messages, receipt, otherReceipt] };
+    const { handlers, chat, ui } = createHandlersForConversation({ conversation: source });
+    await handlers.deleteMessage(messages[1]);
+    expect(ui.confirm).toHaveBeenCalledWith(expect.stringContaining('关联的工具回执'));
+    expect(chat.replaceConversationMessages).toHaveBeenCalledWith(
+      expect.anything(), [messages[0], messages[2], otherReceipt]
+    );
+  });
+
+  it('keeps history unchanged when deletion is cancelled or the body cannot be loaded', async () => {
+    const cancelled = createHandlersForConversation({ conversation, ui: { confirm: vi.fn(() => false) } });
+    await cancelled.handlers.deleteMessage(messages[1]);
+    expect(cancelled.chat.replaceConversationMessages).not.toHaveBeenCalled();
+    const unavailable = createHandlersForConversation({ conversation, chat: { ensureConversationWritable: vi.fn(async () => null) } });
+    await unavailable.handlers.deleteMessage(messages[1]);
+    expect(unavailable.ui.confirm).not.toHaveBeenCalled();
+    expect(unavailable.chat.replaceConversationMessages).not.toHaveBeenCalled();
+    expect(unavailable.runReply).not.toHaveBeenCalled();
+  });
+
+  it('does not rewrite history or request a model when resend confirmation is cancelled', async () => {
+    const { handlers, chat, ui, runReply } = createHandlersForConversation({ conversation, ui: {
+      confirm: vi.fn(() => false), editing: { messageId: 'u1', draft: '新问题', attachments: [] }
+    } });
+    await handlers.retryLatestAssistant(messages[1]);
+    await handlers.commitMessageEdit(messages[0]);
+    expect(ui.confirm).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(ui.confirm).mock.calls.every(([text]) => text.includes('按接口计费'))).toBe(true);
+    expect(chat.replaceConversationMessages).not.toHaveBeenCalled();
+    expect(ui.cancelEditingMessage).not.toHaveBeenCalled();
+    expect(runReply).not.toHaveBeenCalled();
   });
 });

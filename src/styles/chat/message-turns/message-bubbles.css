@@ -73,42 +73,6 @@
 .bubble.assistant > .message-rich-text > * {
   max-width: 100%;
 }
-.user-bubble-action-menu {
-  display: inline-flex;
-  align-items: stretch;
-  gap: 6px;
-  align-self: flex-end;
-  margin-top: 8px;
-  padding: 6px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--border-hover) 38%, transparent);
-  background: color-mix(in srgb, var(--surface-solid) 92%, rgba(255,255,255,0.88));
-  box-shadow: 0 12px 24px rgba(103, 122, 171, 0.12);
-  backdrop-filter: blur(14px);
-  animation: streamingCopyIn 140ms ease both;
-}
-.user-bubble-action-btn {
-  min-height: 34px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-soft);
-  font: inherit;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
-}
-.user-bubble-action-btn:hover,
-.user-bubble-action-btn:focus-visible {
-  background: color-mix(in srgb, var(--accent-soft) 16%, transparent);
-  color: var(--text);
-  outline: none;
-  transform: translateY(-1px);
-}
 .bubble-frame.assistant.streaming-stage .message-rich-text { animation: streamingCopyIn 140ms ease both; }
 .bubble-frame.assistant.streaming-live .bubble.assistant {
   padding-bottom: 10px;

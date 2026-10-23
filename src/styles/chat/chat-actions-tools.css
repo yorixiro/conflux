@@ -93,6 +93,9 @@
 }
 .message-inline-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0; }
 .message-inline-actions.user { justify-content: flex-end; }
+.user-message-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.message-turn.user .user-message-footer .message-inline-actions { padding: 0; }
+.user-message-footer .micro-action-btn { width: 32px; height: 32px; }
 .message-inline-actions.assistant { justify-content: flex-start; }
 .message-turn.user .message-inline-actions { padding-right: 8px; }
 .message-turn.assistant .message-inline-actions {
@@ -172,61 +175,63 @@
   animation: thinkingOrbitSpin 2.6s linear infinite;
 }
 .message-inline-progress { align-self: center; font-size: var(--type-tiny); color: var(--text-muted); letter-spacing: 0.01em; }
-.assistant-message-sheet-dismiss {
+.message-action-dialog {
   position: fixed;
-  inset: 0;
-  z-index: 539;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: color-mix(in srgb, rgba(18, 21, 32, 0.22) 78%, transparent);
-  appearance: none;
-}
-.assistant-message-action-sheet {
-  position: fixed;
-  left: max(10px, env(safe-area-inset-left));
-  right: max(10px, env(safe-area-inset-right));
-  bottom: max(10px, env(safe-area-inset-bottom));
-  z-index: 540;
-  width: min(520px, calc(100vw - 20px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  inset: auto 10px max(10px, env(safe-area-inset-bottom));
+  width: min(520px, calc(100vw - 20px));
   max-height: min(78vh, 620px);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 10px 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--border-hover) 54%, transparent);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--surface-solid) 98%, #fff 2%);
-  box-shadow:
-    0 22px 58px rgba(36, 42, 66, 0.2),
-    0 0 0 1px color-mix(in srgb, rgba(255,255,255,0.68) 54%, transparent) inset;
-  backdrop-filter: blur(22px);
-  overflow: hidden;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-solid);
+  color: var(--text);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  overflow: auto;
 }
-html[data-native-keyboard-overlay='true'][data-keyboard-open='true'] .assistant-message-action-sheet {
+.message-action-dialog::backdrop { background: rgba(0, 0, 0, 0.12); }
+.message-action-dialog.menu {
+  inset: auto;
+  width: min(250px, calc(100vw - 16px));
+  margin: 0;
+  padding: 8px;
+}
+.message-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 8px 6px;
+  font-size: var(--type-small);
+  color: var(--text-muted);
+}
+.message-action-header button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-soft);
+}
+.message-action-header button:hover { background: var(--surface-muted); }
+html[data-native-keyboard-overlay='true'][data-keyboard-open='true'] .message-action-dialog:not(.menu) {
   bottom: calc(var(--keyboard-offset, 0px) + 8px);
   max-height: min(62vh, calc(var(--viewport-height, 100vh) - var(--keyboard-offset, 0px) - var(--viewport-offset-top, 0px) - 24px));
 }
-.assistant-message-action-handle {
-  align-self: center;
-  width: 48px;
-  height: 5px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text-muted) 26%, transparent);
-}
-.assistant-message-action-menu {
+.message-action-menu {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 4px 0 2px;
 }
-.assistant-message-action-btn {
+.message-action-btn {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 52px;
+  min-height: 44px;
   width: 100%;
   padding: 0 12px;
   border: 0;
@@ -239,13 +244,20 @@ html[data-native-keyboard-overlay='true'][data-keyboard-open='true'] .assistant-
   text-align: left;
   cursor: pointer;
 }
-.assistant-message-action-btn:hover,
-.assistant-message-action-btn:focus-visible {
+.message-action-btn:hover,
+.message-action-btn:focus-visible {
   background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
   color: color-mix(in srgb, var(--accent) 78%, var(--text) 22%);
   outline: none;
 }
-.assistant-message-action-btn svg {
+.message-action-btn.destructive {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 10px 10px;
+  color: var(--danger, #c04b4b);
+}
+.message-action-btn.destructive svg { color: inherit; }
+.message-action-btn svg {
   flex: 0 0 auto;
   color: color-mix(in srgb, var(--text-soft) 74%, var(--text-muted) 26%);
 }
