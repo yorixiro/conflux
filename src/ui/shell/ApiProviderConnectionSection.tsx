@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import {
   buildProviderPresetPatch,
   PROVIDER_PRESETS
@@ -32,6 +33,7 @@ export function ApiProviderConnectionSection({
   onSetApiConfig
 }: ApiProviderConnectionSectionProps) {
   const { t } = useI18n();
+  const fieldId = useId();
 
   return (
     <section className="api-provider-section api-provider-section-config">
@@ -39,8 +41,9 @@ export function ApiProviderConnectionSection({
         <h3>{t('apiProvider.connection.title')}</h3>
       </div>
       <div className="settings-form">
-        <label>{t('apiProvider.connection.templateLabel')}</label>
+        <label htmlFor={`${fieldId}-template`}>{t('apiProvider.connection.templateLabel')}</label>
         <select
+          id={`${fieldId}-template`}
           value={selectedPresetId}
           onChange={(event) => {
             const nextPresetId = event.target.value;
@@ -59,14 +62,15 @@ export function ApiProviderConnectionSection({
           ))}
         </select>
 
-        <label>{t('apiProvider.connection.nameLabel')}</label>
+        <label htmlFor={`${fieldId}-name`}>{t('apiProvider.connection.nameLabel')}</label>
         <input
+          id={`${fieldId}-name`}
           value={api.name}
           onChange={(event) => onSetApiConfig({ name: event.target.value })}
           placeholder={t('apiProvider.connection.namePlaceholder')}
           autoComplete="off"
         />
-        <label className="api-provider-field-label">
+        <label className="api-provider-field-label" htmlFor={`${fieldId}-base-url`}>
           <span>API Base URL</span>
           <HelpHint
             className="help-hint--below"
@@ -75,6 +79,7 @@ export function ApiProviderConnectionSection({
           />
         </label>
         <input
+          id={`${fieldId}-base-url`}
           value={api.baseUrl}
           onChange={(event) => onSetApiConfig({ baseUrl: event.target.value })}
           placeholder="https://api.openai.com/v1"
@@ -85,7 +90,7 @@ export function ApiProviderConnectionSection({
           spellCheck={false}
           autoComplete="off"
         />
-        <label className="api-provider-field-label">
+        <label className="api-provider-field-label" htmlFor={`${fieldId}-key`}>
           <span>API Key</span>
           <HelpHint
             className="help-hint--below"
@@ -94,6 +99,7 @@ export function ApiProviderConnectionSection({
           />
         </label>
         <input
+          id={`${fieldId}-key`}
           className="api-provider-masked-input"
           value={api.apiKey}
           onChange={(event) => onSetApiConfig({ apiKey: event.target.value })}

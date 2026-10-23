@@ -23,3 +23,8 @@ export function getProviderModelBindingValue(provider: ProviderProfile) {
     ? POLARIS_PUBLIC_PROVIDER_MODEL
     : provider.model;
 }
+
+export function getProviderMissingFields(provider: ProviderProfile) {
+  if (isBuiltInProviderDisplay(provider)) return [];
+  return (['baseUrl', 'apiKey', 'model'] as const).filter(field => !provider[field].trim());
+}

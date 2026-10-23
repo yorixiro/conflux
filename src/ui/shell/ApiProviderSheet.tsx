@@ -251,22 +251,6 @@ export function ApiProviderSheet({
             )
           ) : (
             <>
-              <div className="provider-stack api-provider-control-layer api-provider-detail-actions">
-                <div className="provider-inline-actions api-provider-inline-actions">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => onDuplicateProvider(t('apiProvider.duplicateName', { name: api.name }))}
-                    disabled={!activeProviderId || builtInProvider}
-                  >
-                    {t('apiProvider.duplicateAsNew')}
-                  </button>
-                  <button type="button" className="btn-secondary danger" onClick={handleDeleteProvider} disabled={!activeProviderId || providers.length <= 1 || builtInProvider}>
-                    {t('apiProvider.deleteCurrent')}
-                  </button>
-                </div>
-              </div>
-
               <ApiProviderConfigForm
                 api={api}
                 providers={providers}
@@ -277,8 +261,29 @@ export function ApiProviderSheet({
                 onToggleModelPicker={() => setModelPickerOpen((prev) => !prev)}
                 onRunApiTest={onRunApiTest}
               />
+              <details className="api-provider-more-settings">
+                <summary>{t('apiProvider.setup.manage')}</summary>
+                <div className="provider-stack api-provider-control-layer api-provider-detail-actions">
+                  <div className="provider-inline-actions api-provider-inline-actions">
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => onDuplicateProvider(t('apiProvider.duplicateName', { name: api.name }))}
+                      disabled={!activeProviderId || builtInProvider}
+                    >
+                      {t('apiProvider.duplicateAsNew')}
+                    </button>
+                    <button type="button" className="btn-secondary danger" onClick={handleDeleteProvider} disabled={!activeProviderId || providers.length <= 1 || builtInProvider}>
+                      {t('apiProvider.deleteCurrent')}
+                    </button>
+                  </div>
+                </div>
+              </details>
             </>
           )}
+        </div>
+        <div className="api-provider-footer">
+          <button type="button" className="btn-secondary" onClick={onClose}>{t('apiProvider.done')}</button>
         </div>
       </div>
     </div>
