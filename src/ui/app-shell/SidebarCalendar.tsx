@@ -15,6 +15,7 @@ export function SidebarCalendar() {
   const monthIndex = month.getMonth();
   const offset = (month.getDay() + 6) % 7;
   const days = new Date(year, monthIndex + 1, 0).getDate();
+  const weeks = Math.ceil((offset + days) / 7);
   const title = new Intl.DateTimeFormat(language, { year: 'numeric', month: 'long' }).format(month);
   const weekday = new Intl.DateTimeFormat(language, { weekday: 'short' });
   const moveMonth = (delta: number) => setMonth(new Date(year, monthIndex + delta, 1));
@@ -28,7 +29,7 @@ export function SidebarCalendar() {
       </header>
       <table aria-label={title}>
         <thead><tr>{Array.from({ length: 7 }, (_, index) => <th key={index} scope="col">{weekday.format(new Date(2026, 0, 5 + index))}</th>)}</tr></thead>
-        <tbody>{Array.from({ length: 6 }, (_, week) => (
+        <tbody>{Array.from({ length: weeks }, (_, week) => (
           <tr key={week}>{Array.from({ length: 7 }, (_, column) => {
             const day = week * 7 + column - offset + 1;
             if (day < 1 || day > days) return <td key={column} />;
