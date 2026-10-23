@@ -77,6 +77,7 @@ export const chat = {
   'chat.messageMeta.tokenCount': '{count} tokens',
   'chat.messageMeta.openTokenUsage': 'View token usage for this message',
   'chat.messageMeta.tokenUsage': 'Token usage',
+  'chat.messageMeta.tokenUsageAbout': 'About usage',
   'chat.messageMeta.closeTokenUsage': 'Close token usage',
   'chat.messageMeta.tokenUsageNote': 'Shows the API usage saved with this message. Input includes context sent with the request, such as persona and chat history. Unrecorded fields are not estimated.',
   'chat.messageRow.generatingAria': 'Generating',

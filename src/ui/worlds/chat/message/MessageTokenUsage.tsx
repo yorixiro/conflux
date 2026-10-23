@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../../../../types/domain';
 import { useI18n } from '../../../../i18n';
 import { Icon } from '../../../Icon';
@@ -8,6 +8,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
   const { language, formatNumber, t } = useI18n();
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const usage = message.tokenUsage;
   const tokenLabel = formatTokenCount(message.tokenCount, usage, {
     formatNumber,
@@ -23,8 +24,40 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
     ['settings.usage.reasoning', usage?.reasoningTokens]
   ] as const;
 
-  useEffect(() => {
-    if (open) dialogRef.current?.showModal();
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    const trigger = triggerRef.current;
+    if (!open || !dialog || !trigger) return;
+
+    const position = () => {
+      const anchor = trigger.getBoundingClientRect();
+      const card = dialog.getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
+      const topEdge = (viewport?.offsetTop ?? 0) + 8;
+      const rightEdge = leftEdge + (viewport?.width ?? window.innerWidth) - 16;
+      const bottomEdge = topEdge + (viewport?.height ?? window.innerHeight) - 16;
+      const above = anchor.top - card.height - 6;
+      const top = above >= topEdge ? above : anchor.bottom + 6;
+      dialog.style.left = `${Math.max(leftEdge, Math.min(anchor.left, rightEdge - card.width))}px`;
+      dialog.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - card.height))}px`;
+    };
+
+    dialog.showModal();
+    position();
+    const resizeObserver = new ResizeObserver(position);
+    resizeObserver.observe(dialog);
+    window.addEventListener('resize', position);
+    window.addEventListener('scroll', position, true);
+    window.visualViewport?.addEventListener('resize', position);
+    window.visualViewport?.addEventListener('scroll', position);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', position);
+      window.removeEventListener('scroll', position, true);
+      window.visualViewport?.removeEventListener('resize', position);
+      window.visualViewport?.removeEventListener('scroll', position);
+    };
   }, [open]);
 
   const close = () => {
@@ -38,6 +71,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
         {new Date(message.timestamp).toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' })}
       </time>
       <button
+        ref={triggerRef}
         type="button"
         className="message-token-trigger"
         aria-label={t('chat.messageMeta.openTokenUsage')}
@@ -65,7 +99,10 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
               </div>
             ))}
           </dl>
-          <p className="message-token-note">{t('chat.messageMeta.tokenUsageNote')}</p>
+          <details className="message-token-note">
+            <summary>{t('chat.messageMeta.tokenUsageAbout')}</summary>
+            <p>{t('chat.messageMeta.tokenUsageNote')}</p>
+          </details>
         </dialog>
       ) : null}
     </div>
