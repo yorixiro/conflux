@@ -25,7 +25,9 @@ export function ConfluxSidebarDialog({ open, onClose, sidebarProps }: {
         onCreateConversation={() => closeAfter(sidebarProps.onCreateConversation)}
         onSelectShelf={shelf => closeAfter(() => sidebarProps.onSelectShelf(shelf))}
         onCreateCustomCollaborator={() => closeAfter(sidebarProps.onCreateCustomCollaborator)}
-        onEditCollaborator={() => closeAfter(sidebarProps.onEditCollaborator)}
+        onCreateCollaboratorFromBuilder={() => closeAfter(sidebarProps.onCreateCollaboratorFromBuilder)}
+        onEditCollaborator={id => closeAfter(() => sidebarProps.onEditCollaborator(id))}
+        onSelectCollaborator={id => { sidebarProps.onSelectCollaborator(id); if (id) onClose(); }}
         onOpenSettings={() => closeAfter(sidebarProps.onOpenSettings)} /> : null}
     </dialog>
   );

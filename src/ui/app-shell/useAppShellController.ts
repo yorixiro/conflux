@@ -239,6 +239,7 @@ export function useAppShellController() {
     collectionShelf,
     collaboratorScopeId: frontstageCollaboratorId,
     currentCollaborator: frontstageCollaborator,
+    chatCollaborator: collaborators.find((collaborator) => collaborator.id === activeConversationCollaboratorId) ?? (activeConversationId ? null : frontstageCollaborator),
     collaborators,
     conversations: desktopSidebarConversations,
     shelfItems: desktopSidebarShelfItems,
@@ -251,14 +252,17 @@ export function useAppShellController() {
       setWorld('collection');
       overlays.collectionCreateCustomCollaborator();
     },
-    onEditCollaborator: () => {
-      collection.setInfoPageRequest({ collaboratorId: frontstageCollaboratorId, tab: 'identity' });
-      overlays.collaboratorActions.openCollaboratorInfo(frontstageCollaboratorId);
+    onCreateCollaboratorFromBuilder: overlays.collectionOpenCollaboratorBuilderForCreate,
+    onEditCollaborator: (collaboratorId = frontstageCollaboratorId) => {
+      if (!collaboratorId) return;
+      collection.setInfoPageRequest({ collaboratorId, tab: 'identity' });
+      overlays.collaboratorActions.openCollaboratorInfo(collaboratorId);
     },
     onSelectShelf: (shelf: typeof collectionShelf) => {
       if (shelf === 'info') {
         collection.setInfoPageRequest(null);
-        setFrontstageCollaboratorId(null);
+        overlays.collaboratorActions.openCollaboratorInfo(activeConversationCollaboratorId ?? frontstageCollaboratorId);
+        return;
       }
       setCollectionShelf(shelf);
       setWorld('collection');

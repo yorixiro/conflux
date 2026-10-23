@@ -114,7 +114,7 @@ export function AppShellView({
                 onDetailOpenChange={setCollectionDetailOpen}
                 onOpenCollaboratorBuilderForCreate={collectionOpenCollaboratorBuilderForCreate}
                 onCreateCustomCollaborator={collectionCreateCustomCollaborator}
-                onTalkToCollaborator={desktopSidebarProps.onSelectCollaborator}
+                onBackToChat={topbarProps.actions.onOpenPreviewChat}
                 onOpenProviderSettings={collectionOpenProviderSettings}
                 onOpenDesktopLocalSettings={collectionOpenDesktopLocalSettings}
                 sectionNavigation={useBottomNavigation}
@@ -230,7 +230,7 @@ export function AppShellView({
           }}
           onOpenHome={() => onHomeOpenChange(true)}
           onOpenArchive={() => {
-            if (activeWorld !== 'collection' || !['info', 'dialogue'].includes(topbarProps.state.collectionShelf)) {
+            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf !== 'dialogue') {
               desktopSidebarProps.onSelectShelf('dialogue');
             }
             onHomeOpenChange(false);

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { CollaboratorInfoOverviewItem } from '../../../app/collection/buildCollaboratorInfoOverview';
 import type { Conversation, McpServerConfig, Persona, PolarisTriggerRule, PolarisTriggerSchedule, ProviderProfile } from '../../../types/domain';
 import { BasicSettingsTab } from '../../shell/persona/settings/BasicSettingsTab';
 import { MemorySettingsTab } from '../../shell/persona/settings/MemorySettingsTab';
@@ -7,7 +6,6 @@ import { RequestSettingsTab } from '../../shell/persona/settings/RequestSettings
 import { RoomSettingsTab } from '../../shell/persona/settings/RoomSettingsTab';
 import { AutomationRulesPanel } from '../../shell/menu/AutomationRulesPanel';
 import type { PersonaUpdatePatch } from '../../shell/persona/personaUiShared';
-import { CollaboratorOverviewRail } from './CollaboratorOverviewRail';
 import { isCompanionCollaboratorId } from '../../../engines/companion';
 import { isProductGuidePersona } from '../../../engines/personaBuiltin';
 import type { I18nKey } from '../../../i18n/messages';
@@ -41,15 +39,10 @@ type CollaboratorInfoShelfProps = {
   triggerRules: PolarisTriggerRule[];
   mcpServers: McpServerConfig[];
   mcpToolTimeoutSeconds: number;
-  collaboratorOverviewItems: CollaboratorInfoOverviewItem[];
-  editing: boolean;
   onUpdateCollaborator: (patch: PersonaUpdatePatch) => void;
-  onSelectCollaborator: (collaboratorId: string | null) => void;
-  onTalkToCollaborator: (collaboratorId: string) => void;
-  onToggleCollaboratorPinned: (collaboratorId: string) => void;
+  onBackToChat: () => void;
   onDeleteCollaborator: (collaboratorId: string) => void;
   onSelectCollaboratorAvatar: (role: 'assistant' | 'user', files: FileList | File[]) => Promise<void>;
-  onCreateFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
   onOpenProviderSettings: () => void;
   onUpdateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
@@ -82,15 +75,10 @@ export function CollaboratorInfoShelf({
   triggerRules,
   mcpServers,
   mcpToolTimeoutSeconds,
-  collaboratorOverviewItems,
-  editing,
   onUpdateCollaborator,
-  onSelectCollaborator,
-  onTalkToCollaborator,
-  onToggleCollaboratorPinned,
+  onBackToChat,
   onDeleteCollaborator,
   onSelectCollaboratorAvatar,
-  onCreateFromBuilder,
   onCreateCustomCollaborator,
   onOpenProviderSettings,
   onUpdateProvider,
@@ -118,30 +106,14 @@ export function CollaboratorInfoShelf({
     }
   }, [activeTab, visibleTabs]);
 
-  if (isAggregateScope) {
-    return (
-      <section className="collaborator-info-shelf collaborator-info-shelf-overview">
-        <CollaboratorOverviewRail
-          items={collaboratorOverviewItems}
-          editing={editing}
-          onSelectCollaborator={onTalkToCollaborator}
-          onEditCollaborator={onSelectCollaborator}
-          onToggleCollaboratorPinned={onToggleCollaboratorPinned}
-          onCreateFromBuilder={onCreateFromBuilder}
-          onCreateCustomCollaborator={onCreateCustomCollaborator}
-          onOpenProviderSettings={onOpenProviderSettings}
-        />
-      </section>
-    );
-  }
-
-  if (!currentCollaborator) {
+  if (isAggregateScope || !currentCollaborator) {
     return (
       <section className="collaborator-info-shelf collaborator-info-shelf-empty">
         <div className="empty-state-floating">
           <p className="empty-state-title">{t('collaborator.info.emptyTitle')}</p>
           <p className="empty-state-hint">{t('collaborator.info.emptyHint')}</p>
-          <button type="button" className="btn-secondary" onClick={() => onSelectCollaborator(null)}>{t('collaborator.overview.back')}</button>
+          <button type="button" className="btn-secondary" onClick={onCreateCustomCollaborator}>新建角色</button>
+          <button type="button" className="btn-secondary" onClick={onBackToChat}>返回聊天</button>
         </div>
       </section>
     );
@@ -151,8 +123,8 @@ export function CollaboratorInfoShelf({
     <section className={`collaborator-info-shelf ${fullscreenOpen ? 'collaborator-info-shelf--fullscreen' : ''}`.trim()}>
       <div className={`collaborator-info-detail-shell ${fullscreenOpen ? 'collaborator-info-detail-shell--fullscreen' : ''}`.trim()}>
         <div className="conflux-role-navigation">
-          <button type="button" className="btn-secondary" onClick={() => onSelectCollaborator(null)}>
-            <span className="conflux-role-back-icon"><Icon name="chevron" size={16} /></span>{t('collaborator.overview.back')}
+          <button type="button" className="btn-secondary" onClick={onBackToChat}>
+            <span className="conflux-role-back-icon"><Icon name="chevron" size={16} /></span>返回聊天
           </button>
           <span>{collaboratorName}</span>
         </div>

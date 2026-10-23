@@ -27,7 +27,7 @@ export const collection = {
   'collection.nav.project': 'Workspaces',
   'collection.nav.code': 'Cards',
   'collection.nav.image': 'Images',
-  'collection.nav.info': 'Contacts',
+  'collection.nav.info': 'Character settings',
   'collection.nav.tabListAria': 'Room views',
   'collection.world.searchCode': 'Search card titles, languages, tags, or content...',
   'collection.world.searchProject': 'Search workspace titles or file paths...',
