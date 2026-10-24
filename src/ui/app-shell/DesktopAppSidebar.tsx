@@ -15,6 +15,7 @@ export type DesktopAppSidebarShelfItem = {
 };
 
 export type DesktopAppSidebarProps = {
+  initialTab?: 'profile' | 'library';
   activeWorld: World;
   activeConversationId: string | null;
   collectionShelf: CollectionShelf;
@@ -60,6 +61,7 @@ function sortSidebarCollaborators(collaborators: Persona[]) {
 }
 
 export function DesktopAppSidebar({
+  initialTab = 'library',
   activeWorld,
   activeConversationId,
   collectionShelf,
@@ -86,7 +88,7 @@ export function DesktopAppSidebar({
   onOpenSettings
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
-  const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>('library');
+  const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const librarySearch = useConversationLibrarySearch(conversations, sidebarTab === 'library' ? searchQuery : '');
   const [collaboratorPickerOpen, setCollaboratorPickerOpen] = useState(false);
