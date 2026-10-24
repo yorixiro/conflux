@@ -17,11 +17,11 @@ export function MobileAppShellFrame({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className="app-stage">
-      <AppTopbar {...topbarProps} actions={{ ...topbarProps.actions,
+      <AppTopbar {...topbarProps} chatCollaborator={sidebarProps?.chatCollaborator} actions={{ ...topbarProps.actions,
         onOpenSidebar: sidebarProps && topbarProps.state.activeWorld === 'chat' ? () => setSidebarOpen(true) : undefined
       }} />
       {children}
-      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} sidebarProps={sidebarProps} /> : null}
+      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} initialTab="profile" sidebarProps={sidebarProps} /> : null}
     </div>
   );
 }
