@@ -8,7 +8,6 @@ import type { CollectionShelf } from '../../types/domain';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
 import { ConfluxQuickSettingsDrawer } from './ConfluxQuickSettingsDrawer';
-import { DesktopAppSidebar } from './DesktopAppSidebar';
 import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
 import { WorldFrameBoundary, WorldFrameFallback } from './WorldFrameBoundary';
 import type { useAppShellViewController } from './useAppShellViewController';
@@ -73,17 +72,13 @@ export function AppShellView({
   chatFrameInteractive,
   groupFrameInteractive,
   quickSettingsOpen,
-  setQuickSettingsOpen,
-  chatHubOpen,
-  setChatHubOpen
+  setQuickSettingsOpen
 }: AppShellViewProps) {
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
-  const mobileChatHubVisible = useBottomNavigation && activeWorld === 'chat' && chatHubOpen && !homeOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
-    setChatHubOpen(false);
     onHomeOpenChange(false);
   };
   const onOpenHomeShelf = (shelf: CollectionShelf) => {
@@ -97,7 +92,6 @@ export function AppShellView({
   const onNewHomeConversation = () => {
     if (desktopSidebarProps.collaborators.length) desktopSidebarProps.onCreateConversation();
     else desktopSidebarProps.onCreateCustomCollaborator();
-    setChatHubOpen(false);
     onHomeOpenChange(false);
   };
 
@@ -228,34 +222,11 @@ export function AppShellView({
       ) : (
         <MobileAppShellFrame
           sidebarProps={{ ...desktopSidebarProps, onOpenHome: () => onHomeOpenChange(true) }}
-          chatHub={mobileChatHubVisible ? (
-            <section className="conflux-chat-hub" aria-label="对话主页">
-              <DesktopAppSidebar
-                {...desktopSidebarProps}
-                presentation="hub"
-                collapsed={false}
-                onToggleCollapsed={() => undefined}
-                onOpenConversation={(id, messageId) => {
-                  desktopSidebarProps.onOpenConversation(id, messageId);
-                  setChatHubOpen(false);
-                }}
-                onSelectCollaborator={(id) => {
-                  desktopSidebarProps.onSelectCollaborator(id);
-                  if (id) setChatHubOpen(false);
-                }}
-                onCreateConversation={() => {
-                  desktopSidebarProps.onCreateConversation();
-                  setChatHubOpen(false);
-                }}
-              />
-            </section>
-          ) : null}
           topbarProps={{
             ...topbarProps,
             actions: {
               ...topbarProps.actions,
-              onOpenHome: undefined,
-              onOpenConversationList: activeWorld === 'chat' ? () => setChatHubOpen(true) : undefined,
+              onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined,
               onOpenQuickSettings: () => setQuickSettingsOpen(true)
             }
           }}
@@ -272,7 +243,6 @@ export function AppShellView({
           settingsOpen={topbarProps.state.menuOpen}
           onOpenChat={() => {
             if (activeWorld !== 'chat') topbarProps.actions.onOpenPreviewChat();
-            setChatHubOpen(true);
             onHomeOpenChange(false);
           }}
           onOpenGroup={() => {
@@ -299,18 +269,14 @@ export function AppShellView({
         />
       ) : null}
 
-      <AppReplyNotificationStack {...replyNotificationProps} onOpen={(notification) => {
-        replyNotificationProps.onOpen(notification);
-        setChatHubOpen(false);
-        onHomeOpenChange(false);
-      }} />
+      <AppReplyNotificationStack {...replyNotificationProps} />
       <PersistenceReadFailureNotice
         notice={persistenceReadFailureNotice}
         onRetry={onRetryPersistenceReadFailure}
         onOpenBackup={onOpenBackupFromReadFailure}
       />
       <ConfluxQuickSettingsDrawer
-        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat' && !mobileChatHubVisible}
+        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat'}
         onClose={() => setQuickSettingsOpen(false)}
         provider={overlaysProps.api}
         onOpenApi={collectionOpenProviderSettings}
