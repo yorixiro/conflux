@@ -299,6 +299,7 @@ export function DesktopAppSidebar({
               title="编辑当前聊天角色"
             >
               <Icon name="settings" size={17} />
+              <span>角色设置</span>
             </button>
           </div>
           <SidebarCalendar />

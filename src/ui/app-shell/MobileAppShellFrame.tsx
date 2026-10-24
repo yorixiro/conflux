@@ -24,7 +24,7 @@ export function MobileAppShellFrame({
       }} /> : null}
       {children}
       {chatHub}
-      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && !chatHub && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} initialTab="profile" sidebarProps={sidebarProps} /> : null}
+      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && !chatHub && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} onOpenConversationList={topbarProps.actions.onOpenConversationList} initialTab="profile" sidebarProps={sidebarProps} /> : null}
     </div>
   );
 }

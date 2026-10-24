@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { DesktopAppSidebar, type DesktopAppSidebarProps } from './DesktopAppSidebar';
 
 /** The mobile drawer uses the same sidebar; native dialog handles focus, Escape and background inertness. */
-export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', sidebarProps }: {
+export function ConfluxSidebarDialog({ open, onClose, onOpenConversationList, initialTab = 'library', sidebarProps }: {
   open: boolean;
   onClose: () => void;
+  onOpenConversationList?: () => void;
   initialTab?: 'profile' | 'library';
   sidebarProps: Omit<DesktopAppSidebarProps, 'collapsed' | 'onToggleCollapsed'>;
 }) {
@@ -20,7 +21,12 @@ export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', si
     <dialog ref={ref} className="conflux-sidebar-dialog" aria-label="当前 AI 资料与日历"
       onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} presentation="profile" collapsed={false} onToggleCollapsed={onClose}
+      {open ? <div className="conflux-sidebar-dialog-content">
+        <nav className="conflux-sidebar-dialog-actions" aria-label="资料导航">
+          {onOpenConversationList ? <button type="button" onClick={() => closeAfter(onOpenConversationList)}>返回对话库</button> : null}
+          <button type="button" onClick={onClose}>关闭</button>
+        </nav>
+        <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} presentation="profile" collapsed={false} onToggleCollapsed={onClose}
         onOpenHome={sidebarProps.onOpenHome ? () => closeAfter(sidebarProps.onOpenHome!) : undefined}
         onOpenConversation={(id, messageId) => closeAfter(() => sidebarProps.onOpenConversation(id, messageId))}
         onCreateConversation={() => closeAfter(sidebarProps.onCreateConversation)}
@@ -29,7 +35,8 @@ export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', si
         onCreateCollaboratorFromBuilder={() => closeAfter(sidebarProps.onCreateCollaboratorFromBuilder)}
         onEditCollaborator={id => closeAfter(() => sidebarProps.onEditCollaborator(id))}
         onSelectCollaborator={id => { sidebarProps.onSelectCollaborator(id); if (id) onClose(); }}
-        onOpenSettings={() => closeAfter(sidebarProps.onOpenSettings)} /> : null}
+        onOpenSettings={() => closeAfter(sidebarProps.onOpenSettings)} />
+      </div> : null}
     </dialog>
   );
 }
