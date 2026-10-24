@@ -60,12 +60,12 @@ const server = createServer(async (req, res) => {
 server.listen(0, '127.0.0.1');
 await once(server, 'listening');
 const origin = `http://127.0.0.1:${server.address().port}`;
-const lazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^GroupWorld-.*\.js$/.test(name));
+const lazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^ThinkingSheet-.*\.js$/.test(name));
 assert.ok(lazyFile, 'Expected a real lazy module');
 const lazyUrl = `${origin}${base}assets/${lazyFile}`;
-// GroupWorld has a 1.2s app preload. Preserve its original first-use check before
-// update installation, then probe a separate real on-demand A chunk while B waits.
-const aUpgradeLazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^ThinkingSheet-.*\.js$/.test(name));
+// Check two genuinely on-demand chunks. World modules preload after 1.2s,
+// so they cannot reliably prove that a page first requests a chunk offline.
+const aUpgradeLazyFile = (await readdir(resolve(root, 'assets'))).find((name) => /^AssetGovernanceDebugLayer-.*\.js$/.test(name));
 assert.ok(aUpgradeLazyFile, 'Expected a real on-demand A module for the waiting-update probe');
 const aUpgradeLazyUrl = `${origin}${base}assets/${aUpgradeLazyFile}`;
 const bLazyUrl = `${origin}${base}${bLazyFile}`;
@@ -128,15 +128,15 @@ try {
   assert.equal(await page.evaluate(async () => !!(await caches.match(location.origin + new URL('assets/private.json', location.href).pathname))), false);
   assert.ok(!(await page.evaluate(async () => (await (await caches.match(new URL('index.html', location.href).href)).text()))).includes('private-smoke-sentinel'));
 
-  assert.deepEqual(lazyPageRequests, [], 'GroupWorld must not be requested by any page before going offline');
+  assert.deepEqual(lazyPageRequests, [], 'ThinkingSheet must not be requested by any page before going offline');
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('#root button');
   assert.equal(await page.title(), 'Conflux');
-  assert.deepEqual(lazyPageRequests, [], 'Offline shell reload must not eagerly request GroupWorld');
+  assert.deepEqual(lazyPageRequests, [], 'Offline shell reload must not eagerly request ThinkingSheet');
   const exports = await page.evaluate(async (url) => Object.keys(await import(url)), lazyUrl);
-  assert.ok(exports.includes('GroupWorld'), 'Lazy module must load on first use offline');
-  assert.deepEqual(lazyPageRequests, [lazyUrl], 'First GroupWorld page request must occur in the offline import');
+  assert.ok(exports.includes('ThinkingSheet'), 'Lazy module must load on first use offline');
+  assert.deepEqual(lazyPageRequests, [lazyUrl], 'First ThinkingSheet page request must occur in the offline import');
 
   // Deploy explicitly different B HTML/chunk while A still controls this client.
   // B's complete cache must wait; an ONLINE reload must not mix B HTML with A's allowlist.
@@ -179,7 +179,7 @@ try {
   assert.deepEqual(aUpgradeLazyPageRequests, [], 'No page may request the waiting-update A probe before going offline');
   await context.setOffline(true);
   const aExports = await page.evaluate(async (url) => Object.keys(await import(url)), aUpgradeLazyUrl);
-  assert.ok(aExports.includes('ThinkingSheet'), 'Matching A lazy module must load on first use offline while B waits');
+  assert.ok(aExports.includes('AssetGovernanceDebugLayer'), 'Matching A lazy module must load on first use offline while B waits');
   assert.deepEqual(aUpgradeLazyPageRequests, [aUpgradeLazyUrl], 'First A probe page request must occur in the offline import');
 
   const workers = context.serviceWorkers();

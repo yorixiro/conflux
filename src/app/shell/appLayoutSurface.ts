@@ -2,7 +2,7 @@ import type { World } from '../../types/domain';
 
 export type AppLayoutSurface = 'phone' | 'tablet' | 'desktop';
 
-export const DESKTOP_LAYOUT_MIN_WIDTH = 500;
+export const DESKTOP_LAYOUT_MIN_WIDTH = 1024;
 export const TABLET_LAYOUT_MIN_WIDTH = 700;
 export const DESKTOP_SIDEBAR_AUTO_COLLAPSE_WIDTH = 920;
 
@@ -25,8 +25,8 @@ export function resolveAppLayoutSurfaceFromMatches(matches: {
   tablet: boolean;
 }): AppLayoutSurface {
   if (matches.nativeIos) return matches.nativeIosTablet ? 'tablet' : 'phone';
-  if (matches.tablet) return 'tablet';
-  return matches.desktop ? 'desktop' : 'phone';
+  if (matches.desktop) return 'desktop';
+  return matches.tablet ? 'tablet' : 'phone';
 }
 
 export function isWideLayoutSurface(surface: AppLayoutSurface) {
