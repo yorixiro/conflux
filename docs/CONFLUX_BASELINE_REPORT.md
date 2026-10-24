@@ -53,3 +53,21 @@
 4. 日记时间轴、主动 Agent、邮箱相册等外部接入留待后续阶段，不挤占当下的聊天内核工作。
 
 本报告是第一份可追溯的 P0 检查点，后续补充实测日志后才能将 P0 标记为通过。
+
+## 2026-10-24 P0 复检与最小修复
+
+以 `feat/conflux-bottom-navigation` 的 `b08870062d278c34e551ebed56ae7f52f32c83c2` 为起点，在全新隔离工作目录检查；初始 `git status --short --branch` 干净，与远端一致。未使用任何真实用户聊天、角色或密钥。
+
+| 实际执行 | 结果 |
+| --- | --- |
+| `npm ci` | 成功，安装 419 个包。 |
+| `npm run build`（修改前） | 成功，TypeScript 与 Vite 构建通过；保留既有混合静态/动态导入和大 chunk 警告。 |
+| `npm test --`（12 个与导航、聊天动作、角色线路、Token、SW 相关的既有测试文件） | 12 个文件、79 项通过。 |
+| `npm run verify`（修改前） | 类型与 worker 检查通过；全量 491 个文件中 490 个通过、1 个失败，3116 项中 3115 项通过。失败为 `startupFactSourceBoundary.test.ts` 对 `AppShellView` 不得直接使用 hooks 的约束。 |
+| 定点修复 | 将右侧快捷设置抽屉的 `quickSettingsOpen` 状态和页面切换时的关闭 effect 从 `AppShellView.tsx` 移至既有 `useAppShellViewController.ts`，`AppShell.tsx` 传入 `homeOpen`。未改样式、接口、存储或请求行为。 |
+| `npm test -- src/stores/startupFactSourceBoundary.test.ts` | 1 个文件、37 项通过。 |
+| `npm run verify`（修改后） | **全部通过**：类型、extra 类型、worker 类型、491 个文件/3116 项单测及生产构建（1182 个模块）。 |
+| `git diff --check` | 通过。 |
+| `npm run test:pwa` | **环境阻塞**：Playwright Chromium 可执行文件不存在。尝试 `npx playwright install chromium` 时下载返回损坏 ZIP，无法启动隔离浏览器。不能记为 PWA 通过。 |
+
+本环境无可运行的 Chromium 和图形显示，**320px 手机、720px 平板、1440px 桌面的浏览器实际交互、安装版 PWA 更新/离线接管尚未复测**。SW 相关现有单测通过，不替代真实浏览器验收。Android APK、安卓真机、真实模型请求和用户设备数据均未接触。P0 仍未全部通过；后续需要在具备浏览器的环境补做三屏隔离测试及 PWA 更新，并在 Termux 上验证已安装 PWA。

@@ -17,6 +17,7 @@ import { useAppearanceDomEffects } from '../useAppearanceDomEffects';
 import type { World } from '../../types/domain';
 
 type AppShellViewControllerInput = ReturnType<typeof useAppShellController> & {
+  homeOpen: boolean;
   startupThemeReady: boolean;
   persistenceReadFailureNotice: PersistenceReadFailureNoticeState;
   onRetryPersistenceReadFailure: () => void;
@@ -115,6 +116,7 @@ function countFilterNodes(root: Element | null) {
 
 export function useAppShellViewController(props: AppShellViewControllerInput) {
   const {
+    homeOpen,
     activeWorld,
     shellWorld,
     activeChatDensity,
@@ -133,6 +135,7 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
     worldPresence.renderGroup
   ].filter(Boolean).length > 1;
   const [isCollaboratorTransitionActive, setIsCollaboratorTransitionActive] = useState(false);
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [worldRetryKeys, setWorldRetryKeys] = useState<WorldRetryKeys>({
     chat: 0,
@@ -170,6 +173,10 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
   const toggleDesktopSidebarCollapsed = () => {
     setDesktopSidebarCollapsed(!effectiveDesktopSidebarCollapsed);
   };
+
+  useEffect(() => {
+    setQuickSettingsOpen(false);
+  }, [activeWorld, homeOpen]);
 
   useAppearanceDomEffects(displayPreferences.appearance);
   useCustomFontDomEffects(customization, displayPreferences);
@@ -305,6 +312,8 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
     hasWideLayout,
     showDesktopSidebar,
     effectiveDesktopSidebarCollapsed,
+    quickSettingsOpen,
+    setQuickSettingsOpen,
     CollectionWorld,
     ChatWorld,
     GroupWorld,

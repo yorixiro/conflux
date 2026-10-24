@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
 import { Icon } from '../Icon';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
@@ -13,7 +13,6 @@ import { WorldFrameBoundary, WorldFrameFallback } from './WorldFrameBoundary';
 import type { useAppShellViewController } from './useAppShellViewController';
 
 type AppShellViewProps = ReturnType<typeof useAppShellViewController> & {
-  homeOpen: boolean;
   onHomeOpenChange: (open: boolean) => void;
 };
 
@@ -71,15 +70,13 @@ export function AppShellView({
   collectionScopeDrawerOpen,
   collectionFrameInteractive,
   chatFrameInteractive,
-  groupFrameInteractive
+  groupFrameInteractive,
+  quickSettingsOpen,
+  setQuickSettingsOpen
 }: AppShellViewProps) {
-  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
-  useEffect(() => {
-    setQuickSettingsOpen(false);
-  }, [activeWorld, homeOpen]);
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     onHomeOpenChange(false);
