@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { DesktopAppSidebar, type DesktopAppSidebarProps } from './DesktopAppSidebar';
 
 /** The mobile drawer uses the same sidebar; native dialog handles focus, Escape and background inertness. */
-export function ConfluxSidebarDialog({ open, onClose, sidebarProps }: {
+export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', sidebarProps }: {
   open: boolean;
   onClose: () => void;
+  initialTab?: 'profile' | 'library';
   sidebarProps: Omit<DesktopAppSidebarProps, 'collapsed' | 'onToggleCollapsed'>;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -19,7 +20,7 @@ export function ConfluxSidebarDialog({ open, onClose, sidebarProps }: {
     <dialog ref={ref} className="conflux-sidebar-dialog" aria-label="聊天侧栏"
       onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      {open ? <DesktopAppSidebar {...sidebarProps} collapsed={false} onToggleCollapsed={onClose}
+      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} collapsed={false} onToggleCollapsed={onClose}
         onOpenHome={sidebarProps.onOpenHome ? () => closeAfter(sidebarProps.onOpenHome!) : undefined}
         onOpenConversation={(id, messageId) => closeAfter(() => sidebarProps.onOpenConversation(id, messageId))}
         onCreateConversation={() => closeAfter(sidebarProps.onCreateConversation)}
