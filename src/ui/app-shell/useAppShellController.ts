@@ -325,6 +325,7 @@ export function useAppShellController() {
     collectionCreateCustomCollaborator: overlays.collectionCreateCustomCollaborator,
     collectionOpenProviderSettings: overlays.collectionOpenProviderSettings,
     collectionOpenSettings: overlays.collectionOpenSettings,
+    openQuickMenuPage: overlays.openMenuAt,
     openBackupSettings: () => overlays.openMenuAt('backup'),
     collectionOpenDesktopLocalSettings: overlays.collectionOpenDesktopLocalSettings,
     collectionDeleteCollaborator: overlays.collaboratorActions.deleteCollaboratorFromPanel,

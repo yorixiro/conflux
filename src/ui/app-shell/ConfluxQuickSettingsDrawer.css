@@ -1,0 +1,156 @@
+/* Isolated, theme-independent shell for the chat's right-hand shortcut drawer. */
+.conflux-quick-settings-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(388px, calc(100vw - 18px));
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid rgba(218, 229, 255, 0.15);
+  border-radius: 0;
+  color: #edf0fa;
+  color-scheme: dark;
+  background: linear-gradient(150deg, rgba(35, 44, 69, 0.96), rgba(16, 25, 45, 0.98));
+  box-shadow: -22px 0 65px rgba(5, 12, 28, 0.27);
+  overflow: hidden;
+}
+.conflux-quick-settings-drawer::backdrop {
+  background: rgba(8, 13, 27, 0.40);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.conflux-quick-settings-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: max(26px, calc(16px + env(safe-area-inset-top, 0px))) 22px max(16px, env(safe-area-inset-bottom, 0px));
+}
+.conflux-quick-settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex: none;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(223, 232, 255, 0.12);
+}
+.conflux-quick-settings-eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: #a7b6d6;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+.conflux-quick-settings-header h2 { margin: 0; font-size: 24px; line-height: 1.3; letter-spacing: 0.04em; font-weight: 600; }
+.conflux-quick-settings-header p { margin: 7px 0 0; color: #a7b4d0; font-size: 12px; }
+.conflux-quick-settings-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 1px solid rgba(222, 232, 255, 0.13);
+  border-radius: 50%;
+  background: rgba(229, 237, 255, 0.06);
+  color: #e6eafa;
+  cursor: pointer;
+}
+.conflux-quick-settings-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 0 18px;
+}
+.conflux-quick-settings-section { padding: 22px 0 16px; border-bottom: 1px solid rgba(223, 232, 255, 0.1); }
+.conflux-quick-settings-section h3 { margin: 0 0 13px 3px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: #acbad6; }
+.conflux-quick-settings-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 55px;
+  padding: 8px 9px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #eef1fb;
+  text-align: left;
+  cursor: pointer;
+}
+.conflux-quick-settings-action-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(206, 222, 255, 0.12);
+  border-radius: 9px;
+  color: #c5ceeb;
+  background: rgba(225, 235, 255, 0.045);
+}
+.conflux-quick-settings-action-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; font-size: 14px; }
+.conflux-quick-settings-action-copy small { font-size: 11px; color: #a4b2d0; }
+.conflux-quick-settings-action > svg:last-child { flex: none; color: #8593b3; }
+.conflux-quick-settings-action > svg:last-child,
+.conflux-quick-settings-footer svg:last-child { opacity: 0.72; }
+.conflux-quick-settings-provider {
+  margin: 0 0 6px;
+  padding: 15px;
+  border: 1px solid rgba(218, 230, 255, 0.13);
+  border-radius: 14px;
+  background: rgba(231, 239, 255, 0.045);
+}
+.conflux-quick-settings-provider-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+.conflux-quick-settings-provider-mark { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: #e1d8ff; background: rgba(182, 169, 237, 0.15); }
+.conflux-quick-settings-provider-heading div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.conflux-quick-settings-provider-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; }
+.conflux-quick-settings-provider-heading small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #b4c0db; }
+.conflux-quick-settings-provider-label { display: block; margin-bottom: 7px; font-size: 11px; color: #b4c0db; }
+.conflux-quick-settings-provider select {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 11px;
+  border: 1px solid rgba(227, 234, 255, 0.20);
+  border-radius: 9px;
+  background: #283652;
+  color: #f1f3ff;
+  font: inherit;
+  font-size: 13px;
+}
+.conflux-quick-settings-provider select:disabled { opacity: 0.5; }
+.conflux-quick-settings-provider p { margin-top: 9px; color: #9eaccb; font-size: 11px; line-height: 1.6; }
+.conflux-quick-settings-footer { flex: none; border-top: 1px solid rgba(223, 232, 255, 0.12); padding-top: 12px; }
+.conflux-quick-settings-footer button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: 1px solid rgba(216, 225, 255, 0.13); border-radius: 12px; background: rgba(223, 233, 255, 0.07); color: #edf0fa; text-align: left; cursor: pointer; }
+.conflux-quick-settings-footer span { flex: 1; }
+.conflux-quick-settings-action:hover, .conflux-quick-settings-close:hover, .conflux-quick-settings-footer button:hover { background: rgba(220, 232, 255, 0.12); }
+.conflux-quick-settings-drawer button:focus-visible, .conflux-quick-settings-drawer select:focus-visible { outline: 2px solid #bcb5ff; outline-offset: 2px; }
+.conflux-quick-settings-desktop-trigger {
+  position: absolute;
+  top: max(18px, calc(10px + env(safe-area-inset-top, 0px)));
+  right: max(14px, var(--desktop-shell-inline, 22px));
+  z-index: 27;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 64%, transparent);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.conflux-quick-settings-desktop-trigger:hover, .conflux-quick-settings-desktop-trigger:focus-visible { color: var(--text); background: var(--accent-soft); outline-offset: 2px; }
+@media (max-width: 380px) {
+  .conflux-quick-settings-content { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .conflux-quick-settings-drawer[open] { animation: conflux-quick-settings-enter 190ms ease-out; }
+  @keyframes conflux-quick-settings-enter { from { transform: translateX(24px); opacity: 0.85; } to { transform: translateX(0); opacity: 1; } }
+}

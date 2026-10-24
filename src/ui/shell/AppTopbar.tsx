@@ -39,6 +39,7 @@ export type AppTopbarActions = {
   onOpenCollectionInfoFullscreen: () => void;
   onToggleMenu: () => void;
   onOpenSettings: () => void;
+  onOpenQuickSettings?: () => void;
   onOpenPreviewChat: () => void;
 };
 
@@ -200,15 +201,29 @@ export function AppTopbar({
             )}
 
             {state.activeWorld === 'chat' && (
-              <button
-                type="button"
-                className="action-btn icon-btn topbar-new-chat-btn"
-                onClick={(event) => handleSelectionAction(actions.onCreateConversation, event.currentTarget)}
-                title={t('common.newConversation')}
-                aria-label={t('common.newConversation')}
-              >
-                <Icon name="plus" size={18} />
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="action-btn icon-btn topbar-new-chat-btn"
+                  onClick={(event) => handleSelectionAction(actions.onCreateConversation, event.currentTarget)}
+                  title={t('common.newConversation')}
+                  aria-label={t('common.newConversation')}
+                >
+                  <Icon name="plus" size={18} />
+                </button>
+                {actions.onOpenQuickSettings ? (
+                  <button
+                    type="button"
+                    className="action-btn icon-btn topbar-quick-settings-btn"
+                    onClick={actions.onOpenQuickSettings}
+                    title="快捷设置"
+                    aria-label="打开右侧快捷设置"
+                    aria-haspopup="dialog"
+                  >
+                    <Icon name="settings" size={18} />
+                  </button>
+                ) : null}
+              </>
             )}
 
             {canOpenCollectionSearch && (

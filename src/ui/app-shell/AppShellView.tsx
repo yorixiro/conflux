@@ -1,11 +1,13 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
+import { Icon } from '../Icon';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
 import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
+import { ConfluxQuickSettingsDrawer } from './ConfluxQuickSettingsDrawer';
 import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
 import { WorldFrameBoundary, WorldFrameFallback } from './WorldFrameBoundary';
 import type { useAppShellViewController } from './useAppShellViewController';
@@ -37,6 +39,7 @@ export function AppShellView({
   collectionCreateCustomCollaborator,
   collectionOpenProviderSettings,
   collectionOpenSettings,
+  openQuickMenuPage,
   collectionOpenDesktopLocalSettings,
   collectionDeleteCollaborator,
   collaboratorTransitionKey,
@@ -70,8 +73,13 @@ export function AppShellView({
   chatFrameInteractive,
   groupFrameInteractive
 }: AppShellViewProps) {
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
+  const chatCollaborator = desktopSidebarProps.chatCollaborator;
+  useEffect(() => {
+    setQuickSettingsOpen(false);
+  }, [activeWorld, homeOpen]);
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     onHomeOpenChange(false);
@@ -201,13 +209,29 @@ export function AppShellView({
           }}
         >
           {worldStack}
+          {activeWorld === 'chat' ? (
+            <button
+              type="button"
+              className="conflux-quick-settings-desktop-trigger"
+              onClick={() => setQuickSettingsOpen(true)}
+              aria-label="打开右侧快捷设置"
+              aria-haspopup="dialog"
+              title="快捷设置"
+            >
+              <Icon name="settings" size={19} />
+            </button>
+          ) : null}
         </DesktopAppShellFrame>
       ) : (
         <MobileAppShellFrame
           sidebarProps={{ ...desktopSidebarProps, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
-            actions: { ...topbarProps.actions, onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined }
+            actions: {
+              ...topbarProps.actions,
+              onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined,
+              onOpenQuickSettings: () => setQuickSettingsOpen(true)
+            }
           }}
         >
           {worldStack}
@@ -253,6 +277,18 @@ export function AppShellView({
         notice={persistenceReadFailureNotice}
         onRetry={onRetryPersistenceReadFailure}
         onOpenBackup={onOpenBackupFromReadFailure}
+      />
+      <ConfluxQuickSettingsDrawer
+        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat'}
+        onClose={() => setQuickSettingsOpen(false)}
+        provider={overlaysProps.api}
+        onOpenApi={collectionOpenProviderSettings}
+        onOpenMenu={openQuickMenuPage}
+        onNewConversation={topbarProps.actions.onCreateConversation}
+        onOpenPersona={chatCollaborator
+          ? () => desktopSidebarProps.onEditCollaborator(chatCollaborator.id)
+          : undefined}
+        onOpenCodeCards={() => desktopSidebarProps.onSelectShelf('code')}
       />
       <AppShellOverlays {...overlaysProps} />
     </main>
