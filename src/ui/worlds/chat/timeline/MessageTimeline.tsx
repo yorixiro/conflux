@@ -420,6 +420,7 @@ export function MessageTimeline({ isWorldSettled }: MessageTimelineProps) {
     codeCardAction: actions.codeCardAction,
     retry: actions.retry,
     editMessage: actions.editMessage,
+    deleteMessage: actions.deleteMessage,
     editAssistantMessage: actions.editAssistantMessage,
     cacheAssistantSpeech: actions.cacheAssistantSpeech,
     forkFromMessage: actions.forkFromMessage,
@@ -439,6 +440,7 @@ export function MessageTimeline({ isWorldSettled }: MessageTimelineProps) {
     actions.cacheAssistantSpeech,
     actions.editAssistantMessage,
     actions.editMessage,
+    actions.deleteMessage,
     actions.forkFromMessage,
     actions.openCodeCard,
     actions.openToolbox,
@@ -497,7 +499,6 @@ export function MessageTimeline({ isWorldSettled }: MessageTimelineProps) {
           const canUseAssistantMore =
             message.role === 'assistant'
             && !message.toolInvocation
-            && isTerminalAssistantInUserTurn
             && !ui.sending
             && Boolean(message.content.trim());
 
@@ -509,7 +510,8 @@ export function MessageTimeline({ isWorldSettled }: MessageTimelineProps) {
             isCodeExpanded: expandedCodeIds.has(message.id),
             canEdit: message.role === 'user' && !message.toolInvocation && !ui.sending,
             canEditAssistant: canUseAssistantMore,
-            canRetry: canUseAssistantMore,
+            canRetry: canUseAssistantMore && isTerminalAssistantInUserTurn,
+            canDelete: !message.toolInvocation && message.role !== 'system' && !ui.sending,
             codeCardActionMode: ui.codeCardActionModeByMessageId[message.id] ?? 'hidden',
             codeCardProgress: ui.codeCardProgressByMessageId[message.id] ?? null,
             messageCycleIndex

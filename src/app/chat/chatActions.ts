@@ -170,6 +170,7 @@ export function createChatActionHandlers({
     }
     const messageIndex = writableConversation.messages.findIndex((candidate) => candidate.id === message.id);
     if (messageIndex === -1) return;
+    if (!ui.confirm('保存并重发这条消息？这条消息之后的记录将被替换，并会再次请求模型，按接口计费。')) return;
     const nextMessages = [...writableConversation.messages.slice(0, messageIndex), nextUserMessage];
     store.chat.replaceConversationMessages(writableConversation, nextMessages);
     ui.cancelEditingMessage();
@@ -200,6 +201,10 @@ export function createChatActionHandlers({
     }
     const messageIndex = writableConversation.messages.findIndex((candidate) => candidate.id === message.id);
     if (messageIndex <= 0) return;
+    const hasLaterMessages = messageIndex < writableConversation.messages.length - 1;
+    if (!ui.confirm(hasLaterMessages
+      ? '重新生成这条回答？这条回答及其后的记录将被替换，并会再次请求模型，按接口计费。'
+      : '重新生成这条回答？会再次请求模型，按接口计费。')) return;
     const nextMessages = writableConversation.messages.slice(0, messageIndex);
     store.chat.replaceConversationMessages(writableConversation, nextMessages);
     await runReply({
@@ -230,6 +235,32 @@ export function createChatActionHandlers({
       voiceCache: undefined
     });
     ui.setCommandStatus('已修改这条回答。');
+  };
+
+  const deleteMessage = async (message: ChatMessage) => {
+    const activeConversation = derived.activeConversation;
+    if (!activeConversation || ui.sending || message.toolInvocation || message.role === 'system') return;
+    if (activeConversation.collaboratorId && isCompanionCollaboratorId(activeConversation.collaboratorId)) {
+      ui.setCommandStatus('电脑端 companion 的消息需要在电脑端删除。', true);
+      return;
+    }
+    const writableConversation = await store.chat.ensureConversationWritable(activeConversation.id);
+    if (!writableConversation) {
+      ui.setCommandStatus('读取当前对话历史失败，先别删除消息。', true);
+      return;
+    }
+    if (!writableConversation.messages.some((candidate) => candidate.id === message.id)) return;
+    const hasToolReceipts = writableConversation.messages.some((candidate) =>
+      candidate.toolInvocation?.originMessageId === message.id
+    );
+    if (!ui.confirm(hasToolReceipts
+      ? '删除这条消息和它关联的工具回执？其他聊天记录、已保存的文件和卡片会保留。此操作无法撤销。'
+      : '删除这条消息？其他聊天记录会保留，此操作无法撤销。')) return;
+    store.chat.replaceConversationMessages(writableConversation, writableConversation.messages.filter((candidate) =>
+      candidate.id !== message.id && candidate.toolInvocation?.originMessageId !== message.id
+    ));
+    if (ui.editing?.messageId === message.id) ui.cancelEditingMessage();
+    ui.setCommandStatus('已删除这条消息。');
   };
 
   const cacheAssistantSpeech = (message: ChatMessage, voiceCache: ChatMessageVoiceCache) => {
@@ -403,6 +434,7 @@ export function createChatActionHandlers({
     commitMessageEdit,
     retryLatestAssistant,
     updateAssistantMessage,
+    deleteMessage,
     cacheAssistantSpeech,
     forkConversationFromMessage,
     selectPersona,

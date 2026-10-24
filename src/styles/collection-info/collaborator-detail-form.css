@@ -7,6 +7,11 @@
   border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 42%, transparent);
 }
 
+.conflux-role-navigation { display:flex; align-items:center; gap:12px; flex:none; padding:4px 10px 10px; }
+.conflux-role-navigation button { min-height:44px; flex:none; }
+.conflux-role-navigation > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-soft); font-size:13px; }
+.conflux-role-back-icon { display:inline-flex; transform:rotate(180deg); }
+
 .collaborator-info-name-input {
   font-size: 20px;
   color: var(--text);
@@ -112,6 +117,17 @@
   margin: 0;
   animation: none;
 }
+
+.conflux-role-notice { margin:0 0 16px; padding:12px; border:1px solid var(--border); color:var(--text-soft); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.conflux-role-notice p { margin:6px 0 10px; }
+.conflux-role-avatar-settings > summary,.conflux-role-optional > summary { min-height:44px; align-content:center; cursor:pointer; color:var(--text); font-size:13px; }
+.conflux-role-connection { --sheet-readable-text:var(--text); --sheet-readable-muted:var(--text-soft); display:flex; flex-direction:column; gap:12px; margin-top:12px; }
+.conflux-role-connection .api-provider-section { padding:14px; border-radius:8px; background:var(--surface); box-shadow:none; backdrop-filter:none; }
+.conflux-role-connection .settings-form input,.conflux-role-connection .settings-form select { min-width:0; width:100%; box-sizing:border-box; }
+.conflux-role-optional .api-provider-section + .api-provider-section { margin-top:12px; }
+.conflux-role-avatar-settings .collaborator-avatar-inline-grid { margin-bottom:16px; }
+.collaborator-info-detail-shell .collaborator-info-nav { overflow-x:auto; flex-wrap:nowrap; }
+.collaborator-info-nav .ps-nav-item { flex:0 0 auto; min-width:90px; }
 
 .collaborator-info-content .room-settings-flow {
   display: flex;

@@ -151,7 +151,11 @@ export function useAppShellCollaboratorActions({
   const createCustomCollaborator = () => {
     closeMenu();
     const nextId = createPersona({ activate: false, template: 'custom' });
-    openCollaboratorInfo(nextId);
+    // The current render's personas list does not include the new role yet.
+    setActiveCollaborator(nextId);
+    setEditingCollaboratorId(nextId);
+    setFrontstageCollaboratorId(nextId);
+    revealCollaboratorInfo({ setWorld, setCollectionShelf });
   };
 
   const talkToCollaborator = (collaboratorId: string) => {

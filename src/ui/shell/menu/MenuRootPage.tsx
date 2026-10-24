@@ -81,9 +81,152 @@ export function MenuRootPage({
         </div>
       </div>
 
-      <section className="menu-section">
+      <section className="menu-section" aria-label={t('settings.section.chat')}>
         <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.language')}</span>
+          <span className="menu-section-kicker">{t('settings.section.chat')}</span>
+        </div>
+        <MenuSheetItem
+          icon="providerRoute"
+          title={t('settings.api.title')}
+          detail={t('settings.api.detail')}
+          helpText={t('settings.api.help')}
+          onClick={onOpenApi}
+        />
+        {memorySettingsVisible ? (
+          <MenuSheetItem
+            icon="feather"
+            title={t('settings.memory.title')}
+            detail={t('settings.memory.detail')}
+            helpText={t('settings.memory.help')}
+            onClick={onOpenMemory}
+          />
+        ) : null}
+        <MenuSheetItem
+          icon="voice"
+          title={t('settings.voice.title')}
+          detail={t('settings.voice.detail')}
+          helpText={t('settings.voice.help')}
+          onClick={onOpenVoice}
+        />
+        <MenuSheetItem
+          icon="infoCard"
+          title={t('settings.usage.title')}
+          detail={
+            tokenUsageSummary.replyCount > 0
+              ? t('settings.usage.detailConfigured', {
+                  count: formatNumber(tokenUsageSummary.replyCount),
+                  tokens: formatNumber(tokenUsageSummary.totalTokens)
+                })
+              : t('settings.usage.detailEmpty')
+          }
+          helpText={t('settings.usage.help')}
+          onClick={onOpenUsage}
+        />
+      </section>
+
+      <section className="menu-section" aria-label={t('settings.section.appearance')}>
+        <div className="menu-section-head">
+          <span className="menu-section-kicker">{t('settings.section.appearance')}</span>
+        </div>
+        <MenuSheetItem
+          icon="sparkle"
+          title={t('settings.display.title')}
+          detail={t('settings.display.detail')}
+          onClick={onOpenDisplay}
+        />
+        <MenuSheetItem
+          icon="fontImport"
+          title={t('settings.fonts.title')}
+          detail={customFontCount > 0 ? t('settings.fonts.detailConfigured', { count: formatNumber(customFontCount) }) : t('settings.fonts.detailEmpty')}
+          onClick={onOpenFonts}
+        />
+      </section>
+
+      <section className="menu-section" aria-label={t('settings.section.dataBackup')}>
+        <div className="menu-section-head">
+          <span className="menu-section-kicker">{t('settings.section.dataBackup')}</span>
+        </div>
+        <MenuSheetItem
+          icon="folder"
+          title={t('settings.backup.title')}
+          helpText={t('settings.backup.help')}
+          onClick={onOpenBackup}
+        />
+        <MenuSheetItem
+          icon="search"
+          title={t('settings.storage.title')}
+          detail={
+            storageHealthSnapshot
+              ? t('settings.storage.detailConfigured', {
+                  size: formatNumber(storageHealthSnapshot.totalBytes / 1024 / 1024, { maximumFractionDigits: 1 })
+                })
+              : t('settings.storage.detailEmpty')
+          }
+          helpText={t('settings.storage.help')}
+          onClick={onOpenStorage}
+        />
+        <MenuSheetItem
+          icon="infoCard"
+          title={t('settings.privacy.title')}
+          helpText={t('settings.privacy.help')}
+          onClick={onOpenPrivacy}
+        />
+      </section>
+
+      <details className="menu-section conflux-settings-extensions">
+        <summary>
+          <span className="conflux-settings-extensions-copy">
+            <strong>{t('settings.section.extensions')}</strong>
+            <small>{t('settings.extensions.detail')}</small>
+          </span>
+          <Icon name="chevron" size={16} />
+        </summary>
+        <MenuSheetItem
+          icon="layers"
+          title={t('settings.toolbox.title')}
+          detail={t('settings.toolbox.detail', { count: formatNumber(enabledToolGroupsCount) })}
+          helpText={t('settings.toolbox.help')}
+          onClick={onOpenToolbox}
+        />
+        <MenuSheetItem
+          icon="mcpServer"
+          title={t('settings.mcp.title')}
+          detail={
+            mcpServerCount > 0
+              ? t('settings.mcp.detailConfigured', { enabled: formatNumber(enabledMcpServerCount), total: formatNumber(mcpServerCount) })
+              : t('settings.mcp.detailEmpty')
+          }
+          helpText={t('settings.mcp.help')}
+          onClick={onOpenMcp}
+        />
+        <MenuSheetItem
+          icon="image"
+          title={t('settings.generation.title')}
+          detail={t('settings.generation.detail')}
+          helpText={t('settings.generation.help')}
+          onClick={onOpenGeneration}
+        />
+        <MenuSheetItem
+          icon="lighthouse"
+          title={t('settings.gateway.title')}
+          detail={t('settings.gateway.detail')}
+          helpText={t('settings.gateway.help')}
+          onClick={onOpenGateway}
+        />
+        {desktopLocalAvailable ? (
+          <MenuSheetItem
+            icon="folder"
+            title={t('settings.desktopLocal.title')}
+            detail={t('settings.desktopLocal.detail')}
+            helpText={t('settings.desktopLocal.help')}
+            onClick={onOpenDesktopLocal}
+          />
+        ) : null}
+      </details>
+
+      <section className="menu-section" aria-label={t('settings.section.general')}>
+        <div className="menu-section-head">
+          <span className="menu-section-kicker">{t('settings.section.general')}</span>
         </div>
         <div className="settings-item menu-language-selector">
           <span className="settings-item-leading">
@@ -108,25 +251,12 @@ export function MenuRootPage({
           </span>
         </div>
         <p className="menu-section-note menu-language-note">{t('settings.language.help')}</p>
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.service')}</span>
-        </div>
         <MenuSheetItem
-          icon="providerRoute"
-          title={t('settings.api.title')}
-          detail={t('settings.api.detail')}
-          helpText={t('settings.api.help')}
-          onClick={onOpenApi}
-        />
-        <MenuSheetItem
-          icon="lighthouse"
-          title={t('settings.gateway.title')}
-          detail={t('settings.gateway.detail')}
-          helpText={t('settings.gateway.help')}
-          onClick={onOpenGateway}
+          icon="openBook"
+          title={t('settings.docs.title')}
+          detail={t('settings.docs.detail')}
+          helpText={t('settings.docs.help')}
+          onClick={onOpenDocs}
         />
         {androidApkUpdateAvailable ? (
           <MenuSheetItem
@@ -137,144 +267,6 @@ export function MenuRootPage({
             onClick={onCheckAndroidApkUpdate}
           />
         ) : null}
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.capabilities')}</span>
-        </div>
-        {memorySettingsVisible ? (
-          <MenuSheetItem
-            icon="feather"
-            title={t('settings.memory.title')}
-            detail={t('settings.memory.detail')}
-            helpText={t('settings.memory.help')}
-            onClick={onOpenMemory}
-          />
-        ) : null}
-        <MenuSheetItem
-          icon="image"
-          title={t('settings.generation.title')}
-          detail={t('settings.generation.detail')}
-          helpText={t('settings.generation.help')}
-          onClick={onOpenGeneration}
-        />
-        <MenuSheetItem
-          icon="voice"
-          title={t('settings.voice.title')}
-          detail={t('settings.voice.detail')}
-          helpText={t('settings.voice.help')}
-          onClick={onOpenVoice}
-        />
-        <MenuSheetItem
-          icon="layers"
-          title={t('settings.toolbox.title')}
-          detail={t('settings.toolbox.detail', { count: formatNumber(enabledToolGroupsCount) })}
-          helpText={t('settings.toolbox.help')}
-          onClick={onOpenToolbox}
-        />
-        <MenuSheetItem
-          icon="mcpServer"
-          title={t('settings.mcp.title')}
-          detail={
-            mcpServerCount > 0
-              ? t('settings.mcp.detailConfigured', { enabled: formatNumber(enabledMcpServerCount), total: formatNumber(mcpServerCount) })
-              : t('settings.mcp.detailEmpty')
-          }
-          helpText={t('settings.mcp.help')}
-          onClick={onOpenMcp}
-        />
-        {desktopLocalAvailable ? (
-          <MenuSheetItem
-            icon="folder"
-            title={t('settings.desktopLocal.title')}
-            detail={t('settings.desktopLocal.detail')}
-            helpText={t('settings.desktopLocal.help')}
-            onClick={onOpenDesktopLocal}
-          />
-        ) : null}
-        <MenuSheetItem
-          icon="infoCard"
-          title={t('settings.usage.title')}
-          detail={
-            tokenUsageSummary.replyCount > 0
-              ? t('settings.usage.detailConfigured', {
-                  count: formatNumber(tokenUsageSummary.replyCount),
-                  tokens: formatNumber(tokenUsageSummary.totalTokens)
-                })
-              : t('settings.usage.detailEmpty')
-          }
-          helpText={t('settings.usage.help')}
-          onClick={onOpenUsage}
-        />
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.appearance')}</span>
-        </div>
-        <MenuSheetItem
-          icon="sparkle"
-          title={t('settings.display.title')}
-          detail={t('settings.display.detail')}
-          onClick={onOpenDisplay}
-        />
-        <MenuSheetItem
-          icon="fontImport"
-          title={t('settings.fonts.title')}
-          detail={customFontCount > 0 ? t('settings.fonts.detailConfigured', { count: formatNumber(customFontCount) }) : t('settings.fonts.detailEmpty')}
-          onClick={onOpenFonts}
-        />
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.documents')}</span>
-        </div>
-        <MenuSheetItem
-          icon="openBook"
-          title={t('settings.docs.title')}
-          detail={t('settings.docs.detail')}
-          helpText={t('settings.docs.help')}
-          onClick={onOpenDocs}
-        />
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.data')}</span>
-        </div>
-        <MenuSheetItem
-          icon="folder"
-          title={t('settings.backup.title')}
-          helpText={t('settings.backup.help')}
-          onClick={onOpenBackup}
-        />
-        <MenuSheetItem
-          icon="search"
-          title={t('settings.storage.title')}
-          detail={
-            storageHealthSnapshot
-              ? t('settings.storage.detailConfigured', {
-                  size: formatNumber(storageHealthSnapshot.totalBytes / 1024 / 1024, { maximumFractionDigits: 1 })
-                })
-              : t('settings.storage.detailEmpty')
-          }
-          helpText={t('settings.storage.help')}
-          onClick={onOpenStorage}
-        />
-      </section>
-
-      <section className="menu-section">
-        <div className="menu-section-head">
-          <span className="menu-section-kicker">{t('settings.section.privacy')}</span>
-        </div>
-        <MenuSheetItem
-          icon="infoCard"
-          title={t('settings.privacy.title')}
-          helpText={t('settings.privacy.help')}
-          onClick={onOpenPrivacy}
-        />
       </section>
     </div>
   );

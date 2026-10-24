@@ -1,9 +1,10 @@
+import { useSpaceStore } from '../../stores/spaceStore';
 import { useMemo } from 'react';
 import { buildConversationCardSummary } from '../../app/collection/conversationCardSummary';
 import { resolveCollectionRenderItemCount } from '../../app/shell/collectionRenderLoad';
 import { deriveAppShellState } from '../../app/shell/deriveAppShellState';
 import { useAppShellStoreBindings } from '../../app/shell/useAppShellStoreBindings';
-import { createCompanionPersonaProjection, isCompanionCollaboratorId } from '../../engines/companion';
+import { createCompanionPersonaProjection } from '../../engines/companion';
 import {
   conversationMatchesCollaboratorScope,
   resolveConversationCollaboratorId
@@ -14,7 +15,6 @@ import { useCollaboratorFrontstageSync } from './useCollaboratorFrontstageSync';
 import { useEditingCollaboratorFrontstageSync } from './useEditingCollaboratorFrontstageSync';
 import { useAppShellOverlayController } from './useAppShellOverlayController';
 import { useAppShellWorldController } from './useAppShellWorldController';
-import { enterCollaboratorCollectionScope } from '../../app/shell/frontstageNavigation';
 import { useThemeSessionActions } from '../../app/theme/useThemeSessionActions';
 import { useAbortStreamingCleanupEffect } from '../worlds/chat/effects/useAbortStreamingCleanupEffect';
 import { useChatUiState } from '../worlds/chat/context/ChatUiState';
@@ -112,10 +112,9 @@ export function useAppShellController() {
     () => [
       { shelf: 'project' as const, label: t('common.workspace') },
       { shelf: 'code' as const, label: t('desktop.navCards') },
-      { shelf: 'image' as const, label: t('desktop.navImages') },
-      { shelf: 'info' as const, label: frontstageCollaboratorName ?? t('desktop.collaboratorSettings') }
+      { shelf: 'image' as const, label: t('desktop.navImages') }
     ],
-    [frontstageCollaboratorName, t]
+    [t]
   );
   const collectionRenderItemCount = useMemo(
     () => resolveCollectionRenderItemCount({
@@ -240,42 +239,41 @@ export function useAppShellController() {
     collectionShelf,
     collaboratorScopeId: frontstageCollaboratorId,
     currentCollaborator: frontstageCollaborator,
+    chatCollaborator: collaborators.find((collaborator) => collaborator.id === activeConversationCollaboratorId) ?? (activeConversationId ? null : frontstageCollaborator),
     collaborators,
     conversations: desktopSidebarConversations,
     shelfItems: desktopSidebarShelfItems,
     onSelectCollaborator: (collaboratorId: string | null) => {
-      enterCollaboratorCollectionScope({
-        activeWorld,
-        setFrontstageCollaboratorId,
-        setCollectionShelf,
-        setWorld
-      }, collaboratorId);
-      if (collaboratorId && !isCompanionCollaboratorId(collaboratorId)) {
-        stores.collaborator.setActiveCollaborator(collaboratorId);
-        setEditingCollaboratorId(collaboratorId);
-      }
-    },
-    onCreateCollaboratorFromBuilder: () => {
-      setWorld('collection');
-      overlays.collectionOpenCollaboratorBuilderForCreate();
+      if (collaboratorId) overlays.collaboratorActions.talkToCollaborator(collaboratorId);
+      else setFrontstageCollaboratorId(null);
     },
     onCreateCustomCollaborator: () => {
+      collection.setInfoPageRequest(null);
       setWorld('collection');
       overlays.collectionCreateCustomCollaborator();
     },
+    onCreateCollaboratorFromBuilder: overlays.collectionOpenCollaboratorBuilderForCreate,
+    onEditCollaborator: (collaboratorId = frontstageCollaboratorId) => {
+      if (!collaboratorId) return;
+      collection.setInfoPageRequest({ collaboratorId, tab: 'identity' });
+      overlays.collaboratorActions.openCollaboratorInfo(collaboratorId);
+    },
     onSelectShelf: (shelf: typeof collectionShelf) => {
-      if (shelf === 'info' && frontstageCollaboratorId) {
-        setEditingCollaboratorId(frontstageCollaboratorId);
+      if (shelf === 'info') {
+        collection.setInfoPageRequest(null);
+        overlays.collaboratorActions.openCollaboratorInfo(activeConversationCollaboratorId ?? frontstageCollaboratorId);
+        return;
       }
       setCollectionShelf(shelf);
       setWorld('collection');
     },
-    onOpenConversation: (conversationId: string) => {
+    onOpenConversation: (conversationId: string, messageId?: string) => {
       if (conversationId !== activeConversationId) {
         clearPendingAttachments();
         clearPendingCardReference();
       }
       setActiveConversation(conversationId);
+      useSpaceStore.getState().setFocusedMessageTarget(messageId ? { conversationId, messageId } : null);
       setWorld('chat');
     },
     onRenameConversation: renameConversation,
@@ -319,6 +317,7 @@ export function useAppShellController() {
     collectionCollaboratorSwitchOpen: collection.collaboratorSwitchOpen,
     setCollectionCollaboratorSwitchOpen: collection.setCollaboratorSwitchOpen,
     collectionInfoFullscreenOpen: collection.infoFullscreenOpen,
+    collectionInfoPageRequest: collection.infoPageRequest,
     setCollectionInfoFullscreenOpen: collection.setInfoFullscreenOpen,
     collectionDetailOpen: collection.detailOpen,
     setCollectionDetailOpen: collection.setDetailOpen,
@@ -326,6 +325,7 @@ export function useAppShellController() {
     collectionCreateCustomCollaborator: overlays.collectionCreateCustomCollaborator,
     collectionOpenProviderSettings: overlays.collectionOpenProviderSettings,
     collectionOpenSettings: overlays.collectionOpenSettings,
+    openQuickMenuPage: overlays.openMenuAt,
     openBackupSettings: () => overlays.openMenuAt('backup'),
     collectionOpenDesktopLocalSettings: overlays.collectionOpenDesktopLocalSettings,
     collectionDeleteCollaborator: overlays.collaboratorActions.deleteCollaboratorFromPanel,

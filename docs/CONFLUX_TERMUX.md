@@ -1,0 +1,44 @@
+# Termux 开发与 PWA 更新
+
+网页和已安装的 PWA 继续使用原来的 4173 地址。保留安装时的主机名：`localhost` 和 `127.0.0.1` 属于不同来源，不要互换。
+
+首次切换到六入口开发分支：
+
+1. 回到原来挂着 Conflux 的 Termux 窗口，按 Ctrl+C，等命令提示符出现。
+2. 先查看本地状态：
+
+```bash
+git -C ~/my_st_termux/conflux status --short --branch
+```
+
+如果出现 `M`、`A`、`D` 或 `??` 等本地修改/新文件，**先停下保留这些改动**，不要强制切分支或清理目录。需要先确认哪些属于正在编辑的 UI。
+3. 如果工作区干净，而且还在旧的 `feat/conflux-shell-pwa` 分支，依次执行：
+
+```bash
+cd ~/my_st_termux/conflux
+git fetch origin feat/conflux-bottom-navigation
+git switch --track -c feat/conflux-bottom-navigation origin/feat/conflux-bottom-navigation
+npm run termux:dev
+```
+
+旧 PWA 分支与六入口分支已分叉，**不能**使用 `git merge --ff-only FETCH_HEAD` 从旧分支直接升级；也不要用强制重置覆盖手机上的工作。
+
+如果本地已经存在 `feat/conflux-bottom-navigation`，工作区干净时改用：
+
+```bash
+git switch feat/conflux-bottom-navigation
+git pull --ff-only origin feat/conflux-bottom-navigation
+npm run termux:dev
+```
+
+4. 看到“开发服务已启动”后，刷新原网页；从系统最近任务划掉 PWA，再点原图标打开。此后界面修改通过 Vite 热更新。Termux 服务需要保持运行；修改本地服务本身后，仍需 Ctrl+C 再运行 `npm run termux:dev`。
+
+出现“新服务未启动：4173 已有服务在运行”，说明原服务还没停。回到占用端口的 Conflux 窗口按 Ctrl+C；不要换端口或反复新开服务。
+
+旧 PWA 仍显示缓存时，在安装时相同来源打开 `/__conflux_dev` 一次，例如原来源是 `http://127.0.0.1:4173` 就打开 `http://127.0.0.1:4173/__conflux_dev`。此入口只注销该来源根作用域的离线 worker，不清除聊天数据库、设置或缓存内容，然后回到实时开发页面。随后重新打开 PWA。
+
+生产页面现在会在恢复到前台时检查 worker 更新，覆盖“点图标只是恢复旧窗口、没有触发页面加载”的情况。切到开发服务时，更新后的 worker 会接管实时页面；普通静态发布仍保留原来的完整资源缓存和等待所有旧窗口关闭后激活的规则。
+
+排查服务模式可运行 `curl -sS --max-time 5 http://127.0.0.1:4173/api/health`；`development` 是实时开发服务，`pwa` 是构建后的静态服务，后者不会随着源码编辑更新。
+
+验证范围：隔离 Chromium 中，旧离线 shell 切换到同来源开发服务、两个窗口接管和重新打开已通过，localStorage 与 IndexedDB 测试记录保留。前台恢复信号在 headless 浏览器中模拟；worker 更新与页面接管实际运行。端口占用时，实际 npm 启动命令明确失败并保留原服务。用户已安装的 Android PWA 仍需手机实际确认。

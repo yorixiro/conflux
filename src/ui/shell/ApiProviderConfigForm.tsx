@@ -6,6 +6,7 @@ import {
 } from '../../engines/providerModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
+import { getProviderMissingFields } from './apiProviderDisplay';
 import {
   ApiProviderCapabilitiesSection,
   ApiProviderImageUnderstandingSection,
@@ -34,6 +35,7 @@ export function ApiProviderConfigForm({
   const { t } = useI18n();
   const publicTrialProvider = resolveProviderCapability(api).route.isBuiltInTrial;
   const builtInProvider = publicTrialProvider;
+  const missingFields = getProviderMissingFields(api);
   const {
     matchedPreset,
     interfacePath
@@ -146,6 +148,14 @@ export function ApiProviderConfigForm({
   return (
     <div className="api-provider-console">
       {!builtInProvider ? (
+        <div className="api-provider-setup-note" role="status">
+          <strong>{missingFields.length
+            ? t('apiProvider.setup.missing', { fields: missingFields.map(field => t(`apiProvider.setup.${field}`)).join(' / ') })
+            : t('apiProvider.setup.complete')}</strong>
+          <p>{t('apiProvider.setup.autosave')}</p>
+        </div>
+      ) : null}
+      {!builtInProvider ? (
         <ApiProviderConnectionSection
           api={api}
           matchedPresetName={matchedPreset ? t('apiProvider.connection.presetAdopted', { name: matchedPreset.name }) : ''}
@@ -169,28 +179,21 @@ export function ApiProviderConfigForm({
         onOpenModelPicker={handleModelPickerAction}
       />
 
-      <ApiProviderSummarySection
-        apiTesting={apiTesting}
-        apiTestResult={apiTestResult}
-        onRunApiTest={onRunApiTest}
-      />
-
-      {!builtInProvider ? (
-        <ApiProviderCapabilitiesSection
-          api={api}
-          onSetApiConfig={onSetApiConfig}
+      <details className="api-provider-more-settings">
+        <summary>{t('apiProvider.setup.more')}</summary>
+        <ApiProviderSummarySection
+          apiTesting={apiTesting}
+          apiTestResult={apiTestResult}
+          onRunApiTest={onRunApiTest}
         />
-      ) : null}
-
-      {!builtInProvider ? (
-        <ApiProviderImageUnderstandingSection
-          api={api}
-          providers={providers}
-          onSetApiConfig={onSetApiConfig}
-        />
-      ) : null}
-
-      <ApiProviderDiagnosticsSection />
+        {!builtInProvider ? (
+          <>
+            <ApiProviderCapabilitiesSection api={api} onSetApiConfig={onSetApiConfig} />
+            <ApiProviderImageUnderstandingSection api={api} providers={providers} onSetApiConfig={onSetApiConfig} />
+          </>
+        ) : null}
+        <ApiProviderDiagnosticsSection />
+      </details>
     </div>
   );
 }

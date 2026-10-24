@@ -23,12 +23,7 @@
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
-.bubble-frame.user:not(.editing) .user-bubble-action-menu,
-.bubble-frame.user:not(.editing) .user-bubble-action-menu * {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
+
 
 .app-shell.app-shell--message-editing-text,
 .app-shell.app-shell--message-editing-text .bubble.assistant .message-rich-text,

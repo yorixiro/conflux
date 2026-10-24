@@ -77,6 +77,7 @@ export function useCollectionWorldController(ui: CollectionWorldUiPorts) {
   const updateMcpServer = useRuntimeStore((state) => state.updateMcpServer);
   const deleteMcpServer = useRuntimeStore((state) => state.deleteMcpServer);
   const providers = useRuntimeStore(selectVisibleProviders);
+  const updateProvider = useRuntimeStore((state) => state.updateProvider);
   const activeProviderId = useRuntimeStore((state) => selectRuntimeApi(state).id);
   const showChatAvatars = useSpaceStore((state) => state.customization.showChatAvatars);
   const themeSession = useThemeSessionActions();
@@ -265,6 +266,7 @@ export function useCollectionWorldController(ui: CollectionWorldUiPorts) {
     ready,
     personas: collaborators,
     providers,
+    onUpdateProvider: updateProvider,
     activeProviderId,
     collaboratorConversationCounts,
     hasScopedImageCards,

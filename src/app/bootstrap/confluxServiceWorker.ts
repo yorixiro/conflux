@@ -11,6 +11,17 @@ export function registerConfluxServiceWorker(): void {
     void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
       scope: import.meta.env.BASE_URL, updateViaCache: 'none'
     })
+      .then((registration) => {
+        // Opening an installed PWA can resume its old page without firing load.
+        // Recheck on return so a local dev worker can take over that cached shell.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            void registration.update().catch((error: unknown) => {
+              console.warn('Conflux PWA update check failed', error);
+            });
+          }
+        });
+      })
       .catch((error: unknown) => {
         console.warn('Conflux PWA shell registration failed', error);
       });

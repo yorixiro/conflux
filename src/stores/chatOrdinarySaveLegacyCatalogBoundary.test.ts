@@ -195,3 +195,42 @@ describe('ordinary chat save legacy-catalog boundary', () => {
     expect(values.has(getLocalDataActiveDataSourceKey())).toBe(false);
   });
 });
+
+describe('lazy conversation draft readback', () => {
+  it('restores a background draft before a rename can overwrite its durable record', async () => {
+    const { useChatStore } = await import('./chatStore');
+    const { projectHydratedChatStorePatch } = await import('./chatStoreHydration');
+    const { readLiveChatStateWithOptions, readCompleteLiveChatState } = await import('./chatCurrentPersistence');
+    const background = buildConversation('draft-background', ['background-1']);
+    const active = buildConversation('draft-active', ['active-1']);
+    const values = createMemoryKv();
+    seedActiveLocalDataChatRepository(values, [background, active], active.id);
+    useChatStore.setState(projectHydratedChatStorePatch(await readLiveChatStateWithOptions({ readMode: 'active-only' })));
+    expect(useChatStore.getState().conversations.find((entry) => entry.id === background.id)?.draft).toBe('');
+
+    useChatStore.getState().setActiveConversation(background.id);
+    await useChatStore.getState().ensureConversationMessagesLoaded(background.id);
+    expect(useChatStore.getState().inputDraft).toBe(background.draft);
+    expect(useChatStore.getState().conversations.find((entry) => entry.id === background.id)?.draft).toBe(background.draft);
+    useChatStore.getState().renameConversation(background.id, 'renamed');
+    await useChatStore.getState().persistToDb();
+    expect((await readCompleteLiveChatState())?.conversations.find((entry) => entry.id === background.id)?.draft).toBe(background.draft);
+    expect(legacyCatalogKeys(values)).toEqual([]);
+  });
+
+  it('keeps a draft typed while the background body is loading', async () => {
+    const { useChatStore } = await import('./chatStore');
+    const { projectHydratedChatStorePatch } = await import('./chatStoreHydration');
+    const { readLiveChatStateWithOptions } = await import('./chatCurrentPersistence');
+    const background = buildConversation('draft-in-flight', ['background-1']);
+    const active = buildConversation('draft-active', ['active-1']);
+    const values = createMemoryKv();
+    seedActiveLocalDataChatRepository(values, [background, active], active.id);
+    useChatStore.setState(projectHydratedChatStorePatch(await readLiveChatStateWithOptions({ readMode: 'active-only' })));
+    useChatStore.getState().setActiveConversation(background.id);
+    useChatStore.getState().setInputDraft('new typing wins');
+    await useChatStore.getState().ensureConversationMessagesLoaded(background.id);
+    expect(useChatStore.getState().inputDraft).toBe('new typing wins');
+    expect(useChatStore.getState().conversations.find((entry) => entry.id === background.id)?.draft).toBe('new typing wins');
+  });
+});

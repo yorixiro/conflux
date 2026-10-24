@@ -11,6 +11,7 @@ This is a personal, local-first Polaris fork targeting Android APK and Web/PWA f
 - package.json and capacitor.config.ts
 
 ## Hard rules
+- Keep changes small and direct. Reuse existing functions; do not add frameworks, layers or generic infrastructure for UI layout work.
 - Use the existing Polaris domain owners: chat, group, persona, collection, runtime, tool-protocol, request, and LocalData. One canonical chat engine, one context compiler, one tool ledger and one data source.
 - Preserve Polaris visual style and responsive shell; port useful InternalBeyond functionality, NOT its iOS-like home/lock/wallet/skins. This product is Conflux; don't call it Nightward.
 - Keep the business implementation shared between Android and Web/PWA. Platform-dependent storage, secure credentials, permissions, background work, push and media go through explicit adapters.
@@ -27,4 +28,4 @@ P0 baseline -> P1 shared platform/xAI -> P2 IB staged import/memory -> P3 journa
 Implement one phase at a time in a small reviewable PR, with durable data/permission tests and a rollback path. Begin with P0 baseline only.
 
 ## Verification
-Read package.json for current scripts; baseline includes npm ci, npm run verify, and (when Android SDK available) npm run android:build-debug. Browser installation and Android actual-device testing are distinct acceptance gates. Every PR must state verified, blocked and untested steps separately.
+Read package.json for current scripts. For UI layout and entry changes, use typecheck/build plus relevant existing tests or focused browser checks. Run full verify for changes to storage, request/provider behavior, shared contracts, or when explicitly requested. Do not add tests that merely mirror trivial presentation code. Clearly distinguish existing regression checks from newly added tests; do not present the repository-wide test count as this change’s work. Browser and Android actual-device testing remain separate acceptance gates.
