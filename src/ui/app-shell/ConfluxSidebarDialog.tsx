@@ -17,10 +17,10 @@ export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', si
   }, [open]);
   const closeAfter = (action: () => void) => { action(); onClose(); };
   return (
-    <dialog ref={ref} className="conflux-sidebar-dialog" aria-label="聊天侧栏"
+    <dialog ref={ref} className="conflux-sidebar-dialog" aria-label="当前 AI 资料与日历"
       onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} collapsed={false} onToggleCollapsed={onClose}
+      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} presentation="profile" collapsed={false} onToggleCollapsed={onClose}
         onOpenHome={sidebarProps.onOpenHome ? () => closeAfter(sidebarProps.onOpenHome!) : undefined}
         onOpenConversation={(id, messageId) => closeAfter(() => sidebarProps.onOpenConversation(id, messageId))}
         onCreateConversation={() => closeAfter(sidebarProps.onCreateConversation)}

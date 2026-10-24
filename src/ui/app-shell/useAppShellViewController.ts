@@ -136,6 +136,7 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
   ].filter(Boolean).length > 1;
   const [isCollaboratorTransitionActive, setIsCollaboratorTransitionActive] = useState(false);
   const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
+  const [chatHubOpen, setChatHubOpen] = useState(true);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [worldRetryKeys, setWorldRetryKeys] = useState<WorldRetryKeys>({
     chat: 0,
@@ -177,6 +178,10 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
   useEffect(() => {
     setQuickSettingsOpen(false);
   }, [activeWorld, homeOpen]);
+
+  useEffect(() => {
+    if (activeWorld !== 'chat') setChatHubOpen(true);
+  }, [activeWorld]);
 
   useAppearanceDomEffects(displayPreferences.appearance);
   useCustomFontDomEffects(customization, displayPreferences);
@@ -314,6 +319,8 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
     effectiveDesktopSidebarCollapsed,
     quickSettingsOpen,
     setQuickSettingsOpen,
+    chatHubOpen,
+    setChatHubOpen,
     CollectionWorld,
     ChatWorld,
     GroupWorld,

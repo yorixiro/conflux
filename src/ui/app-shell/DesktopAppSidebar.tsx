@@ -15,6 +15,7 @@ export type DesktopAppSidebarShelfItem = {
 };
 
 export type DesktopAppSidebarProps = {
+  presentation?: 'sidebar' | 'hub' | 'profile';
   initialTab?: 'profile' | 'library';
   activeWorld: World;
   activeConversationId: string | null;
@@ -61,6 +62,7 @@ function sortSidebarCollaborators(collaborators: Persona[]) {
 }
 
 export function DesktopAppSidebar({
+  presentation = 'sidebar',
   initialTab = 'library',
   activeWorld,
   activeConversationId,
@@ -172,8 +174,8 @@ export function DesktopAppSidebar({
 
   const rolePicker = collaboratorPickerOpen ? (
     <section id="conflux-role-picker" className="conflux-sidebar-contact-list" aria-label="通讯录">
-      <header><strong>通讯录</strong><button type="button" className="conflux-sidebar-create" onClick={onCreateCustomCollaborator}><Icon name="plus" size={14} />新建角色</button></header>
-      <button
+      <header><strong>{presentation === 'hub' ? '所有 AI 角色' : '通讯录'}</strong>{presentation !== 'hub' ? <button type="button" className="conflux-sidebar-create" onClick={onCreateCustomCollaborator}><Icon name="plus" size={14} />新建角色</button> : null}</header>
+      {presentation !== 'hub' ? <button
         type="button"
         className={`desktop-sidebar-collaborator-option ${collaboratorScopeId === null ? 'active' : ''}`}
         onClick={() => handleSelectCollaborator(null)}
@@ -183,7 +185,7 @@ export function DesktopAppSidebar({
         <span className="desktop-sidebar-collaborator-option-copy">
           <strong>全部角色</strong><small>查看所有对话</small>
         </span>
-      </button>
+      </button> : null}
       <div className="desktop-sidebar-collaborator-picker" role="list" aria-label="角色列表">
       {sortedCollaborators.map(collaborator => (
         <div key={collaborator.id} className="conflux-sidebar-contact-row" role="listitem">
@@ -211,14 +213,30 @@ export function DesktopAppSidebar({
         <button type="button" className="conflux-library-role-settings" aria-label={`设置${collaborator.name}`} title="角色设置" onClick={() => onEditCollaborator(collaborator.id)}><Icon name="settings" size={16} /></button>
         </div>
       ))}
+      {presentation === 'hub' && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色。使用右上角的＋创建第一个角色。</p> : null}
       </div>
       <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>AI 生成人设（会调用模型）</button></details>
     </section>
   ) : null;
 
   return (
-    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''}`} aria-label={t('desktop.navLabel')}>
-      <div className="desktop-app-sidebar-topline">
+    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : t('desktop.navLabel')}>
+      {presentation === 'hub' ? (
+        <>
+          <header className="conflux-hub-heading">
+            <div>
+              <span>CONFLUX / CHAT</span>
+              <h1>对话</h1>
+            </div>
+            <button type="button" onClick={collaboratorPickerOpen ? onCreateCustomCollaborator : (collaborators.length ? onCreateConversation : onCreateCustomCollaborator)} aria-label={collaboratorPickerOpen ? '新建 AI 角色' : '新建对话'} title={collaboratorPickerOpen ? '新建 AI 角色' : '新建对话'}><Icon name="plus" size={20} /></button>
+          </header>
+          <div className="conflux-hub-tabs" role="tablist" aria-label="对话内容">
+            <button type="button" id="conflux-hub-recent-tab" role="tab" aria-controls="conflux-library-panel" aria-selected={!collaboratorPickerOpen} onClick={() => setCollaboratorPickerOpen(false)}>最近对话</button>
+            <button type="button" id="conflux-hub-contacts-tab" role="tab" aria-controls="conflux-library-panel" aria-selected={collaboratorPickerOpen} onClick={() => setCollaboratorPickerOpen(true)}>AI 通讯录</button>
+          </div>
+        </>
+      ) : null}
+      {presentation === 'sidebar' ? <div className="desktop-app-sidebar-topline">
         <button
           type="button"
           className="desktop-sidebar-collapse-toggle"
@@ -243,17 +261,18 @@ export function DesktopAppSidebar({
             <Icon name="navWorkspace" size={17} />
           </button>
         ) : null}
-      </div>
+      </div> : null}
 
-      <div className="conflux-sidebar-tabs" role="tablist" aria-label="侧栏内容">
+      {presentation === 'sidebar' ? <div className="conflux-sidebar-tabs" role="tablist" aria-label="侧栏内容">
         <button type="button" id="conflux-profile-tab" role="tab" aria-selected={sidebarTab === 'profile'} aria-controls="conflux-profile-panel" onClick={() => setSidebarTab('profile')}>个人资料</button>
         <button type="button" id="conflux-library-tab" role="tab" aria-selected={sidebarTab === 'library'} aria-controls="conflux-library-panel" onClick={() => setSidebarTab('library')}>对话库</button>
-      </div>
-      {sidebarTab === 'profile' ? (
+      </div> : null}
+      {(presentation === 'profile' || (presentation === 'sidebar' && sidebarTab === 'profile')) ? (
         <section
           id="conflux-profile-panel"
           role="tabpanel"
-          aria-labelledby="conflux-profile-tab"
+          aria-label={presentation === 'profile' ? '当前 AI 资料与日历' : undefined}
+          aria-labelledby={presentation === 'sidebar' ? 'conflux-profile-tab' : undefined}
           className="conflux-sidebar-panel conflux-sidebar-profile"
         >
           <div className="conflux-profile-heading">
@@ -286,8 +305,9 @@ export function DesktopAppSidebar({
         </section>
       ) : null}
 
-      {sidebarTab === 'library' ? (
-      <section id="conflux-library-panel" role="tabpanel" aria-labelledby="conflux-library-tab" className="desktop-sidebar-section desktop-sidebar-threads conflux-sidebar-panel">
+      {(presentation === 'hub' || (presentation === 'sidebar' && sidebarTab === 'library')) ? (
+      <section id="conflux-library-panel" role="tabpanel" aria-labelledby={presentation === 'hub' ? (collaboratorPickerOpen ? 'conflux-hub-contacts-tab' : 'conflux-hub-recent-tab') : 'conflux-library-tab'} className="desktop-sidebar-section desktop-sidebar-threads conflux-sidebar-panel">
+        {presentation !== 'hub' ? <>
         <div className="conflux-library-role">
           <button type="button" className="conflux-library-role-select" onClick={() => setSidebarTab('profile')} title="查看聊天角色资料">
             {currentCollaborator ? <PersonaAvatar role="assistant" seed={currentCollaborator.id} assetId={currentCollaborator.assistantAvatarAssetId} iconId={currentCollaborator.assistantAvatarIconId} shape={currentCollaborator.assistantAvatarShape} size={32} /> : <Icon name="persona" size={24} />}
@@ -298,11 +318,12 @@ export function DesktopAppSidebar({
         <button type="button" className="desktop-sidebar-nav-item conflux-sidebar-contacts" onClick={() => { if (collapsed) onToggleCollapsed(); setCollaboratorPickerOpen(open => !open); }} aria-expanded={collaboratorPickerOpen} aria-controls="conflux-role-picker">
           <Icon name="persona" size={18} /><span>通讯录</span><Icon name={collaboratorPickerOpen ? 'chevronUp' : 'chevronDown'} size={14} />
         </button>
+        </> : null}
         {rolePicker}
         {!collaboratorPickerOpen ? <>
-        <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
+        {presentation !== 'hub' ? <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
           {collaborators.length ? '新建对话' : '创建角色并开始聊天'}
-        </button>
+        </button> : null}
         <label className="conflux-sidebar-search">
           <span>搜索聊天记录</span>
           <input type="search" placeholder="搜索对话标题、聊天内容" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} />
@@ -452,7 +473,7 @@ export function DesktopAppSidebar({
       </section>
       ) : null}
 
-      <footer className="desktop-sidebar-footer">
+      {presentation === 'sidebar' ? <footer className="desktop-sidebar-footer">
         <button
           type="button"
           className="desktop-sidebar-settings"
@@ -464,7 +485,7 @@ export function DesktopAppSidebar({
           <span>{t('common.settings')}</span>
         </button>
 
-      </footer>
+      </footer> : null}
     </aside>
   );
 }

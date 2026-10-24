@@ -69,3 +69,35 @@
 .conflux-sidebar-dialog .desktop-sidebar-thread-more { opacity:1; transform:none; min-width:44px; min-height:44px; }
 .conflux-sidebar-dialog .desktop-sidebar-footer { display:none; }
 @media (min-width:700px) { .conflux-sidebar-dialog { width:min(40vw,340px); } }
+
+/* Mobile "对话" owns the one conversation/contact library; chat detail keeps only its profile drawer. */
+.app-stage.conflux-chat-hub-open > .world-stack { display:none; }
+.conflux-chat-hub { display:flex; flex:1; min-height:0; width:100%; overflow:hidden; position:relative; z-index:2; }
+.conflux-chat-hub .desktop-app-sidebar.conflux-conversation-hub {
+  display:flex; flex-direction:column; gap:15px; width:100%; max-width:720px; height:100%; min-width:0;
+  margin:0 auto; box-sizing:border-box; padding:20px max(16px,env(safe-area-inset-left,0px)) 16px;
+  overflow:hidden; color:var(--text); background:color-mix(in srgb,var(--surface-solid,var(--bg)) 88%,transparent);
+}
+.conflux-hub-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; flex:none; }
+.conflux-hub-heading span { font-size:10px; letter-spacing:.16em; color:var(--text-muted); }
+.conflux-hub-heading h1 { margin:2px 0 0; font:inherit; font-size:23px; font-weight:680; }
+.conflux-hub-heading button { display:grid; place-items:center; width:44px; min-height:44px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); cursor:pointer; }
+.conflux-hub-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; flex:none; border-bottom:1px solid var(--border); }
+.conflux-hub-tabs button { min-height:44px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--text-soft); font:inherit; font-size:14px; cursor:pointer; }
+.conflux-hub-tabs button[aria-selected='true'] { border-bottom-color:var(--accent); color:var(--text); font-weight:650; }
+.conflux-chat-hub .conflux-sidebar-panel { gap:14px; }
+.conflux-chat-hub .desktop-sidebar-thread-list { gap:4px; }
+.conflux-chat-hub .desktop-sidebar-thread { min-height:54px; padding:9px 10px; }
+.conflux-chat-hub .desktop-sidebar-thread-title { font-size:14px; }
+.conflux-chat-hub .desktop-sidebar-thread-meta { font-size:11px; }
+.conflux-chat-hub .desktop-sidebar-thread-body { grid-template-columns:minmax(0,1fr) 44px; }
+.conflux-chat-hub .desktop-sidebar-thread-more { min-width:44px; min-height:48px; opacity:1; transform:none; }
+.conflux-chat-hub .conflux-sidebar-contact-list { gap:12px; }
+.conflux-chat-hub .conflux-sidebar-contact-list > header { padding:0 4px; color:var(--text-soft); }
+.conflux-chat-hub .conflux-sidebar-contact-list .desktop-sidebar-collaborator-picker {
+  flex:0 1 auto; min-height:0; max-height:calc(100dvh - 245px); padding:0;
+  border:0; border-radius:0; background:transparent; box-shadow:none;
+}
+.conflux-chat-hub .conflux-sidebar-contact-row { border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent); }
+.conflux-chat-hub .conflux-sidebar-contact-row > .desktop-sidebar-collaborator-option { min-height:58px; }
+.conflux-chat-hub button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }

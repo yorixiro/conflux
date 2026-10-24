@@ -33,6 +33,7 @@ export type AppTopbarState = {
 export type AppTopbarActions = {
   onToggleWorld: () => void;
   onOpenHome?: () => void;
+  onOpenConversationList?: () => void;
   onOpenSidebar?: () => void;
   onToggleCollaboratorSwitch: () => void;
   onCreateConversation: () => void;
@@ -121,7 +122,7 @@ export function AppTopbar({
   const collectionSearchLabel = collectionSearchTitle;
   const collectionSearchIcon = collectionCardsEditable ? 'editList' : 'search';
   const showCollaboratorGate = state.activeWorld === 'collection';
-  const showChatNavigation = state.activeWorld === 'chat' && (actions.onOpenHome || actions.onOpenSidebar);
+  const showChatNavigation = state.activeWorld === 'chat' && (actions.onOpenHome || actions.onOpenConversationList || actions.onOpenSidebar);
 
   if (!state.showShell) {
     return null;
@@ -133,6 +134,13 @@ export function AppTopbar({
         <div className="topbar-main">
           {showChatNavigation ? (
             <div className="topbar-actions topbar-actions--leading">
+              {actions.onOpenConversationList ? (
+                <button type="button" className="action-btn icon-btn topbar-back-btn"
+                  onClick={(event) => handleSelectionAction(actions.onOpenConversationList!, event.currentTarget)}
+                  title="返回对话列表" aria-label="返回对话列表">
+                  <Icon name="chevron" size={18} />
+                </button>
+              ) : null}
               {actions.onOpenHome ? (
                 <button type="button" className="action-btn icon-btn topbar-back-btn"
                   onClick={(event) => handleSelectionAction(actions.onOpenHome!, event.currentTarget)}
@@ -142,8 +150,8 @@ export function AppTopbar({
               ) : null}
               {actions.onOpenSidebar ? (
                 <button type="button" className="action-btn icon-btn"
-                  onClick={actions.onOpenSidebar} title="打开 AI 资料与对话库"
-                  aria-label="打开 AI 资料与对话库" aria-haspopup="dialog">
+                  onClick={actions.onOpenSidebar} title="查看当前 AI 资料与日历"
+                  aria-label="查看当前 AI 资料与日历" aria-haspopup="dialog">
                   {chatCollaborator ? (
                     <PersonaAvatar role="assistant" seed={chatCollaborator.id}
                       assetId={chatCollaborator.assistantAvatarAssetId}
