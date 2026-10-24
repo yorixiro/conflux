@@ -5,8 +5,9 @@ import {
   unlockRunCodeSandbox
 } from '../../infrastructure/runCodeSandboxMode';
 import type { ActiveThemePreview } from '../../stores/spaceStore';
-import type { CollectionShelf, World } from '../../types/domain';
+import type { CollectionShelf, Persona, World } from '../../types/domain';
 import { Icon } from '../Icon';
+import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { runSelectionAction } from '../haptics';
 import { WorldAnchor } from './WorldAnchor';
 import { useI18n } from '../../i18n';
@@ -46,11 +47,13 @@ export type AppTopbarActions = {
 export type AppTopbarProps = {
   state: AppTopbarState;
   actions: AppTopbarActions;
+  chatCollaborator?: Persona | null;
 };
 
 export function AppTopbar({
   state,
-  actions
+  actions,
+  chatCollaborator
 }: AppTopbarProps) {
   const { t } = useI18n();
   const [brandSpinning, setBrandSpinning] = useState(false);
@@ -139,9 +142,14 @@ export function AppTopbar({
               ) : null}
               {actions.onOpenSidebar ? (
                 <button type="button" className="action-btn icon-btn"
-                  onClick={actions.onOpenSidebar} title="打开对话库"
-                  aria-label="打开聊天侧栏" aria-haspopup="dialog">
-                  <Icon name="sidebar" size={18} />
+                  onClick={actions.onOpenSidebar} title="打开 AI 资料与对话库"
+                  aria-label="打开 AI 资料与对话库" aria-haspopup="dialog">
+                  {chatCollaborator ? (
+                    <PersonaAvatar role="assistant" seed={chatCollaborator.id}
+                      assetId={chatCollaborator.assistantAvatarAssetId}
+                      iconId={chatCollaborator.assistantAvatarIconId}
+                      shape={chatCollaborator.assistantAvatarShape} size={28} />
+                  ) : <Icon name="persona" size={19} />}
                 </button>
               ) : null}
             </div>
