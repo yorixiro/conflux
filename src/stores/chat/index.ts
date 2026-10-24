@@ -174,9 +174,12 @@ export async function readCompleteLiveChatState(
   return await readLiveChatStateWithOptions({ readMode: 'complete', ...options });
 }
 
-export async function readConversationMessages(conversationId: string): Promise<ChatMessage[]> {
+export async function readConversationMessages(
+  conversationId: string,
+  onDraftRead?: (draft: string) => void
+): Promise<ChatMessage[]> {
   try {
-    const localDataRead = await readConversationMessagesFromLocalDataLive(conversationId);
+    const localDataRead = await readConversationMessagesFromLocalDataLive(conversationId, onDraftRead);
     if (localDataRead.status === 'complete') return localDataRead.messages;
     if (
       localDataRead.status === 'deleted'

@@ -218,7 +218,8 @@ export async function readConversationMessagesFromLocalDataRepositoryIfActive(
 }
 
 export async function readConversationMessagesFromLocalDataLive(
-  conversationId: string
+  conversationId: string,
+  onDraftRead?: (draft: string) => void
 ): Promise<ChatLocalDataMessageReadResult> {
   const active = await isChatLocalDataRepositoryActive();
   if (!active && !(await hasChatLocalDataRepositoryRows())) return { status: 'inactive' };
@@ -227,6 +228,7 @@ export async function readConversationMessagesFromLocalDataLive(
     getConversationRecordLocalDataRef(conversationId)
   );
   if (record.status === 'complete') {
+    onDraftRead?.(record.value.draft);
     return {
       status: 'complete',
       messages: record.value.messages.map(normalizeChatMessage)
