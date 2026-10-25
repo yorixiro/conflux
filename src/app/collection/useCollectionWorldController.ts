@@ -125,7 +125,7 @@ export function useCollectionWorldController(ui: CollectionWorldUiPorts) {
   );
 
   useEffect(() => {
-    if (!shouldForceInfoShelf || collectionShelf === 'info') return;
+    if (!shouldForceInfoShelf || collectionShelf === 'info' || collectionShelf === 'album') return;
     setCollectionShelf('info');
   }, [collectionShelf, setCollectionShelf, shouldForceInfoShelf]);
 

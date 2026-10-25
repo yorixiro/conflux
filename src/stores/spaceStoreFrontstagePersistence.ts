@@ -7,7 +7,7 @@ export const SPACE_FRONTSTAGE_SCHEMA_VERSION = 6;
 
 type PersistedLegacySpaceFrontstageFields = Partial<{
   activeWorld: World;
-  collectionShelf: 'info' | 'code' | 'project' | 'dialogue' | 'image' | 'group';
+  collectionShelf: 'info' | 'code' | 'project' | 'dialogue' | 'image' | 'album' | 'group';
   frontstageCollaboratorId: string | null;
   chatProjectId: string | null;
   frontstageProjectId: string | null;
@@ -82,6 +82,8 @@ export function migratePersistedSpaceFrontstageState(
         ? 'info'
         : state.collectionShelf === 'dialogue'
           ? 'dialogue'
+          : state.collectionShelf === 'album'
+            ? 'album'
           : state.collectionShelf === 'project'
             ? 'project'
             : state.collectionShelf === 'image'

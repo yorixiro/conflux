@@ -79,6 +79,15 @@ const baseArgs = {
 };
 
 describe('resolveCollectionRenderItemCount', () => {
+  it('counts album assets without tying the booklet to the current chat collaborator', () => {
+    const count = resolveCollectionRenderItemCount({
+      ...baseArgs,
+      collectionShelf: 'album',
+      frontstageCollaboratorId: 'aa',
+      imageCards: [imageCard({ id: 'self' }), imageCard({ id: 'ai', ownerCollaboratorId: 'bb' })]
+    });
+    expect(count).toBe(2);
+  });
   it('keeps orphaned history out of concrete collaborator dialogue counts', () => {
     const count = resolveCollectionRenderItemCount({
       ...baseArgs,

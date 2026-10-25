@@ -68,7 +68,7 @@ export function MobileBottomNavigation({
     : homeOpen ? 'home'
     : activeWorld === 'chat' ? 'chat'
     : activeWorld === 'group' ? 'group'
-    : collectionShelf === 'info' || collectionShelf === 'dialogue' ? 'archive' : 'workshop';
+    : collectionShelf === 'info' || collectionShelf === 'dialogue' || collectionShelf === 'album' ? 'archive' : 'workshop';
 
   const actions: Record<Section, () => void> = {
     chat: onOpenChat, group: onOpenGroup, home: onOpenHome,

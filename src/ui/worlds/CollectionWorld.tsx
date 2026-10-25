@@ -8,6 +8,7 @@ import { buildVisibleCollectionShelfNavItems } from '../collection/grid/collecti
 import { DialogueCollectionShelf } from '../collection/grid/DialogueCollectionShelf';
 import { CollaboratorInfoShelf, type CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 import { ImageCollectionShelf } from '../collection/images/ImageCollectionShelf';
+import { ArchiveAlbumShelf } from '../collection/album/ArchiveAlbumShelf';
 import { CodeProjectCollectionShelfPages } from './collection/CodeProjectCollectionShelfPages';
 import { useI18n } from '../../i18n';
 
@@ -64,6 +65,7 @@ export function CollectionWorld({
       buildVisibleCollectionShelfNavItems(
         {
           dialogue: true,
+          album: true,
           info: true,
           code: true,
           project: true,
@@ -80,10 +82,10 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
-  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue';
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue' || activeShelf === 'album';
   const sectionNavItems = visibleShelfItems.filter((item) => (
     archiveShelfActive
-      ? item.shelf === 'info' || item.shelf === 'dialogue'
+      ? item.shelf === 'info' || item.shelf === 'dialogue' || item.shelf === 'album'
       : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
   ));
   const selectShelf = (shelf: typeof activeShelf) => {
@@ -135,7 +137,7 @@ export function CollectionWorld({
                 aria-current={activeShelf === item.shelf ? 'page' : undefined}
                 onClick={() => selectShelf(item.shelf)}
               >
-                {item.shelf === 'info' ? '角色资料' : item.shelf === 'dialogue' ? '对话档案'
+                {item.shelf === 'info' ? '角色资料' : item.shelf === 'dialogue' ? '对话档案' : item.shelf === 'album' ? '收藏册'
                   : item.shelf === 'project' ? '项目' : item.shelf === 'code' ? '代码卡片' : '图片素材'}
               </button>
             ))}
@@ -153,6 +155,8 @@ export function CollectionWorld({
                       ? t('collection.world.searchCode')
                       : controller.collectionShelf === 'project'
                         ? t('collection.world.searchProject')
+                        : controller.collectionShelf === 'album'
+                          ? '搜索收藏照片'
                         : controller.collectionShelf === 'image'
                           ? t('collection.world.searchImage')
                           : t('collection.world.searchDialogue')
@@ -254,6 +258,14 @@ export function CollectionWorld({
                 />
               </div>
             </div>
+            ) : null}
+
+            {visibleShelfSet.has('album') && activeShelf === 'album' ? (
+              <div className="collection-shelf-page collection-shelf-page--album collection-shelf-page--active" data-shelf-page="album">
+                <div className="collection-shelf-page-body">
+                  <ArchiveAlbumShelf searchTerm={controller.searchTerm} />
+                </div>
+              </div>
             ) : null}
 
             {(activeShelf === 'code' || activeShelf === 'project') && visibleShelfSet.has(activeShelf) ? (

@@ -136,6 +136,8 @@ export function buildUiContextPrompt(context: AssistantToolContext | undefined):
       ? '对话收藏'
       : ui.collectionShelf === 'image'
         ? '图片收藏'
+        : ui.collectionShelf === 'album'
+          ? '收藏册'
         : '代码收藏';
   const lines = [
     `当前界面：${ui.activeWorld === 'chat' ? '对话区' : '收藏区'}${ui.activeWorld === 'collection' ? ` · ${collectionShelfLabel}` : ''}`,
