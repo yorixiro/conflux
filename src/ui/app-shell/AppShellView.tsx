@@ -181,8 +181,6 @@ export function AppShellView({
           />
         </div>
       ) : null}
-      <div className="bg-glow bg-glow-top" />
-      <div className="bg-glow bg-glow-bottom" />
       <div className="theme-transition-veil" aria-hidden="true" />
       <div className="collaborator-transition-veil" aria-hidden="true" />
       {!startupThemeReady ? <div className="startup-theme-veil" aria-hidden="true" /> : null}
