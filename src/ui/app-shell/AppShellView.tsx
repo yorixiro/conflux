@@ -5,6 +5,8 @@ import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
 import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
+import { usePersonaStore } from '../../stores/personaStore';
+import { getProviderModelBindingValue } from '../shell/apiProviderDisplay';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
 import { ConfluxQuickSettingsDrawer } from './ConfluxQuickSettingsDrawer';
@@ -77,6 +79,20 @@ export function AppShellView({
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
+  const setChatCollaboratorProvider = (providerId: string) => {
+    if (!chatCollaborator) return;
+    if (providerId === '__unconfigured__' || providerId === '') {
+      usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
+        advanced: { providerId: '', providerRouteMode: providerId ? 'unconfigured' : 'inherit', modelOverride: '' }
+      });
+      return;
+    }
+    const selected = overlaysProps.api.providers.find((item) => item.id === providerId);
+    if (!selected) return;
+    usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
+      advanced: { providerId: selected.id, providerRouteMode: 'fixed', modelOverride: getProviderModelBindingValue(selected) }
+    });
+  };
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     onHomeOpenChange(false);
@@ -280,6 +296,8 @@ export function AppShellView({
         onOpenApi={collectionOpenProviderSettings}
         onOpenMenu={openQuickMenuPage}
         onNewConversation={topbarProps.actions.onCreateConversation}
+        currentPersona={chatCollaborator}
+        onSetPersonaProvider={setChatCollaboratorProvider}
         onOpenPersona={chatCollaborator
           ? () => desktopSidebarProps.onEditCollaborator(chatCollaborator.id)
           : undefined}

@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type ReactNode } from 'react';
 import { resolvePersonaProviderBinding } from '../../../../engines/personaProviderBinding';
+import { useRuntimeStore } from '../../../../stores/runtimeStore';
 import { ApiProviderConnectionSection } from '../../ApiProviderConnectionSection';
 import { ApiProviderCapabilitiesSection, ApiProviderImageUnderstandingSection } from '../../ApiProviderConfigEditableSections';
 import { resolveApiProviderFormViewModel, shouldOpenAdvancedSettings } from '../../ApiProviderConfigShared';
@@ -85,8 +86,8 @@ function ProviderBindingSettings({
   const fixedProviderId = activePersona?.advanced.providerId?.trim() || '';
   const fixedProvider = providers.find((provider) => provider.id === fixedProviderId) ?? null;
   const routeMode = activePersona?.advanced.providerRouteMode;
-  const selectValue = fixedProviderId || (routeMode === 'unconfigured' || routeMode === 'fixed' ? '__unconfigured__' : '');
-  const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim() || routeMode === 'unconfigured');
+  const selectValue = fixedProviderId || (routeMode === 'inherit' ? '' : '__unconfigured__');
+  const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim() || routeMode === 'inherit');
   const fixedProviderBuiltIn = fixedProvider ? isBuiltInProviderDisplay(fixedProvider) : false;
   const globalProvider = providers.find(provider => provider.id === activeProviderId) ?? providers[0];
   const binding = globalProvider ? resolvePersonaProviderBinding({ globalApi: globalProvider, providers, persona: activePersona }) : null;
@@ -139,6 +140,17 @@ function ProviderBindingSettings({
           <button
             type="button"
             className="btn-secondary compact"
+            disabled={!activePersona}
+            onClick={() => {
+              const nextId = useRuntimeStore.getState().createProvider('AI 专属线路', { activate: false });
+              onUpdatePersona({ advanced: { providerId: nextId, providerRouteMode: 'fixed', modelOverride: '' } });
+            }}
+          >
+            为当前 AI 新建空白线路
+          </button>
+          <button
+            type="button"
+            className="btn-secondary compact"
             onClick={() => updateProviderBinding('')}
             disabled={!hasProviderBinding}
           >
@@ -173,10 +185,10 @@ function ProviderBindingSettings({
           value={fixedProviderBuiltIn && fixedProvider ? getProviderModelDisplayLabel(fixedProvider) : (activePersona?.advanced.modelOverride || '')}
           onChange={(event) => onUpdatePersona({ advanced: { modelOverride: event.target.value } })}
           placeholder={fixedProviderBuiltIn ? t('request.settings.builtInModelPlaceholder') : t('request.settings.modelPlaceholder')}
-          disabled={fixedProviderBuiltIn || binding?.status !== 'ready'}
+          disabled={fixedProviderBuiltIn || (!fixedProvider && binding?.status !== 'ready')}
         />
       </div>
-      {binding?.status === 'ready' && connectionProvider
+      {(fixedProvider || binding?.status === 'ready') && connectionProvider
         ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} />
         : null}
     </>

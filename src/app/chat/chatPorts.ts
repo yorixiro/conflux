@@ -220,7 +220,7 @@ export type ChatActionStoreBindings = {
   runtime: {
     companionConnections: PolarisCompanionConnection[];
     deleteCompanionConnection: (connectionId: string) => void;
-    readLatestState?: () => { providers: ProviderProfile[] };
+    readLatestState?: () => { api: ProviderProfile; providers: ProviderProfile[] };
   };
 };
 

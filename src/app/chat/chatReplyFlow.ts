@@ -76,9 +76,11 @@ export function createChatReplyRunner({
     const activeCollaborator = personaState.personas.find(
       (persona) => persona.id === params.collaboratorId
     ) ?? derived.persona;
+    const routeRuntimeState = store.runtime.readLatestState();
     const routeStatus = resolvePersonaProviderStatus(
       activeCollaborator,
-      store.runtime.readLatestState().providers
+      routeRuntimeState.providers,
+      routeRuntimeState.api
     );
     if (routeStatus !== 'ready') {
       reportRouteFailure?.(routeStatus === 'missing-provider'

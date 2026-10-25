@@ -27,6 +27,7 @@ type SubmitMessageState = {
   activeCollaboratorId: string | null;
   personas: Persona[];
   providers?: ProviderProfile[];
+  globalApi?: ProviderProfile;
 };
 
 type SubmitMessageHandlers = {
@@ -101,7 +102,11 @@ export async function submitMessage(state: SubmitMessageState, handlers: SubmitM
 
   const selectedCollaboratorId = state.frontstageCollaboratorId ?? state.activeCollaboratorId;
   const selectedPersona = state.personas.find((persona) => persona.id === selectedCollaboratorId);
-  const routeStatus = resolvePersonaProviderStatus(selectedPersona, state.providers ?? []);
+  if (!selectedPersona) {
+    handlers.setCommandStatus('当前没有可用协作者，先新建一个协作者再继续聊天。', true);
+    return;
+  }
+  const routeStatus = resolvePersonaProviderStatus(selectedPersona, state.providers ?? [], state.globalApi);
   if (routeStatus !== 'ready') {
     handlers.setCommandStatus(routeStatus === 'missing-provider'
       ? `「${selectedPersona?.name ?? '当前角色'}」原绑定的模型线路已不存在，请到档案的请求设置里重新选择。`

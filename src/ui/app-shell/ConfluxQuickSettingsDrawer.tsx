@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import type { ApiOverlayProps, MenuOverlayPage } from '../../app/shell/appShellContracts';
+import { resolvePersonaProviderBinding } from '../../engines/personaProviderBinding';
+import type { Persona } from '../../types/domain';
 import { Icon, type IconName } from '../Icon';
+import { getProviderModelDisplayLabel } from '../shell/apiProviderDisplay';
 import './ConfluxQuickSettingsDrawer.css';
 
 type QuickSettingsProps = {
@@ -10,6 +13,8 @@ type QuickSettingsProps = {
   onOpenApi: () => void;
   onOpenMenu: (page: MenuOverlayPage) => void;
   onNewConversation: () => void;
+  currentPersona: Persona | null;
+  onSetPersonaProvider: (providerId: string) => void;
   onOpenPersona?: () => void;
   onOpenCodeCards: () => void;
 };
@@ -45,6 +50,8 @@ export function ConfluxQuickSettingsDrawer({
   onOpenApi,
   onOpenMenu,
   onNewConversation,
+  currentPersona,
+  onSetPersonaProvider,
   onOpenPersona,
   onOpenCodeCards
 }: QuickSettingsProps) {
@@ -63,7 +70,13 @@ export function ConfluxQuickSettingsDrawer({
     action();
   };
   const openMenuPage = (page: MenuOverlayPage) => closeAndRun(() => onOpenMenu(page));
-  const activeProvider = provider.providers.find((item) => item.id === provider.activeProviderId);
+  const binding = currentPersona ? resolvePersonaProviderBinding({
+    globalApi: provider.api,
+    providers: provider.providers,
+    persona: currentPersona
+  }) : null;
+  const routeValue = binding?.fixedProviderId
+    || (currentPersona?.advanced.providerRouteMode === 'inherit' ? '' : '__unconfigured__');
 
   return (
     <dialog
@@ -92,23 +105,33 @@ export function ConfluxQuickSettingsDrawer({
               <div className="conflux-quick-settings-provider-heading">
                 <span className="conflux-quick-settings-provider-mark"><Icon name="providerRoute" size={18} /></span>
                 <div>
-                  <strong>{activeProvider?.name || provider.api.name || '尚未配置接口'}</strong>
-                  <small>{activeProvider?.model || provider.api.model || '尚未选择模型'}</small>
+                  <strong>{binding?.status === 'unconfigured'
+                    ? '当前 AI 尚未配置模型线路'
+                    : binding?.status === 'missing-provider'
+                      ? '当前 AI 原绑定线路已失效'
+                      : binding?.api.name || '尚未选择 AI'}</strong>
+                  <small>{binding?.status === 'ready'
+                    ? binding.modelId || '尚未选择模型'
+                    : '绑定有效线路后才能发送消息'}</small>
                 </div>
               </div>
-              <label className="conflux-quick-settings-provider-label" htmlFor="conflux-quick-provider-select">全局默认线路</label>
+              <label className="conflux-quick-settings-provider-label" htmlFor="conflux-quick-provider-select">当前 AI · 模型线路</label>
               <select
                 id="conflux-quick-provider-select"
-                value={activeProvider?.id ?? ''}
-                onChange={(event) => provider.onSetActiveProvider(event.target.value)}
-                disabled={provider.providers.length === 0}
+                value={routeValue}
+                onChange={(event) => onSetPersonaProvider(event.target.value)}
+                disabled={!currentPersona}
               >
-                {!activeProvider ? <option value="">请选择线路</option> : null}
+                <option value="__unconfigured__">未配置（暂不能聊天）</option>
+                <option value="">跟随全局（需手动选择）</option>
+                {binding?.fixedProviderId && !binding.fixedProvider
+                  ? <option value={binding.fixedProviderId} disabled>已失效的线路</option>
+                  : null}
                 {provider.providers.map((item) => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>{item.name} · {getProviderModelDisplayLabel(item)}</option>
                 ))}
               </select>
-              <p>此处切换全局默认线路；角色单独指定的接口仍以角色设置为准。</p>
+              <p>只为当前 AI 选择线路；不会修改其他联系人的模型绑定。</p>
             </div>
             <QuickAction icon="settings" label="管理 API 接口" detail="密钥、地址、协议和模型" onClick={() => closeAndRun(onOpenApi)} />
           </section>

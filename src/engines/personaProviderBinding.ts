@@ -1,4 +1,5 @@
 import type { Persona, ProviderProfile } from '../types/domain';
+import { isPolarisBuiltInProvider } from './freeProvider';
 
 export type PersonaProviderBinding = {
   api: ProviderProfile;
@@ -9,16 +10,27 @@ export type PersonaProviderBinding = {
   modelId: string;
 };
 
+function hasUsableProviderRoute(provider: ProviderProfile, modelOverride?: string) {
+  if (isPolarisBuiltInProvider(provider)) return Boolean(modelOverride?.trim() || provider.model.trim());
+  return Boolean((modelOverride?.trim() || provider.model.trim()) && provider.baseUrl.trim() && provider.apiKey.trim());
+}
+
 export function resolvePersonaProviderStatus(
   persona: Persona | null | undefined,
-  providers: ProviderProfile[]
+  providers: ProviderProfile[],
+  globalApi?: ProviderProfile
 ): PersonaProviderBinding['status'] {
+  if (!persona) return 'unconfigured';
   const providerId = persona?.advanced?.providerId?.trim();
   if (providerId) {
-    return providers.some((provider) => provider.id === providerId) ? 'ready' : 'missing-provider';
+    const provider = providers.find((entry) => entry.id === providerId);
+    if (!provider) return 'missing-provider';
+    return hasUsableProviderRoute(provider, persona.advanced?.modelOverride) ? 'ready' : 'unconfigured';
   }
-  return persona?.advanced?.providerRouteMode === 'unconfigured'
-    || persona?.advanced?.providerRouteMode === 'fixed'
+  // Historical personas without a route choice must not silently borrow the
+  // global DeepSeek (or any other) connection. Only explicit opt-in inherits it.
+  if (persona.advanced?.providerRouteMode !== 'inherit') return 'unconfigured';
+  return globalApi && !hasUsableProviderRoute(globalApi, persona.advanced?.modelOverride)
     ? 'unconfigured'
     : 'ready';
 }
@@ -43,7 +55,7 @@ export function resolvePersonaProviderBinding(args: {
 
   return {
     api,
-    status: resolvePersonaProviderStatus(args.persona, args.providers),
+    status: resolvePersonaProviderStatus(args.persona, args.providers, args.globalApi),
     fixedProvider,
     fixedProviderId,
     modelOverride,

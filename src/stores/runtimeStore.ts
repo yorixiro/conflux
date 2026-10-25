@@ -134,7 +134,7 @@ export type RuntimeState = {
   deleteMcpServer: (serverId: string) => void;
   setMcpToolTimeoutSeconds: (seconds: number) => void;
   setActiveProvider: (providerId: string) => void;
-  createProvider: (namePrefix?: string) => string;
+  createProvider: (namePrefix?: string, options?: { activate?: boolean }) => string;
   importProvider: (provider: Partial<ProviderProfile>) => string;
   duplicateProvider: (providerId: string, duplicateName?: string) => string | null;
   updateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
@@ -422,7 +422,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
         activeProviderId: nextApi.id
       };
     }),
-  createProvider: (namePrefix = '新线路') => {
+  createProvider: (namePrefix = '新线路', options) => {
     const providerId = createUid('provider');
     set((state) => {
       const customProviderCount = countUserEditableCustomProviders(state.providers);
@@ -435,7 +435,8 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
         ...builtInProviders,
         nextProvider,
         ...customProviders.filter((provider) => (
-          provider.id !== DEFAULT_PROVIDER.id
+          (options?.activate === false && provider.id === state.activeProviderId)
+          || provider.id !== DEFAULT_PROVIDER.id
           || provider.baseUrl.trim()
           || provider.apiKey.trim()
           || provider.model.trim()
@@ -444,7 +445,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
       ];
       return {
         providers,
-        activeProviderId: nextProvider.id
+        activeProviderId: options?.activate === false ? state.activeProviderId : nextProvider.id
       };
     });
     return providerId;

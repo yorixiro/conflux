@@ -13,8 +13,13 @@ const writableSession = (messages: never[] = []) =>
     messages
   }));
 
+const readyPersona = (id: string) => ({ id, advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' } });
+
 describe('submitMessage', () => {
-  it('does not save or send a message for a new collaborator without a selected model route', async () => {
+  it.each([
+    ['new', 'unconfigured'],
+    ['historical', undefined]
+  ])('does not save or send a message for a %s collaborator without a selected model route', async (_label, routeMode) => {
     const addMessage = vi.fn();
     const requestReply = vi.fn();
     const setCommandStatus = vi.fn();
@@ -32,7 +37,7 @@ describe('submitMessage', () => {
       personas: [{
         id: 'gpt-contact',
         name: 'gpt',
-        advanced: { providerId: '', providerRouteMode: 'unconfigured', modelOverride: '' }
+        advanced: { providerId: '', providerRouteMode: routeMode, modelOverride: '' }
       }] as never[],
       providers: [{ id: 'deepseek', name: 'DeepSeek', model: 'deepseek-flash' }] as never[]
     }, {
@@ -100,8 +105,8 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'lyra',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' },
-        { id: 'lyra' }
+        readyPersona('pharos'),
+        readyPersona('lyra')
       ] as never[]
     }, {
       createConversation,
@@ -153,7 +158,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -209,7 +214,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -264,8 +269,8 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'lyra',
       activeCollaboratorId: 'lyra',
       personas: [
-        { id: 'pharos' },
-        { id: 'lyra' }
+        readyPersona('pharos'),
+        readyPersona('lyra')
       ] as never[]
     }, {
       createConversation,
@@ -309,7 +314,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -391,7 +396,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation: vi.fn(() => 'conv-new'),
@@ -433,7 +438,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
