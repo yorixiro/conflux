@@ -72,6 +72,9 @@ export type PolarisToolPromptPreferences = Partial<Record<PolarisToolPromptGroup
 export type RunCodeSandboxProfile = 'safe' | 'experimental';
 
 export type AssistantToolContext = {
+  // Request-local schema disclosure. The full registry remains the authority
+  // for availability, permissions and execution.
+  toolExposure?: 'index' | 'full';
   activeCard: CodeCard | null;
   activeCardReferenceMode?: 'continue' | 'reference' | 'ambient';
   visibleCards: CodeCard[];

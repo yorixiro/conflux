@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolveAssistantToolRequestTools } from './assistantToolProtocolRequestTools';
+import { buildAssistantToolPromptSections } from './assistantToolProtocolPrompt';
 import { buildToolCardFunctionName } from '../toolCardRuntime';
 
 function workspaceSnapshot() {
@@ -17,6 +18,36 @@ function workspaceSnapshot() {
 }
 
 describe('assistantToolProtocolRequestTools', () => {
+  it('exposes only the environment discovery tools in a normal index request, then full tools after discovery', () => {
+    const context = {
+      activeCard: null,
+      visibleCards: [],
+      toolExposure: 'index' as const,
+      enabledToolGroups: { environment: true, room: true, knowledge: true, memory: true }
+    };
+    const index = resolveAssistantToolRequestTools(context);
+    const indexNames = index.tools.map((tool) => tool.function.name);
+    expect(indexNames).toEqual(['listEnvironmentNodes', 'inspectEnvironmentNode', 'searchEnvironmentNodes']);
+    const catalog = buildAssistantToolPromptSections(context).find((section) => section.name === 'tool_catalog_capability')?.content ?? '';
+    expect(catalog).toContain('searchEnvironmentNodes');
+    expect(catalog).not.toContain('createCodeCard');
+
+    const expandedNames = resolveAssistantToolRequestTools({ ...context, toolExposure: 'full' })
+      .tools.map((tool) => tool.function.name);
+    expect(expandedNames).toContain('createCodeCard');
+    expect(expandedNames).toContain('searchEnvironmentNodes');
+  });
+
+  it('does not disclose environment tools if that toolbox group is disabled', () => {
+    const result = resolveAssistantToolRequestTools({
+      activeCard: null,
+      visibleCards: [],
+      toolExposure: 'index',
+      enabledToolGroups: { environment: false, room: true }
+    });
+    expect(result.tools).toEqual([]);
+  });
+
   it('keeps room content tools visible in ordinary chat while hiding workspace file tools', () => {
     const result = resolveAssistantToolRequestTools({
       themeToolMode: 'stable',

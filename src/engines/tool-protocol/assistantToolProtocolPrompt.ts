@@ -396,6 +396,9 @@ export function buildAssistantToolPromptSections(
         '下面这段只管执行，不改你的 persona；Polaris 是应用名，不是你的名字。',
         '工具提示只教现实边界，不教脑内流程：说明真实对象、可用能力、输入输出、副作用和作用域，不替你规定固定步骤。',
         '这里只列这轮当前已打开的工具；工具动作按需要使用，正文按当前对话语境回应。',
+        ...(context?.toolExposure === 'index' ? [
+          '需要使用其他已启用的能力（例如卡片、记忆、工作区、联网、日历、MCP、换肤）时，先用 searchEnvironmentNodes 查找对应入口；检索后同一次对话会开放适用的具体工具。普通闲聊无需检索。'
+        ] : []),
         '如果用户只是普通聊天、写自介、润色文案或表达想法，先自然回答，不要输出工具协议、代码草稿或调试残片。',
         ...buildToolEnforcementLines(context, protocolMode),
         ...buildObjectBoundaryLines(receipt)
