@@ -27,6 +27,12 @@
 .conflux-sidebar-contact-more { flex:none; color:var(--text-soft); font-size:12px; }
 .conflux-sidebar-contact-more summary { min-height:44px; align-content:center; cursor:pointer; }
 .conflux-sidebar-contact-more button { min-height:44px; width:100%; border:1px solid var(--border); background:transparent; color:var(--text); font:inherit; }
+.conflux-sidebar-contact-list--sidebar { flex:0 1 auto; gap:10px; }
+.conflux-sidebar-contact-list--sidebar > header { padding:0 2px; color:var(--text-soft); }
+.conflux-sidebar-contact-list--sidebar .conflux-sidebar-flat-contacts { min-height:0; max-height:calc(100dvh - 270px); gap:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.conflux-sidebar-contact-list--sidebar .conflux-sidebar-contact-row { border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent); }
+.conflux-sidebar-contact-list--sidebar .conflux-sidebar-contact-row > .desktop-sidebar-collaborator-option { min-height:64px; padding:10px 5px; border-radius:0; }
+.conflux-sidebar-contact-reset { align-self:flex-start; min-height:44px; padding:0 4px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
 .desktop-app-sidebar.collapsed .conflux-sidebar-contact-list { display:none; }
 .conflux-sidebar-calendar { border:1px solid var(--border); padding:8px; color:var(--text); }
 .conflux-sidebar-calendar > header { display:flex; align-items:center; justify-content:space-between; gap:4px; }
