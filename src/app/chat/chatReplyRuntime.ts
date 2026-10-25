@@ -323,29 +323,10 @@ async function requestReplyRound({
       mcpToolCatalog.errors?.length ? `mcp errors ${mcpToolCatalog.errors.length}` : null
     ]
   });
-  const latestUserText = [...messages].reverse().find((message) => message.role === 'user')?.content ?? '';
-  const directToolRequest = /搜索|查一下|查询|联网|网页|天气预报|日历|提醒|主动消息|\bMCP\b|调用工具|上传|下载|生成图片|二维码|创建卡片|修改卡片|工作区|\bCSS\b|换肤|改主题/i
-    .test(latestUserText);
-  const toolExposure: NonNullable<AssistantToolContext['toolExposure']> = (
-    toolExchangeDepth > 0
-    || directToolRequest
-    || effectiveToolContext.activeProject
-    || effectiveToolContext.activeCard
-    || (activeRequestSnapshot.currentTask && !isConversationTaskTerminal(activeRequestSnapshot.currentTask.status))
-    || effectiveToolContext.themeContextMode === 'focused'
-    || effectiveToolContext.toolEnforcementMode === 'force'
-    || effectiveToolContext.toolEnforcementScope
-    || effectiveToolContext.runtimeFeedback?.pendingWorkspaceProposal
-    || effectiveToolContext.attachmentSnapshot?.latest.length
-    || effectiveToolContext.enabledToolGroups?.environment === false
-      ? 'full'
-      : 'index'
-  );
   const toolContextWithMcp = {
     ...effectiveToolContextWithDesktop,
     mcpTools: mcpToolCatalog.tools,
-    mcpCatalogErrors: mcpToolCatalog.errors,
-    toolExposure
+    mcpCatalogErrors: mcpToolCatalog.errors
   };
   const availableToolNames = resolveAvailablePolarisToolNames(toolContextWithMcp);
   const ignoredUnknownNativeToolNames = Array.from(availableToolNames);

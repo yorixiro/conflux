@@ -48,7 +48,6 @@ export type ToolResolutionSource = Partial<Pick<
   | 'desktopLocalHost'
   | 'personalData'
   | 'mcpTools'
-  | 'toolExposure'
 >>;
 
 export const POLARIS_TOOL_REGISTRY_BY_NAME = {
@@ -115,15 +114,12 @@ export function resolveAvailablePolarisTools(context?: ToolResolutionSource) {
     return [];
   }
 
-  const available = [
+  return [
     ...POLARIS_TOOL_REGISTRY,
     ...POLARIS_TOOL_REGISTRY_ALIASES,
     ...resolveCardToolDefinitions(context),
     ...resolveMcpToolDefinitions(context)
   ].filter((tool) => isPolarisNativeToolVisible(tool, context));
-  return context?.toolExposure === 'index'
-    ? available.filter((tool) => tool.group === 'environment')
-    : available;
 }
 
 export function isPolarisToolExposedAsNative(tool: PolarisToolDefinition) {
