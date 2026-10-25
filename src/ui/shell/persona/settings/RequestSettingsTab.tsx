@@ -84,25 +84,37 @@ function ProviderBindingSettings({
   const fieldId = useId();
   const fixedProviderId = activePersona?.advanced.providerId?.trim() || '';
   const fixedProvider = providers.find((provider) => provider.id === fixedProviderId) ?? null;
-  const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim());
+  const routeMode = activePersona?.advanced.providerRouteMode;
+  const selectValue = fixedProviderId || (routeMode === 'unconfigured' || routeMode === 'fixed' ? '__unconfigured__' : '');
+  const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim() || routeMode === 'unconfigured');
   const fixedProviderBuiltIn = fixedProvider ? isBuiltInProviderDisplay(fixedProvider) : false;
   const globalProvider = providers.find(provider => provider.id === activeProviderId) ?? providers[0];
   const binding = globalProvider ? resolvePersonaProviderBinding({ globalApi: globalProvider, providers, persona: activePersona }) : null;
   const connectionProvider = binding?.fixedProvider ?? globalProvider;
 
   const updateProviderBinding = (providerId: string) => {
+    if (providerId === '__unconfigured__') {
+      onUpdatePersona({ advanced: { providerId: '', providerRouteMode: 'unconfigured', modelOverride: '' } });
+      return;
+    }
     if (!providerId) {
-      onUpdatePersona({ advanced: { providerId: '', modelOverride: '' } });
+      onUpdatePersona({ advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' } });
       return;
     }
     const provider = providers.find((entry) => entry.id === providerId);
     if (!provider) return;
-    onUpdatePersona({ advanced: { providerId: provider.id, modelOverride: getProviderModelBindingValue(provider) } });
+    onUpdatePersona({ advanced: { providerId: provider.id, providerRouteMode: 'fixed', modelOverride: getProviderModelBindingValue(provider) } });
   };
 
   return (
     <>
-      {binding ? <p className="conflux-role-notice">本角色实际使用：{binding.api.name} · {getProviderModelDisplayLabel(binding.api)}</p> : null}
+      {binding?.status === 'unconfigured'
+        ? <p className="conflux-role-notice">本角色还没有绑定模型线路，选择线路后才能发送消息。</p>
+        : binding?.status === 'missing-provider'
+          ? <p className="conflux-role-notice">原绑定的模型线路已不存在。请重新选择，系统不会自动改用其他模型。</p>
+          : binding
+            ? <p className="conflux-role-notice">本角色实际使用：{binding.api.name} · {getProviderModelDisplayLabel(binding.api)}{!fixedProviderId ? '（跟随全局线路）' : ''}</p>
+            : null}
       <div className="ps-field">
         <div className="ps-field-head">
           <label className="ps-field-label" htmlFor={`${fieldId}-provider`}>{t('request.settings.providerLabel')}</label>
@@ -111,10 +123,12 @@ function ProviderBindingSettings({
         <select
           className="ps-input"
           id={`${fieldId}-provider`}
-          value={fixedProviderId}
+          value={selectValue}
           onChange={(event) => updateProviderBinding(event.target.value)}
         >
+          <option value="__unconfigured__">未配置（暂不能聊天）</option>
           <option value="">{t('request.settings.followGlobalProvider')}</option>
+          {fixedProviderId && !fixedProvider ? <option value={fixedProviderId} disabled>已失效的线路 · {fixedProviderId}</option> : null}
           {providers.map((provider) => (
             <option key={provider.id} value={provider.id}>
               {provider.name} · {getProviderModelDisplayLabel(provider)}
@@ -125,7 +139,7 @@ function ProviderBindingSettings({
           <button
             type="button"
             className="btn-secondary compact"
-            onClick={() => onUpdatePersona({ advanced: { providerId: '', modelOverride: '' } })}
+            onClick={() => updateProviderBinding('')}
             disabled={!hasProviderBinding}
           >
             {t('request.settings.followGlobal')}
@@ -159,10 +173,12 @@ function ProviderBindingSettings({
           value={fixedProviderBuiltIn && fixedProvider ? getProviderModelDisplayLabel(fixedProvider) : (activePersona?.advanced.modelOverride || '')}
           onChange={(event) => onUpdatePersona({ advanced: { modelOverride: event.target.value } })}
           placeholder={fixedProviderBuiltIn ? t('request.settings.builtInModelPlaceholder') : t('request.settings.modelPlaceholder')}
-          disabled={fixedProviderBuiltIn}
+          disabled={fixedProviderBuiltIn || binding?.status !== 'ready'}
         />
       </div>
-      {connectionProvider ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} /> : null}
+      {binding?.status === 'ready' && connectionProvider
+        ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} />
+        : null}
     </>
   );
 }

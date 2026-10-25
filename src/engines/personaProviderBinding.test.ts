@@ -123,6 +123,22 @@ describe('resolvePersonaProviderBinding', () => {
     expect(result.fixedProvider).toBeNull();
     expect(result.api.id).toBe('global');
     expect(result.api.model).toBe('global-override');
+    expect(result.status).toBe('ready');
+  });
+
+  it('requires a provider selection for newly created collaborators without affecting legacy global followers', () => {
+    const result = resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, kimiApi],
+      persona: createPersona({ providerRouteMode: 'unconfigured' })
+    });
+
+    expect(result.status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, kimiApi],
+      persona: createPersona({ providerRouteMode: 'inherit' })
+    }).status).toBe('ready');
   });
 
   it('uses the collaborator provider and model together when both are pinned', () => {
@@ -135,6 +151,7 @@ describe('resolvePersonaProviderBinding', () => {
     expect(result.fixedProvider?.id).toBe('kimi');
     expect(result.api.id).toBe('kimi');
     expect(result.api.model).toBe('kimi-thinking');
+    expect(result.status).toBe('ready');
   });
 
   it('does not apply a dangling pinned model to the global provider', () => {
@@ -147,6 +164,7 @@ describe('resolvePersonaProviderBinding', () => {
     expect(result.fixedProvider).toBeNull();
     expect(result.api.id).toBe('global');
     expect(result.api.model).toBe('global-model');
+    expect(result.status).toBe('missing-provider');
   });
 
   it('pins Xiao Assistant to the built-in Polaris product guide model', () => {

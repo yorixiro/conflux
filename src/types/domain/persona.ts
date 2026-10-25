@@ -192,6 +192,8 @@ export interface PersonaMemoryReferenceDoc {
 
 export interface PersonaAdvancedSettings {
   providerId?: string;
+  /** Undefined keeps the legacy follow-global behavior for existing collaborators. */
+  providerRouteMode?: 'unconfigured' | 'inherit' | 'fixed';
   modelOverride: string;
   temperature: string;
   topP: string;

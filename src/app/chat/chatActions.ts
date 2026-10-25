@@ -117,7 +117,8 @@ export function createChatActionHandlers({
         activeConversationId: latestSubmitState.activeConversationId,
         frontstageCollaboratorId: latestSubmitState.frontstageCollaboratorId,
         activeCollaboratorId: latestSubmitState.activeCollaboratorId,
-        personas: latestSubmitState.personas
+        personas: latestSubmitState.personas,
+        providers: store.runtime.readLatestState?.().providers
       }, {
         createConversation: store.chat.createConversation,
         ensureConversationWritable: store.chat.ensureConversationWritable,

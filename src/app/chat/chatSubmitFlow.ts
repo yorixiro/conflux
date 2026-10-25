@@ -1,4 +1,5 @@
-import type { ChatAttachment, ChatCardReference, ChatMessage, Persona } from '../../types/domain';
+import type { ChatAttachment, ChatCardReference, ChatMessage, Persona, ProviderProfile } from '../../types/domain';
+import { resolvePersonaProviderStatus } from '../../engines/personaProviderBinding';
 import { createMessage } from '../../engines/chatMessageFactory';
 import { ensureConversationSession } from './chatConversationSession';
 import type { WritableConversationBody } from '../../stores/chatStore';
@@ -25,6 +26,7 @@ type SubmitMessageState = {
   frontstageCollaboratorId: string | null;
   activeCollaboratorId: string | null;
   personas: Persona[];
+  providers?: ProviderProfile[];
 };
 
 type SubmitMessageHandlers = {
@@ -98,6 +100,14 @@ export async function submitMessage(state: SubmitMessageState, handlers: SubmitM
   }
 
   const selectedCollaboratorId = state.frontstageCollaboratorId ?? state.activeCollaboratorId;
+  const selectedPersona = state.personas.find((persona) => persona.id === selectedCollaboratorId);
+  const routeStatus = resolvePersonaProviderStatus(selectedPersona, state.providers ?? []);
+  if (routeStatus !== 'ready') {
+    handlers.setCommandStatus(routeStatus === 'missing-provider'
+      ? `「${selectedPersona?.name ?? '当前角色'}」原绑定的模型线路已不存在，请到档案的请求设置里重新选择。`
+      : `「${selectedPersona?.name ?? '当前角色'}」还没有选择模型线路，请先到档案的请求设置里绑定。`, true);
+    return;
+  }
   const activeConversation = state.activeConversationId
     ? state.conversations.find((conversation) => conversation.id === state.activeConversationId) ?? null
     : null;

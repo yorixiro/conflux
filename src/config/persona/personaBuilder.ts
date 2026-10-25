@@ -197,6 +197,7 @@ export function createPersonaTemplate(
     },
     advanced: {
       providerId: overrides.advanced?.providerId ?? '',
+      providerRouteMode: overrides.advanced?.providerRouteMode,
       modelOverride: overrides.advanced?.modelOverride ?? '',
       temperature: overrides.advanced?.temperature ?? '0.7',
       topP: overrides.advanced?.topP ?? '',

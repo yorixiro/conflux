@@ -394,7 +394,8 @@ export function useChatProviderValue({
     },
     store: replyStore,
     derived,
-    toolActions
+    toolActions,
+    reportRouteFailure: (message) => ui.setCommandStatus(message, true)
   });
   const submitSlashCommand = createChatSlashCommandHandler({
     ui: {

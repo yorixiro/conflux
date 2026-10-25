@@ -90,7 +90,8 @@ export function createChatActionStoreBindings(store: ChatStoreBindings): ChatAct
     },
     runtime: {
       companionConnections: store.runtime.companionConnections,
-      deleteCompanionConnection: store.runtime.deleteCompanionConnection
+      deleteCompanionConnection: store.runtime.deleteCompanionConnection,
+      readLatestState: store.runtime.readLatestState
     }
   };
 }
