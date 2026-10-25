@@ -101,6 +101,8 @@
   inset: 20px 8px 20px;
   --fb-line: rgb(31 38 48 / 0.13);
 }
+/* The host already has its own pagination; keep Sasshi's canvas and its drag surface full-bleed. */
+.conflux-archive-album__desk .folio-foot { display: none; }
 .conflux-archive-album__empty {
   position: absolute;
   z-index: 1;

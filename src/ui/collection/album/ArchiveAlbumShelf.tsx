@@ -8,10 +8,11 @@ import { useCollectionStore } from '../../../stores/collectionStore';
 import { usePersonaStore } from '../../../stores/personaStore';
 import type { ImageAssetCard } from '../../../types/domain';
 import { ImageAssetPreview } from '../images/ImageAssetPreview';
-import { FlatBook } from './sasshi/FlatBook';
+import { BookView, type BookViewHandle } from './sasshi/BookView';
 import { BOOKLET_COVERS } from './sasshi/cover';
 import { createAlbumImageContent } from './sasshi/content';
 import { resolveLayout } from './sasshi/layout';
+import type { BookState } from './sasshi/scene';
 import './sasshi/book.css';
 import './archive-album.css';
 
@@ -21,6 +22,7 @@ const BOOK_LAYOUT = resolveLayout('idCard2x4');
 /** Reads only nearby sleeve previews; full images remain in Conflux's canonical asset store. */
 function useNearbyAlbumImages(cards: ImageAssetCard[], index: number, narrow: boolean) {
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const loaded = useRef(new Map<string, string>());
   const visibleIds = useMemo(() => {
     const start = narrow ? Math.max(0, index - 1) * BOOK_LAYOUT.perSide : Math.max(0, index * 2 - 2) * BOOK_LAYOUT.perSide;
     const end = narrow ? (index + 2) * BOOK_LAYOUT.perSide : (index * 2 + 2) * BOOK_LAYOUT.perSide;
@@ -30,9 +32,8 @@ function useNearbyAlbumImages(cards: ImageAssetCard[], index: number, narrow: bo
 
   useEffect(() => {
     let active = true;
-    const created: string[] = [];
-    setUrls({});
     for (const assetId of visibleIds) {
+      if (loaded.current.has(assetId)) continue;
       void (async () => {
         try {
           const blob = (await getAssetPreviewBlob(assetId)) ?? (await getAssetBlob(assetId));
@@ -42,18 +43,33 @@ function useNearbyAlbumImages(cards: ImageAssetCard[], index: number, narrow: bo
             URL.revokeObjectURL(objectUrl);
             return;
           }
-          created.push(objectUrl);
-          setUrls((existing) => ({ ...existing, [assetId]: objectUrl }));
+          if (loaded.current.has(assetId)) {
+            URL.revokeObjectURL(objectUrl);
+            return;
+          }
+          loaded.current.set(assetId, objectUrl);
+          // Adjacent sheets share previews. Retain them across flips so the
+          // physical page never loses its image mid-animation; cap memory.
+          if (loaded.current.size > 64) {
+            for (const [oldId, oldUrl] of loaded.current) {
+              if (visibleIds.includes(oldId)) continue;
+              loaded.current.delete(oldId);
+              URL.revokeObjectURL(oldUrl);
+              if (loaded.current.size <= 56) break;
+            }
+          }
+          setUrls(Object.fromEntries(loaded.current));
         } catch {
           // A missing/corrupt asset must not keep the rest of the book from opening.
         }
       })();
     }
-    return () => {
-      active = false;
-      for (const url of created) URL.revokeObjectURL(url);
-    };
+    return () => { active = false; };
   }, [assetKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => {
+    for (const objectUrl of loaded.current.values()) URL.revokeObjectURL(objectUrl);
+    loaded.current.clear();
+  }, []);
   return urls;
 }
 
@@ -64,13 +80,14 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
   const createImageCardFromAsset = useCollectionStore((state) => state.createImageCardFromAsset);
   const updateImageCard = useCollectionStore((state) => state.updateImageCard);
   const [ownerId, setOwnerId] = useState<OwnerId>('self');
-  const [index, setIndex] = useState(0);
-  const [closed, setClosed] = useState(false);
+  const [position, setPosition] = useState<BookState | null>(null);
+  const [bookRevision, setBookRevision] = useState(0);
   const [narrow, setNarrow] = useState(false);
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ error: boolean; text: string } | null>(null);
   const bookBox = useRef<HTMLDivElement | null>(null);
+  const bookRef = useRef<BookViewHandle | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
   const counts = useMemo(() => {
@@ -88,8 +105,9 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
       .filter((card) => !query || [card.title, ...card.tags].some((part) => part.toLocaleLowerCase().includes(query)))
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }, [imageCards, conversations, ownerId, searchTerm]);
-  const total = narrow ? BOOK_LAYOUT.pageCount(cards.length) : BOOK_LAYOUT.sheetCount(cards.length) + 1;
-  const safeIndex = Math.min(index, Math.max(0, total - 1));
+  const total = position?.count ?? (narrow ? BOOK_LAYOUT.pageCount(cards.length) : BOOK_LAYOUT.sheetCount(cards.length) + 1);
+  const safeIndex = Math.min(position?.index ?? 0, Math.max(0, total - 1));
+  const closed = position?.closed ?? false;
   const urls = useNearbyAlbumImages(cards, safeIndex, narrow);
   const content = useMemo(() => createAlbumImageContent(cards.map((card) => ({
     id: card.id,
@@ -111,7 +129,7 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
   useEffect(() => {
     if (ownerId !== 'self' && !personas.some((persona) => persona.id === ownerId)) {
       setOwnerId('self');
-      setIndex(0);
+      setPosition(null);
       setPreviewCardId(null);
     }
   }, [ownerId, personas]);
@@ -119,21 +137,13 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
   const switchOwner = (id: OwnerId) => {
     if (busy || id === ownerId) return;
     setOwnerId(id);
-    setIndex(0);
-    setClosed(false);
+    setPosition(null);
     setPreviewCardId(null);
     setStatus(null);
   };
   const turn = (direction: 1 | -1) => {
-    if (closed) {
-      if (direction > 0) setClosed(false);
-      return;
-    }
-    if (direction < 0 && safeIndex === 0) {
-      setClosed(true);
-    } else {
-      setIndex(Math.min(total - 1, Math.max(0, safeIndex + direction)));
-    }
+    if (direction > 0) bookRef.current?.next();
+    else bookRef.current?.prev();
   };
   const importFiles = async (files: File[]) => {
     if (busy || !files.length) return;
@@ -161,8 +171,8 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
         if (result) saved += 1;
       }
       setStatus({ error: false, text: `已收入 ${ownerId === 'self' ? '我的' : ownerName}收藏册：${saved} 张。` });
-      setClosed(false);
-      setIndex(0);
+      setPosition(null);
+      setBookRevision((revision) => revision + 1);
     } catch (error) {
       setStatus({ error: true, text: `保存失败，已成功收入 ${saved} 张：${error instanceof Error ? error.message : '未知错误'}` });
     } finally {
@@ -215,14 +225,14 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
         onDragOver={(event) => { if (event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
         onDrop={handleDrop}
       >
-        <FlatBook
+        <BookView
+          key={`${ownerId}:${bookRevision}`}
+          ref={bookRef}
           content={content}
           layout={BOOK_LAYOUT}
           cover={{ ...BOOKLET_COVERS.cards, title: ownerName }}
-          index={safeIndex}
           narrow={narrow}
-          closed={closed}
-          onTurn={turn}
+          onState={setPosition}
           onPick={(itemIndex) => setPreviewCardId(cards[itemIndex]?.id ?? null)}
           labels={{ openBook: '打开收藏册', openCard: (title) => `查看 ${title}` }}
         />
@@ -232,7 +242,7 @@ export function ArchiveAlbumShelf({ searchTerm }: { searchTerm: string }) {
         <button type="button" onClick={() => turn(-1)} disabled={closed}>上一页</button>
         <span>{closed ? '封面' : `${safeIndex + 1} / ${total}`} · {cards.length} 张收藏</span>
         <button type="button" onClick={() => turn(1)} disabled={!closed && safeIndex === total - 1}>{closed ? '打开' : '下一页'}</button>
-        {!closed ? <button type="button" onClick={() => setClosed(true)}>合上</button> : null}
+        {!closed ? <button type="button" onClick={() => bookRef.current?.toggleCover()}>合上</button> : null}
       </div>
       {activePreviewIndex >= 0 ? (
         <ImageAssetPreview

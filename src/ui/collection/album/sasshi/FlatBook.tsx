@@ -2,7 +2,7 @@ import { useEffect, useRef, type CSSProperties, type MouseEvent, type PointerEve
 import { CoverPreview } from "./CoverPreview";
 import type { CoverSpec } from "./cover";
 import { COVER_HEX } from "./cover-style";
-import type { ContentSource, SlotCell } from "./content";
+import type { ContentSource, SlotCell } from "./content/grid";
 import { DEFAULT_LABELS, type BookLabels } from "./labels";
 import { resolveLayout, spreadSides, type BookLayout } from "./layout";
 const DEFAULT_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif';
