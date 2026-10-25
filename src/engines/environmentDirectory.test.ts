@@ -11,6 +11,17 @@ const baseSnapshot: EnvironmentDirectorySnapshot = {
     activeProjectId: 'project-1'
   },
   activeCollaboratorName: 'Pharos',
+  albumOwnerId: 'persona-1',
+  albumImageCards: [{
+    id: 'photo-1',
+    title: '雨天的照片',
+    assetId: 'asset-1',
+    tags: ['雨天', '纪念'],
+    source: 'manual'
+  }],
+  albumCanSendImage: true,
+  albumCanInspectImage: true,
+  albumCanSaveAttachment: true,
   activeCardId: 'card-1',
   cards: [{
     id: 'card-1',
@@ -120,5 +131,57 @@ describe('executeEnvironmentDirectoryAction', () => {
     if (!result.ok) return;
     expect(result.detailText).toContain('environment/settings/provider');
     expect(result.detailText).toContain('OpenAI Compatible');
+  });
+
+  it('discovers the blue album from Archive with its existing image-card source and tool boundaries', () => {
+    const root = executeEnvironmentDirectoryAction(baseSnapshot, { kind: 'listEnvironmentNodes' });
+    expect(root.ok).toBe(true);
+    if (!root.ok) return;
+    expect(root.detailText).toContain('environment/archive');
+
+    const found = executeEnvironmentDirectoryAction(baseSnapshot, {
+      kind: 'searchEnvironmentNodes', query: '收藏册'
+    });
+    expect(found.ok).toBe(true);
+    if (!found.ok) return;
+    expect(found.detailText).toContain('environment/archive/album');
+
+    const album = executeEnvironmentDirectoryAction(baseSnapshot, {
+      kind: 'inspectEnvironmentNode', nodeId: 'environment/archive/album'
+    });
+    expect(album.ok).toBe(true);
+    if (!album.ok) return;
+    expect(album.detailText).toContain('1 张收藏图片');
+    expect(album.detailText).toContain('雨天的照片');
+    expect(album.detailText).toContain('tool=sendImageAttachment');
+    expect(album.detailText).toContain('tool=saveAttachmentToCollection');
+    expect(album.detailText).toContain('不列用户私人或其他 AI 的收藏');
+  });
+
+  it('keeps an unbound conversation album empty without conflating missing access with lost photos', () => {
+    const result = executeEnvironmentDirectoryAction({
+      ...baseSnapshot,
+      albumOwnerId: null,
+      albumImageCards: []
+    }, { kind: 'inspectEnvironmentNode', nodeId: 'environment/archive/album' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.detailText).toContain('当前没有可读取收藏册的协作者');
+    expect(result.detailText).not.toContain('asset-1');
+    expect(result.detailText).not.toContain('雨天的照片');
+    expect(result.detailText).not.toContain('tool=saveAttachmentToCollection');
+  });
+
+  it('does not advertise an album write tool when attachments are unavailable or disabled', () => {
+    const result = executeEnvironmentDirectoryAction({
+      ...baseSnapshot,
+      albumCanSaveAttachment: false,
+      albumCanSendImage: false
+    }, { kind: 'inspectEnvironmentNode', nodeId: 'environment/archive/album' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.detailText).toContain('当前附件收藏工具=未开放');
+    expect(result.detailText).not.toContain('tool=saveAttachmentToCollection');
+    expect(result.detailText).not.toContain('tool=sendImageAttachment');
   });
 });

@@ -109,7 +109,7 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     brief: '把已有图片发到聊天里',
     schema: {
       name: 'sendImageAttachment',
-      description: '把当前对话里的图片附件或图片收藏里的现有图片作为本地图片附件发到聊天里。不调用生图模型。',
+      description: '把当前对话里的图片附件或图片收藏（档案收藏册共用的图片卡）作为本地图片附件发到聊天里。不调用生图模型。',
       parameters: objectParameters({
         target: stringProperty('图片 URL、图片附件 id、图片卡 id、assetId、文件名或标题；省略时使用最近/唯一可用图片。'),
         title: stringProperty('可选显示文件名。'),
@@ -194,7 +194,7 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     brief: '把图片附件收进图片收藏',
     schema: {
       name: 'saveAttachmentToCollection',
-      description: '把图片附件收进图片收藏。',
+      description: '把当前对话的图片附件存进当前协作者的图片收藏；档案里的该协作者收藏册会展示同一张图片。',
       parameters: objectParameters({
         target: stringProperty('目标附件 id 或文件名。'),
         title: stringProperty('可选标题。'),
@@ -205,7 +205,7 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     },
     rules: [
       '8. saveAttachmentToCollection：把图片附件收进图片收藏。',
-      '- 用户说“把这张图/二维码收起来”时，用 saveAttachmentToCollection。'
+      '- 用户说“把这张图/二维码收起来”或“放进我们的收藏册”时，用 saveAttachmentToCollection；收藏册与图片收藏共用同一份图片卡。'
     ]
   },
   saveAttachmentAsCodeCard: {
