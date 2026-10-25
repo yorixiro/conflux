@@ -80,10 +80,18 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
-  const workshopShelfActive = activeShelf === 'project' || activeShelf === 'code' || activeShelf === 'image';
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue';
   const sectionNavItems = visibleShelfItems.filter((item) => (
-    item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
+    archiveShelfActive
+      ? item.shelf === 'info' || item.shelf === 'dialogue'
+      : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
   ));
+  const selectShelf = (shelf: typeof activeShelf) => {
+    setCollectionShelf(shelf);
+    if (shelf === 'info' && controller.isAggregateScope && controller.personas.length > 0) {
+      onCollaboratorSwitchOpenChange(true);
+    }
+  };
   useEffect(() => {
     if (visibleShelfSet.has(activeShelf)) return;
     setCollectionShelf(visibleShelfItems[0]?.shelf ?? 'dialogue');
@@ -118,16 +126,17 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
-        {sectionNavigation && workshopShelfActive ? (
-          <nav className="conflux-collection-section-nav" aria-label="工坊分类">
+        {sectionNavigation ? (
+          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '档案分类' : '工坊分类'}>
             {sectionNavItems.map((item) => (
               <button
                 key={item.shelf}
                 type="button"
                 aria-current={activeShelf === item.shelf ? 'page' : undefined}
-                onClick={() => setCollectionShelf(item.shelf)}
+                onClick={() => selectShelf(item.shelf)}
               >
-                {item.shelf === 'project' ? '项目' : item.shelf === 'code' ? '代码卡片' : '图片素材'}
+                {item.shelf === 'info' ? '角色资料' : item.shelf === 'dialogue' ? '对话档案'
+                  : item.shelf === 'project' ? '项目' : item.shelf === 'code' ? '代码卡片' : '图片素材'}
               </button>
             ))}
           </nav>
@@ -202,6 +211,7 @@ export function CollectionWorld({
                   onDeleteCollaborator={onDeleteCollaborator}
                   onSelectCollaboratorAvatar={controller.onSelectCurrentCollaboratorAvatar}
                   onCreateCustomCollaborator={onCreateCustomCollaborator}
+                  onChooseCollaborator={() => onCollaboratorSwitchOpenChange(true)}
                   onOpenProviderSettings={onOpenProviderSettings}
                   onUpdateProvider={controller.onUpdateProvider}
                   onCreateTriggerRule={controller.onCreateAutomationRule}

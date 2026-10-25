@@ -43,6 +43,7 @@ type CollaboratorInfoShelfProps = {
   onBackToChat: () => void;
   onDeleteCollaborator: (collaboratorId: string) => void;
   onSelectCollaboratorAvatar: (role: 'assistant' | 'user', files: FileList | File[]) => Promise<void>;
+  onChooseCollaborator: () => void;
   onCreateCustomCollaborator: () => void;
   onOpenProviderSettings: () => void;
   onUpdateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
@@ -79,6 +80,7 @@ export function CollaboratorInfoShelf({
   onBackToChat,
   onDeleteCollaborator,
   onSelectCollaboratorAvatar,
+  onChooseCollaborator,
   onCreateCustomCollaborator,
   onOpenProviderSettings,
   onUpdateProvider,
@@ -112,6 +114,7 @@ export function CollaboratorInfoShelf({
         <div className="empty-state-floating">
           <p className="empty-state-title">{t('collaborator.info.emptyTitle')}</p>
           <p className="empty-state-hint">{t('collaborator.info.emptyHint')}</p>
+          <button type="button" className="btn-secondary" onClick={onChooseCollaborator}>选择已有角色</button>
           <button type="button" className="btn-secondary" onClick={onCreateCustomCollaborator}>新建角色</button>
           <button type="button" className="btn-secondary" onClick={onBackToChat}>返回聊天</button>
         </div>
