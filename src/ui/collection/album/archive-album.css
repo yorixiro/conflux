@@ -107,7 +107,7 @@
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: 14px;
+  bottom: 62px;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -123,15 +123,103 @@
 }
 .conflux-archive-album__empty button { padding: 6px 12px; }
 .conflux-archive-album__pagination {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 8px;
+  max-width: calc(100% - 12px);
+  padding: 5px;
+  border: 1px solid var(--folio-line);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--folio-raised) 84%, transparent);
+  backdrop-filter: blur(12px);
   color: var(--folio-ink-2);
   font-size: 12px;
 }
 .conflux-archive-album__pagination span { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.conflux-archive-album__pagination button { padding: 7px 12px; }
+.conflux-archive-album__pagination button { padding: 7px 10px; white-space: nowrap; }
+.conflux-archive-album__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--folio-ink-2);
+  font-size: 13px;
+}
+.conflux-archive-album__pouch-index {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.conflux-archive-album__pouch-index:focus-within {
+  z-index: 6;
+  top: 16px;
+  left: 16px;
+  width: auto;
+  height: auto;
+  max-width: calc(100% - 32px);
+  clip-path: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: var(--folio-raised);
+  border-radius: 12px;
+}
+.conflux-archive-album__pouch-index button { color: var(--folio-ink); }
+.conflux-archive-album__desk:has(.conflux-archive-album__loading) .conflux-archive-album__pouch-index {
+  z-index: 2;
+  top: 26%;
+  left: 10%;
+  width: 80%;
+  height: auto;
+  clip-path: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.conflux-archive-album__desk:has(.conflux-archive-album__loading) .conflux-archive-album__pouch-index button {
+  padding: 7px 12px;
+  border: 1px solid var(--folio-line);
+  border-radius: 20px;
+  background: var(--folio-raised);
+}
+.conflux-archive-album__detail-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(15 23 33 / 0.65);
+}
+.conflux-archive-album__detail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, 100%);
+  max-height: 85dvh;
+  padding: 20px;
+  overflow: auto;
+  background: var(--folio-raised);
+  border-radius: 16px;
+  color: var(--folio-ink);
+}
+.conflux-archive-album__detail h3 { margin: 0; }
+.conflux-archive-album__detail img { max-width: 100%; max-height: 65dvh; object-fit: contain; }
+.conflux-archive-album__detail p { margin: 0; white-space: pre-wrap; }
+.conflux-archive-album__detail-close { align-self: flex-end; padding: 6px 12px; }
 @media (max-width: 540px) {
   .conflux-archive-album { gap: 8px; padding-top: 6px; }
   .conflux-archive-album__header { align-items: flex-start; }
@@ -140,5 +228,6 @@
   .conflux-archive-album__desk { min-height: 360px; height: min(63svh, 530px); border-radius: 14px; }
   .conflux-archive-album__desk .folio-flat { inset: 12px 4px 12px; }
   .conflux-archive-album__pagination { gap: 5px; }
-  .conflux-archive-album__pagination button { padding: 7px 9px; }
+  .conflux-archive-album__pagination { width: max-content; max-width: calc(100% - 8px); gap: 2px; bottom: 8px; }
+  .conflux-archive-album__pagination button { padding: 7px 6px; font-size: 11px; }
 }

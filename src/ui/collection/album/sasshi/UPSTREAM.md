@@ -11,3 +11,5 @@ The Archive album includes Sasshi's actual WebGL 3D renderer (`scene.ts`), physi
 `content.ts` adapts Conflux's existing LocalData image cards to both render paths; owner scope and photo uploads remain in Conflux's canonical Collection domain.
 
 The album is a view of existing collection image cards; it does not change or migrate existing saved data.
+
+The blue `aitetsu` Résumé folio uses upstream `src/bag` (clear zip pouch, Planck 2D physics, movable keepsakes and device motion), `src/paper/typeset.ts` and `src/print/kinsoku.ts`. Conflux maps photo cards into the pouch at render time, preserving canonical ownership, imports and previews. The frosted ring-less case and its materials remain upstream's design.
