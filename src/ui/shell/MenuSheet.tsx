@@ -253,6 +253,7 @@ export function MenuSheet({
         {visiblePage === 'usage' ? (
           <MenuUsagePage
             summary={controller.tokenUsageSummary}
+            insights={controller.requestInsightEntries}
             onBack={() => controller.onSetPage('root')}
           />
         ) : null}
