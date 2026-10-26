@@ -8,6 +8,7 @@ import { BookView, type BookViewHandle } from './sasshi/BookView';
 import type { CaseSpec } from './sasshi/binder';
 import type { CoverSpec } from './sasshi/cover';
 import { canRender3d } from './sasshi/support';
+import { StampGallery } from './StampGallery';
 
 type BagModule = typeof import('./bag');
 type MotionUi = MotionStatus | 'off' | 'asking';
@@ -129,6 +130,7 @@ export function ArchiveFolio({
   const [motion, setMotion] = useState<MotionUi>('off');
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detailImage, setDetailImage] = useState<string | null>(null);
+  const [stampPageOpen, setStampPageOpen] = useState(false);
   const bookRef = useRef<BookViewHandle | null>(null);
   const pouchRef = useRef<PouchAddon | null>(null);
   const livePick = useRef<(id: string) => void>(() => {});
@@ -155,6 +157,7 @@ export function ArchiveFolio({
   useEffect(() => {
     setGroup(0);
     setDetailId(null);
+    setStampPageOpen(false);
   }, [ownerId]);
   useEffect(() => () => { bag?.disableMotion(); }, [bag]);
 
@@ -230,7 +233,9 @@ export function ArchiveFolio({
 
   return (
     <>
-      {show3d ? (
+      {stampPageOpen ? (
+        <StampGallery />
+      ) : show3d ? (
         <BookView
           key={`${ownerId}:${index}:${visible.map((card) => card.id).join(':')}`}
           ref={bookRef}
@@ -248,20 +253,23 @@ export function ArchiveFolio({
           {supported ? '正在整理透明收藏袋…' : '这台设备暂不支持 3D 展示，可从下方查看收藏。'}
         </div>
       )}
-      <div className="conflux-archive-album__pouch-index" aria-label="袋内物件">
-        {profile.items.map((item) => <button key={item.id} type="button" onClick={() => pick(item.id)}>{item.label}</button>)}
-      </div>
+      {!stampPageOpen ? (
+        <div className="conflux-archive-album__pouch-index" aria-label="袋内物件">
+          {profile.items.map((item) => <button key={item.id} type="button" onClick={() => pick(item.id)}>{item.label}</button>)}
+        </div>
+      ) : null}
       <div className="conflux-archive-album__pagination" aria-label="收藏册操作">
-        <button type="button" disabled={!show3d} onClick={() => bookRef.current?.toggleCover()}>{closed ? '打开封套' : '合上封套'}</button>
-        <button type="button" disabled={!show3d || closed} onClick={shake}>摇一摇</button>
-        {show3d && motion !== 'unsupported' ? <button type="button" disabled={motion === 'asking' || closed} onClick={toggleMotion}>{motion === 'granted' ? '关闭体感' : motion === 'asking' ? '正在请求…' : '手机体感'}</button> : null}
-        {cards.length > PHOTOS_PER_POUCH ? (
+        {ownerId === 'self' ? <button type="button" onClick={() => { setStampPageOpen((open) => !open); setDetailId(null); }}>{stampPageOpen ? '返回收藏册' : '邮票内页 · 6'}</button> : null}
+        {!stampPageOpen ? <button type="button" disabled={!show3d} onClick={() => bookRef.current?.toggleCover()}>{closed ? '打开封套' : '合上封套'}</button> : null}
+        {!stampPageOpen ? <button type="button" disabled={!show3d || closed} onClick={shake}>摇一摇</button> : null}
+        {!stampPageOpen && show3d && motion !== 'unsupported' ? <button type="button" disabled={motion === 'asking' || closed} onClick={toggleMotion}>{motion === 'granted' ? '关闭体感' : motion === 'asking' ? '正在请求…' : '手机体感'}</button> : null}
+        {!stampPageOpen && cards.length > PHOTOS_PER_POUCH ? (
           <>
             <button type="button" disabled={index === 0} onClick={() => { setGroup(index - 1); setDetailId(null); }}>上一组</button>
             <span>{index + 1} / {count}</span>
             <button type="button" disabled={index >= count - 1} onClick={() => { setGroup(index + 1); setDetailId(null); }}>下一组</button>
           </>
-        ) : <span>{cards.length} 张收藏</span>}
+        ) : !stampPageOpen ? <span>{cards.length} 张收藏</span> : null}
       </div>
       {detail ? (
         <div className="conflux-archive-album__detail-backdrop" role="presentation" onClick={() => setDetailId(null)}>

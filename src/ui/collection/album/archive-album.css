@@ -122,6 +122,7 @@
   font-size: 12px;
 }
 .conflux-archive-album__empty button { padding: 6px 12px; }
+.conflux-archive-album__desk:has(.conflux-stamp-gallery) .conflux-archive-album__empty { display: none; }
 .conflux-archive-album__pagination {
   position: absolute;
   z-index: 4;
