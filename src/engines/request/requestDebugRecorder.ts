@@ -2,6 +2,7 @@ import { isRequestDebugCaptureEnabled } from '../../app/developer/debugCaptureRu
 import type { AssistantReply } from '../chatApi';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
+import { recordRequestInsight } from './requestInsightRuntime';
 
 type RequestDebugRecordOptions = {
   phase?: 'prepared' | 'completed' | 'failed';
@@ -11,6 +12,13 @@ type RequestDebugRecordOptions = {
 };
 
 export function recordRequestDebug(audit: AssistantRequestAudit, options?: RequestDebugRecordOptions) {
+  // Lightweight, text-free request counts are available in ordinary Usage settings.
+  // Full prompt/request capture remains explicitly developer-only.
+  try {
+    recordRequestInsight(audit, options);
+  } catch {
+    // A diagnostic view must never prevent the actual model request from running.
+  }
   if (!isRequestDebugCaptureEnabled()) return;
 
   void import('./requestDebugRuntime')

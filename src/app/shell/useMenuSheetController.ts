@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { RequestDebugEntry } from '../../engines/request/requestDebugRuntime';
+import {
+  readRequestInsightEntries,
+  REQUEST_INSIGHT_EVENT,
+  type RequestInsightEntry
+} from '../../engines/request/requestInsightRuntime';
 import type { LocalDataHealthSnapshot } from '../../infrastructure/localDataHealth';
 import type { LocalRuntimeLogEntry } from './localRuntimeLog';
 import { useChatStore } from '../../stores/chatStore';
@@ -105,6 +110,7 @@ export function useMenuSheetController({
 
   const [page, setPage] = useState<MenuPage>(() => initialPage);
   const [requestDebugEntries, setRequestDebugEntries] = useState<RequestDebugEntry[]>([]);
+  const [requestInsightEntries, setRequestInsightEntries] = useState<RequestInsightEntry[]>([]);
   const [storageHealthSnapshot, setStorageHealthSnapshot] = useState<LocalDataHealthSnapshot | null>(null);
   const [storageHealthError, setStorageHealthError] = useState<string | null>(null);
   const [runtimeLogEntries, setRuntimeLogEntries] = useState<LocalRuntimeLogEntry[]>([]);
@@ -142,6 +148,14 @@ export function useMenuSheetController({
       disposed = true;
       window.removeEventListener(REQUEST_DEBUG_EVENT, handleRequestDebugUpdated);
     };
+  }, [open, page]);
+
+  useEffect(() => {
+    if (!open || page !== 'usage' || typeof window === 'undefined') return;
+    const syncInsights = () => setRequestInsightEntries(readRequestInsightEntries());
+    syncInsights();
+    window.addEventListener(REQUEST_INSIGHT_EVENT, syncInsights);
+    return () => window.removeEventListener(REQUEST_INSIGHT_EVENT, syncInsights);
   }, [open, page]);
 
   const refreshStorageHealth = async (options?: { includeRuntimeLog?: boolean }) => {
@@ -265,6 +279,7 @@ export function useMenuSheetController({
     displayPreferences,
     customFontCount: fontLibrary.customFontCount,
     tokenUsageSummary,
+    requestInsightEntries,
     storageHealthSnapshot,
     storageHealthError,
     runtimeLogEntries,
