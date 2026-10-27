@@ -262,6 +262,7 @@ export function DesktopAppSidebar({
       {presentation === 'sidebar' ? <div className="conflux-sidebar-tabs" role="tablist" aria-label="侧栏内容">
         <button type="button" id="conflux-profile-tab" role="tab" aria-selected={sidebarTab === 'profile'} aria-controls="conflux-profile-panel" onClick={() => setSidebarTab('profile')}>个人资料</button>
         <button type="button" id="conflux-library-tab" role="tab" aria-selected={sidebarTab === 'library'} aria-controls="conflux-library-panel" onClick={() => setSidebarTab('library')}>对话库</button>
+        {kekeThemeActive ? <button type="button" className="keke-tabs-gear" onClick={onOpenSettings} aria-label="设置" title="设置">☼</button> : null}
       </div> : null}
       {(presentation === 'profile' || (presentation === 'sidebar' && sidebarTab === 'profile')) ? (
         <section

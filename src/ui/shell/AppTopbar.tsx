@@ -11,6 +11,9 @@ import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { runSelectionAction } from '../haptics';
 import { WorldAnchor } from './WorldAnchor';
 import { useI18n } from '../../i18n';
+import { useSpaceStore } from '../../stores/spaceStore';
+import { KekeTopGarland } from '../app-shell/KekeOriginalDecor';
+import '../app-shell/KekeOriginalChrome.css';
 
 export type AppTopbarState = {
   activeWorld: World;
@@ -57,6 +60,8 @@ export function AppTopbar({
   chatCollaborator
 }: AppTopbarProps) {
   const { t } = useI18n();
+  const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
+  const showKekeChrome = state.activeWorld === 'chat' && (kekePreset === 'keke-doodle' || kekePreset === 'keke-pois');
   const [brandSpinning, setBrandSpinning] = useState(false);
   const spinResetTimeoutRef = useRef<number | null>(null);
 
@@ -129,7 +134,7 @@ export function AppTopbar({
   }
 
   return (
-    <header className={`topbar chat-topbar-shell topbar--mirrored topbar--centered-context ${showChatNavigation ? 'topbar--chat-navigation' : ''}`}>
+    <header className={`topbar chat-topbar-shell topbar--mirrored topbar--centered-context ${showChatNavigation ? 'topbar--chat-navigation' : ''} ${showKekeChrome ? 'keke-original-topbar' : ''}`}>
       <div className="topbar-surface">
         <div className="topbar-main">
           {showChatNavigation ? (
@@ -152,7 +157,7 @@ export function AppTopbar({
                 <button type="button" className="action-btn icon-btn"
                   onClick={actions.onOpenSidebar} title="查看当前 AI 资料与日历"
                   aria-label="查看当前 AI 资料与日历" aria-haspopup="dialog">
-                  {chatCollaborator ? (
+                  {showKekeChrome ? <span className="keke-original-header-avatar" aria-hidden="true">克</span> : chatCollaborator ? (
                     <PersonaAvatar role="assistant" seed={chatCollaborator.id}
                       assetId={chatCollaborator.assistantAvatarAssetId}
                       iconId={chatCollaborator.assistantAvatarIconId}
@@ -248,6 +253,7 @@ export function AppTopbar({
               </button>
             )}
           </div>
+          {showKekeChrome ? <KekeTopGarland pois={kekePreset === 'keke-pois'} /> : null}
         </div>
       </div>
 

@@ -34,12 +34,15 @@ const artAssets = new Map([
   ['charm', 'doodle-charm.webp'],
   ['bar', 'doodle-hanger.webp'],
   ['disc', 'doodle-disc.webp'],
+  ['trk', 'doodle-scroll-track.webp'],
+  ['thm', 'doodle-scroll-thumb.webp'],
   ['stp', 'doodle-decoration.webp'],
   ['cat', 'doodle-cat.webp'],
   ['barg', 'pois-hanger.webp'],
   ['discg', 'pois-disc.webp'],
   ['stpg', 'pois-decoration.webp'],
-  ['charmg', 'pois-charm.webp']
+  ['charmg', 'pois-charm.webp'],
+  ['thmg', 'pois-scroll-thumb.webp']
 ]);
 const doodlePaperArt = new Map([
   ['--kbun', 'doodle-paper-bunny.webp'],

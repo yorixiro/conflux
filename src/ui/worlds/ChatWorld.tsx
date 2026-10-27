@@ -13,6 +13,8 @@ import {
   useChatUi
 } from './chat/context/ChatContext';
 import type { ChatUiState } from './chat/context/ChatUiState';
+import { useSpaceStore } from '../../stores/spaceStore';
+import { KekeChatMotionLayers } from '../app-shell/KekeOriginalDecor';
 
 const ThinkingSheet = lazy(() => loadThinkingSheetModule().then((module) => ({ default: module.ThinkingSheet })));
 
@@ -27,6 +29,7 @@ type ChatWorldProps = {
 };
 
 function ChatWorldLayout({ shell }: ChatWorldProps) {
+  const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
   const stablePayload = useChatStablePayload();
   const presentation = useChatPresentation();
   const composer = useChatComposer();
@@ -75,6 +78,7 @@ function ChatWorldLayout({ shell }: ChatWorldProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {kekePreset === 'keke-doodle' || kekePreset === 'keke-pois' ? <KekeChatMotionLayers pois={kekePreset === 'keke-pois'} /> : null}
       <div className="chat-body">
         <MessageTimeline isWorldSettled={shell.isActiveWorld && !shell.isWorldSwitching} />
       </div>

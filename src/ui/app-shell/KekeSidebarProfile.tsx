@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { Persona } from '../../types/domain';
 import { useSpaceStore } from '../../stores/spaceStore';
-import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { SidebarCalendar } from './SidebarCalendar';
 
 function spiral(cx: number, cy: number, radius: number, turns: number, direction: number) {
@@ -47,11 +46,11 @@ export function KekeSidebarProfile({ persona, conversationCount, onEdit }: {
 
     <div className="keke-profile-avatar-row">
       <span className="keke-profile-avatar">
-        {persona ? <PersonaAvatar role="assistant" seed={persona.id} assetId={persona.assistantAvatarAssetId} iconId={persona.assistantAvatarIconId} shape={persona.assistantAvatarShape} size={64} /> : <span>克</span>}
+        <span>克</span>
       </span>
       <img className="keke-avatar-sticker" src={isPois ? '/theme-assets/keke/pois-disc.webp' : '/theme-assets/keke/doodle-disc.webp'} alt="" />
     </div>
-    <div className="keke-profile-name"><b>{name}</b><span>( ˶ˆᗜˆ˵ )</span></div>
+    <button type="button" className="keke-profile-name" onClick={onEdit} disabled={!persona} title="编辑当前聊天角色"><b>{name}</b><span>( ˶ˆᗜˆ˵ )</span></button>
     <div className="keke-profile-status"><i /> toujours là · 今天也在</div>
     <div className="keke-profile-divider"><i /><b>✛</b><i /></div>
 
@@ -70,10 +69,9 @@ export function KekeSidebarProfile({ persona, conversationCount, onEdit }: {
         <span>✣ 换个主题</span><span className="keke-theme-colors" aria-hidden="true"><i /><i /><i /></span>
         <small>→ {isPois ? '贴纸' : '波点'}</small>
       </button>
-      <button className="keke-profile-edit" type="button" onClick={onEdit} disabled={!persona}>✦ 角色设置</button>
     </div>
 
-    <div className="keke-calendar-wrap"><SidebarCalendar /><img className="keke-calendar-cat" alt="" src="/theme-assets/keke/doodle-cat.webp" /></div>
+    <div className="keke-calendar-wrap"><SidebarCalendar variant="keke" /><img className="keke-calendar-cat" alt="" src="/theme-assets/keke/doodle-cat.webp" /></div>
 
     <div className="keke-profile-lower">
       <div className="keke-sticky-note"><b>今日小事 ♡</b>
@@ -86,6 +84,6 @@ export function KekeSidebarProfile({ persona, conversationCount, onEdit }: {
         <i className="keke-sweet-heart">♡</i><i className="keke-sweet-star">✦</i><span>sweet no.128</span>
       </div>
     </div>
-    <div className="keke-paw-footer" aria-hidden="true">✿　✿　✿　✿ <span>10.27 tue · ☾</span></div>
+    <div className="keke-paw-footer" aria-hidden="true"><i /><i /><i /><i /><span>{new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', weekday: 'short' }).format(new Date()).replace(',', ' ·').toLowerCase()} · ☾</span></div>
   </div>;
 }

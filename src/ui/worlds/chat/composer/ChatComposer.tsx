@@ -19,6 +19,7 @@ import { SlashCommandSuggestions } from './SlashCommandSuggestions';
 import { KaomojiDrawer, KaomojiFaceIcon } from './kaomoji/KaomojiDrawer';
 import { useComposerFileIngest } from './useComposerFileIngest';
 import { useI18n } from '../../../../i18n';
+import { useSpaceStore } from '../../../../stores/spaceStore';
 
 function resolveThemeReviveSpell(input: string): 'restore-default' | 'revive-last' | null {
   const normalized = input.trim().toLowerCase().replace(/\s+/g, '');
@@ -43,6 +44,8 @@ function resolveThemeReviveSpell(input: string): 'restore-default' | 'revive-las
 }
 
 export function ChatComposer() {
+  const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
+  const showKekeChrome = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
   const { t } = useI18n();
   const presentation = useChatPresentation();
   const composer = useChatComposer();
@@ -289,6 +292,11 @@ export function ChatComposer() {
           query={slashCommandQuery}
           onPick={handlePickSlashCommand}
         />
+        {showKekeChrome ? <div className="keke-original-modes" role="group" aria-label="快捷工具">
+          <button type="button" className={attachmentPickerOpen ? 'hit' : ''} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }}>✧ 附件</button>
+          <button type="button" className={kaomojiOpen ? 'hit' : ''} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }}>♡ 颜文字</button>
+          <button type="button" disabled={interactionLocked} onClick={actions.openToolbox}>✦ 工具</button>
+        </div> : null}
         <div className="chat-submit-anchor">
           {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onClose={() => setKaomojiOpen(false)} /> : null}
           {ui.submitFlight ? (
@@ -352,6 +360,7 @@ export function ChatComposer() {
             </div>
           </div>
         </div>
+        {showKekeChrome ? <div className="keke-original-marquee" aria-hidden="true"><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span></div> : null}
       </div>
     </>
   );

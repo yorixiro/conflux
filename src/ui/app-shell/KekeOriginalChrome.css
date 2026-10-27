@@ -1,0 +1,120 @@
+/* 克克 source-derived UI motion and the original torn notebook header/footer. */
+@keyframes kekeSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes kekeSwayPaper { 0%, 100% { transform: rotate(-.9deg); } 50% { transform: rotate(.9deg); } }
+@keyframes kekeBoing { 30% { transform: scale(.88); } 60% { transform: scale(1.08) rotate(4deg); } }
+@keyframes kekePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(176,131,140,.42); } 70%,100% { box-shadow: 0 0 0 6px transparent; } }
+@keyframes kekeTwinkle { 0%,100% { opacity: .25; transform: scale(.7) rotate(0); } 50% { opacity: 1; transform: scale(1.2) rotate(25deg); } }
+@keyframes kekeInk { from { opacity: 0; filter: blur(4px); } }
+@keyframes kekeRise { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
+@keyframes kekeBloom { from { opacity: 0; transform: scale(.3) rotate(-90deg); } }
+@keyframes kekeShine { to { background-position: 150% 0; } }
+@keyframes kekeMarquee { to { transform: translateX(-100%); } }
+@keyframes kekeStamp { 30% { transform: scale(.8) rotate(-10deg); } 65% { transform: scale(1.05) rotate(3deg); } }
+@keyframes kekeRing { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(2.4); } }
+@keyframes kekePeek { 0%,70%,100% { transform: translateY(0); } 78% { transform: translateY(2px); } 86% { transform: translateY(-1px); } }
+
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar {
+  --keke-header-paper: #faf7f5;
+  --keke-header-rule: rgba(157,171,185,.2);
+  --keke-header-ink: #7a6d71;
+  --keke-header-hot: #b0838c;
+  padding: 12px 16px 12px 8px;
+  background: repeating-linear-gradient(transparent 0 21px,var(--keke-header-rule) 21px 22px) 0 4px,var(--keke-header-paper);
+  box-shadow: 0 6px 14px -10px rgba(90,70,76,.25);
+}
+body[data-polaris-preset='keke-pois'] .app-shell.chat .keke-original-topbar {
+  --keke-header-paper: #f6f5f5;
+  --keke-header-rule: rgba(120,114,116,.12);
+  --keke-header-ink: #6e6668;
+  --keke-header-hot: #a5858c;
+}
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: -11px;
+  height: 12px;
+  pointer-events: none;
+  transform: scaleY(-1);
+  filter: drop-shadow(0 -1px .8px rgba(90,70,76,.22));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='12'%3E%3Cpath fill='%23faf7f5' d='M0 12 L0 4.1 L3.2 6.7 L6 5.8 L10.2 2 L14.9 1.8 L19.4 2.1 L22.3 4.9 L28.5 2.5 L32 6.5 L38.8 6.1 L43.1 9.3 L45.8 8.4 L49.6 2.7 L52.6 4 L58.8 2.9 L63.9 6.6 L68.1 5.9 L70.9 2 L74.3 6.9 L78.7 4 L83.8 5.1 L87.7 7.9 L93.3 3.5 L98.4 5.7 L104.9 7.3 L108.7 9.3 L111.7 4.8 L117.6 2.7 L122.3 1.8 L127.8 7.6 L132.9 8.5 L136.8 7.1 L140 4.1 L140 12Z'/%3E%3C/svg%3E") 37px 100% / 140px 12px repeat-x;
+}
+body[data-polaris-preset='keke-pois'] .app-shell.chat .keke-original-topbar::after { filter: grayscale(.28) drop-shadow(0 -1px .8px rgba(90,70,76,.22)); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .topbar-surface { background: none; border: 0; box-shadow: none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .topbar-main { isolation: isolate; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .brand-world-mark { display: none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .world-anchor[data-surface='world-anchor'] { font-family: "Nunito", "Yuanti SC", "YouYuan", "PingFang SC", sans-serif; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .world-anchor h1 { font-size: 20px; font-weight: 800; letter-spacing: .18em; color: #5d5357; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .world-anchor p { font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #a39599; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .pulse-dot { animation: kekePulse 3.2s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .topbar-actions--leading button:has(.keke-original-header-avatar) { border: 0; background: none; box-shadow: none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-header-avatar { position: relative; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #ead9dc; box-shadow: 0 0 0 2px #fff,1.5px 2px 0 2px rgba(122,109,113,.14); color: #5d5357; font: 800 15px/1 "Nunito", "Yuanti SC",sans-serif; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-header-avatar::after { content: ''; position: absolute; right: 0; bottom: 1px; width: 8px; height: 8px; border-radius: 50%; background: #b88690; box-shadow: 0 0 0 2px #fff; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .topbar-actions--leading button:active .keke-original-header-avatar { animation: kekeBoing .6s ease-out; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-topbar .topbar-quick-settings-btn { width: 38px; height: 38px; border: 1.5px solid rgba(90,76,82,.75); border-radius: 50%; background: rgba(255,255,255,.55); box-shadow: 1.5px 2.5px 0 rgba(90,70,76,.1); color: #5a4c52; }
+
+/* Original source's swinging 16-piece charm string, including original bitmap pendants. */
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland { position: absolute; left: 12px; right: 12px; bottom: -2px; height: 0; z-index: 4; color: #b0838c; --keke-charm-ink: #b0838c; --keke-charm-yellow: #ebe4d4; --keke-charm-blue: #dfe3e7; --keke-charm-pink: #ead9dc; pointer-events: none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland.pois { --keke-charm-ink: #9a8f93; --keke-charm-yellow: #e9e4e4; --keke-charm-blue: #e1e5e9; --keke-charm-pink: #f3f0f0; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-garland-thread { position: absolute; left: -6px; top: 0; width: calc(100% + 12px); height: 10px; overflow: visible; fill: none; stroke: var(--keke-charm-ink); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .75; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-garland-pin { position: absolute; top: -4px; left: -8px; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 32%,#fff 0 1.3px,transparent 1.7px),var(--keke-charm-ink); box-shadow: 1px 2px 1.5px rgba(90,70,76,.3); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-garland-pin.right { left: auto; right: -8px; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland > i { position: absolute; display: flex; flex-direction: column; align-items: center; translate: -50% 0; font-style: normal; color: var(--keke-charm-ink); transform-origin: 50% 0; animation: kekeSway 6s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-garland-string { border-left: 1.5px dashed var(--keke-charm-ink); opacity: .7; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland img { width: auto; filter: drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27)); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland b { font-size: 12px; font-weight: 700; white-space: nowrap; letter-spacing: .04em; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-garland .keke-garland-label { padding: 4px 7px 3px; border-radius: 6px; background: rgba(255,255,255,.9); box-shadow: 0 0 0 1.2px rgba(176,131,140,.55),1.5px 2px 0 rgba(90,70,76,.18); font-size: 11px; transform: rotate(-2deg); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-sketch { display: block; stroke: var(--keke-charm-ink,#b0838c); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; fill: var(--keke-charm-pink,#ead9dc); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-sketch--note,.app-shell.chat .keke-original-sketch--cloud { fill: var(--keke-charm-blue,#dfe3e7); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-sketch--cherry { fill: var(--keke-charm-yellow,#ebe4d4); }
+
+/* Original floaty icon wall and the scrolling track + pendant thimble. */
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-chat-decor { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-wall { position: absolute; inset: 0; opacity: .34; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-wall > span { position: absolute; translate: -50% -50%; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-scroll-track,
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-scroll-thumb { position: absolute; z-index: 3; opacity: 0; transition: opacity .3s; filter: drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27)); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-scroll-track { right: 6px; top: 118px; height: 120px; width: auto; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-scroll-thumb { right: 24px; top: 118px; height: auto; width: 22px; transition: opacity .3s, top .12s linear; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-scroll-track.visible,.app-shell.chat .keke-original-scroll-thumb.visible { opacity: .97; }
+
+/* Source bubbles: subtle paper tilt, ink-reveal and arrival shine. */
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row.user .bubble,
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row.assistant .bubble { transition: transform .5s cubic-bezier(.2,.8,.2,1), text-shadow .5s, box-shadow .5s; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row.user .bubble:active,
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row.assistant .bubble:active { transform: translateY(-2px); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row .bubble { animation: kekeRise .9s cubic-bezier(.2,.8,.2,1) both; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .msg-row.user .bubble::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(105deg,transparent 38%,rgba(255,255,255,.22) 50%,transparent 62%) -150% 0/250% 100% no-repeat; animation: kekeShine 1.5s cubic-bezier(.2,.8,.2,1) .35s both; }
+
+/* Same handmade paper composer, but three modes trigger real Conflux features. */
+body[data-polaris-preset^="keke-"] .app-shell.chat .chat-dock { --keke-dock-paper: #faf7f5; --keke-dock-rule: rgba(157,171,185,.2); --keke-dock-margin: rgba(196,151,159,.4); background: linear-gradient(90deg,transparent 26px,var(--keke-dock-margin) 26px 27px,transparent 27px), repeating-linear-gradient(transparent 0 21px,var(--keke-dock-rule) 21px 22px) 0 8px,var(--keke-dock-paper); }
+body[data-polaris-preset='keke-pois'] .app-shell.chat .chat-dock { --keke-dock-paper: #f6f5f5; --keke-dock-rule: rgba(120,114,116,.12); --keke-dock-margin: rgba(185,147,154,.36); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .chat-composer { gap: 5px; padding: 4px 16px 2px; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes { position: relative; display: flex; gap: 8px; align-items: center; padding: 0 2px 8px; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes button { min-height: 24px; padding: 0 9px 0 7px; border: 1.2px solid var(--keke-ink,#7a6d71); border-radius: 12px; color: #5d5357; background: #efe3e4; font: 800 11px/1 "Nunito","Yuanti SC",sans-serif; letter-spacing: .1em; box-shadow: 0 0 0 2px var(--keke-dock-paper),1.5px 2px 0 2px rgba(122,109,113,.12); transform: rotate(-2deg); transition: transform .4s cubic-bezier(.2,.8,.2,1); cursor: pointer; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes button:nth-child(2) { background: #e4e7ea; transform: rotate(1.5deg); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes button:nth-child(3) { background: #ede7db; transform: rotate(-1deg); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes button:active,.app-shell.chat .keke-original-modes button.hit { animation: kekeBoing .6s cubic-bezier(.2,.8,.2,1); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-modes button:disabled { opacity: .5; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .chat-box-shell { border-radius: 16px; background: #fff; box-shadow: 0 0 0 2px var(--keke-dock-paper),1.5px 2px 0 2px rgba(176,131,140,.18); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .chat-box textarea { font-weight: 700; letter-spacing: .05em; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .chat-box textarea::placeholder { font-weight: 700; font-size: 12px; letter-spacing: .08em; color: #b8acb0; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .composer-slot-btn,.app-shell.chat .send-btn { position: relative; border-radius: 50%; box-shadow: 0 0 0 2px var(--keke-dock-paper),1.5px 2px 0 2px rgba(122,109,113,.12); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .send-btn.has-content { animation: kekeBoing .6s cubic-bezier(.2,.8,.2,1); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-marquee { display: flex; overflow: hidden; margin: 2px -16px 0; white-space: nowrap; color: #c3a6ac; font: 11px/1.5 system-ui,sans-serif; letter-spacing: .18em; -webkit-mask: linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent); mask: linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent); }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-original-marquee span { flex: none; animation: kekeMarquee 28s linear infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-ribbon { transform-origin: 50% 0; animation: kekeSway 6s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-avatar-sticker { animation: kekeSway 5s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-status i { animation: kekePulse 3.2s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-divider b { animation: kekeTwinkle 2.6s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-sheet .conflux-sidebar-calendar::after { transform-origin: 50% 0; animation: kekeSwayPaper 5s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-sheet .conflux-sidebar-calendar time[aria-current='date'] { animation: kekeTwinkle 3.2s ease-in-out infinite; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .keke-rain-cat { animation: kekePeek 5s cubic-bezier(.2,.8,.2,1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-polaris-preset^="keke-"] .app-shell.chat :is(.keke-original-garland > i,.keke-original-marquee span,.keke-profile-ribbon,.keke-avatar-sticker,.keke-profile-status i,.keke-profile-divider b,.keke-rain-cat,.msg-row .bubble) { animation: none; }
+  body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-sheet .conflux-sidebar-calendar::after,
+  body[data-polaris-preset^="keke-"] .app-shell.chat .keke-profile-sheet .conflux-sidebar-calendar time[aria-current='date'] { animation: none; }
+}
