@@ -68,6 +68,8 @@ export interface SceneAddon {
 
 export type PouchAddonOptions = {
   profile: Profile;
+  /** Compile offscreen detail shaders only when needed. Heavy foil stamps opt out. */
+  prewarmStills?: boolean;
   /** @deprecated light only; ignored */
   dark?: boolean;
   /** A click (press shorter than 250 ms that moved less than 6 px) on an object. */
@@ -460,7 +462,7 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
     );
 
   // the stills' programs (the detail view's), compiled in parallel in an idle moment once everything is built: its first open only renders
-  void stocked.then(() => {
+  if (opts.prewarmStills !== false) void stocked.then(() => {
     const go = () => {
       if (!disposed && studio && !contextLost()) void prewarmStills(studio, objects);
     };

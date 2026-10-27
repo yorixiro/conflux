@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { composeDeal, footprintsTouch } from './compose';
 import { STAMP_BODY } from './objects/stamp';
-import { resolveLayout } from '../sasshi/layout';
 
 describe('postage pocket layout', () => {
-  it('reserves a second physical sheet side for the postal sleeve', () => {
-    expect(resolveLayout('idCard2x3').pageCount(7)).toBe(2);
-  });
   it('keeps all six physical stamps separated within the zipper sleeve', () => {
     const kinds = Array(6).fill('stamp') as ('stamp')[];
     const bodies = kinds.map((_, i) => ({ id: `stamp:${i}`, ...STAMP_BODY }));

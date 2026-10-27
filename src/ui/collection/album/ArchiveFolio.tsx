@@ -4,7 +4,6 @@ import { getAssetBlob, getAssetPreviewBlob } from '../../../infrastructure/asset
 import type { ImageAssetCard } from '../../../types/domain';
 import type { PouchAddon, SceneAddon } from './bag';
 import type { MotionStatus } from './bag/motion';
-import { createPocketGrid } from './sasshi/content/grid';
 import type { PocketItem, Profile } from './profile/schema';
 import { BookView, type BookViewHandle } from './sasshi/BookView';
 import type { CaseSpec } from './sasshi/binder';
@@ -22,13 +21,6 @@ const FOLIO_CASE: Omit<CaseSpec, 'liner'> = {
   board: { w: 250, h: 340 },
   depth: 16,
 };
-
-/** One real transparent sheet: two 3D pockets can be revealed by turning it. */
-const INNER_PAGE = createPocketGrid({
-  items: Array.from({ length: 7 }, (_, i) => ({ id: `clear-pocket:${i}` })),
-  paint: () => {},
-  sources: () => [],
-});
 
 /** Object URLs exist only for the currently needed photographs, not in application state. */
 function usePouchImages(cards: ImageAssetCard[]) {
@@ -124,7 +116,7 @@ function folioProfile(name: string, cards: ImageAssetCard[], visible: ImageAsset
   };
 }
 
-/** A second physical pocket in the same binder; photographs remain on the first page. */
+/** An alternate 3D sleeve within the same binder; not a fake paper sheet. */
 function stampProfile(name: string): Profile {
   return {
     lang: 'zh-CN', name, role: '邮票收藏', bio: '六枚纪念邮票', links: [], coverTitle: name,
@@ -151,14 +143,6 @@ export function ArchiveFolio({
 }) {
   const [bag, setBag] = useState<BagModule | null>(null);
   const [supported] = useState(() => typeof document !== 'undefined' && canRender3d());
-  // Tablet GPUs can handle a sharp MSAA canvas, but the desktop-size VSM
-  // shadows and frost targets make every drag needlessly expensive. Sasshi's
-  // low preset reduces those auxiliary passes without lowering pixel ratio.
-  const [folioQuality] = useState<'low' | undefined>(() =>
-    typeof window !== 'undefined' && (
-      window.matchMedia?.('(pointer: coarse)').matches || navigator.maxTouchPoints > 0
-    ) ? 'low' : undefined,
-  );
   const [group, setGroup] = useState(0);
   const [closed, setClosed] = useState(false);
   const [motion, setMotion] = useState<MotionUi>('off');
@@ -222,18 +206,18 @@ export function ArchiveFolio({
       pagesRef.current = null;
       return [photo];
     }
-    const stamps = bag.createPouchAddon({ ...options, profile: liveStampProfile.current, labels: { pouch: 'POSTAGE · 06' } });
-    // A narrow book cameras the LEFT board after the sheet turns. Keep the
-    // photo pouch on the right/back board and mount the stamp pouch on the
-    // left/front board. Putting both under 'back-inside' crops the stamps
-    // outside the viewport on page two (as seen on the Android tablet).
-    const postageGroup = new Group();
-    postageGroup.name = 'folio-postage-front-page';
-    postageGroup.add(stamps.object);
-    // The foil's directional key follows the pointer in the same board frame.
+    const stamps = bag.createPouchAddon({ ...options, profile: liveStampProfile.current, labels: { pouch: 'POSTAGE · 06' }, prewarmStills: false });
+    // This folio has no paper sheets: an earlier attempt inserted seven dummy
+    // card cells just to get a second page index. The resulting empty sheet
+    // covered the stamps and cost a full deforming mesh/shadow pass. Switch
+    // which 3D sleeve is visible inside the SAME blue back cover instead.
+    const sleeveGroup = new Group();
+    sleeveGroup.name = 'folio-sleeves';
+    sleeveGroup.add(photo.object, stamps.object);
+    // The foil's directional key follows the pointer in the pouch frame.
     const key = new DirectionalLight(0xfff1d8, 0);
     key.position.set(-0.3, 0.45, 0.5);
-    postageGroup.add(key, key.target);
+    sleeveGroup.add(key, key.target);
     let wake: (() => void) | null = null;
     let lastLight = '';
     const aim = (ray: Parameters<NonNullable<PouchAddon['pointer']>['down']>[0]) => {
@@ -252,7 +236,6 @@ export function ArchiveFolio({
     const select = (postage: boolean) => {
       photo.object.visible = !postage;
       stamps.object.visible = postage;
-      postageGroup.visible = postage;
       key.intensity = 0;
       lastLight = '';
       pouchRef.current = postage ? stamps : photo;
@@ -260,42 +243,24 @@ export function ArchiveFolio({
     };
     select(false);
     pagesRef.current = { photo, stamps, select };
-    const photoPage: SceneAddon = {
+    const sleeves: SceneAddon = {
       anchor: 'back-inside',
-      object: photo.object,
-      attach: (ctx) => photo.attach(ctx),
-      update: (dt, t, frame) => photo.object.visible && photo.update(dt, t, frame),
+      object: sleeveGroup,
+      attach: (ctx) => { wake = ctx.invalidate; photo.attach(ctx); stamps.attach(ctx); },
+      update: (dt, t, frame) => (stamps.object.visible ? stamps : photo).update(dt, t, frame),
       pointer: {
-        down: (ray, event) => photo.object.visible && photo.pointer.down(ray, event),
-        move: (ray, event) => { if (photo.object.visible) photo.pointer.move(ray, event); },
-        up: (ray, event) => { if (photo.object.visible) photo.pointer.up(ray, event); },
-        hover: (ray) => photo.object.visible && (photo.pointer.hover?.(ray) ?? false),
+        down: (ray, event) => { aim(ray); return (stamps.object.visible ? stamps : photo).pointer.down(ray, event); },
+        move: (ray, event) => { aim(ray); (stamps.object.visible ? stamps : photo).pointer.move(ray, event); },
+        up: (ray, event) => (stamps.object.visible ? stamps : photo).pointer.up(ray, event),
+        hover: (ray) => { aim(ray); return (stamps.object.visible ? stamps : photo).pointer.hover?.(ray) ?? false; },
       },
-      setOpen: (open) => photo.setOpen(open),
-      setDark: (dark) => photo.setDark(dark),
+      setOpen: (open) => { photo.setOpen(open); stamps.setOpen(open); },
+      setDark: (dark) => { photo.setDark(dark); stamps.setDark(dark); },
       printed: () => photo.printed?.() ?? Promise.resolve(),
-      restore: () => photo.restore(),
-      dispose: () => photo.dispose(),
+      restore: () => { photo.restore(); stamps.restore(); },
+      dispose: () => { photo.dispose(); stamps.dispose(); pagesRef.current = null; },
     };
-    const postagePage: SceneAddon = {
-      anchor: 'front-inside',
-      object: postageGroup,
-      attach: (ctx) => { wake = ctx.invalidate; stamps.attach(ctx); },
-      update: (dt, t, frame) => stamps.object.visible && stamps.update(dt, t, frame),
-      pointer: {
-        down: (ray, event) => { if (!stamps.object.visible) return false; aim(ray); return stamps.pointer.down(ray, event); },
-        move: (ray, event) => { if (stamps.object.visible) { aim(ray); stamps.pointer.move(ray, event); } },
-        up: (ray, event) => { if (stamps.object.visible) stamps.pointer.up(ray, event); },
-        hover: (ray) => { if (!stamps.object.visible) return false; aim(ray); return stamps.pointer.hover?.(ray) ?? false; },
-      },
-      setOpen: (open) => stamps.setOpen(open),
-      setDark: (dark) => stamps.setDark(dark),
-      // The six relief textures can finish streaming after the cover opens.
-      printed: () => Promise.resolve(),
-      restore: () => stamps.restore(),
-      dispose: () => { stamps.dispose(); pagesRef.current = null; },
-    };
-    return [photoPage, postagePage];
+    return [sleeves];
   }, [bag, ownerId]);
 
   const caseSpec = useMemo<CaseSpec>(() => ({
@@ -353,20 +318,13 @@ export function ArchiveFolio({
         <BookView
           key={`${ownerId}:${index}:${visible.map((card) => card.id).join(':')}`}
           ref={bookRef}
-          content={ownerId === 'self' ? INNER_PAGE : undefined}
-          sheets={ownerId === 'self' ? 1 : 0}
+          sheets={0}
           case={caseSpec}
           cover={cover}
           addons={addons}
-          quality={folioQuality}
           tilt
           autoOpen
-          onState={(state) => {
-            setClosed(state.closed);
-            const postage = ownerId === 'self' && state.index > 0;
-            pagesRef.current?.select(postage);
-            setStampPageOpen(postage);
-          }}
+          onState={(state) => setClosed(state.closed)}
           labels={{ region: `${ownerName}的蓝色收藏册`, openBook: '打开收藏册' }}
         />
       ) : (
@@ -383,12 +341,16 @@ export function ArchiveFolio({
           className="conflux-archive-album__page-tab"
           data-stamp-active={stampPageOpen ? 'true' : undefined}
           aria-pressed={stampPageOpen}
-          aria-label={stampPageOpen ? '翻回照片收藏内页' : '翻到六枚邮票收藏内页'}
+          aria-label={stampPageOpen ? '切回照片收纳袋' : '切换到六枚邮票收纳袋'}
+          disabled={!show3d}
           onClick={() => {
             setDetailId(null);
             if (closed) bookRef.current?.toggleCover();
-            else if (stampPageOpen) bookRef.current?.prev();
-            else bookRef.current?.next();
+            else if (pagesRef.current) {
+              const next = !stampPageOpen;
+              pagesRef.current.select(next);
+              setStampPageOpen(next);
+            }
           }}
         >
           <span>{stampPageOpen ? 'PHOTOS' : 'POSTAGE'}</span>
