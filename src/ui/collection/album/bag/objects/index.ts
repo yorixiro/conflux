@@ -17,6 +17,7 @@ import { buildPolaroid, POLAROID_BODY } from "./polaroid";
 import { buildResume, RESUME_BODY } from "./resume";
 import { assemble, type ObjectDef } from "./rig";
 import { buildTicket, TICKET_BODY } from "./ticket";
+import { buildStamp, STAMP_BODY } from "./stamp";
 import type { BodySpec, BuiltObject, ObjectCtx } from "./types";
 
 export type { BodySpec, BodyState, BuiltObject, FontStacks, ObjectCtx, Owner, Pouch, PouchCtx } from "./types";
@@ -35,6 +36,8 @@ function define(item: PocketItem, ctx: ObjectCtx): ObjectDef {
       return buildPolaroid(item, ctx);
     case "note":
       return buildNote(item, ctx);
+    case "stamp":
+      return buildStamp(item, ctx);
     default: {
       const never: never = item;
       throw new Error(`unknown pocket item kind: ${JSON.stringify(never)}`);
@@ -44,7 +47,7 @@ function define(item: PocketItem, ctx: ObjectCtx): ObjectDef {
 
 /** The sim's body of an item, without building it (the very spec its builder gives). */
 export function bodySpec(item: PocketItem): BodySpec {
-  const body = { card: CARD_BODY, resume: RESUME_BODY, ticket: TICKET_BODY, polaroid: POLAROID_BODY, note: NOTE_BODY }[item.kind];
+  const body = { card: CARD_BODY, resume: RESUME_BODY, ticket: TICKET_BODY, polaroid: POLAROID_BODY, note: NOTE_BODY, stamp: STAMP_BODY }[item.kind];
   return { id: item.id, ...body };
 }
 

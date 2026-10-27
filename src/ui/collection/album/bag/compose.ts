@@ -37,6 +37,15 @@ export function composeDeal(kinds: readonly ItemKind[], specs: readonly BodySpec
     const used = new Set<ItemKind>();
     return specs.map((_, i) => {
       const kind = kinds[i];
+      if (kind === "stamp") {
+        const serial = kinds.slice(0, i).filter((k) => k === "stamp").length;
+        // Two columns of three loose stamps inside the existing transparent pouch.
+        // A small alternating cant preserves the scrapbook feeling without covering the art.
+        const x = (serial % 2 ? 60 : -60) + (r() - 0.5) * j.d;
+        const y = 103 - Math.floor(serial / 2) * 103 + (r() - 0.5) * j.d;
+        const angle = (serial % 2 ? 3 : -4) + (r() - 0.5) * j.a;
+        return { x: (mirror * x) / 1000, y: y / 1000, angle: (mirror * angle * Math.PI) / 180 };
+      }
       const slot = kind ? SLOTS[kind] : undefined;
       if (!kind || !slot || used.has(kind)) return null;
       used.add(kind);

@@ -27,7 +27,11 @@ export type PolaroidItem = ItemBase & {
   place?: string; date?: string; back?: string;
 };
 export type NoteItem = ItemBase & { kind: 'note'; text: string; from: string; date?: string };
-export type PocketItem = BusinessCardItem | ResumeItem | TicketItem | PolaroidItem | NoteItem;
+export type StampItem = ItemBase & {
+  kind: 'stamp'; image: string; finish: 'impasto-gloss' | 'gildfoil' | 'kogei';
+  metal?: 'gold' | 'silver';
+};
+export type PocketItem = BusinessCardItem | ResumeItem | TicketItem | PolaroidItem | NoteItem | StampItem;
 export type ItemKind = PocketItem['kind'];
 export type Profile = {
   lang?: string; name: string; nameLocal?: string; handle?: string; role: string;
