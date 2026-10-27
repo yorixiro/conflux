@@ -479,6 +479,14 @@ export function createBagSim(o: BagSimOptions): BagSim {
       if (acc < 0) acc = 0;
     },
     state: () => states,
+    relabel(ids) {
+      if (ids.length !== items.length || new Set(ids).size !== ids.length) throw new Error("invalid pouch body ids");
+      byId.clear();
+      items.forEach((it, i) => {
+        it.spec.id = it.out.id = ids[i]!;
+        byId.set(it.spec.id, it);
+      });
+    },
     grab(id, x, y) {
       const it = byId.get(id);
       if (!it || !Number.isFinite(x + y) || held === it) return;

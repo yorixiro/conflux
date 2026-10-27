@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { canvasFont, canvasFontLocal, hanLangOf, type FontRun, type HanLang, type Role } from "../../fonts";
 import { wrapUnits, type WrapOptions } from "../../print/kinsoku";
 import type { ObjectCtx } from "./types";
+import { skipReceiveOnlyShadowDraw } from "../../receiveOnlyShadow";
 
 export type V2 = readonly [number, number];
 
@@ -139,6 +140,7 @@ export function receiveSun(o: THREE.Object3D): void {
     m.receiveShadow = true;
     m.castShadow = false;
     m.customDepthMaterial = noDepth();
+    skipReceiveOnlyShadowDraw(m);
   });
 }
 
@@ -291,7 +293,8 @@ export function wrapText(g: CanvasRenderingContext2D, text: string, o: FontOpts,
 
 const decoded = new Map<string, Promise<HTMLImageElement>>();
 /**
- * A picture, loaded and decoded once per URL for every user (the pouch's object and its lightbox snapshot paint the same pixels).
+ * Share in-flight decoding. Once painted, the object's canvas owns the pixels (including its stills), so do not retain decoded
+ * images forever: revoking an object URL alone does not release an image kept in this map.
  * Rejects when it fails to load; the failure is not cached, so a later call tries again.
  */
 export function decodedImage(src: string): Promise<HTMLImageElement> {
@@ -302,7 +305,10 @@ export function decodedImage(src: string): Promise<HTMLImageElement> {
     img.decoding = "async";
     img.src = src;
     p = img.decode().then(
-      () => img,
+      () => {
+        if (decoded.get(src) === p) decoded.delete(src);
+        return img;
+      },
       (e: unknown) => {
         decoded.delete(src);
         throw e instanceof Error ? e : new Error(`could not load ${src}`);

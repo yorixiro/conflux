@@ -35,7 +35,7 @@ const SUPER_MAX_PX = 8e6;
  */
 const SHADOW = { soft: { blur: 4, dy: 2.9, alpha: 0.16 }, contact: { blur: 0.3, dy: 0.3, alpha: 0.12 } } as const;
 
-export type SnapshotOptions = { side?: "front" | "back"; shadow?: boolean };
+export type SnapshotOptions = { side?: "front" | "back"; shadow?: boolean; signal?: AbortSignal };
 /**
  * A still: a PNG data URL, and the transparent margin round the object on every side as a fraction of the image's width (0 without
  * `shadow`). The object itself is the image minus `pad · width` on each side (top and bottom too: the margin is the same in px).
@@ -290,13 +290,23 @@ export async function prewarmStills(host: Studio, objects: readonly BuiltObject[
 
 export async function renderSnapshot(host: Studio, live: BuiltObject, width: number, opts: SnapshotOptions = {}): Promise<SnapshotImage | null> {
   const { renderer } = host;
-  const lost = () => renderer.getContext().isContextLost();
+  const lost = () => opts.signal?.aborted || renderer.getContext().isContextLost();
+  if (lost()) return null;
   const { model, flat } = live.still();
   const scene = new THREE.Scene();
   const rts: THREE.WebGLRenderTarget[] = [];
   try {
     // the picture (the polaroid's photo) is in the print before the still is taken: the detail shows what lies in the pouch
-    await live.ready;
+    if (opts.signal) {
+      const signal = opts.signal;
+      await new Promise<void>((resolve, reject) => {
+        const done = () => { signal.removeEventListener('abort', done); resolve(); };
+        signal.addEventListener('abort', done, { once: true });
+        if (signal.aborted) done();
+        void live.ready.then(done, reject);
+      });
+    } else await live.ready;
+    if (lost()) return null;
     // the back: turned over like a card in the hand (about its vertical axis), so its top stays at the top
     if (opts.side === "back") model.rotation.y = Math.PI;
     scene.add(model);
@@ -350,6 +360,7 @@ export async function renderSnapshot(host: Studio, live: BuiltObject, width: num
     if (lost()) return null;
     for (const rt of rts.splice(0)) rt.dispose();
     await yieldFrame();
+    if (lost()) return null;
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -362,6 +373,7 @@ export async function renderSnapshot(host: Studio, live: BuiltObject, width: num
       return url ? { url, pad: 0 } : null;
     }
     await yieldFrame();
+    if (lost()) return null;
     const ppm = width / (bw * 1000);
     const holes = live.holes ? holeMask(canvas, live.outline, { minX: box.min.x, maxX: box.max.x, minY: box.min.y, maxY: box.max.y }, opts.side === "back", 1.5) : null;
     const shot = withShadow(canvas, ppm, holes);

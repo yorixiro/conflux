@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { skipReceiveOnlyShadowDraw } from "../receiveOnlyShadow";
 import type { AddonContext, SceneAddon } from "./addon";
 import { COVER_MATERIALS, type CoverSpec } from "./cover";
 import { ensureFonts, fontsLoadedFor } from "../fonts";
@@ -95,6 +96,10 @@ export type BookState = {
 };
 
 export type BookOptions = {
+  /** Cancel a React mount that was abandoned while fonts were loading, before allocating a WebGL context. */
+  signal?: AbortSignal;
+  /** Fixed-cover hosts can skip painting the unused cloth/leather alternatives in idle time. Frost programs still warm normally. */
+  prewarmCovers?: boolean;
   /**
    * sasshi: what the pockets hold (content/grid.ts). Default: a pocket grid of `cards` (today's card binder behaviour).
    * Its `layout` is used unless BookOptions.layout is given.
@@ -534,6 +539,10 @@ export async function createBook(host: HTMLElement, opts: BookOptions): Promise<
   const faces = [`600 48px ${font}`, fonts.serif && `500 48px ${fonts.serif}`, fonts.serif && `400 48px ${fonts.serif}`, fonts.mono && `400 48px ${fonts.mono}`].filter((f): f is string => !!f);
   const all = Promise.all([...faces.map((f) => document.fonts.load(f).catch(() => [])), ensureFonts(caseFontRuns(opts.cover.title, opts.case ?? {}))]);
   const late = await Promise.race([all.then(() => false), new Promise<boolean>((r) => setTimeout(() => r(true), 600))]);
+  if (opts.signal?.aborted) {
+    for (const a of opts.addons ?? []) a.dispose();
+    opts.signal.throwIfAborted();
+  }
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
   try {
     const book = buildBook(host, opts, renderer, fonts);
@@ -2248,7 +2257,10 @@ function buildBook(host: HTMLElement, opts: BookOptions, renderer: THREE.WebGLRe
   }
   const guardReceiver = (ob: THREE.Object3D) => {
     const m = ob as THREE.Mesh;
-    if (m.isMesh && m.receiveShadow && !m.customDepthMaterial) m.customDepthMaterial = receiveOnly;
+    if (m.isMesh && m.receiveShadow && !m.customDepthMaterial) {
+      m.customDepthMaterial = receiveOnly;
+      skipReceiveOnlyShadowDraw(m);
+    }
   };
   /** The key's map is to be drawn in the next pass that renders the scene (the frosted background or the main one) */
   function keyMap() {
@@ -3675,7 +3687,7 @@ function buildBook(host: HTMLElement, opts: BookOptions, renderer: THREE.WebGLRe
   const cancelIdle = (id: number) => (typeof cancelIdleCallback === "function" ? cancelIdleCallback(id) : clearTimeout(id));
   function prepaintSoon() {
     cancelIdle(prepaintTimer);
-    const todo = COVER_MATERIALS.filter((m) => m !== curCover.material).map((m) => ({ ...curCover, material: m }));
+    const todo = opts.prewarmCovers === false ? [] : COVER_MATERIALS.filter((m) => m !== curCover.material).map((m) => ({ ...curCover, material: m }));
     // sasshi (round 4, E1): a step of one (binder.ts prepaintSteps) an idle slot
     let steps: Generator<void, void> | null = null;
     const next = () => {

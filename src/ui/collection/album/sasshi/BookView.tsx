@@ -36,6 +36,7 @@ export type BookViewHandle = {
 };
 
 export type BookViewProps = {
+  prewarmCovers?: boolean;
   /** The card binder's items (shorthand; `content` or `items` win) */
   cards?: BookCard[];
   /**
@@ -104,6 +105,7 @@ const LOADER_DELAY = 300;
 const capable = () => typeof window !== "undefined" && canRender3d();
 
 export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookView({
+  prewarmCovers,
   cards,
   content: contentProp,
   layout: layoutProp,
@@ -232,6 +234,7 @@ export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookV
   useEffect(() => {
     if (kind !== "3d" || !measured) return;
     let dead = false;
+    const abort = new AbortController();
     let book: Book | null = null;
     setReady(false);
     setSceneState(null);
@@ -242,6 +245,8 @@ export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookV
         dead
           ? null
           : m.createBook(stageRef.current!, {
+              signal: abort.signal,
+              prewarmCovers,
               content,
               layout: layoutProp,
               sheets: sheetsProp,
@@ -282,11 +287,13 @@ export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookV
         now.onBook?.(b);
       })
       .catch((err: unknown) => {
+        if (dead) return;
         console.warn("[sasshi] 3D book failed, using the flat one", err);
         if (!dead) setFailed(true);
       });
     return () => {
       dead = true;
+      abort.abort();
       book?.dispose();
       bookRef.current = null;
       live.current.onBook?.(null);

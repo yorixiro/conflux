@@ -249,27 +249,31 @@ export function buildPolaroid(item: PolaroidItem, ctx: ObjectCtx): ObjectDef {
   const glossTex = T.add(dataTexture(gm.c, ctx));
 
   let disposed = false;
+  let pictureGen = 0;
   T.onFree(() => {
     disposed = true;
   });
   // the picture: decoded once for every user of the URL; the object is complete (and `ready`) once it is in the print
-  const ready: Promise<void> = item.image
-    ? decodedImage(item.image).then(
+  const loadPicture = (src: string | undefined, paintOnLoad = true): Promise<void> => {
+    const gen = ++pictureGen;
+    photoReady = false;
+    picture = !!src;
+    return src ? decodedImage(src).then(
         (img) => {
-          if (disposed) return;
+          if (disposed || gen !== pictureGen) return;
           renderPhoto(img);
-          paint();
-          ctx.onChange?.();
+          if (paintOnLoad) { paint(); ctx.onChange?.(); }
         },
         () => {
           // no picture after all: the procedural one
-          if (disposed) return;
+          if (disposed || gen !== pictureGen) return;
           picture = false;
-          paint();
-          ctx.onChange?.();
+          if (paintOnLoad) { paint(); ctx.onChange?.(); }
         },
       )
     : Promise.resolve();
+  };
+  let ready = loadPicture(item.image);
 
   const outline0 = roundedRectOutline(POLAROID_W, POLAROID_H, 0.0009, 5);
   const mask = maskTexture(T, ctx, outline0, POLAROID_W, POLAROID_H, 5200);
@@ -290,12 +294,14 @@ export function buildPolaroid(item: PolaroidItem, ctx: ObjectCtx): ObjectDef {
     tracker: T,
     repaint: paint,
     runs,
-    ready,
+    get ready() { return ready; },
     relabel(next, nctx) {
-      // the photograph is rendered once: another picture is another object
-      if (next.kind !== "polaroid" || next.image !== item.image) return null;
+      if (next.kind !== "polaroid") return null;
+      const changed = next.image !== item.image;
       item = next;
       ctx = nctx;
+      // setProfile paints and uploads once after both the photo and its fonts arrive.
+      if (changed) ready = loadPicture(next.image, false);
       return words();
     },
   };

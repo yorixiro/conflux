@@ -237,11 +237,12 @@ export function assemble(def: ObjectDef): BuiltObject {
     relabel(item, ctx) {
       const runs = def.relabel?.(item, ctx);
       if (!runs) return false;
+      built.body.id = item.id;
       built.fonts = runs;
       return true;
     },
     fonts: def.runs ?? [],
-    ready: def.ready ?? Promise.resolve(),
+    get ready() { return def.ready ?? Promise.resolve(); },
     flex: () => flex?.value ?? 0,
     holes: (def.shadowHoles?.length ?? 0) > 0,
     still() {
