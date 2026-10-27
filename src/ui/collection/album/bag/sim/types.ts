@@ -79,6 +79,8 @@ export interface BagSim {
   step(dt: number, frame: Frame): void;
   /** Live array, one entry per body in spec order. It is mutated in place by `step`; copy what you need to keep. */
   state(): readonly BodyState[];
+  /** Rename equal-shaped slots atomically, retaining bodies, velocities, layers and held joints. */
+  relabel(ids: readonly string[]): void;
   /** Pick up a body at pouch point (x, y). The body becomes a ghost (collides with walls only) shown on the top layer. */
   grab(id: string, x: number, y: number): void;
   /** Move the pointer while holding. */

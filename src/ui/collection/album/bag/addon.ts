@@ -138,8 +138,8 @@ export interface PouchAddon extends SceneAddon {
    * handful of frames. Takes about half a second (the first switch to a language a little more: its faces download). The stills
    * (snapshot) follow: none is kept from the old language, and one asked for during the swap is of the new one. `labels.pouch`: the
    * film's mark (default: the profile's name). Resolves true once the new language is on view (or a later call overtook this one),
-   * false when it cannot be done in place: the profile's items differ from the pouch's (ids and kinds in order, the polaroid's
-   * picture) — the host then builds a new pouch.
+   * false when the count or kinds differ, or non-photo ids change — the host then replaces only that pouch. Equal-shaped photo
+   * slots reuse their canvas textures, geometry and physics (including velocity/layer); image loads are superseded by later calls.
    */
   setProfile(profile: Profile, labels?: { pouch?: string }): Promise<boolean>;
   /**
@@ -230,6 +230,16 @@ const SHAKE = { dur: 0.36, unload: 0.6, second: 0.13, secondK: 0.75, gain: 0.55,
 /** The pouch's print faces are requested this long after it is made at the latest (a host that never reports the cover). */
 const FONTS_LATEST = 2500;
 
+/** Cancellation ends a wait even when the obsolete image/font request has not settled yet. */
+function settleOrAbort(work: Promise<unknown>, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const done = () => { signal.removeEventListener('abort', done); resolve(); };
+    signal.addEventListener('abort', done, { once: true });
+    void work.then(done, (error: unknown) => { signal.removeEventListener('abort', done); reject(error); });
+  });
+}
+
 export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
   const { profile } = opts;
   /** The film's mark (setProfile changes it with the language). */
@@ -271,7 +281,8 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
 
   /** The print was set in the web faces from the start (a pouch made again later in the visit): no repaint when they are all in. */
   const webAtBuild = printWebOn();
-  const items = profile.items;
+  let items = profile.items;
+  let printedProfile = profile;
   /** The film and the objects (spec order), once built (see `built`). */
   let pouch: Pouch | null = null;
   const slots: (BuiltObject | null)[] = items.map(() => null);
@@ -341,9 +352,11 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
   const specLayers = bodies.map((b) => b.layer as LayerNo);
   const homes = specLayers.slice();
   let disposed = false;
+  let swapAbort = new AbortController();
   /** Stills by id, size, side and shadow; `done` once the render has finished (kept) or failed (dropped). */
-  type Shot = { p: Promise<SnapshotImage | null>; done: boolean };
+  type Shot = { p: Promise<SnapshotImage | null>; done: boolean; abort: AbortController };
   const shots = new Map<string, Shot>();
+  const clearShots = () => { for (const s of shots.values()) s.abort.abort(); shots.clear(); };
   /** Context losses seen (webglcontextlost, restore()): a still whose render one overlapped is thrown away. */
   let losses = 0;
   const contextLost = () => studio?.renderer.getContext().isContextLost() ?? false;
@@ -421,7 +434,15 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
         stockJobs.push(...jobs);
         recipes[i] = r;
         placed.push(
-          Promise.all([compiled(o.object), uploadSlowly(o.object)]).then(() => {
+          // Stamp maps determine shader defines. Compile/upload the final recipe once, rather than the fallback followed by it.
+          (items[i]!.kind === "stamp" ? (async () => {
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            try {
+              await Promise.race([o.ready, new Promise<void>((resolve) => { timer = setTimeout(resolve, 1500); })]);
+            } finally { clearTimeout(timer); }
+          })() : Promise.resolve()).then(() => {
+            if (!disposed) return Promise.all([compiled(o.object), uploadSlowly(o.object)]);
+          }).then(() => {
             if (disposed) o.dispose();
             else place(i, o);
           }),
@@ -514,46 +535,65 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
    * turns to the new language within a few frames. Swaps run one after the other; a later call makes an earlier one stop where it is.
    */
   let swapGen = 0;
+  const pendingPrint = new Set<number>();
+  let filmDirty = false;
+  let requestedPrint = JSON.stringify([profile, filmLabel]);
   let swaps: Promise<void> = Promise.resolve();
   const sameItems = (p: Profile) =>
     p.items.length === items.length &&
     p.items.every((it, i) => {
       const was = items[i]!;
-      // the polaroid's photograph is rendered once: another picture is another object
-      return it.id === was.id && it.kind === was.kind && (it.kind !== "polaroid" || was.kind !== "polaroid" || it.image === was.image);
+      // A different photo in an equal-shaped slot changes print, not geometry or a physics body.
+      return it.kind === was.kind && (it.kind === "polaroid" || it.id === was.id);
     });
-  async function swapTo(next: Profile, label: string | undefined, gen: number): Promise<void> {
+  async function swapTo(next: Profile, label: string | undefined, gen: number, signal: AbortSignal): Promise<void> {
     await built;
     // the first late repaint (the web faces) must be done: it paints whatever the objects hold
     kickFonts();
     await fontsSettled;
     const alive = () => !disposed && gen === swapGen;
     if (!alive()) return;
-    await makeStocks(remakeStocks(recipes.flat()), alive);
+    const ownerChanged = JSON.stringify(ctxFor(printedProfile).owner) !== JSON.stringify(ctxFor(next).owner) || printedProfile.lang !== next.lang;
+    const changed = next.items.map((it, i) => ownerChanged || pendingPrint.has(i) || JSON.stringify(it) !== JSON.stringify(items[i]));
+    await makeStocks(remakeStocks(recipes.filter((_, i) => changed[i]).flat()), alive);
     if (!alive()) return;
     const nctx = ctxFor(next);
-    slots.forEach((o, i) => o?.relabel(next.items[i]!, nctx));
+    changed.forEach((dirty, i) => { if (dirty) pendingPrint.add(i); });
+    filmDirty ||= ownerChanged || label !== filmLabel;
+    slots.forEach((o, i) => { if (changed[i]) o?.relabel(next.items[i]!, nctx); });
+    sim.relabel(next.items.map((it) => it.id));
+    items = next.items;
+    printedProfile = next;
+    if (hold) hold.id = states.find((s) => s.held)?.id ?? hold.id;
+    kindById.clear();
+    items.forEach((it) => kindById.set(it.id, it.kind));
     pouch?.relabel({ ...nctx, label: label ?? next.name });
-    await ensureFonts([...(pouch?.fonts ?? []), ...slots.flatMap((o) => o?.fonts ?? [])]);
+    const loaded = Promise.all([ensureFonts([...(pouch?.fonts ?? []), ...slots.flatMap((o) => o?.fonts ?? [])]), ...slots.map((o) => o?.ready)]);
+    await settleOrAbort(loaded, signal);
+    if (!alive()) return;
     // one thing per task, back to back (a print and its upload take 2–15 ms; all of them in one task would be a long one): the
     // pouch turns to the new language over a few frames. (Overtaken: the objects hold the new words, some still show the old print;
     // the next swap paints them all.)
-    if (pouch) {
+    if (pouch && filmDirty) {
       if (!alive()) return;
       pouch.repaint();
       upload(pouch.group);
+      filmDirty = false;
     }
-    for (const o of slots) {
+    for (let i = 0; i < slots.length; i++) {
+      const o = slots[i];
+      if (!changed[i]) continue;
       if (!o) continue;
       await nextTask();
       if (!alive()) return;
       o.repaint();
       upload(o.object);
+      pendingPrint.delete(i);
       host?.invalidate();
     }
     filmLabel = label;
     // the stills of the old language (and any made from it meanwhile) go
-    shots.clear();
+    clearShots();
     releaseStocks();
     host?.invalidate();
   }
@@ -748,17 +788,17 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
     kickFonts();
     const era = losses;
     const gen = swapGen;
-    const entry: Shot = { p: Promise.resolve(null), done: false };
+    const entry: Shot = { p: Promise.resolve(null), done: false, abort: new AbortController() };
     // a still that failed, or whose render a context loss overlapped, is not kept: the next ask renders it again. One asked for while
     // a language swap is on its way waits for it; one whose render a later swap overtook is rendered again, in the new language.
-    entry.p = Promise.all([fontsSettled, swaps])
+    entry.p = settleOrAbort(Promise.all([fontsSettled, swaps]), entry.abort.signal)
       .then(() => {
         const live = slots.find((ob) => ob?.body.id === id);
-        return disposed || !studio || !live ? null : renderSnapshot(studio, live, w, { side, shadow });
+        return disposed || entry.abort.signal.aborted || !studio || !live ? null : renderSnapshot(studio, live, w, { side, shadow, signal: entry.abort.signal });
       })
       .then((s) => {
         entry.done = true;
-        if (s && era === losses && gen === swapGen && !contextLost()) return s;
+        if (s && !entry.abort.signal.aborted && era === losses && gen === swapGen && !contextLost()) return s;
         if (shots.get(key) === entry) shots.delete(key);
         return s && gen !== swapGen && !disposed && studio && !contextLost() ? still(id, w, side, shadow) : null;
       });
@@ -895,23 +935,34 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
       const w = Math.max(16, Math.min(2048, Math.round(Number.isFinite(px) ? px : 512)));
       const shadow = o?.shadow === true;
       const p = still(id, w, o?.side === "back" ? "back" : "front", shadow);
+      const entry = shots.get(`${id}:${w}:${o?.side === "back" ? "back" : "front"}:${shadow ? "s" : ""}`);
+      const cancel = () => entry?.abort.abort();
+      o?.signal?.addEventListener('abort', cancel, { once: true });
+      if (o?.signal?.aborted) cancel();
+      const result = p.finally(() => o?.signal?.removeEventListener('abort', cancel));
       // without a shadow, the plain data URL (as before)
-      return shadow ? p : p.then((s) => s?.url ?? null);
+      return shadow ? result : result.then((s) => s?.url ?? null);
     }) as PouchAddon["snapshot"],
     restore() {
       // the GPU is back: drop the stills still being made across the loss (they read back zeros, if anything); the finished ones are
       // plain data and stay
       losses++;
-      for (const [k, s] of [...shots]) if (!s.done) shots.delete(k);
+      for (const [k, s] of [...shots]) if (!s.done) { s.abort.abort(); shots.delete(k); }
       host?.invalidate();
     },
     setProfile(next, labels) {
       if (disposed || !sameItems(next)) return Promise.resolve(false);
+      const signature = JSON.stringify([next, labels?.pouch]);
+      if (signature === requestedPrint) return swaps.then(() => true);
+      requestedPrint = signature;
       const gen = ++swapGen;
+      swapAbort.abort();
+      swapAbort = new AbortController();
+      const signal = swapAbort.signal;
       const label = labels?.pouch;
       // nothing of the old language is handed out from now on
-      shots.clear();
-      const run = swaps.then(() => swapTo(next, label, gen)).catch((e: unknown) => console.error("[sasshi] pouch language swap failed", e));
+      clearShots();
+      const run = swaps.then(() => swapTo(next, label, gen, signal)).catch((e: unknown) => console.error("[sasshi] pouch language swap failed", e));
       swaps = run;
       return run.then(() => true);
     },
@@ -923,12 +974,14 @@ export function createPouchAddon(opts: PouchAddonOptions): PouchAddon {
     dispose() {
       if (disposed) return;
       disposed = true;
+      swapAbort.abort();
+      kickFonts();
       unsubscribe();
       hold = null;
       host = null;
       studio?.renderer.domElement.removeEventListener("webglcontextlost", onLost);
       studio = null;
-      shots.clear();
+      clearShots();
       for (const o of slots) o?.dispose();
       pouch?.dispose();
       root.removeFromParent();

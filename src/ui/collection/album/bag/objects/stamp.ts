@@ -100,35 +100,46 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
 
   let disposed = false;
   tracker.onFree(() => { disposed = true; });
-  const art = new Promise<void>((resolve) => {
+  // Every request settles on disposal; late network responses cannot mutate a dead pouch.
+  const loadTexture = (src: string): Promise<THREE.Texture | null> => new Promise((resolve) => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.referrerPolicy = 'no-referrer';
-    image.onload = () => {
-      if (!disposed) {
-        const original = tracker.add(new THREE.Texture(image));
-        original.colorSpace = THREE.SRGBColorSpace;
-        original.minFilter = THREE.LinearMipmapLinearFilter;
-        original.magFilter = THREE.LinearFilter;
-        original.anisotropy = Math.min(8, ctx.anisotropy);
-        original.needsUpdate = true;
-        material.map = original;
-        ctx.onChange?.();
-      }
-      resolve();
+    image.decoding = 'async';
+    let done = false;
+    const finishLoad = (texture: THREE.Texture | null) => {
+      if (done) { texture?.dispose(); return; }
+      done = true;
+      image.onload = image.onerror = null;
+      if (!texture) image.removeAttribute('src');
+      resolve(texture);
     };
-    image.onerror = () => resolve();
-    image.src = finish.art;
+    tracker.onFree(() => { if (!done) finishLoad(null); });
+    image.onload = () => {
+      void image.decode().catch(() => {}).then(() => finishLoad(disposed ? null : new THREE.Texture(image)));
+    };
+    image.onerror = () => finishLoad(null);
+    image.src = src;
   });
-
-  const loader = new THREE.TextureLoader();
-  loader.setCrossOrigin('anonymous');
+  const configure = (texture: THREE.Texture, colorSpace: THREE.ColorSpace) => {
+    texture.colorSpace = colorSpace;
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = Math.min(8, ctx.anisotropy);
+    texture.needsUpdate = true;
+    return tracker.add(texture);
+  };
+  const art = loadTexture(finish.art).then((texture) => {
+    if (!texture) return;
+    if (disposed) return texture.dispose();
+    material.map = configure(texture, THREE.SRGBColorSpace);
+    albedo.dispose();
+    ctx.onChange?.();
+  });
   const dataMaps = Promise.all(Object.entries(finish.maps).map(async ([role, suffix]) => {
-    try {
-      return { role: role as BakeRole, texture: await loader.loadAsync(sourceMap(id, suffix)) };
-    } catch {
-      return null;
-    }
+    const texture = await loadTexture(sourceMap(id, suffix));
+    return texture ? { role: role as BakeRole, texture } : null;
   })).then((results) => {
     // Each finish needs several maps. Updating shader defines per network
     // completion used to compile the same physical material up to five times.
@@ -141,11 +152,7 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     for (const result of results) {
       if (!result) continue;
       const { role, texture } = result;
-      texture.colorSpace = THREE.NoColorSpace;
-      texture.minFilter = THREE.LinearMipmapLinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.anisotropy = Math.min(8, ctx.anisotropy);
-      tracker.add(texture);
+      configure(texture, THREE.NoColorSpace);
       changed = true;
       switch (role) {
         case 'normal':

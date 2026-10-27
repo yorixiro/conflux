@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DirectionalLight, Group } from 'three';
 import { getAssetBlob, getAssetPreviewBlob } from '../../../infrastructure/assetStore';
 import type { ImageAssetCard } from '../../../types/domain';
-import type { PouchAddon, SceneAddon } from './bag';
+import type { AddonContext, PouchAddon, SceneAddon } from './bag/addon';
 import type { MotionStatus } from './bag/motion';
 import type { PocketItem, Profile } from './profile/schema';
 import { BookView, type BookViewHandle } from './sasshi/BookView';
@@ -13,7 +13,7 @@ import { COLLECTED_STAMPS } from './stamps';
 
 type BagModule = typeof import('./bag');
 type MotionUi = MotionStatus | 'off' | 'asking';
-type Pages = { photo: PouchAddon; stamps: PouchAddon; select: (stamps: boolean) => void };
+type Pages = { setPhoto: (profile: Profile) => void; select: (stamps: boolean) => void };
 
 const PHOTOS_PER_POUCH = 2;
 const FOLIO_CASE: Omit<CaseSpec, 'liner'> = {
@@ -149,12 +149,16 @@ export function ArchiveFolio({
   const [detailId, setDetailId] = useState<string | null>(null);
   const [detailImage, setDetailImage] = useState<string | null>(null);
   const [stampPageOpen, setStampPageOpen] = useState(false);
+  const [loadedOwner, setLoadedOwner] = useState<string | null>(null);
   const bookRef = useRef<BookViewHandle | null>(null);
   const pouchRef = useRef<PouchAddon | null>(null);
   const pagesRef = useRef<Pages | null>(null);
   const livePick = useRef<(id: string) => void>(() => {});
   const livePhotoProfile = useRef<Profile | null>(null);
   const liveStampProfile = useRef<Profile | null>(null);
+  const liveStampPageOpen = useRef(false);
+  const livePicturesReady = useRef(false);
+  const liveDetailOpen = useRef(false);
 
   const count = Math.max(1, Math.ceil(cards.length / PHOTOS_PER_POUCH));
   const index = Math.min(group, count - 1);
@@ -166,6 +170,16 @@ export function ArchiveFolio({
   const profile = stampPageOpen && ownerId === 'self' ? postageProfile : photoProfile;
   livePhotoProfile.current = photoProfile;
   liveStampProfile.current = postageProfile;
+  liveStampPageOpen.current = stampPageOpen;
+  livePicturesReady.current = pictures.ready;
+  liveDetailOpen.current = !!detailId;
+  useEffect(() => { bookRef.current?.book?.setAmbient(!detailId); }, [detailId]);
+  useEffect(() => {
+    if (pictures.ready) setLoadedOwner(ownerId);
+  }, [ownerId, pictures.ready]);
+  useEffect(() => {
+    if (pictures.ready) pagesRef.current?.setPhoto(photoProfile);
+  }, [photoProfile, pictures.ready]);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,28 +214,37 @@ export function ArchiveFolio({
       printScale: 1, // phone: limit upload and memory cost
       onPick: (id: string) => livePick.current(id),
     };
-    const photo = bag.createPouchAddon({ ...options, profile: livePhotoProfile.current });
-    if (ownerId !== 'self') {
-      pouchRef.current = photo;
-      pagesRef.current = null;
-      return [photo];
-    }
-    const stamps = bag.createPouchAddon({ ...options, profile: liveStampProfile.current, labels: { pouch: 'POSTAGE · 06' }, prewarmStills: false });
+    let photo = bag.createPouchAddon({ ...options, profile: livePhotoProfile.current, prewarmStills: false });
+    // Hidden stamps do not build meshes, decode maps or compile programs until their first selection.
+    let stamps: PouchAddon | null = null;
     // This folio has no paper sheets: an earlier attempt inserted seven dummy
     // card cells just to get a second page index. The resulting empty sheet
     // covered the stamps and cost a full deforming mesh/shadow pass. Switch
     // which 3D sleeve is visible inside the SAME blue back cover instead.
     const sleeveGroup = new Group();
     sleeveGroup.name = 'folio-sleeves';
-    sleeveGroup.add(photo.object, stamps.object);
+    sleeveGroup.add(photo.object);
     // The foil's directional key follows the pointer in the pouch frame.
     const key = new DirectionalLight(0xfff1d8, 0);
     key.position.set(-0.3, 0.45, 0.5);
     sleeveGroup.add(key, key.target);
     let wake: (() => void) | null = null;
+    let context: AddonContext | null = null;
+    let disposed = false;
+    let photoGen = 0;
+    let pendingPhoto: PouchAddon | null = null;
+    let requestedPhoto = JSON.stringify(livePhotoProfile.current);
+    let open = 0;
+    let postage = false;
+    const attachPouch = (pouch: PouchAddon) => {
+      if (!context) return;
+      pouch.attach({ ...context, invalidate: () => {
+        if (!disposed && pouch.object.visible && (pouch === photo || pouch === stamps)) wake?.();
+      } });
+    };
     let lastLight = '';
     const aim = (ray: Parameters<NonNullable<PouchAddon['pointer']>['down']>[0]) => {
-      if (!stamps.object.visible) return;
+      if (!stamps || !postage) return;
       const hit = stamps.debug.hit(ray);
       const position = hit ? stamps.debug.sim.state().find((state) => state.id === hit.id) : null;
       const lx = hit && position ? Math.max(-0.5, Math.min(0.5, (hit.x - position.x) / 0.071)) : 0;
@@ -233,32 +256,75 @@ export function ArchiveFolio({
       key.position.set(-0.3 + lx, 0.45 - ly, 0.5).normalize();
       wake?.();
     };
-    const select = (postage: boolean) => {
+    const select = (next: boolean) => {
+      postage = next && ownerId === 'self';
+      if (postage && !stamps) {
+        stamps = bag.createPouchAddon({ ...options, profile: liveStampProfile.current!, labels: { pouch: 'POSTAGE · 06' }, prewarmStills: false });
+        sleeveGroup.add(stamps.object);
+        attachPouch(stamps);
+        stamps.setOpen(open);
+      }
       photo.object.visible = !postage;
-      stamps.object.visible = postage;
+      if (stamps) stamps.object.visible = postage;
       key.intensity = 0;
       lastLight = '';
       pouchRef.current = postage ? stamps : photo;
       wake?.();
     };
     select(false);
-    pagesRef.current = { photo, stamps, select };
+    const pages: Pages = {
+      select,
+      setPhoto(next) {
+        const signature = JSON.stringify(next);
+        if (disposed || signature === requestedPhoto) return;
+        requestedPhoto = signature;
+        const gen = ++photoGen;
+        pendingPhoto?.dispose();
+        pendingPhoto = null;
+        void photo.setProfile(next).then(async (updated) => {
+          if (disposed || gen !== photoGen || updated) return;
+          // A different object count (e.g. the final group has one photo) replaces only this sleeve.
+          const replacement = bag.createPouchAddon({ ...options, profile: next, prewarmStills: false });
+          pendingPhoto = replacement;
+          attachPouch(replacement);
+          await replacement.printed?.();
+          if (disposed || gen !== photoGen) { replacement.dispose(); return; }
+          pendingPhoto = null;
+          photo.dispose();
+          photo = replacement;
+          sleeveGroup.add(photo.object);
+          photo.setOpen(open);
+          select(postage);
+        }).catch((error: unknown) => {
+          if (!disposed && gen === photoGen) console.warn('[Conflux] 照片收纳袋更新失败', error);
+        });
+      },
+    };
+    pagesRef.current = pages;
+    const active = () => postage && stamps ? stamps : photo;
     const sleeves: SceneAddon = {
       anchor: 'back-inside',
       object: sleeveGroup,
-      attach: (ctx) => { wake = ctx.invalidate; photo.attach(ctx); stamps.attach(ctx); },
-      update: (dt, t, frame) => (stamps.object.visible ? stamps : photo).update(dt, t, frame),
+      attach: (ctx) => { context = ctx; wake = ctx.invalidate; attachPouch(photo); if (stamps) attachPouch(stamps); },
+      update: (dt, t, frame) => active().update(dt, t, frame),
       pointer: {
-        down: (ray, event) => { aim(ray); return (stamps.object.visible ? stamps : photo).pointer.down(ray, event); },
-        move: (ray, event) => { aim(ray); (stamps.object.visible ? stamps : photo).pointer.move(ray, event); },
-        up: (ray, event) => (stamps.object.visible ? stamps : photo).pointer.up(ray, event),
-        hover: (ray) => { aim(ray); return (stamps.object.visible ? stamps : photo).pointer.hover?.(ray) ?? false; },
+        down: (ray, event) => { aim(ray); return active().pointer.down(ray, event); },
+        move: (ray, event) => { aim(ray); active().pointer.move(ray, event); },
+        up: (ray, event) => active().pointer.up(ray, event),
+        hover: (ray) => { aim(ray); return active().pointer.hover?.(ray) ?? false; },
       },
-      setOpen: (open) => { photo.setOpen(open); stamps.setOpen(open); },
-      setDark: (dark) => { photo.setDark(dark); stamps.setDark(dark); },
+      setOpen: (value) => { open = value; photo.setOpen(value); stamps?.setOpen(value); },
+      setDark: (dark) => { photo.setDark(dark); stamps?.setDark(dark); },
       printed: () => photo.printed?.() ?? Promise.resolve(),
-      restore: () => { photo.restore(); stamps.restore(); },
-      dispose: () => { photo.dispose(); stamps.dispose(); pagesRef.current = null; },
+      restore: () => { photo.restore(); stamps?.restore(); pendingPhoto?.restore(); },
+      dispose: () => {
+        disposed = true;
+        photoGen++;
+        wake = null;
+        context = null;
+        photo.dispose(); stamps?.dispose(); pendingPhoto?.dispose();
+        if (pagesRef.current === pages) { pagesRef.current = null; pouchRef.current = null; }
+      },
     };
     return [sleeves];
   }, [bag, ownerId]);
@@ -295,11 +361,12 @@ export function ArchiveFolio({
       return;
     }
     let cancelled = false;
+    const abort = new AbortController();
     setDetailImage(null);
-    void pouchRef.current.snapshot(detailId, 740, { shadow: true }).then((image) => {
+    void pouchRef.current.snapshot(detailId, 740, { shadow: true, signal: abort.signal }).then((image) => {
       if (!cancelled && image) setDetailImage(typeof image === 'string' ? image : image.url);
     }).catch(() => {});
-    return () => { cancelled = true; };
+    return () => { cancelled = true; abort.abort(); };
   }, [detailId]);
   useEffect(() => {
     if (!detailId) return;
@@ -310,13 +377,14 @@ export function ArchiveFolio({
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [detailId]);
   const detail = profile.items.find((item) => item.id === detailId);
-  const show3d = supported && !!bag && pictures.ready;
+  // Once mounted, keep the scene while the next group's object URLs are being read.
+  const show3d = supported && !!bag && (pictures.ready || loadedOwner === ownerId);
 
   return (
     <>
       {show3d ? (
         <BookView
-          key={`${ownerId}:${index}:${visible.map((card) => card.id).join(':')}`}
+          key={ownerId}
           ref={bookRef}
           sheets={0}
           case={caseSpec}
@@ -324,6 +392,13 @@ export function ArchiveFolio({
           addons={addons}
           tilt
           autoOpen
+          prewarmCovers={false}
+          onBook={(book) => {
+            if (!book) return;
+            book.setAmbient(!liveDetailOpen.current);
+            if (livePicturesReady.current) pagesRef.current?.setPhoto(livePhotoProfile.current!);
+            pagesRef.current?.select(liveStampPageOpen.current);
+          }}
           onState={(state) => setClosed(state.closed)}
           labels={{ region: `${ownerName}的蓝色收藏册`, openBook: '打开收藏册' }}
         />
