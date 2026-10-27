@@ -78,6 +78,9 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     alphaTest: 0.2,
     alphaToCoverage: true,
     side: THREE.DoubleSide,
+    // A stamp is a single relief surface, not two overlapping shells.
+    // Three.js otherwise draws transparent DoubleSide materials twice.
+    forceSinglePass: true,
     displacementScale: depth,
     displacementBias: -depth * 0.5,
   }));
