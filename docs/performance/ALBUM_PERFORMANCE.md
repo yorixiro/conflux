@@ -109,7 +109,7 @@
 - 定向 Vitest（6 个文件，11 项测试）：通过。包含已有 `bag/stamp-page.test.ts` 1 项，新增测试 10 项。
 - `npm run typecheck`：仅运行一次，退出 2。发现 6 处错误：可选 printed 方法调用、新增测试缺少 from、
   Texture.image 的 unknown 类型及 Mesh.material 联合类型。已逐处修正；遵照本次只运行一次的限制未复跑，
-  **最终版本类型检查通过状态未确认**。
+  **初轮最终版本类型检查通过状态当时未确认**。见下方 2026-10-27 收尾复核。
 - `git diff --check`：通过。
 - 诊断服务的 TSX 和三个主模块可经 Vite transform，但关闭 smoke 服务时出现退出 13，故不将其计为完整通过。
 - 未运行 build、verify、全量测试、整套 E2E，也未动用户数据。
@@ -122,8 +122,23 @@ PR 保持 draft。真机及浏览器可访问环境下仍需：
 2. 确认普通切组 renderer created 不增长；首次邮票分配后，多次袋子/分组往返 textures/geometries 不持续增长。
 3. 查看六枚邮票的金属反光、原浮雕、透明锯齿边缘及 MSAA；验证手指拖动/真实体感、隐藏袋恢复、末组数量变化。
 4. 极慢网络下最终 shader 的可见帧编译、完整 PBR 双面透明绘制、环境帧的磨砂 blur 仍可能占 GPU 时间；未测之前不排序为实测瓶颈。
-5. 在允许后对最终 revision 再确认类型检查状态。本次未重复运行。
+5. 类型状态已在下方收尾复核确认通过；真机性能及外观项目仍待验收。
 
 未改 renderer antialias、原图尺寸、DPR 算法、48×60 浮雕、金属/法线/透明材质参数、磨砂质量、
 照片与邮票共用一本册的交互；未引入第二 renderer、WebGPU、场景框架或空白实体格页。
 回退本 PR 单独提交即可撤销，无数据迁移或存储回滚要求。
+
+
+## 2026-10-27：PR #6 收尾复核
+
+按 [最新工单评论](https://github.com/yorixiro/conflux/pull/6#issuecomment-6437106562) 操作：
+
+- 唯一代码修改：`bag/lifecycle.test.ts` 的 `profile(...): Profile` fixture 补充
+  `coverTitle: 'Fixture'`，不修改生产 schema 或任何渲染参数。
+- 本轮 `npm run typecheck` **仅复跑一次，exit 0**。先前报告中的最终类型状态现已确认通过。
+- 未复跑 Vitest、全量测试、build、verify 或 E2E；上一轮 11 项定向测试结果保留为历史结果。
+- 新增 [Termux 隔离真实应用预览步骤](../../tools/album-performance/README.md#安卓平板-termux隔离体验真实应用)：
+  独立 worktree、独立缓存与 5179 origin；不切换用户原工作目录，不改动 5173/4173 服务或正式 PWA。
+- 预览方案已准备，未在安卓平板执行。FPS/P95、GPU 时间和资源/内存曲线仍**未实测**；
+  六枚原图、金属反光、完整浮雕、透明袋/磨砂、边缘抗锯齿、真实触摸与前后台恢复仍待用户观察。
+- PR 保持 Draft，不合并、不强制推送。

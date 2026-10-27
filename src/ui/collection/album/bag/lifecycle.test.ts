@@ -26,7 +26,7 @@ vi.mock('./objects', async () => {
   };
 });
 const {createPouchAddon} = await import('./addon');
-const profile = (id: string, image='blob:fast', noteText='unchanged'): Profile => ({name:'Fixture',role:'album',bio:'',links:[],albums:{cards:[],postcards:[]},items:[
+const profile = (id: string, image='blob:fast', noteText='unchanged'): Profile => ({name:'Fixture',coverTitle:'Fixture',role:'album',bio:'',links:[],albums:{cards:[],postcards:[]},items:[
   {kind:'note',id:'note',label:'Note',text:noteText,from:'Fixture'},
   {kind:'polaroid',id,label:'Photo',image,caption:id},
 ]});
