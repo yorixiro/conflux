@@ -151,6 +151,14 @@ export function ArchiveFolio({
 }) {
   const [bag, setBag] = useState<BagModule | null>(null);
   const [supported] = useState(() => typeof document !== 'undefined' && canRender3d());
+  // Tablet GPUs can handle a sharp MSAA canvas, but the desktop-size VSM
+  // shadows and frost targets make every drag needlessly expensive. Sasshi's
+  // low preset reduces those auxiliary passes without lowering pixel ratio.
+  const [folioQuality] = useState<'low' | undefined>(() =>
+    typeof window !== 'undefined' && (
+      window.matchMedia?.('(pointer: coarse)').matches || navigator.maxTouchPoints > 0
+    ) ? 'low' : undefined,
+  );
   const [group, setGroup] = useState(0);
   const [closed, setClosed] = useState(false);
   const [motion, setMotion] = useState<MotionUi>('off');
@@ -350,6 +358,7 @@ export function ArchiveFolio({
           case={caseSpec}
           cover={cover}
           addons={addons}
+          quality={folioQuality}
           tilt
           autoOpen
           onState={(state) => {

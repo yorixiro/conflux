@@ -67,19 +67,23 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
   const finish = recipe(item);
   const depth = W * finish.displacement;
   const thickness = depth + 0.00035;
-  const { c, g } = makeCanvas(456, 570);
+  // Only the offline fallback is painted to canvas. Do not downsample the
+  // author's artwork into a 456x570 canvas and upload it a second time.
+  const { c, g } = makeCanvas(128, 160);
   const albedo = tracker.add(colorTexture(c, ctx));
   const material = tracker.add(new THREE.MeshPhysicalMaterial({
     ...finish.params,
     map: albedo,
     transparent: true,
-    alphaTest: 0.5,
+    alphaTest: 0.2,
     alphaToCoverage: true,
     side: THREE.DoubleSide,
     displacementScale: depth,
     displacementBias: -depth * 0.5,
   }));
-  const geometry = tracker.add(new THREE.PlaneGeometry(W, H, 48, 60));
+  // The baked normal map retains the fine relief; extra tessellation just
+  // multiplies vertex work (and aliasing) on Android's tiler GPUs.
+  const geometry = tracker.add(new THREE.PlaneGeometry(W, H, 32, 40));
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.z = depth * 0.5 + 0.0002;
   mesh.frustumCulled = false;
@@ -89,7 +93,7 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
   g.fillStyle = '#f3f0e6';
   g.fillRect(0, 0, c.width, c.height);
   g.textAlign = 'center';
-  g.font = '23px Georgia, serif';
+  g.font = '11px Georgia, serif';
   g.fillStyle = '#6d7377';
   g.fillText(item.label.slice(0, 22), c.width / 2, c.height / 2);
   albedo.needsUpdate = true;
@@ -102,9 +106,13 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
       if (!disposed) {
-        g.clearRect(0, 0, c.width, c.height);
-        g.drawImage(image, 0, 0, c.width, c.height);
-        albedo.needsUpdate = true;
+        const original = tracker.add(new THREE.Texture(image));
+        original.colorSpace = THREE.SRGBColorSpace;
+        original.minFilter = THREE.LinearMipmapLinearFilter;
+        original.magFilter = THREE.LinearFilter;
+        original.anisotropy = Math.min(8, ctx.anisotropy);
+        original.needsUpdate = true;
+        material.map = original;
         ctx.onChange?.();
       }
       resolve();
@@ -115,14 +123,31 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
 
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin('anonymous');
-  const dataMaps = Object.entries(finish.maps).map(async ([role, suffix]) => {
+  const dataMaps = Promise.all(Object.entries(finish.maps).map(async ([role, suffix]) => {
     try {
-      const texture = await loader.loadAsync(sourceMap(id, suffix));
-      if (disposed) return texture.dispose();
+      return { role: role as BakeRole, texture: await loader.loadAsync(sourceMap(id, suffix)) };
+    } catch {
+      return null;
+    }
+  })).then((results) => {
+    // Each finish needs several maps. Updating shader defines per network
+    // completion used to compile the same physical material up to five times.
+    // Install all available maps in one transaction / one shader update.
+    if (disposed) {
+      results.forEach((result) => result?.texture.dispose());
+      return;
+    }
+    let changed = false;
+    for (const result of results) {
+      if (!result) continue;
+      const { role, texture } = result;
       texture.colorSpace = THREE.NoColorSpace;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
       texture.anisotropy = Math.min(8, ctx.anisotropy);
       tracker.add(texture);
-      switch (role as BakeRole) {
+      changed = true;
+      switch (role) {
         case 'normal':
           material.normalMap = texture;
           material.normalScale.set(Math.abs(finish.normalScale), finish.normalScale);
@@ -139,10 +164,10 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
         case 'sheen': material.sheenColorMap = texture; break;
         case 'anisotropy': material.anisotropyMap = texture; break;
       }
+    }
+    if (changed) {
       material.needsUpdate = true;
       ctx.onChange?.();
-    } catch {
-      // Stay readable on a slow/offline PWA; never draw a broken foil layer.
     }
   });
 
@@ -152,7 +177,7 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     outline: OUTLINE,
     parts: [mesh],
     tracker,
-    ready: Promise.all([art, ...dataMaps]).then(() => {}),
+    ready: Promise.all([art, dataMaps]).then(() => {}),
     repaint: () => {},
     runs: [],
     relabel(next) { return next.kind === 'stamp' && next.image === item.image ? [] : null; },
