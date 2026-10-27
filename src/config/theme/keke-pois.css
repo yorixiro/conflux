@@ -115,20 +115,6 @@
   box-shadow: 0 0 0 1px rgba(134, 103, 98, .22);
 }
 
-.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::before,
-.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::before {
-  content: '';
-  position: absolute;
-  right: 24px;
-  top: 78px;
-  width: 42px;
-  height: 95px;
-  background: url('/theme-assets/keke/pois-hanger.webp') center/contain no-repeat;
-  rotate: 3deg;
-  opacity: .85;
-  pointer-events: none;
-}
-
 .app-shell.chat .conflux-sidebar-search input,
 .app-shell.chat .conflux-sidebar-create,
 .app-shell.chat .conflux-profile-edit {

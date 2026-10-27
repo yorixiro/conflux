@@ -112,7 +112,11 @@
 }
 
 .collaborator-info-content [data-theme-preview='keke-doodle'] .room-theme-preset-art {
-  background: #faf7f5 url('/theme-assets/keke/doodle-background.jpg') center/cover;
+  background:
+    url('/theme-assets/keke/doodle-paper-bunny.webp') 18% center/auto 68% no-repeat,
+    url('/theme-assets/keke/doodle-paper-cat.webp') 82% center/auto 64% no-repeat,
+    radial-gradient(circle, rgba(150, 118, 124, .22) .9px, transparent 1.3px) 9px 9px/18px 18px,
+    #faf7f5;
 }
 
 .collaborator-info-content [data-theme-preview='keke-doodle'] .room-theme-preset-bubble {

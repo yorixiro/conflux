@@ -133,12 +133,32 @@
   position: relative;
   padding: 11px 4px;
   border-bottom: 1px dashed rgba(176, 131, 140, .36);
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 8px;
 }
+
+.app-shell.chat .conflux-profile-heading > div { min-width: 0; }
 
 .app-shell.chat .conflux-profile-heading h2,
 .app-shell.chat .conflux-library-role-select span {
   font-weight: 800;
   letter-spacing: .06em;
+}
+
+.app-shell.chat .conflux-profile-heading h2 {
+  font-size: 18px;
+  line-height: 1.35;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.app-shell.chat .conflux-profile-heading .conflux-profile-edit {
+  grid-column: 1 / -1;
+  justify-self: end;
+  margin-left: 0;
 }
 
 .app-shell.chat .conflux-profile-edit,
@@ -236,20 +256,6 @@
 .app-shell.chat .desktop-sidebar-thread-more,
 .app-shell.chat .desktop-sidebar-thread-menu-item {
   color: var(--text-soft);
-}
-
-.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::after,
-.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::after {
-  content: '';
-  position: absolute;
-  right: 9px;
-  bottom: 9px;
-  width: 116px;
-  height: 146px;
-  opacity: .82;
-  background: var(--keke-side-decoration) right bottom/contain no-repeat;
-  pointer-events: none;
-  z-index: 0;
 }
 
 @media (max-width: 600px) {

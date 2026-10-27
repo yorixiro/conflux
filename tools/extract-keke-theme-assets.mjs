@@ -40,6 +40,10 @@ const artAssets = new Map([
   ['stpg', 'pois-decoration.webp'],
   ['charmg', 'pois-charm.webp']
 ]);
+const doodlePaperArt = new Map([
+  ['--kbun', 'doodle-paper-bunny.webp'],
+  ['--kcat', 'doodle-paper-cat.webp']
+]);
 
 function extractAll(pattern, names) {
   const found = new Set();
@@ -58,3 +62,4 @@ function extractAll(pattern, names) {
 
 extractAll(/(--[\w-]+):url\(data:image\/(\w+);base64,([A-Za-z0-9+/=]+)\)/g, cssAssets);
 extractAll(/"([a-z0-9]+)":\s*"data:image\/([a-z]+);base64,([A-Za-z0-9+/=]+)"/g, artAssets);
+extractAll(/setProperty\('(\-\-k(?:bun|cat))','url\(data:image\/(webp);base64,([A-Za-z0-9+/=]+)\)'\)/g, doodlePaperArt);

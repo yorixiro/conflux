@@ -34,11 +34,26 @@
 }
 
 .app-shell.chat .app-stage {
-  background: linear-gradient(rgba(250, 247, 245, .71), rgba(250, 247, 245, .76)), url('/theme-assets/keke/doodle-background.jpg') center/cover no-repeat;
+  background:
+    radial-gradient(circle, rgba(150, 118, 124, .22) .9px, transparent 1.3px) 9px 9px/18px 18px,
+    radial-gradient(130% 95% at 50% 45%, #fdf8f6 55%, #f4eae8 100%);
 }
 
 .app-shell.chat .world-stack,
 .app-shell.chat .world-chat { background: transparent; }
+
+.app-shell.chat .world-chat::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    url('/theme-assets/keke/doodle-paper-bunny.webp') 22% 24%/auto min(30%, 240px) no-repeat,
+    url('/theme-assets/keke/doodle-paper-cat.webp') 78% 78%/auto min(25%, 195px) no-repeat;
+  mix-blend-mode: multiply;
+  opacity: .74;
+}
 
 .app-shell.chat .chat-flow {
   background: linear-gradient(90deg, transparent 28px, rgba(196, 151, 159, .14) 29px, transparent 30px);
@@ -117,20 +132,6 @@
 
 .app-shell.chat .conflux-sidebar-calendar {
   background: rgba(255, 255, 255, .58);
-}
-
-.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::before,
-.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::before {
-  content: '';
-  position: absolute;
-  right: 24px;
-  top: 78px;
-  width: 48px;
-  height: 100px;
-  background: url('/theme-assets/keke/doodle-hanger.webp') center/contain no-repeat;
-  rotate: 3deg;
-  opacity: .86;
-  pointer-events: none;
 }
 
 .app-shell.chat .conflux-sidebar-search input,
