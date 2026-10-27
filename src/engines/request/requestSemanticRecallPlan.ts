@@ -326,6 +326,8 @@ export function resolveRequestSemanticRecallPlan(args?: {
   currentCollaboratorId?: string | null;
   maxTokens: number | null;
   maxCandidates?: number | null;
+  /** Let the one-memory gate evaluate matched sources without a recent-tail shadow. */
+  matchOnlyCandidates?: boolean;
   config?: Partial<AssistantSemanticRecallConfig>;
   vectorCandidates?: AssistantSemanticRecallCandidateDecision[];
 }): AssistantRequestSemanticRecallPlan {
@@ -434,16 +436,19 @@ export function resolveRequestSemanticRecallPlan(args?: {
       score: candidate.score
     }));
 
-  const dedupedCandidates = dedupeCandidates([
-    ...recentTailCandidates,
-    ...matchedContextCandidates,
-    ...(args.vectorCandidates ?? []).filter((candidate) =>
+  const vectorMatches = (args.vectorCandidates ?? []).filter((candidate) =>
       candidate.kind === 'vector_match'
       && candidate.sourceConversationId
       && scopedConversationIds.has(candidate.sourceConversationId)
-    ),
-    ...voiceAnchorCandidates
-  ]);
+    );
+  const dedupedCandidates = args.matchOnlyCandidates
+    ? [...matchedContextCandidates, ...vectorMatches]
+    : dedupeCandidates([
+        ...recentTailCandidates,
+        ...matchedContextCandidates,
+        ...vectorMatches,
+        ...voiceAnchorCandidates
+      ]);
   const maxCandidates = typeof args.maxCandidates === 'number' && Number.isFinite(args.maxCandidates) && args.maxCandidates > 0
     ? Math.floor(args.maxCandidates)
     : null;

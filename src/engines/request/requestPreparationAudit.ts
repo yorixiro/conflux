@@ -49,6 +49,7 @@ export function buildRequestAudit(args: {
   memoryPlan: AssistantRequestAudit['memoryPlan'];
   conversationSummaryPlan: AssistantRequestAudit['conversationSummaryPlan'];
   semanticRecallPlan: AssistantRequestAudit['semanticRecallPlan'];
+  oneMemoryRecallPlan?: AssistantRequestAudit['oneMemoryRecallPlan'];
   semanticRecallContextCandidates?: AssistantRequestAudit['semanticRecallContextCandidates'];
   cachePlan: AssistantRequestAudit['cachePlan'];
   contextPlan: AssistantRequestAudit['contextPlan'];
@@ -76,6 +77,7 @@ export function buildRequestAudit(args: {
     memoryPlan,
     conversationSummaryPlan,
     semanticRecallPlan,
+    oneMemoryRecallPlan,
     semanticRecallContextCandidates,
     cachePlan,
     contextPlan,
@@ -102,6 +104,7 @@ export function buildRequestAudit(args: {
     memoryPlan,
     conversationSummaryPlan,
     semanticRecallPlan,
+    ...(oneMemoryRecallPlan ? { oneMemoryRecallPlan } : {}),
     semanticRecallContextCandidates,
     cachePlan,
     contextPlan,

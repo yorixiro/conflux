@@ -272,6 +272,60 @@ describe('prepareCollaboratorReplyRequest semantic recall', () => {
     resolveRequestSemanticVectorCandidatesMock.mockResolvedValue([]);
   });
 
+  it('routes the opt-in one-memory result into the actual provider context', async () => {
+    const persona = createPersonaTemplate({
+      id: 'pharos',
+      name: 'Pharos',
+      description: '灯塔',
+      memory: {
+        conversationSummaries: [{
+          id: 'background-summary',
+          kind: 'recent_topic',
+          title: '旧摘要',
+          content: '这个摘要不应该与单条召回一起被动注入。',
+          sequence: 1,
+          sourceConversationIds: ['older-1'],
+          sourceMessageIds: ['old-user-1'],
+          sourceCharCount: 100,
+          generator: 'manual',
+          generatedAt: 1,
+          updatedAt: 2
+        }]
+      }
+    });
+    const prepared = await prepareCollaboratorReplyRequest({
+      api: textProvider,
+      persona,
+      oneMemoryRecallEnabled: true,
+      messages: [createUserMessage('current-user', '草莓蛋糕喜好', 10)],
+      semanticRecallConversations: [
+        createConversation({ id: 'older-1', title: '草莓', messages: [createUserMessage('old-user-1', '草莓蛋糕喜好：更喜欢带酸味的新鲜草莓。', 1)] }),
+        createConversation({ id: 'older-2', title: '其他', messages: [createUserMessage('old-user-2', '草莓蛋糕喜好：希望奶油不要太甜。', 2)] })
+      ],
+      activeConversationId: 'active'
+    });
+    const recallSegments = prepared.context.segments.filter((segment) => segment.kind === 'semantic_recall');
+    expect(recallSegments).toHaveLength(1);
+    expect(prepared.audit.oneMemoryRecallPlan?.selected).not.toBeNull();
+    expect(prepared.audit.semanticRecallContextCandidates).toHaveLength(1);
+    expect(prepared.context.segments.some((segment) => segment.kind === 'conversation_summary')).toBe(false);
+  });
+
+  it('allows zero passive injection without inventing a recent-tail memory', async () => {
+    const prepared = await prepareCollaboratorReplyRequest({
+      api: textProvider,
+      persona: createPersonaTemplate({ id: 'pharos', name: 'Pharos', description: '灯塔' }),
+      oneMemoryRecallEnabled: true,
+      messages: [createUserMessage('current-user', '完全不同的新话题', 10)],
+      semanticRecallConversations: [
+        createConversation({ id: 'older-1', title: '旧话题', messages: [createUserMessage('old-user-1', '无关的咖啡闲聊内容', 1)] })
+      ],
+      activeConversationId: 'active'
+    });
+    expect(prepared.audit.oneMemoryRecallPlan?.selected).toBeNull();
+    expect(prepared.context.segments.some((segment) => segment.kind === 'semantic_recall')).toBe(false);
+  });
+
   it('keeps cross-conversation recall out of provider context when the collaborator disables it', async () => {
     const persona = createPersonaTemplate({
       id: 'pharos',

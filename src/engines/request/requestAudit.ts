@@ -3,6 +3,7 @@ import type { AssistantRequestBudgetBucket, AssistantRequestBudgetPlan, Assistan
 import type { AssistantRequestContext } from './requestContext';
 import type { RequestContextReceipt } from './requestContextReceipt';
 import type { AssistantRequestMemoryPlan } from './requestMemoryPlan';
+import type { PassiveRecallPlan } from './requestRecallGate';
 import type { AssistantConversationSummaryPlan } from './requestConversationSummaryPlan';
 import type {
   AssistantRequestSemanticRecallPlan,
@@ -161,6 +162,8 @@ export type AssistantRequestAudit = {
   memoryPlan: AssistantRequestMemoryPlan;
   conversationSummaryPlan: AssistantConversationSummaryPlan;
   semanticRecallPlan: AssistantRequestSemanticRecallPlan;
+  /** Final 0-or-1 passive injection decision when one-memory mode is active. */
+  oneMemoryRecallPlan?: PassiveRecallPlan;
   semanticRecallContextCandidates?: AssistantSemanticRecallContextCandidate[];
   cachePlan: AssistantRequestCachePlan;
   contextPlan: AssistantRequestContextPlan;

@@ -33,6 +33,8 @@ import {
   resolveRequestSemanticVectorCandidates,
   type RequestSemanticVectorEmbeddingClient
 } from './requestSemanticVectorRecall';
+import { planOneMemoryRequestRecall } from './requestOneMemoryRecall';
+import type { PassiveRecallDelivery, PassiveRecallEvidence } from './requestRecallGate';
 import { buildAssistantPromptParts } from './requestPromptLayers';
 import { selectPromptPartsForBudget } from './requestTruncation';
 import { buildTemplateContext } from '../templateEngine';
@@ -577,6 +579,10 @@ export async function prepareCollaboratorReplyRequest(params: {
   personas?: Persona[];
   messages: ChatMessage[];
   semanticRecallEnabled?: boolean;
+  /** Opt-in alternative to the legacy multi-item passive recall path. */
+  oneMemoryRecallEnabled?: boolean;
+  passiveRecallDeliveries?: PassiveRecallDelivery[];
+  exactRecallEvidence?: PassiveRecallEvidence[];
   semanticRecallConversations?: Conversation[];
   loadSemanticRecallConversations?: (conversationIds: string[]) => Promise<Conversation[]>;
   activeConversationId?: string | null;
@@ -713,6 +719,7 @@ export async function prepareCollaboratorReplyRequest(params: {
         currentCollaboratorId: persona?.id ?? null,
         maxTokens: null,
         maxCandidates: DEFAULT_SEMANTIC_RECALL_REQUEST_MAX_CANDIDATES,
+        matchOnlyCandidates: params.oneMemoryRecallEnabled === true,
         config: semanticRecallConfig,
         vectorCandidates: semanticVectorCandidates
       }
@@ -721,6 +728,20 @@ export async function prepareCollaboratorReplyRequest(params: {
     plan: semanticRecallPlan,
     conversations: semanticRecallConversations
   });
+  const oneMemoryRecall = params.oneMemoryRecallEnabled === true && semanticRecallEnabled && persona
+    ? await planOneMemoryRequestRecall({
+        currentScopeId: persona.id,
+        candidates: semanticRecallCandidates,
+        exact: params.exactRecallEvidence,
+        recentContext: latestUserRecallQuery(requestSourceMessages),
+        deliveries: params.passiveRecallDeliveries,
+        now: Date.now()
+      })
+    : null;
+  const effectiveSemanticRecallCandidates = oneMemoryRecall?.semanticCandidates ?? semanticRecallCandidates;
+  const effectiveConversationSummaryPlan = oneMemoryRecall
+    ? { ...conversationSummaryPlan, selectedSummaries: [], estimatedTokens: 0 }
+    : conversationSummaryPlan;
   const historyMaxTokens = resolveRequestHistoryBudget({
     plan: budgetPlan,
     promptParts: selectedPromptParts,
@@ -773,9 +794,9 @@ export async function prepareCollaboratorReplyRequest(params: {
     messages: runtimeConversation,
     messagesPrepared: true,
     toolLedger,
-    memoryLines: memoryPlan.selectedLines,
-    conversationSummaries: conversationSummaryPlan.selectedSummaries,
-    semanticRecallCandidates,
+    memoryLines: [...memoryPlan.selectedLines, ...(oneMemoryRecall?.exactMemoryLines ?? [])],
+    conversationSummaries: effectiveConversationSummaryPlan.selectedSummaries,
+    semanticRecallCandidates: effectiveSemanticRecallCandidates,
     memoryReferenceDocs: canReadMemoryDocs ? persona?.memory.referenceDocs ?? [] : [],
     workspaceReferenceDocs: canReadWorkspaceReferenceDocs
       ? toolContext?.visibleWorkspaceReferenceDocs?.filter((doc) =>
@@ -805,7 +826,7 @@ export async function prepareCollaboratorReplyRequest(params: {
     context,
     contextPlan,
     memoryPlan,
-    conversationSummaryPlan,
+    conversationSummaryPlan: effectiveConversationSummaryPlan,
     semanticRecallPlan,
     cachePlan,
     tooling
@@ -832,9 +853,10 @@ export async function prepareCollaboratorReplyRequest(params: {
       budgetPlan,
       budgetUsage,
       memoryPlan,
-      conversationSummaryPlan,
+      conversationSummaryPlan: effectiveConversationSummaryPlan,
       semanticRecallPlan,
-      semanticRecallContextCandidates: semanticRecallCandidates,
+      semanticRecallContextCandidates: effectiveSemanticRecallCandidates,
+      oneMemoryRecallPlan: oneMemoryRecall?.plan,
       cachePlan,
       contextPlan,
       sourceMessages: requestSourceMessages,
