@@ -8,6 +8,9 @@ import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { collectionRelativeDateLabel } from '../collection/collectionUtils';
 import { useI18n } from '../../i18n';
 import { SidebarCalendar } from './SidebarCalendar';
+import { KekeSidebarPaper, KekeSidebarProfile } from './KekeSidebarProfile';
+import { useSpaceStore } from '../../stores/spaceStore';
+import './KekeSidebarProfile.css';
 
 export type DesktopAppSidebarShelfItem = {
   shelf: CollectionShelf;
@@ -90,6 +93,7 @@ export function DesktopAppSidebar({
   onOpenSettings
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
+  const kekeThemeActive = useSpaceStore((state) => state.theme.activePresetId === 'keke-doodle' || state.theme.activePresetId === 'keke-pois');
   const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const librarySearch = useConversationLibrarySearch(conversations, sidebarTab === 'library' ? searchQuery : '');
@@ -211,7 +215,8 @@ export function DesktopAppSidebar({
   ) : null;
 
   return (
-    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : t('desktop.navLabel')}>
+    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive && presentation !== 'hub' ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : t('desktop.navLabel')}>
+      {kekeThemeActive && presentation !== 'hub' && !collapsed ? <KekeSidebarPaper /> : null}
       {presentation === 'hub' ? (
         <>
           <header className="conflux-hub-heading">
@@ -264,8 +269,9 @@ export function DesktopAppSidebar({
           role="tabpanel"
           aria-label={presentation === 'profile' ? '当前 AI 资料与日历' : undefined}
           aria-labelledby={presentation === 'sidebar' ? 'conflux-profile-tab' : undefined}
-          className="conflux-sidebar-panel conflux-sidebar-profile"
+          className={`conflux-sidebar-panel conflux-sidebar-profile${kekeThemeActive ? ' keke-sidebar-profile' : ''}`}
         >
+          {kekeThemeActive ? <KekeSidebarProfile persona={chatCollaborator} conversationCount={conversations.length} onEdit={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} /> : <>
           <div className="conflux-profile-heading">
             {chatCollaborator ? (
               <PersonaAvatar
@@ -294,6 +300,7 @@ export function DesktopAppSidebar({
             </button>
           </div>
           <SidebarCalendar />
+          </>}
         </section>
       ) : null}
 

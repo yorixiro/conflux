@@ -5,6 +5,7 @@
  */
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 const source = process.argv[2];
 if (!source) throw new Error('Provide the source HTML path');
@@ -63,3 +64,31 @@ function extractAll(pattern, names) {
 extractAll(/(--[\w-]+):url\(data:image\/(\w+);base64,([A-Za-z0-9+/=]+)\)/g, cssAssets);
 extractAll(/"([a-z0-9]+)":\s*"data:image\/([a-z]+);base64,([A-Za-z0-9+/=]+)"/g, artAssets);
 extractAll(/setProperty\('(\-\-k(?:bun|cat))','url\(data:image\/(webp);base64,([A-Za-z0-9+/=]+)\)'\)/g, doodlePaperArt);
+
+// Lift the exact hand-drawn vector alphabet and its deterministic phrase pattern.
+const letteringSource = html.match(/手写英文信纸：矢量笔画自己画[^\n]*\n\s*\{const G=(\{[^\n]+\});/);
+if (!letteringSource) throw new Error('Original hand-lettering alphabet not found');
+const glyphs = runInNewContext(`(${letteringSource[1]})`, {}, { timeout: 100 });
+const phrases = ['good night', 'miss you ♡', 'still here', 'sweet dream', 'hello again', 'toujours la', 'today too', 'forever ✧', 'so close', 'little star', 'stay a bit', 'hold on ♡'];
+let seed = 5;
+const random = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+let letters = '';
+for (let row = 0; row < 3; row += 1) for (let column = 0; column < 4; column += 1) {
+  const phrase = phrases[row * 4 + column];
+  const scale = .95 + random() * .25;
+  const rotate = (random() - .5) * 7;
+  const xStart = 8 + (row % 2) * 45 + column * 90;
+  const y = 30 + row * 66 + (random() - .5) * 6;
+  let paths = '';
+  let x = 0;
+  for (const character of phrase) {
+    const glyph = glyphs[character];
+    if (!glyph) continue;
+    if (glyph[0]) paths += `<path d="${glyph[0]}" transform="translate(${x.toFixed(1)} ${((random() - .5) * .9).toFixed(2)}) rotate(${((random() - .5) * 8).toFixed(1)})"/>`;
+    x += glyph[1] + .5;
+  }
+  for (const origin of [xStart, xStart - 360]) {
+    letters += `<g transform="translate(${origin.toFixed(1)} ${y.toFixed(1)}) rotate(${rotate.toFixed(1)}) scale(${scale.toFixed(2)})">${paths}</g>`;
+  }
+}
+writeFileSync(resolve(output, 'doodle-lettering.svg'), `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="198"><g fill="none" stroke="rgb(150,114,122)" stroke-opacity=".34" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">${letters}</g></svg>`);

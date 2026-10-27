@@ -21,6 +21,7 @@
   --keke-calendar-background: radial-gradient(#e3d9dc 1.2px, transparent 1.6px) 0 0/10px 10px, #f3f0f0;
   --keke-calendar-cat: url('/theme-assets/keke/pois-disc.webp');
   --keke-side-decoration: url('/theme-assets/keke/pois-decoration.webp');
+  --keke-chat-charm: url('/theme-assets/keke/pois-charm.webp');
   --keke-washi: repeating-linear-gradient(45deg, #e3d9dc 0 4px, #f6f3f3 4px 8px);
   --chat-bubble-assistant-fill: rgba(242, 242, 242, .5);
   --chat-bubble-assistant-border: 1.5px dashed rgba(255, 255, 255, .62);

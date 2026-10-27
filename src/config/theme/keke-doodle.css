@@ -21,6 +21,7 @@
   --keke-calendar-background: rgba(255, 255, 255, .69);
   --keke-calendar-cat: url('/theme-assets/keke/doodle-cat.webp');
   --keke-side-decoration: url('/theme-assets/keke/doodle-decoration.webp');
+  --keke-chat-charm: url('/theme-assets/keke/doodle-charm.webp');
   --chat-bubble-assistant-fill: #faf7f5;
   --chat-bubble-assistant-border: 1.2px solid #7a6d71;
   --chat-bubble-assistant-shadow: var(--keke-bubble-shadow);
@@ -41,6 +42,15 @@
 
 .app-shell.chat .world-stack,
 .app-shell.chat .world-chat { background: transparent; }
+
+.app-shell.chat .world-chat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: url('/theme-assets/keke/doodle-lettering.svg') 0 0/360px 198px repeat;
+}
 
 .app-shell.chat .world-chat::after {
   content: '';
