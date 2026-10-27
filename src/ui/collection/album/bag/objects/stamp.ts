@@ -81,9 +81,9 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     displacementScale: depth,
     displacementBias: -depth * 0.5,
   }));
-  // The baked normal map retains the fine relief; extra tessellation just
-  // multiplies vertex work (and aliasing) on Android's tiler GPUs.
-  const geometry = tracker.add(new THREE.PlaneGeometry(W, H, 32, 40));
+  // Preserve the relief's full geometry; performance is recovered by
+  // removing the redundant book sheet and background shader prewarming.
+  const geometry = tracker.add(new THREE.PlaneGeometry(W, H, 48, 60));
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.z = depth * 0.5 + 0.0002;
   mesh.frustumCulled = false;
