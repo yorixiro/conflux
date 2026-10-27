@@ -14,6 +14,7 @@ import { RoomBackgroundSettingsSection } from './RoomBackgroundSettingsSection';
 import { RoomStarSettingsSection } from './RoomStarSettingsSection';
 import { RoomThemeActionsSection } from './RoomThemeActionsSection';
 import { RoomThemeLibrarySection } from './RoomThemeLibrarySection';
+import { RoomThemePresetSection } from './RoomThemePresetSection';
 
 type RoomThemePage = 'overview' | 'css' | 'library';
 
@@ -79,6 +80,10 @@ export function RoomSettingsTab({
 
       {activeThemePage === 'overview' ? (
         <>
+          <RoomThemePresetSection
+            activePresetId={controller.theme.activePresetId}
+            onApplyPreset={controller.themeSession.applyThemePreset}
+          />
           <section className="theme-studio-section room-toggle-section room-display-settings">
             <PersonaToggle
               label={t('room.settings.chatAvatarLayout')}

@@ -1,0 +1,141 @@
+/* 铅笔贴纸：source doodle palette, image assets and notebook construction. */
+.app-shell.chat {
+  --bg: #faf7f5;
+  --surface: #faf7f5;
+  --surface-solid: #faf7f5;
+  --surface-deep: #f3e9ea;
+  --border: rgba(122, 109, 113, .3);
+  --border-hover: rgba(122, 109, 113, .64);
+  --text: #5d5357;
+  --text-soft: #7a6d71;
+  --text-muted: #a39599;
+  --accent: #b0838c;
+  --accent-soft: rgba(214, 186, 191, .38);
+  --accent-glow: rgba(176, 131, 140, .2);
+  --keke-paper: #faf7f5;
+  --keke-ink: #7a6d71;
+  --keke-rose: #b0838c;
+  --keke-active-tab: rgba(244, 222, 228, .94);
+  --keke-bubble-shadow: 0 0 0 2.5px #faf7f5, 2px 3px 0 2.5px rgba(157, 171, 185, .25);
+  --keke-sidebar-background: repeating-linear-gradient(0deg, transparent 0 21px, rgba(157, 171, 185, .18) 21px 22px), #faf7f5;
+  --keke-calendar-background: rgba(255, 255, 255, .69);
+  --keke-calendar-cat: url('/theme-assets/keke/doodle-cat.webp');
+  --keke-side-decoration: url('/theme-assets/keke/doodle-decoration.webp');
+  --chat-bubble-assistant-fill: #faf7f5;
+  --chat-bubble-assistant-border: 1.2px solid #7a6d71;
+  --chat-bubble-assistant-shadow: var(--keke-bubble-shadow);
+  --chat-bubble-user-fill: #f3e9ea;
+  --chat-bubble-user-border: 1.2px solid #7a6d71;
+  --chat-bubble-user-shadow: 0 0 0 2.5px #faf7f5, 2px 3px 0 2.5px rgba(176, 131, 140, .25);
+  --chat-send-active-fill: #dcbfc4;
+  --chat-send-active-text: #66545b;
+  --chat-composer-fill: #fff;
+  --chat-composer-fill-focus: #fff;
+}
+
+.app-shell.chat .app-stage {
+  background: linear-gradient(rgba(250, 247, 245, .71), rgba(250, 247, 245, .76)), url('/theme-assets/keke/doodle-background.jpg') center/cover no-repeat;
+}
+
+.app-shell.chat .world-stack,
+.app-shell.chat .world-chat { background: transparent; }
+
+.app-shell.chat .chat-flow {
+  background: linear-gradient(90deg, transparent 28px, rgba(196, 151, 159, .14) 29px, transparent 30px);
+}
+
+.app-shell.chat .bubble.user,
+.app-shell.chat .bubble.assistant {
+  position: relative;
+  border: 1.2px solid #7a6d71;
+  border-radius: 18px 16px 17px 19px;
+  box-shadow: 0 0 0 2.5px #faf7f5, 2px 3px 0 2.5px rgba(157, 171, 185, .25);
+  color: #5d5357;
+}
+
+.app-shell.chat .bubble.user {
+  rotate: .4deg;
+  background: #f3e9ea;
+  color: #52494d;
+  box-shadow: 0 0 0 2.5px #faf7f5, 2px 3px 0 2.5px rgba(176, 131, 140, .25);
+}
+
+.app-shell.chat .msg-row.user:nth-child(3n) .bubble.user { background: #f6eeee; rotate: -.4deg; }
+.app-shell.chat .msg-row.assistant:nth-child(4n) .bubble.assistant { rotate: -.5deg; }
+
+.app-shell.chat .msg-row.user .bubble::after {
+  content: '✧';
+  top: -15px;
+  right: -7px;
+  font: 800 21px/1 system-ui, sans-serif;
+  color: #b0838c;
+  text-shadow: -1px -1px #faf7f5, 1px 1px #faf7f5;
+}
+
+.app-shell.chat .msg-row.assistant .bubble::after {
+  content: '☆';
+  right: -10px;
+  bottom: -12px;
+  font: 800 18px/1 system-ui, sans-serif;
+  color: #9dabb9;
+  text-shadow: 0 0 2px #faf7f5;
+}
+
+.app-shell.chat .topbar-surface {
+  background: repeating-linear-gradient(transparent 0 21px, rgba(157, 171, 185, .18) 21px 22px), #faf7f5;
+}
+
+.app-shell.chat .chat-dock {
+  background: linear-gradient(90deg, transparent 26px, rgba(196, 151, 159, .35) 26px 27px, transparent 27px), repeating-linear-gradient(transparent 0 21px, rgba(157, 171, 185, .2) 21px 22px), #faf7f5;
+}
+
+.app-shell.chat .chat-dock::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 23px;
+  top: -12px;
+  width: 62px;
+  height: 17px;
+  rotate: -6deg;
+  background: repeating-linear-gradient(45deg, rgba(214, 186, 191, .72) 0 4px, rgba(232, 215, 218, .72) 4px 8px);
+  clip-path: polygon(2% 0, 97% 4%, 100% 30%, 96% 52%, 100% 78%, 97% 100%, 2% 96%, 0 70%, 4% 48%, 0 22%);
+  pointer-events: none;
+}
+
+.app-shell.chat .chat-box-shell {
+  border: 1.2px solid #7a6d71;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 0 0 2px #faf7f5, 2px 3px 0 2px rgba(176, 131, 140, .18);
+}
+
+.app-shell.chat .send-btn.has-content {
+  border: 1.2px solid #7a6d71;
+  box-shadow: 0 0 0 2px #faf7f5, 2px 3px 0 2px rgba(122, 109, 113, .14);
+}
+
+.app-shell.chat .conflux-sidebar-calendar {
+  background: rgba(255, 255, 255, .58);
+}
+
+.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::before,
+.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::before {
+  content: '';
+  position: absolute;
+  right: 24px;
+  top: 78px;
+  width: 48px;
+  height: 100px;
+  background: url('/theme-assets/keke/doodle-hanger.webp') center/contain no-repeat;
+  rotate: 3deg;
+  opacity: .86;
+  pointer-events: none;
+}
+
+.app-shell.chat .conflux-sidebar-search input,
+.app-shell.chat .conflux-sidebar-create,
+.app-shell.chat .conflux-profile-edit {
+  border: 1.2px solid #7a6d71;
+  box-shadow: 1.5px 2px 0 rgba(176, 131, 140, .18);
+}

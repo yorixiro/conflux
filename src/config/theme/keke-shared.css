@@ -1,0 +1,263 @@
+/* Claude "克克" prototype: shared sticker-family surfaces, remapped to real Conflux UI.
+   Behavior remains owned by ChatWorld, ChatComposer, MessageRow and DesktopAppSidebar. */
+.app-shell.chat {
+  --keke-paper: #faf7f5;
+  --keke-ink: #7a6d71;
+  --keke-rose: #b0838c;
+  --keke-rule: rgba(157, 171, 185, .2);
+  --keke-washi: repeating-linear-gradient(45deg, rgba(214, 186, 191, .72) 0 4px, rgba(232, 215, 218, .72) 4px 8px);
+  --chat-bubble-assistant-padding: 11px 15px;
+  --chat-bubble-assistant-backdrop: none;
+  --chat-bubble-assistant-radius: 17px;
+  --chat-bubble-user-radius: 17px;
+  --chat-composer-backdrop: none;
+  --chat-send-active-text: #fff;
+  color: var(--text);
+}
+
+.app-shell.chat .topbar-surface {
+  border-bottom: 1px dashed var(--keke-rose);
+  background: var(--keke-paper);
+  box-shadow: 0 7px 14px -11px rgba(90, 70, 76, .22);
+}
+
+.app-shell.chat .chat-flow {
+  color: var(--text);
+  scrollbar-color: rgba(176, 131, 140, .22) transparent;
+}
+
+.app-shell.chat .bubble.user,
+.app-shell.chat .bubble.assistant {
+  border: 0;
+  font-weight: 600;
+  line-height: 1.72;
+  letter-spacing: .025em;
+  text-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.app-shell.chat .bubble.user,
+.app-shell.chat .bubble.assistant {
+  box-shadow: var(--keke-bubble-shadow);
+}
+
+.app-shell.chat .msg-row.user .bubble::after,
+.app-shell.chat .msg-row.assistant .bubble::after {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.app-shell.chat .message-meta,
+.app-shell.chat .message-identity-meta,
+.app-shell.chat .message-timestamp {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+.app-shell.chat .chat-dock {
+  background: var(--keke-paper);
+  box-shadow: 0 -7px 15px -12px rgba(90, 70, 76, .25);
+}
+
+.app-shell.chat .chat-dock::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -11px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: var(--keke-paper);
+  clip-path: polygon(0 44%, 2% 20%, 5% 56%, 8% 12%, 11% 39%, 15% 16%, 19% 69%, 23% 28%, 27% 54%, 31% 11%, 36% 70%, 42% 25%, 48% 57%, 53% 16%, 58% 62%, 64% 30%, 70% 55%, 75% 18%, 82% 62%, 87% 20%, 93% 56%, 97% 24%, 100% 42%, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.app-shell.chat .chat-box-shell {
+  border: 1px solid rgba(176, 131, 140, .22);
+  background: rgba(255, 255, 255, .76);
+  box-shadow: 2px 3px 0 rgba(176, 131, 140, .13);
+}
+
+.app-shell.chat .chat-box textarea {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.app-shell.chat .send-btn {
+  border-radius: 50%;
+  box-shadow: 1px 2px 0 rgba(90, 70, 76, .14);
+}
+
+.app-shell.chat .composer-slot-btn,
+.app-shell.chat .micro-action-btn,
+.app-shell.chat .message-action-btn {
+  border-color: rgba(176, 131, 140, .3);
+  color: var(--text-soft);
+}
+
+.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar,
+.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub) {
+  background: var(--keke-sidebar-background);
+  color: var(--text);
+  border-right: 1px dashed rgba(176, 131, 140, .42);
+}
+
+.app-shell.chat .conflux-sidebar-tabs,
+.app-shell.chat .conflux-hub-tabs {
+  gap: 8px;
+  border-bottom: 0;
+}
+
+.app-shell.chat .conflux-sidebar-tabs button,
+.app-shell.chat .conflux-hub-tabs button {
+  flex: 1;
+  min-width: 0;
+  border: 1px dashed rgba(176, 131, 140, .42);
+  border-radius: 8px 8px 4px 4px;
+  background: rgba(255, 255, 255, .55);
+  font-weight: 700;
+}
+
+.app-shell.chat .conflux-sidebar-tabs button[aria-selected='true'],
+.app-shell.chat .conflux-hub-tabs button[aria-selected='true'] {
+  border-color: var(--keke-rose);
+  border-bottom: 2px solid var(--keke-rose);
+  background: var(--keke-active-tab);
+  color: var(--text);
+}
+
+.app-shell.chat .conflux-profile-heading {
+  position: relative;
+  padding: 11px 4px;
+  border-bottom: 1px dashed rgba(176, 131, 140, .36);
+}
+
+.app-shell.chat .conflux-profile-heading h2,
+.app-shell.chat .conflux-library-role-select span {
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.app-shell.chat .conflux-profile-edit,
+.app-shell.chat .conflux-sidebar-create,
+.app-shell.chat .conflux-sidebar-search input,
+.app-shell.chat .conflux-library-role-settings {
+  border: 1px dashed rgba(176, 131, 140, .52);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .62);
+  color: var(--text);
+}
+
+.app-shell.chat .conflux-sidebar-calendar {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  margin-top: 13px;
+  padding: 17px 10px 46px;
+  border: 1.5px dashed rgba(176, 131, 140, .52);
+  border-radius: 10px;
+  background: var(--keke-calendar-background);
+  box-shadow: 1.5px 2.5px 0 rgba(90, 70, 76, .1);
+}
+
+.app-shell.chat .conflux-sidebar-calendar::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: -7px;
+  width: 44px;
+  height: 12px;
+  rotate: -5deg;
+  background: var(--keke-washi);
+  pointer-events: none;
+}
+
+.app-shell.chat .conflux-sidebar-calendar::after {
+  content: '';
+  position: absolute;
+  left: -7px;
+  bottom: -14px;
+  width: 86px;
+  height: 86px;
+  background: var(--keke-calendar-cat) center/contain no-repeat;
+  filter: drop-shadow(1px 2px 1px rgba(90, 70, 76, .2));
+  pointer-events: none;
+}
+
+.app-shell.chat .conflux-sidebar-calendar header strong {
+  padding: 2px 7px;
+  font-weight: 800;
+  background: linear-gradient(transparent 58%, var(--keke-active-tab) 58%);
+}
+
+.app-shell.chat .conflux-sidebar-calendar > header button {
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px dashed rgba(176, 131, 140, .5);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .65);
+}
+
+.app-shell.chat .conflux-sidebar-calendar th {
+  border-bottom: 1px dashed rgba(176, 131, 140, .4);
+  color: var(--keke-rose);
+  font-weight: 700;
+}
+
+.app-shell.chat .conflux-sidebar-calendar time[aria-current='date'] {
+  border: 0;
+  border-radius: 48% 52% 47% 53%;
+  outline: none;
+  background: var(--keke-rose);
+  color: #fff;
+  transform: rotate(-5deg);
+}
+
+.app-shell.chat .conflux-sidebar-calendar .conflux-calendar-today {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  width: auto;
+  min-width: 0;
+  min-height: 28px;
+  font-weight: 700;
+  color: var(--keke-rose);
+}
+
+.app-shell.chat .desktop-sidebar-thread-row.active,
+.app-shell.chat .conflux-sidebar-contact-row:has(.active) {
+  border-radius: 10px;
+  background: var(--keke-active-tab);
+}
+
+.app-shell.chat .desktop-sidebar-thread-more,
+.app-shell.chat .desktop-sidebar-thread-menu-item {
+  color: var(--text-soft);
+}
+
+.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::after,
+.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::after {
+  content: '';
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  width: 116px;
+  height: 146px;
+  opacity: .82;
+  background: var(--keke-side-decoration) right bottom/contain no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (max-width: 600px) {
+  .app-shell.chat .chat-flow { padding-inline: 15px; }
+  .app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::after { opacity: .55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell.chat .bubble.user,
+  .app-shell.chat .bubble.assistant { animation: none; }
+}

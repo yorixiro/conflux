@@ -35,6 +35,22 @@ const THEME_PRESET_STABLE_PROFILES: Record<string, ThemePresetStableProfile> = {
     depth: 'soft',
     intensity: 0.56
   },
+  'keke-doodle': {
+    seedColor: '#b0838c',
+    mood: 'sweet',
+    material: 'paper',
+    density: 'balanced',
+    depth: 'soft',
+    intensity: 0.5
+  },
+  'keke-pois': {
+    seedColor: '#a5858c',
+    mood: 'quiet',
+    material: 'paper',
+    density: 'airy',
+    depth: 'flat',
+    intensity: 0.42
+  },
   'glass-mint': {
     seedColor: '#3ba56f',
     mood: 'airy',

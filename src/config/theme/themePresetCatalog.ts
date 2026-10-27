@@ -1,4 +1,7 @@
 import type { ThemePreset } from '../../types/domain';
+import KEKE_SHARED_CSS from './keke-shared.css?raw';
+import KEKE_DOODLE_CSS from './keke-doodle.css?raw';
+import KEKE_POIS_CSS from './keke-pois.css?raw';
 import {
   AURORA_PRESET_CSS,
   GLASS_PRESET_CSS,
@@ -143,6 +146,58 @@ const VISIBLE_THEME_PRESETS: ThemePreset[] = [
       recipe: { name: '奶油纸页', note: '纸纹、奶油表面和更安静的默认停留感。' },
       styleLabel: 'Paper'
     }
+  ),
+  createPreset(
+    'keke-doodle',
+    '克克 / 铅笔贴纸',
+    '奶灰粉、铅笔线、手账撕纸和猫猫贴饰',
+    '由克克设计文件拆出的铅笔贴纸主题。映射到真实消息、输入框、角色资料和对话库。',
+    {
+      '--chat-bg': '#faf7f5',
+      '--cool-bg': '#faf7f5',
+      '--cool-surface': '#faf7f5',
+      '--cool-surface-solid': '#faf7f5',
+      '--cool-surface-deep': '#f3e9ea',
+      '--cool-border': 'rgba(122,109,113,.3)',
+      '--cool-border-hover': 'rgba(122,109,113,.64)',
+      '--cool-text': '#5d5357',
+      '--cool-text-soft': '#7a6d71',
+      '--cool-text-muted': '#a39599',
+      '--cool-accent': '#b0838c',
+      '--cool-accent-soft': 'rgba(214,186,191,.38)',
+      '--cool-accent-glow': 'rgba(176,131,140,.2)',
+      '--bubble-user': '#f3e9ea',
+      '--bubble-ai': '#faf7f5',
+      '--radius-xl': '18px',
+      '--radius-2xl': '20px'
+    },
+    { css: `${KEKE_SHARED_CSS}\n${KEKE_DOODLE_CSS}`, recipe: { name: '铅笔贴纸', note: '原样素材，真实 Conflux 聊天功能。' }, styleLabel: 'Sticker' }
+  ),
+  createPreset(
+    'keke-pois',
+    '克克 / 灰粉波点',
+    '灰白圆点、低饱和粉、像素贴饰和透明气泡',
+    '由克克设计文件拆出的灰粉波点主题。聊天、收藏、角色操作继续使用 Conflux 的真实数据。',
+    {
+      '--chat-bg': '#c6c4c5',
+      '--cool-bg': '#c6c4c5',
+      '--cool-surface': 'rgba(246,245,245,.86)',
+      '--cool-surface-solid': '#f6f5f5',
+      '--cool-surface-deep': '#f3f0f0',
+      '--cool-border': 'rgba(90,80,84,.18)',
+      '--cool-border-hover': 'rgba(90,80,84,.38)',
+      '--cool-text': '#4d484a',
+      '--cool-text-soft': '#6e6668',
+      '--cool-text-muted': '#77716f',
+      '--cool-accent': '#a5858c',
+      '--cool-accent-soft': 'rgba(201,163,170,.4)',
+      '--cool-accent-glow': 'rgba(185,147,154,.18)',
+      '--bubble-user': 'rgba(236,215,219,.58)',
+      '--bubble-ai': 'rgba(242,242,242,.5)',
+      '--radius-xl': '16px',
+      '--radius-2xl': '18px'
+    },
+    { css: `${KEKE_SHARED_CSS}\n${KEKE_POIS_CSS}`, recipe: { name: '灰粉波点', note: '低饱和灰粉，像素装饰，真实对话。' }, styleLabel: 'Pois' }
   )
 ];
 

@@ -1,0 +1,137 @@
+/* 灰粉波点：source background and bitmap pixel stickers, no retouching. */
+.app-shell.chat {
+  --bg: #c6c4c5;
+  --surface: rgba(246, 245, 245, .86);
+  --surface-solid: #f6f5f5;
+  --surface-deep: #f3f0f0;
+  --border: rgba(90, 80, 84, .18);
+  --border-hover: rgba(90, 80, 84, .38);
+  --text: #4d484a;
+  --text-soft: #6e6668;
+  --text-muted: #77716f;
+  --accent: #a5858c;
+  --accent-soft: rgba(201, 163, 170, .4);
+  --accent-glow: rgba(185, 147, 154, .18);
+  --keke-paper: #f6f5f5;
+  --keke-ink: #6e6668;
+  --keke-rose: #a5858c;
+  --keke-active-tab: rgba(227, 217, 220, .8);
+  --keke-bubble-shadow: 0 2px 10px rgba(70, 64, 66, .05);
+  --keke-sidebar-background: radial-gradient(#e3d9dc 1.2px, transparent 1.6px) 0 0/10px 10px, #f3f0f0;
+  --keke-calendar-background: radial-gradient(#e3d9dc 1.2px, transparent 1.6px) 0 0/10px 10px, #f3f0f0;
+  --keke-calendar-cat: url('/theme-assets/keke/pois-disc.webp');
+  --keke-side-decoration: url('/theme-assets/keke/pois-decoration.webp');
+  --keke-washi: repeating-linear-gradient(45deg, #e3d9dc 0 4px, #f6f3f3 4px 8px);
+  --chat-bubble-assistant-fill: rgba(242, 242, 242, .5);
+  --chat-bubble-assistant-border: 1.5px dashed rgba(255, 255, 255, .62);
+  --chat-bubble-assistant-shadow: 0 2px 10px rgba(70, 64, 66, .05);
+  --chat-bubble-user-fill: rgba(236, 215, 219, .58);
+  --chat-bubble-user-border: 1.5px dashed rgba(255, 255, 255, .62);
+  --chat-bubble-user-shadow: 0 2px 10px rgba(150, 105, 115, .07);
+  --chat-send-active-fill: #c9a3aa;
+  --chat-send-active-text: #fff;
+  --chat-composer-fill: rgba(255, 255, 255, .84);
+  --chat-composer-fill-focus: rgba(255, 255, 255, .94);
+}
+
+.app-shell.chat .app-stage {
+  background: url('/theme-assets/keke/pois-background.jpg') center/cover no-repeat;
+}
+
+.app-shell.chat .world-stack,
+.app-shell.chat .world-chat { background: transparent; }
+
+.app-shell.chat .bubble.user,
+.app-shell.chat .bubble.assistant {
+  border: 1.5px dashed rgba(255, 255, 255, .6);
+  border-radius: 16px;
+  color: #4d484a;
+  text-shadow: 0 0 3px rgba(255, 255, 255, .8);
+  box-shadow: 0 2px 10px rgba(70, 64, 66, .05);
+}
+
+.app-shell.chat .bubble.assistant { background: rgba(242, 242, 242, .58); }
+.app-shell.chat .bubble.user {
+  background: rgba(236, 215, 219, .7);
+  color: #5a4a4e;
+  box-shadow: 0 2px 10px rgba(150, 105, 115, .07);
+}
+
+.app-shell.chat .msg-row.user .bubble::after,
+.app-shell.chat .msg-row.assistant .bubble::after {
+  content: '';
+  top: -12px;
+  right: -14px;
+  width: 34px;
+  height: 36px;
+  background: url('/theme-assets/keke/pois-sticker-1.png') center/contain no-repeat;
+  rotate: -14deg;
+  filter: drop-shadow(1px 2px 1px rgba(70, 64, 66, .12));
+}
+
+.app-shell.chat .msg-row:nth-child(6n+2) .bubble::after { background-image: url('/theme-assets/keke/pois-sticker-2.png'); rotate: 10deg; }
+.app-shell.chat .msg-row:nth-child(6n+3) .bubble::after { background-image: url('/theme-assets/keke/pois-sticker-3.png'); rotate: -6deg; }
+.app-shell.chat .msg-row:nth-child(6n+4) .bubble::after { background-image: url('/theme-assets/keke/pois-sticker-4.png'); rotate: 16deg; }
+.app-shell.chat .msg-row:nth-child(6n+5) .bubble::after { background-image: url('/theme-assets/keke/pois-sticker-5.png'); rotate: -10deg; }
+.app-shell.chat .msg-row:nth-child(6n) .bubble::after { background-image: url('/theme-assets/keke/pois-sticker-6.png'); rotate: 8deg; }
+
+.app-shell.chat .topbar-surface {
+  border-bottom: 1.5px dashed #fff;
+  background: radial-gradient(#e3d9dc 1.1px, transparent 1.5px) 0 0/12px 12px, #f6f5f5;
+}
+
+.app-shell.chat .chat-dock {
+  background: radial-gradient(#e3d9dc 1.1px, transparent 1.5px) 0 0/12px 12px, #f6f5f5;
+}
+
+.app-shell.chat .chat-box-shell {
+  border: 1.5px dashed #fff;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 0 0 1px rgba(134, 103, 98, .22), 0 3px 9px rgba(70, 64, 66, .08);
+}
+
+.app-shell.chat .chat-dock::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  right: 26px;
+  top: -9px;
+  width: 48px;
+  height: 16px;
+  rotate: 5deg;
+  background: repeating-linear-gradient(45deg, #e3d9dc 0 4px, #f6f3f3 4px 8px);
+  clip-path: polygon(3% 0, 98% 5%, 100% 86%, 97% 100%, 0 94%, 4% 45%);
+  pointer-events: none;
+}
+
+.app-shell.chat .send-btn.has-content {
+  border: 1.5px dashed #fff;
+  box-shadow: 0 0 0 1px rgba(134, 103, 98, .24);
+}
+
+.app-shell.chat .conflux-sidebar-calendar {
+  border: 1.5px dashed #fff;
+  box-shadow: 0 0 0 1px rgba(134, 103, 98, .22);
+}
+
+.app-shell.chat .conflux-sidebar-dialog .desktop-app-sidebar::before,
+.app-shell.chat .desktop-app-sidebar:not(.conflux-conversation-hub)::before {
+  content: '';
+  position: absolute;
+  right: 24px;
+  top: 78px;
+  width: 42px;
+  height: 95px;
+  background: url('/theme-assets/keke/pois-hanger.webp') center/contain no-repeat;
+  rotate: 3deg;
+  opacity: .85;
+  pointer-events: none;
+}
+
+.app-shell.chat .conflux-sidebar-search input,
+.app-shell.chat .conflux-sidebar-create,
+.app-shell.chat .conflux-profile-edit {
+  border: 1.5px dashed #fff;
+  box-shadow: 0 0 0 1px rgba(134, 103, 98, .22);
+}

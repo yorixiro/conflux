@@ -54,6 +54,98 @@
   gap: 14px;
 }
 
+.collaborator-info-content .room-theme-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.collaborator-info-content .room-theme-preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  min-width: 0;
+  padding: 5px 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-solid) 80%, transparent);
+  color: var(--text);
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+
+.collaborator-info-content .room-theme-preset-card.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.collaborator-info-content .room-theme-preset-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.collaborator-info-content .room-theme-preset-art {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  height: 72px;
+  padding: 11px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #f8f8f8, #e8e8e8);
+  overflow: hidden;
+}
+
+.collaborator-info-content .room-theme-preset-bubble {
+  width: 67%;
+  height: 15px;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 1px 3px #0001;
+}
+
+.collaborator-info-content .room-theme-preset-bubble + .room-theme-preset-bubble {
+  align-self: flex-end;
+  background: #dedede;
+}
+
+.collaborator-info-content [data-theme-preview='keke-doodle'] .room-theme-preset-art {
+  background: #faf7f5 url('/theme-assets/keke/doodle-background.jpg') center/cover;
+}
+
+.collaborator-info-content [data-theme-preview='keke-doodle'] .room-theme-preset-bubble {
+  border: 1px dashed #b99c9f;
+  background: #fffaf7e8;
+}
+
+.collaborator-info-content [data-theme-preview='keke-doodle'] .room-theme-preset-bubble + .room-theme-preset-bubble {
+  background: #efdae0e8;
+}
+
+.collaborator-info-content [data-theme-preview='keke-pois'] .room-theme-preset-art {
+  background: #c6c4c5 url('/theme-assets/keke/pois-background.jpg') center/cover;
+}
+
+.collaborator-info-content [data-theme-preview='keke-pois'] .room-theme-preset-bubble {
+  background: #e8e4e5dc;
+}
+
+.collaborator-info-content [data-theme-preview='keke-pois'] .room-theme-preset-bubble + .room-theme-preset-bubble {
+  background: #e7c7cedc;
+}
+
+.collaborator-info-content .room-theme-preset-card strong {
+  font-size: 12px;
+}
+
+.collaborator-info-content .room-theme-preset-description {
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 @media (max-width: 430px) {
   .collaborator-info-content .room-theme-page-nav button {
     flex-direction: column;

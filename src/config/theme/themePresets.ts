@@ -22,7 +22,10 @@ export function listThemePresetIds() {
 }
 
 export function listStudioThemePresets() {
-  return THEME_PRESETS.filter((preset) => preset.id === DEFAULT_THEME_PRESET_ID);
+  // Keep legacy experimental presets hidden while exposing the two user-provided skins.
+  return THEME_PRESETS.filter((preset) =>
+    preset.id === DEFAULT_THEME_PRESET_ID || preset.id === 'keke-doodle' || preset.id === 'keke-pois'
+  );
 }
 
 export function buildThemeFrameFromPresetId(presetId: string = DEFAULT_THEME_PRESET_ID): ThemeFrame {
