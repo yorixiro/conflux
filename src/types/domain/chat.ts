@@ -80,6 +80,26 @@ export type ChatMemoryEvidence = {
   strategy: 'none' | 'local_scan' | 'semantic_index';
   status: 'disabled' | 'not_configured' | 'empty' | 'within_budget' | 'trimmed_budget';
   items: ChatMemoryEvidenceItem[];
+  /** Only an injected, completed one-memory request can leave this durable receipt. */
+  passiveRecallReceipt?: {
+    version: 1;
+    id: string;
+    scopeId: string;
+    sourceRef: string;
+    sourceConversationId?: string | null;
+    sourceMessageIds?: string[];
+    deliveredAt: number;
+  };
+  /** Local replay trace: decisions alone never count as a delivery. */
+  passiveRecallReview?: {
+    version: 1;
+    evaluatedAt: number;
+    result: 'injected' | 'no_match' | 'not_injected';
+    decisions: Array<{
+      id: string;
+      status: 'selected' | 'blocked_scope' | 'blocked_context' | 'blocked_cooldown' | 'blocked_relevance' | 'blocked_review';
+    }>;
+  };
 };
 
 export type WorkspaceLedgerEvent =

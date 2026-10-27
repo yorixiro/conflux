@@ -133,9 +133,16 @@ export function searchCollaboratorMemorySources(args: {
 }): MemorySearchResult {
   const mode = args.mode ?? 'auto';
   const maxResults = resolvePositiveLimit(args.maxResults, DEFAULT_MEMORY_SEARCH_MAX_RESULTS);
+  const allowedConversationIds = new Set(args.conversations
+    .filter((conversation) => sameCollaboratorScope({
+      currentCollaboratorId: args.currentCollaboratorId,
+      conversationCollaboratorId: conversation.collaboratorId
+    }))
+    .map((conversation) => conversation.id));
   const summaries = mode === 'source'
     ? []
     : (args.summaries ?? [])
+        .filter((summary) => summary.sourceConversationIds.every((id) => allowedConversationIds.has(id)))
         .flatMap((summary) => scoreSummary(args.query, summary) ?? [])
         .sort((left, right) => {
           const scoreDelta = right.score - left.score;
@@ -175,6 +182,8 @@ export function openConversationMemorySource(args: {
   const sourceMessages = sourceMessageIds.size > 0
     ? conversation.messages.filter((message) => sourceMessageIds.has(message.id))
     : conversation.messages.filter((message) => message.role === 'user' || message.role === 'assistant');
+  // A stale or forged source pointer must not silently become a successful read.
+  if (sourceMessageIds.size > 0 && sourceMessages.length !== sourceMessageIds.size) return null;
   const maxChars = resolvePositiveLimit(args.maxChars, DEFAULT_MEMORY_SOURCE_OPEN_MAX_CHARS);
   const messages: MemorySourceOpenResult['messages'] = [];
   let usedChars = 0;

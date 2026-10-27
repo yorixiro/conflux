@@ -99,4 +99,26 @@ describe('memoryToolSearch', () => {
       })]
     }));
   });
+
+  it('never returns a summary whose source belongs to a different collaborator or was deleted', () => {
+    const result = searchCollaboratorMemorySources({
+      query: '羽毛球',
+      summaries: [summary({ id: 'foreign', content: '喜欢打羽毛球', sourceConversationIds: ['private-b'] })],
+      conversations: [
+        conversation({ id: 'private-b', collaboratorId: 'persona-b', messages: [message('b1', 'user', '我喜欢羽毛球', 1)] }),
+        conversation({ id: 'own', collaboratorId: 'pharos', messages: [message('a1', 'user', '今天去散步', 1)] })
+      ],
+      currentCollaboratorId: 'pharos'
+    });
+    expect(result.summaries).toEqual([]);
+    expect(result.sources).toEqual([]);
+  });
+
+  it('fails closed when any requested source message has been deleted', () => {
+    expect(openConversationMemorySource({
+      sourceConversationId: 'old',
+      sourceMessageIds: ['old-user', 'deleted-id'],
+      conversations: [conversation({ id: 'old', messages: [message('old-user', 'user', '留下的消息', 1)] })]
+    })).toBeNull();
+  });
 });

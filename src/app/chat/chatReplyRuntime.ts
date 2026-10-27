@@ -33,6 +33,7 @@ import type { ChatReplyStoreBindings, ChatUiReplyState } from './chatPorts';
 import { parseAssistantReplyContent } from './chatReplyContent';
 import { buildReplyToolContext, type ChatReplyRequestSnapshot } from './chatReplyContext';
 import { buildChatMemoryEvidenceFromAudit } from './chatMemoryEvidence';
+import { collectPassiveRecallDeliveries } from '../../engines/request/requestRecallReceipts';
 import { createStreamingSession } from './chatStreamingSession';
 import { buildStoredToolCallRecords } from './chatToolCallRecords';
 import { recordModelFlowTrace } from './modelFlowTraceRecorder';
@@ -286,6 +287,16 @@ async function requestReplyRound({
   await persistChatReplyBoundary(chat.persistToDb, 'before-request');
   recordChatSendPerformanceMark(conversationId, '聊天发送 · 用户消息已安全落盘');
   const activeRequestSnapshot = refreshRequestSnapshot?.() ?? requestSnapshot;
+  const passiveRecallDeliveries = activeRequestSnapshot.oneMemoryRecallEnabled === true
+    ? collectPassiveRecallDeliveries({
+        conversations: [
+          writableConversation.conversation,
+          ...(activeRequestSnapshot.semanticRecallConversations ?? activeRequestSnapshot.conversations)
+        ],
+        currentScopeId: collaboratorId,
+        existingConversationIds: new Set(activeRequestSnapshot.conversations.map((entry) => entry.id))
+      })
+    : undefined;
   const {
     collaboratorForReply,
     assistantName,
@@ -371,6 +382,8 @@ async function requestReplyRound({
       persona: collaboratorForReply,
       personas: activeRequestSnapshot.personas,
       semanticRecallEnabled: activeRequestSnapshot.semanticRecallEnabled,
+      oneMemoryRecallEnabled: activeRequestSnapshot.oneMemoryRecallEnabled,
+      passiveRecallDeliveries,
       messages: requestMessages,
       semanticRecallConversations: activeRequestSnapshot.semanticRecallConversations ?? activeRequestSnapshot.conversations,
       loadSemanticRecallConversations,

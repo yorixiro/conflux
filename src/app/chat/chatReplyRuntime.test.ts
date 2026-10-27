@@ -1436,4 +1436,93 @@ describe('requestReply task activation', () => {
       && message.content.includes('流式连接提前结束')
     )).toBe(true);
   });
+  it('passes prior persisted receipts into opt-in request and commits only successful injection evidence', async () => {
+    vi.stubGlobal('window', {
+      setTimeout,
+      clearTimeout,
+      requestAnimationFrame: (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0),
+      cancelAnimationFrame: (id: number) => clearTimeout(id)
+    });
+    requestCollaboratorReplyMock.mockReset();
+    const previousReceipt = {
+      version: 1 as const,
+      id: 'old:u1',
+      scopeId: 'pharos',
+      sourceRef: 'old:u1',
+      sourceConversationId: 'old',
+      sourceMessageIds: ['u1'],
+      deliveredAt: Date.now() - 1000
+    };
+    const oldAssistant: ChatMessage = {
+      id: 'previous-assistant', role: 'assistant', content: '上一次回答', timestamp: Date.now() - 1000,
+      memoryEvidence: { requestId: 'old-request', strategy: 'local_scan', status: 'within_budget', items: [], passiveRecallReceipt: previousReceipt }
+    };
+    const user: ChatMessage = { id: 'user-current', role: 'user', content: '那次味道呢', timestamp: Date.now() };
+    let messages = [oldAssistant, user];
+    const persistToDb = vi.fn(async () => undefined);
+    const recalledText = '那天说的炸鸡有黄油香味';
+    requestCollaboratorReplyMock.mockImplementationOnce(async ({ onAudit }) => {
+      onAudit?.({
+        requestId: 'new-request', collaboratorId: 'pharos',
+        oneMemoryRecallPlan: {
+          selected: {
+            id: 'old:u2', scopeId: 'pharos', text: recalledText, sourceRef: 'old:u2',
+            sourceConversationId: 'old', sourceMessageIds: ['u2'],
+            confidence: 0.95, bestConfidence: 0.95, fusedScore: 0.02, lanes: ['lexical']
+          },
+          decisions: [{ id: 'old:u2', status: 'selected' }]
+        },
+        semanticRecallPlan: { strategy: 'local_scan', status: 'within_budget', selectedCandidates: [] },
+        semanticRecallContextCandidates: [{
+          id: 'matched-old', kind: 'matched_context', label: '旧对话', sourceConversationId: 'old',
+          sourceMessageIds: ['u2'], score: 0.95, text: recalledText
+        }],
+        context: { segments: [{ kind: 'semantic_recall', messages: [{ role: 'system', content: recalledText }] }] }
+      });
+      return { content: '记得那个味道。', finishReason: 'stop' };
+    });
+
+    const live = buildWritableConversation(messages);
+    const snapshot = buildRequestSnapshot(null, {
+      oneMemoryRecallEnabled: true,
+      conversations: [live.conversation, { ...live.conversation, id: 'old', messages: [] }],
+      semanticRecallConversations: [live.conversation]
+    });
+    const result = await requestReply({
+      ui: {
+        abortControllerRef: { current: null }, setSending: vi.fn(), setStreaming: vi.fn(),
+        streamingLifecycleReleaseRef: { current: null }
+      },
+      chat: {
+        addMessage: (_conversationId, message) => { messages = [...messages, message]; },
+        appendRuntimeFeedbackEvent: vi.fn(),
+        findConversation: vi.fn(() => live.conversation),
+        insertMessageBefore: vi.fn(),
+        findConversationMessage: vi.fn((_conversationId, id) => messages.find((message) => message.id === id)),
+        getConversationMessages: vi.fn(() => messages),
+        replaceConversationMessages: vi.fn(),
+        getConversationTask: vi.fn(() => null),
+        setConversationTask: vi.fn(),
+        updateMessage: vi.fn((_conversationId, id, patch) => {
+          messages = messages.map((message) => message.id === id ? { ...message, ...patch } : message);
+        }),
+        persistToDb
+      },
+      executeToolActions: vi.fn(async () => []),
+      conversationId: live.conversationId,
+      writableConversation: live,
+      collaboratorId: 'pharos',
+      messages,
+      requestSnapshot: snapshot
+    });
+
+    expect(result.status).toBe('completed');
+    expect(requestCollaboratorReplyMock).toHaveBeenCalledWith(expect.objectContaining({
+      oneMemoryRecallEnabled: true,
+      passiveRecallDeliveries: [{ id: 'old:u1', deliveredAt: previousReceipt.deliveredAt }]
+    }));
+    expect(messages.find((message) => message.content === '记得那个味道。')?.memoryEvidence?.passiveRecallReceipt)
+      .toMatchObject({ id: 'old:u2', scopeId: 'pharos' });
+    expect(persistToDb).toHaveBeenCalledTimes(2);
+  });
 });

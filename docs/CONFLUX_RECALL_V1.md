@@ -21,7 +21,7 @@
 | 给 | `requestOneMemoryRecall.ts` → `requestPreparation.ts` → `requestContext.ts` | 模型实际上下文只包含最终获准的动态召回 |
 | 另外通道 | `exactRecallEvidence` / 既有长期资料目录 | 专名触发也经过同一闸门，资料不被无条件展开 |
 | 我自己翻 | `searchMemory` / `openMemorySource` | AI 在授权范围内主动检索并能定位来源 |
-| 复盘 | 请求 audit / 待完成持久回执 | 能解释命中、拒绝、注入和冷却，注入成功后才更新回执 |
+| 复盘 | 请求 audit / 助手消息上的 `passiveRecallReview` 与 `passiveRecallReceipt` | 能解释命中、拒绝、注入和冷却；回执随聊天记录持久化 |
 
 ## 三阶段交付
 
@@ -33,12 +33,15 @@
 - [x] 单条注入和空结果请求级测试；原模式保留。
 - [ ] 检索质量的中文多义词、时间、否定、专名基准集。
 
-### 第二阶段：可追溯与生命周期
+### 第二阶段：可追溯与生命周期（已实现基础闭环，仍需扩大持久读回覆盖）
 
-- [ ] 为被动注入建立持久回执，按当前 Persona/会话隔离；只在真正发送成功后记录。
+- [x] 在现有 ChatMessage.memoryEvidence 中写入被动注入回执与拒绝原因；只有请求上下文实际包含选中片段、且模型成功返回并提交助手消息时才生成送达回执。随 LocalData 对话存储/删除，不建第二份记忆库。
+- [x] 将现有已加载对话中的回执接入下一轮 cooldown；同源只记录最后一次，其他 Persona 的回执不参与。
 - [ ] 冷却时间、重复记忆、失败重试、断电读回、历史删除与回执一致性测试。
-- [ ] 将主动查阅工具的来源过滤与读回异常纳入统一验收。
+- [x] 主动查阅的摘要来源过滤按 Persona 限定；缺少 Persona、来源失效/部分消息被删时拒绝读取。
 - [ ] 确认隐私边界与可撤销授权；取消操作不生成回执。
+
+**未完成的关键边界：** 目前跨轮冷却从当前对话和召回目录中已加载的对话消息读取；没有读取到的旧会话回执不能保证跨窗口冷却。真实 Android 断电恢复、保存失败重试、批量历史删除和用户可撤销授权还需要验收。旧默认多条召回保持不变，新路径仍为 `oneMemoryRecallEnabled` 显式 opt-in。
 
 ### 第三阶段：启用与回归
 
@@ -49,6 +52,6 @@
 
 ## 当前代码接口
 
-`planPassiveRecall` 是无状态纯决策层，只接收已授权、已检索的候选。`planOneMemoryRequestRecall` 将 Polaris 现有 `matched_context` / `vector_match` 源消息映射进闸门。`prepareCollaboratorReplyRequest({ oneMemoryRecallEnabled: true })` 选择新路径；没有该参数时仍走旧路径。冷却证据可由调用者以 `passiveRecallDeliveries` 注入，但当前产品尚未完成持久回执和 UI 开关。
+`planPassiveRecall` 是无状态纯决策层，只接收已授权、已检索的候选。`planOneMemoryRequestRecall` 将 Polaris 现有 `matched_context` / `vector_match` 源消息映射进闸门。`prepareCollaboratorReplyRequest({ oneMemoryRecallEnabled: true })` 选择新路径；没有该参数时仍走旧路径。请求链已透传 `oneMemoryRecallEnabled` 并从已加载聊天消息读入 `passiveRecallDeliveries`；UI 尚未提供开关，不能宣称正式启用。
 
 提醒：测试中使用合成消息和假 Provider，没有发送付费模型请求，也没有读取用户真实历史。代码测试通过不等于移动设备体验通过。

@@ -63,6 +63,57 @@ function audit(seed: Partial<AssistantRequestAudit>): AssistantRequestAudit {
 }
 
 describe('buildChatMemoryEvidenceFromAudit', () => {
+  it('records only the actually injected item in one-memory mode, ignoring legacy ranked hits', () => {
+    const selectedText = '小欣喜欢淡淡黄油味的炸鸡';
+    const evidence = buildChatMemoryEvidenceFromAudit(audit({
+      oneMemoryRecallPlan: {
+        selected: {
+          id: 'old:u1',
+          scopeId: 'pharos',
+          sourceRef: 'old:u1',
+          sourceConversationId: 'old',
+          sourceMessageIds: ['u1'],
+          text: selectedText,
+          confidence: 0.9,
+          bestConfidence: 0.9,
+          fusedScore: 0.02,
+          lanes: ['lexical']
+        },
+        decisions: [{ id: 'old:u1', status: 'selected' }]
+      },
+      semanticRecallPlan: {
+        status: 'within_budget', strategy: 'local_scan',
+        config: { recentTailConversationCount: 3, recentTailUserMessageCount: 3, voiceAnchorCount: 3 },
+        selectedCandidates: [{
+          id: 'old-hit-not-injected', kind: 'matched_context', label: 'old',
+          sourceConversationId: 'old', sourceMessageIds: ['u2'],
+          estimatedTokens: 10, charCount: 20, score: 0.99, contentFingerprint: 'old', status: 'kept'
+        }],
+        estimatedTokens: 10, maxTokens: null, entries: []
+      },
+      semanticRecallContextCandidates: [{
+        id: 'new-selected', kind: 'matched_context', label: 'old',
+        sourceConversationId: 'old', sourceMessageIds: ['u1'], score: 0.9, text: selectedText
+      }],
+      context: {
+        memorySlots: { session: [], profile: [], pin: [] },
+        attachmentSlots: { enabled: false, pending: [] },
+        segments: [{ kind: 'semantic_recall', messages: [{ role: 'system', content: `[回忆]\n${selectedText}` }] }]
+      }
+    }), 10_000);
+    expect(evidence?.items.map((item) => item.id)).toEqual(['new-selected']);
+    expect(evidence?.passiveRecallReceipt).toMatchObject({ id: 'old:u1', deliveredAt: 10_000 });
+  });
+
+  it('never displays planned but uninjected memory', () => {
+    const evidence = buildChatMemoryEvidenceFromAudit(audit({
+      oneMemoryRecallPlan: { selected: null, decisions: [{ id: 'old:u1', status: 'blocked_cooldown' }] }
+    }));
+    expect(evidence?.items).toEqual([]);
+    expect(evidence?.passiveRecallReceipt).toBeUndefined();
+    expect(evidence?.passiveRecallReview).toMatchObject({ result: 'no_match' });
+  });
+
   it('keeps user-visible semantic recall evidence for assistant messages', () => {
     const evidence = buildChatMemoryEvidenceFromAudit(audit({
       semanticRecallPlan: {

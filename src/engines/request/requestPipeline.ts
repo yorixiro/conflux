@@ -2,6 +2,7 @@ import type { AssistantToolContext } from '../assistantToolProtocol';
 import type { OpenAiToolHistoryMode } from '../provider-runtime/providerRuntimeOpenAiToolHistory';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
+import type { PassiveRecallDelivery } from './requestRecallGate';
 import { recordRequestDebug } from './requestDebugRecorder';
 import {
   prepareCollaboratorReplyRequest,
@@ -61,6 +62,8 @@ export async function requestCollaboratorReply(params: {
   personas?: Persona[];
   messages: ChatMessage[];
   semanticRecallEnabled?: boolean;
+  oneMemoryRecallEnabled?: boolean;
+  passiveRecallDeliveries?: PassiveRecallDelivery[];
   semanticRecallConversations?: Conversation[];
   loadSemanticRecallConversations?: (conversationIds: string[]) => Promise<Conversation[]>;
   activeConversationId?: string | null;
@@ -84,6 +87,8 @@ export async function requestCollaboratorReply(params: {
     personas,
     messages,
     semanticRecallEnabled,
+    oneMemoryRecallEnabled,
+    passiveRecallDeliveries,
     semanticRecallConversations,
     loadSemanticRecallConversations,
     activeConversationId,
@@ -107,6 +112,8 @@ export async function requestCollaboratorReply(params: {
     personas,
     messages,
     semanticRecallEnabled,
+    oneMemoryRecallEnabled,
+    passiveRecallDeliveries,
     semanticRecallConversations,
     loadSemanticRecallConversations,
     activeConversationId,

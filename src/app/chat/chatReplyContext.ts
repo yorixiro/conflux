@@ -127,6 +127,8 @@ export type ChatReplyRequestSnapshot = {
   runtimeFeedbackEvents: RuntimeFeedbackEvent[];
   conversations: Conversation[];
   semanticRecallEnabled?: boolean;
+  /** Internal opt-in until the memory release gate has completed device validation. */
+  oneMemoryRecallEnabled?: boolean;
   semanticRecallConversations?: Conversation[];
   personas: Persona[];
   currentCollaboratorId: string | null;
@@ -216,6 +218,7 @@ export function createChatReplyRequestSnapshot(args: {
     runtimeFeedbackEvents: source.runtimeFeedbackEvents,
     conversations: source.conversations,
     semanticRecallEnabled: source.semanticRecallEnabled,
+    oneMemoryRecallEnabled: source.oneMemoryRecallEnabled,
     semanticRecallConversations: source.semanticRecallConversations,
     personas: source.personas,
     currentCollaboratorId: source.currentCollaboratorId,
