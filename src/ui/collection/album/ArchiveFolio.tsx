@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DirectionalLight } from 'three';
+import { DirectionalLight, Group } from 'three';
 import { getAssetBlob, getAssetPreviewBlob } from '../../../infrastructure/assetStore';
 import type { ImageAssetCard } from '../../../types/domain';
 import type { PouchAddon, SceneAddon } from './bag';
@@ -215,20 +215,17 @@ export function ArchiveFolio({
       return [photo];
     }
     const stamps = bag.createPouchAddon({ ...options, profile: liveStampProfile.current, labels: { pouch: 'POSTAGE · 06' } });
-    // Keep both pockets in the real book scene. Turning its PVC sheet reveals
-    // the other one without remounting the cover, destroying photo positions,
-    // or replacing the whole book with a flat DOM gallery.
-    const group = photo.object.clone(false);
-    group.name = 'folio-paged-pouches';
-    group.position.set(0, 0, 0);
-    group.rotation.set(0, 0, 0);
-    group.scale.set(1, 1, 1);
-    group.add(photo.object, stamps.object);
-    // The foil glints travel with the pointer, as on the source site. The
-    // stamp body's actual normal map scatters this light across the relief.
+    // A narrow book cameras the LEFT board after the sheet turns. Keep the
+    // photo pouch on the right/back board and mount the stamp pouch on the
+    // left/front board. Putting both under 'back-inside' crops the stamps
+    // outside the viewport on page two (as seen on the Android tablet).
+    const postageGroup = new Group();
+    postageGroup.name = 'folio-postage-front-page';
+    postageGroup.add(stamps.object);
+    // The foil's directional key follows the pointer in the same board frame.
     const key = new DirectionalLight(0xfff1d8, 0);
     key.position.set(-0.3, 0.45, 0.5);
-    group.add(key);
+    postageGroup.add(key, key.target);
     let wake: (() => void) | null = null;
     let lastLight = '';
     const aim = (ray: Parameters<NonNullable<PouchAddon['pointer']>['down']>[0]) => {
@@ -247,6 +244,7 @@ export function ArchiveFolio({
     const select = (postage: boolean) => {
       photo.object.visible = !postage;
       stamps.object.visible = postage;
+      postageGroup.visible = postage;
       key.intensity = 0;
       lastLight = '';
       pouchRef.current = postage ? stamps : photo;
@@ -254,25 +252,42 @@ export function ArchiveFolio({
     };
     select(false);
     pagesRef.current = { photo, stamps, select };
-    const current = () => pouchRef.current ?? photo;
-    const pair: SceneAddon = {
+    const photoPage: SceneAddon = {
       anchor: 'back-inside',
-      object: group,
-      attach: (ctx) => { wake = ctx.invalidate; photo.attach(ctx); stamps.attach(ctx); },
-      update: (dt, t, frame) => current().update(dt, t, frame),
+      object: photo.object,
+      attach: (ctx) => photo.attach(ctx),
+      update: (dt, t, frame) => photo.object.visible && photo.update(dt, t, frame),
       pointer: {
-        down: (ray, event) => { aim(ray); return current().pointer.down(ray, event); },
-        move: (ray, event) => { aim(ray); current().pointer.move(ray, event); },
-        up: (ray, event) => current().pointer.up(ray, event),
-        hover: (ray) => { aim(ray); return current().pointer.hover?.(ray) ?? false; },
+        down: (ray, event) => photo.object.visible && photo.pointer.down(ray, event),
+        move: (ray, event) => { if (photo.object.visible) photo.pointer.move(ray, event); },
+        up: (ray, event) => { if (photo.object.visible) photo.pointer.up(ray, event); },
+        hover: (ray) => photo.object.visible && (photo.pointer.hover?.(ray) ?? false),
       },
-      setOpen: (open) => { photo.setOpen(open); stamps.setOpen(open); },
-      setDark: (dark) => { photo.setDark(dark); stamps.setDark(dark); },
+      setOpen: (open) => photo.setOpen(open),
+      setDark: (dark) => photo.setDark(dark),
       printed: () => photo.printed?.() ?? Promise.resolve(),
-      restore: () => { photo.restore(); stamps.restore(); },
-      dispose: () => { photo.dispose(); stamps.dispose(); pagesRef.current = null; },
+      restore: () => photo.restore(),
+      dispose: () => photo.dispose(),
     };
-    return [pair];
+    const postagePage: SceneAddon = {
+      anchor: 'front-inside',
+      object: postageGroup,
+      attach: (ctx) => { wake = ctx.invalidate; stamps.attach(ctx); },
+      update: (dt, t, frame) => stamps.object.visible && stamps.update(dt, t, frame),
+      pointer: {
+        down: (ray, event) => { if (!stamps.object.visible) return false; aim(ray); return stamps.pointer.down(ray, event); },
+        move: (ray, event) => { if (stamps.object.visible) { aim(ray); stamps.pointer.move(ray, event); } },
+        up: (ray, event) => { if (stamps.object.visible) stamps.pointer.up(ray, event); },
+        hover: (ray) => { if (!stamps.object.visible) return false; aim(ray); return stamps.pointer.hover?.(ray) ?? false; },
+      },
+      setOpen: (open) => stamps.setOpen(open),
+      setDark: (dark) => stamps.setDark(dark),
+      // The six relief textures can finish streaming after the cover opens.
+      printed: () => Promise.resolve(),
+      restore: () => stamps.restore(),
+      dispose: () => { stamps.dispose(); pagesRef.current = null; },
+    };
+    return [photoPage, postagePage];
   }, [bag, ownerId]);
 
   const caseSpec = useMemo<CaseSpec>(() => ({
