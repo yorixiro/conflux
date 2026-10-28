@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { resolvePersonaProviderBinding } from '../../engines/personaProviderBinding';
 import { resolveProviderCapability } from '../../engines/provider-runtime';
 import { canDiscoverProviderModels } from '../../engines/providerModelDiscovery';
@@ -10,6 +10,10 @@ import './PersonaModelSettings.css';
 
 export function PersonaModelSettings({ persona, settings = false }: { persona: Persona; settings?: boolean }) {
   const id = useId();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const providers = useRuntimeStore((state) => state.providers);
   const globalApi = useRuntimeStore(selectRuntimeApi);
   const editablePersona = usePersonaStore((state) => state.personas.some((item) => item.id === persona.id));
@@ -28,20 +32,55 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
   const depths = deepseek
     ? [{ value: '', label: '默认' }, { value: '1024', label: '低' }, { value: '8192', label: '高' }, { value: '16384', label: '最高' }]
     : [{ value: '', label: '默认' }, { value: '1024', label: '低' }, { value: '4096', label: '中' }, { value: '8192', label: '高' }];
-  const models = Array.from(new Set([binding.modelId, ...discovery.models.map((model) => model.id)].filter(Boolean)));
+  const models = discovery.models.filter((model) => `${model.id} ${model.label || ''}`.toLowerCase().includes(query.toLowerCase()));
   const update = (advanced: Partial<Persona['advanced']>) => updateCollaborator(persona.id, { advanced });
+
+  useEffect(() => { setPickerOpen(false); setQuery(''); }, [persona.id, binding.api.id, binding.api.baseUrl, binding.api.path, binding.api.protocol, binding.api.apiKey]);
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) setPickerOpen(false);
+    };
+    document.addEventListener('pointerdown', dismiss);
+    return () => document.removeEventListener('pointerdown', dismiss);
+  }, [pickerOpen]);
+
+  function togglePicker() {
+    setPickerOpen(!pickerOpen);
+    setQuery('');
+    if (!pickerOpen && canPull && !discovery.models.length && discovery.status !== 'loading') void discovery.refresh();
+  }
 
   return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="当前 AI 模型与思考强度">
     <div className="model-effort-row">
-      <label className="model-quick-picker" title={binding.modelId || '在 API 设置中配置模型'}>
-        <span className="model-quick-caption">模型</span>
-        <span className="model-quick-value" aria-hidden="true">{binding.modelId || '未配置'}</span>
-        <select aria-label="选择模型" value={binding.modelOverride} disabled={!editable} onChange={(event) => update({ modelOverride: event.target.value })}>
-          <option value="">{binding.fixedProvider?.model || globalApi.model || '未配置'} · 跟随线路</option>
-          {models.map((model) => <option key={model} value={model}>{model}</option>)}
-        </select>
-        <span className="model-quick-arrow" aria-hidden="true">▾</span>
-      </label>
+      <div className="model-quick-picker" ref={pickerRef} onKeyDown={(event) => {
+        if (event.key === 'Escape' && pickerOpen) {
+          event.stopPropagation(); setPickerOpen(false); triggerRef.current?.focus();
+        }
+      }}>
+        <button className="model-quick-trigger" type="button" ref={triggerRef} aria-label="选择模型" aria-expanded={pickerOpen} aria-controls={`${id}-models`} disabled={!editable} onClick={togglePicker} title={binding.modelId || '选择模型'}>
+          <span className="model-quick-caption">模型</span>
+          <span className="model-quick-value">{binding.modelId || '未配置'}</span>
+          <span className="model-quick-arrow" aria-hidden="true">▾</span>
+        </button>
+        {pickerOpen ? <div className="model-quick-menu" id={`${id}-models`} role="dialog" aria-label="选择 API 模型">
+          <div className="model-quick-menu-heading">
+            <strong>选择模型</strong>
+            <button type="button" disabled={!canPull || discovery.status === 'loading'} onClick={() => void discovery.refresh()}>{discovery.status === 'loading' ? '正在拉取…' : '刷新列表'}</button>
+          </div>
+          <input aria-label="搜索模型" placeholder="搜索模型" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <div className="model-quick-options">
+            {models.map((model) => <button key={model.id} type="button" aria-pressed={binding.modelId === model.id} onClick={() => {
+              update({ modelOverride: model.id }); setPickerOpen(false); triggerRef.current?.focus();
+            }}>
+              <span>{model.id}</span><span aria-hidden="true">{binding.modelId === model.id ? '✓' : ''}</span>
+            </button>)}
+          </div>
+          <div className="model-quick-status" role="status" aria-live="polite">
+            {discovery.status === 'loading' ? '正在获取此 API 的模型列表…' : discovery.status === 'error' ? discovery.error : !canPull ? '请先在 API 设置中填写地址和密钥。' : query && !models.length ? '没有匹配的模型' : null}
+          </div>
+        </div> : null}
+      </div>
       <label className="effort-quick-picker" title={canSetDepth ? '思考强度' : '请在 API 设置中检查思考能力'}>
         <span className="model-quick-caption">思考</span>
         <span className="model-quick-value" aria-hidden="true">{depths.find((depth) => depth.value === budget)?.label || '自定义'}</span>

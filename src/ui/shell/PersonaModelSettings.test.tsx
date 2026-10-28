@@ -28,7 +28,9 @@ describe('model and effort controls', () => {
   it('renders current model and supported effort in the compact chat strip, without connection forms', () => {
     const html = renderToStaticMarkup(<PersonaModelSettings persona={setup()} />);
     expect(html).toContain('chat-model-toolbar');
-    expect(html).toContain('value="deepseek-v4-flash" selected=""');
+    expect(html).toContain('deepseek-v4-flash');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('跟随线路');
     expect(html).toContain('value="16384" selected=""');
     expect(html).not.toContain('disabled=""');
     expect(html).not.toContain('拉取模型列表');
