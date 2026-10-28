@@ -10,7 +10,7 @@
       0 -12px 24px rgba(8, 10, 20, 0.08);
   }
   .attachment-picker-actions { gap: 6px; }
-  .attachment-picker-action { min-height: 76px; padding: 11px; border-radius: 16px; }
+  .attachment-picker-action { min-height: 44px; padding: 7px 11px; border-radius: 12px; }
   .attachment-picker-action-copy strong { font-size: 13px; }
   .active-preview-strip,
   .chat-box-shell { backdrop-filter: blur(12px) saturate(1.08); box-shadow: 0 10px 18px color-mix(in srgb, var(--accent-soft) 6%, transparent); }
