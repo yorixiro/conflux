@@ -29,6 +29,7 @@ export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', si
         onCreateCollaboratorFromBuilder={() => closeAfter(sidebarProps.onCreateCollaboratorFromBuilder)}
         onEditCollaborator={id => closeAfter(() => sidebarProps.onEditCollaborator(id))}
         onSelectCollaborator={id => { sidebarProps.onSelectCollaborator(id); if (id) onClose(); }}
+        onOpenApi={sidebarProps.onOpenApi ? () => { ref.current?.close(); closeAfter(sidebarProps.onOpenApi!); } : undefined}
         onOpenSettings={() => closeAfter(sidebarProps.onOpenSettings)} /> : null}
     </dialog>
   );

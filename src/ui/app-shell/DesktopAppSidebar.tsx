@@ -8,6 +8,7 @@ import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { collectionRelativeDateLabel } from '../collection/collectionUtils';
 import { useI18n } from '../../i18n';
 import { SidebarCalendar } from './SidebarCalendar';
+import { SidebarModelSettings } from './SidebarModelSettings';
 
 export type DesktopAppSidebarShelfItem = {
   shelf: CollectionShelf;
@@ -41,6 +42,7 @@ export type DesktopAppSidebarProps = {
   onCreateConversation: () => void;
   onOpenGroupWorld: () => void;
   onOpenSettings: () => void;
+  onOpenApi?: () => void;
 };
 
 function sortSidebarConversations(conversations: ConversationCardSummary[]) {
@@ -87,7 +89,8 @@ export function DesktopAppSidebar({
   onDeleteConversation,
   onCreateConversation,
   onOpenGroupWorld,
-  onOpenSettings
+  onOpenSettings,
+  onOpenApi
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
   const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>(initialTab);
@@ -293,6 +296,7 @@ export function DesktopAppSidebar({
               <span>角色设置</span>
             </button>
           </div>
+          {chatCollaborator ? <SidebarModelSettings key={chatCollaborator.id} persona={chatCollaborator} onOpenSettings={onOpenApi ?? onOpenSettings} /> : null}
           <SidebarCalendar />
         </section>
       ) : null}

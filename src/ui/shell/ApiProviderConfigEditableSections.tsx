@@ -12,6 +12,7 @@ type ApiProviderModelSectionProps = {
   modelDiscoveryError: string | null;
   onSetApiConfig: (patch: Partial<ProviderProfile>) => void;
   onOpenModelPicker: () => void;
+  onRefreshModels: () => void;
 };
 
 export function ApiProviderModelSection({
@@ -22,7 +23,8 @@ export function ApiProviderModelSection({
   modelDiscoveryStatus,
   modelDiscoveryError,
   onSetApiConfig,
-  onOpenModelPicker
+  onOpenModelPicker,
+  onRefreshModels
 }: ApiProviderModelSectionProps) {
   const { t } = useI18n();
   const builtInProvider = isBuiltInProviderDisplay(api);
@@ -73,6 +75,12 @@ export function ApiProviderModelSection({
             {modelPickerOpen ? '▴' : '▾'}
           </button>
         </div>
+        {!builtInProvider ? <button
+          type="button"
+          className="btn-secondary compact"
+          onClick={onRefreshModels}
+          disabled={!canDiscoverModels || discoveryLoading}
+        >{discoveryLoading ? '正在拉取…' : discoveredModels.length ? '刷新模型列表' : '拉取模型列表'}</button> : null}
         {!builtInProvider && modelPickerOpen && canPickModels ? (
           <div className="provider-model-list">
             {displayedModels.map((model) => (
