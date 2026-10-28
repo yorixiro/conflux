@@ -35,6 +35,7 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
     <div className="model-effort-row">
       <label className="model-quick-picker" title={binding.modelId || '在 API 设置中配置模型'}>
         <span className="model-quick-caption">模型</span>
+        <span className="model-quick-value" aria-hidden="true">{binding.modelId || '未配置'}</span>
         <select aria-label="选择模型" value={binding.modelOverride} disabled={!editable} onChange={(event) => update({ modelOverride: event.target.value })}>
           <option value="">{binding.fixedProvider?.model || globalApi.model || '未配置'} · 跟随线路</option>
           {models.map((model) => <option key={model} value={model}>{model}</option>)}
@@ -42,7 +43,8 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
         <span className="model-quick-arrow" aria-hidden="true">▾</span>
       </label>
       <label className="effort-quick-picker" title={canSetDepth ? '思考强度' : '请在 API 设置中检查思考能力'}>
-        <span className="model-quick-caption">EFFORT</span>
+        <span className="model-quick-caption">思考</span>
+        <span className="model-quick-value" aria-hidden="true">{depths.find((depth) => depth.value === budget)?.label || '自定义'}</span>
         <select aria-label="思考强度" value={budget} disabled={!canSetDepth} onChange={(event) => update({ thinkingBudget: event.target.value })}>
           {depths.map((depth) => <option key={depth.value} value={depth.value}>{depth.label}</option>)}
           {!depths.some((depth) => depth.value === budget) ? <option value={budget}>自定义</option> : null}

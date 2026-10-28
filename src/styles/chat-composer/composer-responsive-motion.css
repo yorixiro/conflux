@@ -1,17 +1,4 @@
 @media (max-width: 720px) {
-  .attachment-picker-sheet {
-    width: calc(100% + 32px);
-    margin: 6px -16px 0;
-    padding: 14px 16px calc(18px + var(--attachment-picker-safe-bottom));
-    border-radius: 24px 24px 0 0;
-    backdrop-filter: blur(16px) saturate(1.06);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,0.18) inset,
-      0 -12px 24px rgba(8, 10, 20, 0.08);
-  }
-  .attachment-picker-actions { gap: 6px; }
-  .attachment-picker-action { min-height: 44px; padding: 7px 11px; border-radius: 12px; }
-  .attachment-picker-action-copy strong { font-size: 13px; }
   .active-preview-strip,
   .chat-box-shell { backdrop-filter: blur(12px) saturate(1.08); box-shadow: 0 10px 18px color-mix(in srgb, var(--accent-soft) 6%, transparent); }
   .chat-box-shell {

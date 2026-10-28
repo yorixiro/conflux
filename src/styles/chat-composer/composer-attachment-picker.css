@@ -1,39 +1,20 @@
 .attachment-picker-sheet {
-  --attachment-picker-safe-bottom: env(safe-area-inset-bottom, 0px);
-  order: 50;
-  flex: 0 0 auto;
-  width: calc(100% + 32px);
-  margin: 6px -16px 0;
-  padding: 14px 16px calc(18px + var(--attachment-picker-safe-bottom));
-  border-radius: 28px 28px 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--border-hover) 34%, rgba(255,255,255,0.16));
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 97%, rgba(255,255,255,0.16)) 0%, color-mix(in srgb, var(--surface) 93%, rgba(255,255,255,0.08)) 100%);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.22) inset,
-    0 -14px 30px rgba(8, 10, 20, 0.08);
-  backdrop-filter: blur(18px) saturate(1.08);
-  position: relative;
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: min(256px, 100%);
   box-sizing: border-box;
-  max-height: min(44dvh, 400px);
+  max-height: min(54dvh, 384px);
+  margin: 0;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  border-radius: 24px;
+  background: var(--surface-solid);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .14);
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-.attachment-picker-sheet::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  width: 42px;
-  height: 4px;
-  border-radius: 999px;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--border-hover) 42%, transparent);
-  opacity: 0.72;
 }
 .app-shell:not(.world-switching) .attachment-picker-sheet { animation: attachmentPickerAppear 140ms var(--ease-out) both; }
 @keyframes attachmentPickerAppear {
@@ -43,16 +24,15 @@
 .attachment-picker-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 6px;
-  margin-top: 8px;
+  gap: 2px;
+  margin-top: 0;
 }
 .attachment-picker-card-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid color-mix(in srgb, var(--border) 24%, transparent);
+  margin: 0;
+  padding: 6px;
 }
 .attachment-picker-card-head {
   display: flex;
@@ -142,43 +122,35 @@
 }
 .attachment-picker-action {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
   gap: 12px;
-  min-height: 48px;
+  min-height: 52px;
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid color-mix(in srgb, var(--border) 34%, transparent);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 56%, transparent);
-  color: inherit;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition: background 140ms ease;
 }
 .attachment-picker-action:hover,
 .attachment-picker-action:focus-visible {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--border-hover) 72%, transparent);
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
-.attachment-picker-action.active {
-  border-color: color-mix(in srgb, var(--border-hover) 78%, transparent);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 18%, var(--surface-solid) 82%), color-mix(in srgb, var(--accent-soft) 10%, var(--surface) 90%));
-}
-.attachment-picker-action.active .attachment-picker-action-icon {
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent-soft) 18%, transparent));
-}
+.attachment-picker-action:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.attachment-picker-action.active { background: color-mix(in srgb, var(--accent-soft) 18%, transparent); }
 .attachment-picker-action-icon {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 8%, var(--surface-solid));
+  color: var(--text);
 }
 .attachment-picker-action-copy {
   min-width: 0;

@@ -167,29 +167,10 @@ export function ComposerAttachments({
         onChange={(event) => { void handleAttachmentSelection(event); }}
       />
       {pickerOpen ? (
-        <div className="attachment-picker-sheet" id="composer-attachment-picker" role="region" aria-label={t('chat.composer.attachmentPickerAria')}>
-          <div className="attachment-picker-actions">
-            <button
-              type="button"
-              className="attachment-picker-action"
-              onClick={(event) => {
-                runSelectionAction(() => {
-                  closePicker();
-                  if (canUseNativePhotoLibraryPicker()) {
-                    void openNativePhotoLibrary().catch(() => undefined);
-                    return;
-                  }
-                  imageLibraryPickerRef.current?.click();
-                }, { element: event.currentTarget });
-              }}
-            >
-              <span className="attachment-picker-action-icon">
-                <Icon name="image" size={18} />
-              </span>
-              <span className="attachment-picker-action-copy">
-                <strong>{t('chat.composer.photoLibrary')}</strong>
-              </span>
-            </button>
+        <div className="attachment-picker-sheet" id="composer-attachment-picker" role="region" aria-label={t('chat.composer.attachmentPickerAria')} onKeyDown={(event) => {
+          if (event.key === 'Escape') { event.stopPropagation(); closePicker(); }
+        }}>
+          {!cardPickerOpen ? <div className="attachment-picker-actions">
             <button
               type="button"
               className="attachment-picker-action"
@@ -209,6 +190,27 @@ export function ComposerAttachments({
               </span>
               <span className="attachment-picker-action-copy">
                 <strong>{t('chat.composer.camera')}</strong>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="attachment-picker-action"
+              onClick={(event) => {
+                runSelectionAction(() => {
+                  closePicker();
+                  if (canUseNativePhotoLibraryPicker()) {
+                    void openNativePhotoLibrary().catch(() => undefined);
+                    return;
+                  }
+                  imageLibraryPickerRef.current?.click();
+                }, { element: event.currentTarget });
+              }}
+            >
+              <span className="attachment-picker-action-icon">
+                <Icon name="image" size={18} />
+              </span>
+              <span className="attachment-picker-action-copy">
+                <strong>{t('chat.composer.photoLibrary')}</strong>
               </span>
             </button>
             <button
@@ -285,7 +287,7 @@ export function ComposerAttachments({
                 <strong>{t('chat.composer.toolbox')}</strong>
               </span>
             </button>
-          </div>
+          </div> : null}
           {cardPickerOpen ? (
             <div className="attachment-picker-card-section">
               <div className="attachment-picker-card-head">

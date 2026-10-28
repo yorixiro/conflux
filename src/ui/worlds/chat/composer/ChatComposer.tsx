@@ -203,7 +203,7 @@ export function ChatComposer() {
   const handleComposerBlankDismiss = (target: EventTarget | null) => {
     if ((!attachmentPickerOpen && !kaomojiOpen) || !(target instanceof HTMLElement)) return;
     const interactiveTarget = target.closest(
-      'button, textarea, input, .chat-box-shell, .kaomoji-drawer, .active-preview-strip, .chat-workspace-banner, .composer-card-reference-strip, .attachment-warning'
+      'button, textarea, input, select, .attachment-picker-sheet, .chat-box-shell, .kaomoji-drawer, .active-preview-strip, .chat-workspace-banner, .composer-card-reference-strip, .attachment-warning'
     );
     if (interactiveTarget) return;
     setAttachmentPickerOpen(false);
@@ -253,6 +253,13 @@ export function ChatComposer() {
         onPointerDownCapture={(event) => handleComposerBlankDismiss(event.target)}
         onClickCapture={(event) => handleComposerBlankDismiss(event.target)}
         onPaste={(event) => { void handleComposerPaste(event); }}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && (attachmentPickerOpen || kaomojiOpen)) {
+            event.stopPropagation();
+            setAttachmentPickerOpen(false);
+            setKaomojiOpen(false);
+          }
+        }}
       >
         <ChatWorkspaceBanner />
         {ui.activePreviewMessage ? (
@@ -263,23 +270,6 @@ export function ChatComposer() {
             onRollback={actions.rollbackToolPreview}
           />
         ) : null}
-        <ComposerAttachments
-          pickerOpen={attachmentPickerOpen}
-          interactionLocked={interactionLocked}
-          pendingAttachmentsCount={attachments.pending.length}
-          hasUnsupportedPendingImages={hasUnsupportedPendingImages}
-          taskToolsEnabled={composer.toolPromptPreferences.task}
-          taskModeEnabled={composer.taskModeEnabled}
-          pendingAttachments={attachments.pending}
-          pendingCardReference={resolvedPendingCardReference}
-          availableCards={composer.availableCards}
-          onAddAttachments={handleAddAttachments}
-          onRemoveAttachment={attachments.remove}
-          onToggleTaskModeEnabled={actions.setTaskModeEnabled}
-          onOpenToolbox={actions.openToolbox}
-          onSetPickerOpen={setAttachmentPickerOpen}
-          onSetPendingCardReference={actions.setPendingCardReference}
-        />
         {resolvedPendingCardReference ? (
           <ComposerCardReferenceStrip
             reference={resolvedPendingCardReference}
@@ -301,6 +291,23 @@ export function ChatComposer() {
           <button type="button" disabled={interactionLocked} onClick={actions.openToolbox}>✦ 工具</button>
         </div> : null}
         <div className="chat-submit-anchor">
+          <ComposerAttachments
+            pickerOpen={attachmentPickerOpen}
+            interactionLocked={interactionLocked}
+            pendingAttachmentsCount={attachments.pending.length}
+            hasUnsupportedPendingImages={hasUnsupportedPendingImages}
+            taskToolsEnabled={composer.toolPromptPreferences.task}
+            taskModeEnabled={composer.taskModeEnabled}
+            pendingAttachments={attachments.pending}
+            pendingCardReference={resolvedPendingCardReference}
+            availableCards={composer.availableCards}
+            onAddAttachments={handleAddAttachments}
+            onRemoveAttachment={attachments.remove}
+            onToggleTaskModeEnabled={actions.setTaskModeEnabled}
+            onOpenToolbox={actions.openToolbox}
+            onSetPickerOpen={setAttachmentPickerOpen}
+            onSetPendingCardReference={actions.setPendingCardReference}
+          />
           {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onClose={() => setKaomojiOpen(false)} /> : null}
           {ui.submitFlight ? (
             <div key={ui.submitFlight.id} className="chat-submit-flight" aria-hidden="true">
