@@ -87,7 +87,7 @@ function ChatWorldLayout({ shell }: ChatWorldProps) {
       <div className={kekeOriginal ? 'chat-dock bar' : 'chat-dock'}>
         {kekeOriginal ? <KekeBarTapes /> : null}
         <ChatComposer />
-        {kekeOriginal ? <KekeBarDeco /> : null}
+        {kekeOriginal ? <><KekeBarDeco /><div id="keke-tabs-slot" style={{ display: 'contents' }} /></> : null}
       </div>
       {thinkingSummaryMessage ? (
         <Suspense fallback={null}>

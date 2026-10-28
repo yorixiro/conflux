@@ -80,7 +80,8 @@ export function AppShellView({
 }: AppShellViewProps) {
   const kekePresetId = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
-  const useBottomNavigation = appLayoutSurface !== 'desktop';
+  const showNavigation = appLayoutSurface !== 'desktop';
+  const useBottomNavigation = showNavigation && !kekeOriginalActive;
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
   const setChatCollaboratorProvider = (providerId: string) => {
@@ -255,8 +256,9 @@ export function AppShellView({
         </MobileAppShellFrame>
       )}
 
-      {useBottomNavigation ? (
+      {showNavigation ? (
         <MobileBottomNavigation
+          kekeTabs={kekeOriginalActive}
           activeWorld={activeWorld}
           collectionShelf={topbarProps.state.collectionShelf}
           homeOpen={homeOpen}

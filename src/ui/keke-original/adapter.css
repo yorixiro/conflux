@@ -12,6 +12,6 @@
 #chat .sd .send-label{display:contents}
 #chat .keke-shell{display:contents}
 #chat .fd{height:auto;min-height:32px}
-#chat nav.tabs{justify-content:space-around;gap:0;background:var(--paper);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;color:var(--dim)}
-#chat nav.tabs::before{display:none}
-#chat nav.tabs button{flex-direction:row;justify-content:center;min-height:0;padding:0 2px;letter-spacing:.1em}
+#chat nav.tabs{justify-content:space-around;gap:0;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))}
+#chat nav.tabs button{padding:0 2px;letter-spacing:.1em}
+html[data-keyboard-open="true"] #chat nav.tabs{display:none}
