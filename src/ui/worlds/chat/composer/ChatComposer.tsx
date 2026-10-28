@@ -1,3 +1,4 @@
+import { KekeFieldDecor, KekeModeButton, KekeSendArt } from '../../../keke-original/KekeOriginalBar';
 import { ImpactStyle } from '@capacitor/haptics';
 import type { ClipboardEvent, KeyboardEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -301,10 +302,12 @@ export function ChatComposer() {
           query={slashCommandQuery}
           onPick={handlePickSlashCommand}
         />
-        {showKekeChrome ? <div className="keke-original-modes" role="group" aria-label="快捷工具">
-          <button type="button" className={attachmentPickerOpen ? 'hit' : ''} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }}>✧ 附件</button>
-          <button type="button" className={kaomojiOpen ? 'hit' : ''} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }}>♡ 颜文字</button>
-          <button type="button" disabled={interactionLocked} onClick={actions.openToolbox}>✦ 工具</button>
+        {showKekeChrome ? <div className="modes" role="group" aria-label="快捷工具">
+          <KekeModeButton k="s" word="pièce" label="附件" hit={attachmentPickerOpen} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }} />
+          <span>✦</span>
+          <KekeModeButton k="l" word="kaomoji" label="颜文字" hit={kaomojiOpen} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }} />
+          <span>✦</span>
+          <KekeModeButton k="b" word="outils" label="工具" disabled={interactionLocked} onClick={actions.openToolbox} />
         </div> : null}
         <div className="chat-submit-anchor">
           <ComposerAttachments
@@ -334,7 +337,7 @@ export function ChatComposer() {
             </div>
           ) : null}
           <div className="chat-box-shell chat-box">
-            <div className="chat-box-main">
+            <div className={showKekeChrome ? 'chat-box-main row' : 'chat-box-main'}>
               <ComposerQuickActions
                 paperStyle={showKekeChrome}
                 pickerOpen={attachmentPickerOpen}
@@ -351,7 +354,7 @@ export function ChatComposer() {
                 disabled={interactionLocked}
                 onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
               ><KaomojiFaceIcon /></button> : null}
-              <div className="composer-text-input">
+              <div className={showKekeChrome ? 'composer-text-input fd' : 'composer-text-input'}>
                 <textarea
                   ref={textareaRef}
                   rows={1}
@@ -364,6 +367,7 @@ export function ChatComposer() {
                   disabled={interactionLocked}
                   placeholder={showKekeChrome ? '说点什么 ๑*˚' : `to ${presentation.assistantName}`}
                 />
+                {showKekeChrome ? <KekeFieldDecor /> : null}
                 <button
                   type="button"
                   className={`voice-input-btn ${dictation.active ? 'is-listening' : ''}`}
@@ -379,7 +383,7 @@ export function ChatComposer() {
               </div>
               <button
                 type="button"
-                className={`send-btn ${
+                className={`send-btn${showKekeChrome ? ' sd' : ''} ${
                   ui.sending
                   || localDraft.trim()
                   || attachments.pending.length > 0
@@ -396,17 +400,13 @@ export function ChatComposer() {
                   });
                 }}
               >
-                {showKekeChrome && !ui.sending && !hasSlashCommandDraft ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 20s-8-4.8-8-10.1C4 4.8 10 3.7 12 8c2-4.3 8-3.2 8 1.9C20 15.2 12 20 12 20Z" fill="#fff9f7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : <Icon name={ui.sending ? 'x' : hasSlashCommandDraft ? 'check' : 'send'} size={16} />}
+                {showKekeChrome && !ui.sending && !hasSlashCommandDraft ? <KekeSendArt /> : <Icon name={ui.sending ? 'x' : hasSlashCommandDraft ? 'check' : 'send'} size={16} />}
               </button>
             </div>
           </div>
         </div>
         {persona ? <PersonaModelSettings key={persona.id} persona={persona} /> : null}
-        {showKekeChrome ? <div className="keke-original-marquee" aria-hidden="true"><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span></div> : null}
+        
       </div>
     </>
   );

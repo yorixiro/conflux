@@ -15,6 +15,7 @@ import {
 import type { ChatUiState } from './chat/context/ChatUiState';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { KekeChatMotionLayers } from '../app-shell/KekeOriginalDecor';
+import { KekeBarDeco, KekeBarTapes } from '../keke-original/KekeOriginalBar';
 
 const ThinkingSheet = lazy(() => loadThinkingSheetModule().then((module) => ({ default: module.ThinkingSheet })));
 
@@ -30,6 +31,7 @@ type ChatWorldProps = {
 
 function ChatWorldLayout({ shell }: ChatWorldProps) {
   const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
+  const kekeOriginal = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
   const stablePayload = useChatStablePayload();
   const presentation = useChatPresentation();
   const composer = useChatComposer();
@@ -82,8 +84,10 @@ function ChatWorldLayout({ shell }: ChatWorldProps) {
       <div className="chat-body">
         <MessageTimeline isWorldSettled={shell.isActiveWorld && !shell.isWorldSwitching} />
       </div>
-      <div className="chat-dock">
+      <div className={kekeOriginal ? 'chat-dock bar' : 'chat-dock'}>
+        {kekeOriginal ? <KekeBarTapes /> : null}
         <ChatComposer />
+        {kekeOriginal ? <KekeBarDeco /> : null}
       </div>
       {thinkingSummaryMessage ? (
         <Suspense fallback={null}>
