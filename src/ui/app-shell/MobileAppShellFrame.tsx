@@ -3,6 +3,7 @@ import { ConfluxSidebarDialog } from './ConfluxSidebarDialog';
 import type { DesktopAppSidebarProps } from './DesktopAppSidebar';
 import { AppTopbar, type AppTopbarProps } from '../shell/AppTopbar';
 import { useSpaceStore } from '../../stores/spaceStore';
+import { KekeOriginalLayers, KEKE_APP_STYLE } from '../keke-original/KekeOriginalLayers';
 
 type MobileAppShellFrameProps = {
   topbarProps: AppTopbarProps;
@@ -19,7 +20,8 @@ export function MobileAppShellFrame({
   const presetId = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginal = (presetId === 'keke-doodle' || presetId === 'keke-pois') && topbarProps.state.activeWorld === 'chat';
   return (
-    <div className={kekeOriginal ? 'app-stage app' : 'app-stage'}>
+    <div className={kekeOriginal ? 'app-stage app' : 'app-stage'} style={kekeOriginal ? KEKE_APP_STYLE : undefined}>
+      {kekeOriginal ? <KekeOriginalLayers /> : null}
       <AppTopbar {...topbarProps} chatCollaborator={sidebarProps?.chatCollaborator} actions={{ ...topbarProps.actions,
         onOpenSidebar: sidebarProps && topbarProps.state.activeWorld === 'chat' ? () => setSidebarOpen(true) : undefined
       }} />
