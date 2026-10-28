@@ -80,8 +80,7 @@ export function AppShellView({
 }: AppShellViewProps) {
   const kekePresetId = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
-  const showNavigation = appLayoutSurface !== 'desktop';
-  const useBottomNavigation = showNavigation && !kekeOriginalActive;
+  const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
   const setChatCollaboratorProvider = (providerId: string) => {
@@ -181,7 +180,7 @@ export function AppShellView({
   return (
     <main
       id={kekeOriginalActive ? 'chat' : undefined}
-      className={`app-shell ${useBottomNavigation ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
+      className={`app-shell ${useBottomNavigation && !kekeOriginalActive ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >
       {backgroundUrl ? (
@@ -256,7 +255,7 @@ export function AppShellView({
         </MobileAppShellFrame>
       )}
 
-      {showNavigation ? (
+      {useBottomNavigation ? (
         <MobileBottomNavigation
           kekeTabs={kekeOriginalActive}
           activeWorld={activeWorld}
