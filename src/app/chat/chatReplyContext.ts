@@ -129,6 +129,10 @@ export type ChatReplyRequestSnapshot = {
   semanticRecallEnabled?: boolean;
   /** Internal opt-in until the memory release gate has completed device validation. */
   oneMemoryRecallEnabled?: boolean;
+  /** Recent complete chat bodies, read exclusively for cross-window cooldown receipts. */
+  passiveRecallDeliveryConversations?: Conversation[];
+  /** A failed receipt read suppresses optional passive injection, not the user's chat request. */
+  passiveRecallCooldownReady?: boolean;
   semanticRecallConversations?: Conversation[];
   personas: Persona[];
   currentCollaboratorId: string | null;
@@ -219,6 +223,8 @@ export function createChatReplyRequestSnapshot(args: {
     conversations: source.conversations,
     semanticRecallEnabled: source.semanticRecallEnabled,
     oneMemoryRecallEnabled: source.oneMemoryRecallEnabled,
+    passiveRecallDeliveryConversations: source.passiveRecallDeliveryConversations,
+    passiveRecallCooldownReady: source.passiveRecallCooldownReady,
     semanticRecallConversations: source.semanticRecallConversations,
     personas: source.personas,
     currentCollaboratorId: source.currentCollaboratorId,

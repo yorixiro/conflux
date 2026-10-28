@@ -54,7 +54,7 @@ export type PassiveRecallPlanInput = {
 };
 
 const RRF_K = 60;
-const DEFAULT_COOLDOWN_MS = 30 * 60_000;
+export const PASSIVE_RECALL_DEFAULT_COOLDOWN_MS = 30 * 60_000;
 const GRAY_ZONE_MIN_CONFIDENCE = 0.55;
 const STRONG_CONFIDENCE = 0.78;
 
@@ -115,7 +115,7 @@ export async function planPassiveRecall(input: PassiveRecallPlanInput): Promise<
   const recentContext = normalize(input.recentContext ?? '');
   const cooldownMs = Number.isFinite(input.cooldownMs) && (input.cooldownMs ?? 0) >= 0
     ? input.cooldownMs!
-    : DEFAULT_COOLDOWN_MS;
+    : PASSIVE_RECALL_DEFAULT_COOLDOWN_MS;
   const latestDelivery = new Map<string, number>();
   for (const delivery of input.deliveries ?? []) {
     if (!Number.isFinite(delivery.deliveredAt)) continue;

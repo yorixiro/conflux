@@ -8,6 +8,7 @@ import type { ChatDerivedStatePort, ChatReplyStoreBindings, ChatUiReplyControlle
 import { createChatReplyRequestSnapshot } from './chatReplyContext';
 import type { ChatReplyRequestSnapshotSource } from './chatReplyContext';
 import {
+  readRecentPassiveRecallConversationBodies,
   readRequestSemanticRecallConversationBodies,
   readRequestSemanticRecallConversations
 } from './chatSemanticRecallCorpus';
@@ -258,6 +259,39 @@ export function createChatReplyRunner({
     try {
       const scopedToolActions = createToolActions?.(buildScopedDerived()) ?? toolActions;
       const initialRequestSnapshot = buildRequestSnapshot();
+      const shouldReadPassiveReceipts = initialRequestSnapshot.oneMemoryRecallEnabled === true
+        && initialRequestSnapshot.semanticRecallEnabled !== false
+        && initialRequestSnapshot.activeCollaborator?.memory.crossConversationRecallEnabled !== false;
+      let passiveRecallDeliveryConversations: ChatReplyRequestSnapshotSource['passiveRecallDeliveryConversations'];
+      let passiveRecallCooldownReady = true;
+      if (shouldReadPassiveReceipts) {
+        try {
+          const loadedById = new Map((initialRequestSnapshot.semanticRecallConversations ?? [])
+            .filter((conversation) => conversation.messages.length > 0)
+            .map((conversation) => [conversation.id, conversation]));
+          passiveRecallDeliveryConversations = await readRecentPassiveRecallConversationBodies({
+            conversations: initialRequestSnapshot.conversations.map((conversation) =>
+              loadedById.get(conversation.id) ?? conversation
+            ),
+            activeConversationId: params.conversationId,
+            currentCollaboratorId: params.collaboratorId,
+            now: Date.now()
+          });
+        } catch (error) {
+          // A missing recent receipt must never silently grant a repeated recall.
+          passiveRecallCooldownReady = false;
+          console.warn('[request] Passive memory recall suppressed because recent receipts are unavailable.', error);
+        }
+      }
+      const withPassiveRecallState = (snapshot: ReturnType<typeof buildRequestSnapshot>) => ({
+        ...snapshot,
+        ...(snapshot.oneMemoryRecallEnabled === true
+          ? {
+              passiveRecallDeliveryConversations,
+              passiveRecallCooldownReady: shouldReadPassiveReceipts && passiveRecallCooldownReady
+            }
+          : {})
+      });
       recordChatSendPerformanceMark(params.conversationId, '聊天发送 · 请求上下文就绪', {
         conversationCount: initialRequestSnapshot.conversations.length,
         messageCount: requestMessages.length,
@@ -277,8 +311,8 @@ export function createChatReplyRunner({
         ),
         chat: overrideReplyChatPort?.(store.chat) ?? store.chat,
         executeToolActions: scopedToolActions.submitAssistantToolActions,
-        requestSnapshot: initialRequestSnapshot,
-        refreshRequestSnapshot: buildRequestSnapshot,
+        requestSnapshot: withPassiveRecallState(initialRequestSnapshot),
+        refreshRequestSnapshot: () => withPassiveRecallState(buildRequestSnapshot()),
         loadSemanticRecallConversations,
         writableConversation,
         ...params,

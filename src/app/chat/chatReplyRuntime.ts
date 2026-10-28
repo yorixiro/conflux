@@ -291,6 +291,7 @@ async function requestReplyRound({
     ? collectPassiveRecallDeliveries({
         conversations: [
           writableConversation.conversation,
+          ...(activeRequestSnapshot.passiveRecallDeliveryConversations ?? []),
           ...(activeRequestSnapshot.semanticRecallConversations ?? activeRequestSnapshot.conversations)
         ],
         currentScopeId: collaboratorId,
@@ -384,6 +385,7 @@ async function requestReplyRound({
       semanticRecallEnabled: activeRequestSnapshot.semanticRecallEnabled,
       oneMemoryRecallEnabled: activeRequestSnapshot.oneMemoryRecallEnabled,
       passiveRecallDeliveries,
+      passiveRecallCooldownReady: activeRequestSnapshot.passiveRecallCooldownReady,
       messages: requestMessages,
       semanticRecallConversations: activeRequestSnapshot.semanticRecallConversations ?? activeRequestSnapshot.conversations,
       loadSemanticRecallConversations,

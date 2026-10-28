@@ -1461,8 +1461,9 @@ describe('requestReply task activation', () => {
     let messages = [oldAssistant, user];
     const persistToDb = vi.fn(async () => undefined);
     const recalledText = '那天说的炸鸡有黄油香味';
+    let preparedAudit: unknown;
     requestCollaboratorReplyMock.mockImplementationOnce(async ({ onAudit }) => {
-      onAudit?.({
+      preparedAudit = {
         requestId: 'new-request', collaboratorId: 'pharos',
         oneMemoryRecallPlan: {
           selected: {
@@ -1478,7 +1479,8 @@ describe('requestReply task activation', () => {
           sourceMessageIds: ['u2'], score: 0.95, text: recalledText
         }],
         context: { segments: [{ kind: 'semantic_recall', messages: [{ role: 'system', content: recalledText }] }] }
-      });
+      };
+      onAudit?.(preparedAudit);
       return { content: '记得那个味道。', finishReason: 'stop' };
     });
 
@@ -1488,7 +1490,7 @@ describe('requestReply task activation', () => {
       conversations: [live.conversation, { ...live.conversation, id: 'old', messages: [] }],
       semanticRecallConversations: [live.conversation]
     });
-    const result = await requestReply({
+    const requestArgs: Parameters<typeof requestReply>[0] = {
       ui: {
         abortControllerRef: { current: null }, setSending: vi.fn(), setStreaming: vi.fn(),
         streamingLifecycleReleaseRef: { current: null }
@@ -1514,7 +1516,8 @@ describe('requestReply task activation', () => {
       collaboratorId: 'pharos',
       messages,
       requestSnapshot: snapshot
-    });
+    };
+    const result = await requestReply(requestArgs);
 
     expect(result.status).toBe('completed');
     expect(requestCollaboratorReplyMock).toHaveBeenCalledWith(expect.objectContaining({
@@ -1524,5 +1527,31 @@ describe('requestReply task activation', () => {
     expect(messages.find((message) => message.content === '记得那个味道。')?.memoryEvidence?.passiveRecallReceipt)
       .toMatchObject({ id: 'old:u2', scopeId: 'pharos' });
     expect(persistToDb).toHaveBeenCalledTimes(2);
+
+    requestCollaboratorReplyMock.mockImplementationOnce(async ({ onAudit }) => {
+      // Preparation may select memory even when the provider rejects the request.
+      onAudit?.(preparedAudit);
+      throw new Error('provider timed out');
+    });
+    const failed = await requestReply({
+      ...requestArgs,
+      writableConversation: buildWritableConversation(messages),
+      messages
+    });
+    expect(failed.status).toBe('failed');
+    expect(messages.filter((message) => message.memoryEvidence?.passiveRecallReceipt)).toHaveLength(2);
+
+    requestCollaboratorReplyMock.mockImplementationOnce(async ({ onAudit }) => {
+      onAudit?.(preparedAudit);
+      requestArgs.ui.abortControllerRef.current?.abort();
+      throw new DOMException('The operation was aborted.', 'AbortError');
+    });
+    const aborted = await requestReply({
+      ...requestArgs,
+      writableConversation: buildWritableConversation(messages),
+      messages
+    });
+    expect(aborted.status).toBe('aborted');
+    expect(messages.filter((message) => message.memoryEvidence?.passiveRecallReceipt)).toHaveLength(2);
   });
 });

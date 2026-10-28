@@ -1,9 +1,87 @@
 import { readConversationMessages } from '../../stores/chatCurrentPersistence';
+import { PASSIVE_RECALL_DEFAULT_COOLDOWN_MS } from '../../engines/request/requestRecallGate';
 import {
   resolveSemanticRecallConfig,
   type AssistantSemanticRecallConfig
 } from '../../engines/request/requestSemanticRecallPlan';
 import type { ChatMessage, Conversation } from '../../types/domain';
+
+const MAX_RECENT_RECEIPT_CONVERSATIONS = 24;
+const RECEIPT_READ_BATCH_SIZE = 4;
+
+function projectPassiveReceiptConversation(conversation: Conversation, messages: ChatMessage[]): Conversation {
+  return {
+    ...conversation,
+    // Do not keep unrelated private message bodies in the receipt-only snapshot.
+    messages: messages.flatMap((message): ChatMessage[] => {
+      const evidence = message.memoryEvidence;
+      if (message.role !== 'assistant' || !evidence?.passiveRecallReceipt) return [];
+      return [{
+        id: message.id,
+        role: 'assistant',
+        content: '',
+        timestamp: message.timestamp,
+        ...(message.requestRole ? { requestRole: message.requestRole } : {}),
+        memoryEvidence: {
+          requestId: evidence.requestId,
+          strategy: evidence.strategy,
+          status: evidence.status,
+          items: [],
+          passiveRecallReceipt: evidence.passiveRecallReceipt
+        }
+      }];
+    })
+  };
+}
+
+/**
+ * Read *only* the conversations capable of holding an unexpired delivery.
+ * A receipt lives on the assistant message and message mutations advance the
+ * conversation's updatedAt, so older catalogs cannot contain live cooldowns.
+ * Fail closed if any recent record cannot be read reliably.
+ */
+export async function readRecentPassiveRecallConversationBodies(args: {
+  conversations: Conversation[];
+  activeConversationId: string;
+  currentCollaboratorId: string;
+  now: number;
+  readMessages?: (conversationId: string) => Promise<ChatMessage[]>;
+}): Promise<Conversation[]> {
+  if (!Number.isFinite(args.now) || args.now <= 0 || !args.currentCollaboratorId.trim()) {
+    throw new Error('Invalid passive recall scope or clock.');
+  }
+  const cutoff = args.now - PASSIVE_RECALL_DEFAULT_COOLDOWN_MS;
+  const recent = args.conversations
+    .filter((conversation) =>
+      conversation.id !== args.activeConversationId
+      && conversation.collaboratorId === args.currentCollaboratorId
+      && Number.isFinite(conversation.updatedAt)
+      && conversation.updatedAt >= cutoff
+    )
+    .sort((left, right) => right.updatedAt - left.updatedAt);
+
+  if (recent.length > MAX_RECENT_RECEIPT_CONVERSATIONS) {
+    throw new Error('Too many recent conversations to verify passive recall cooldown.');
+  }
+
+  const loaded: Conversation[] = [];
+  const readMessages = args.readMessages ?? readConversationMessages;
+  for (let offset = 0; offset < recent.length; offset += RECEIPT_READ_BATCH_SIZE) {
+    const batch = recent.slice(offset, offset + RECEIPT_READ_BATCH_SIZE);
+    const resolved = await Promise.all(batch.map(async (conversation) => {
+      if (conversation.messages.length) {
+        return projectPassiveReceiptConversation(conversation, conversation.messages);
+      }
+      const messages = await readMessages(conversation.id);
+      if (!Array.isArray(messages) || messages.length === 0) {
+        throw new Error(`Recent conversation is not readable: ${conversation.id}`);
+      }
+      return projectPassiveReceiptConversation(conversation, messages);
+    }));
+    loaded.push(...resolved);
+  }
+  return loaded;
+}
 
 function shouldPreferLiveConversation(params: {
   conversation: Conversation;

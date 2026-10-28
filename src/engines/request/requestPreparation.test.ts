@@ -326,6 +326,29 @@ describe('prepareCollaboratorReplyRequest semantic recall', () => {
     expect(prepared.context.segments.some((segment) => segment.kind === 'semantic_recall')).toBe(false);
   });
 
+  it('fails closed without passive recall when persisted cooldown cannot be read', async () => {
+    const prepared = await prepareCollaboratorReplyRequest({
+      api: textProvider,
+      persona: createPersonaTemplate({
+        id: 'pharos', name: 'Pharos', description: '灯塔',
+        memory: { personalMemories: ['喜欢清淡的食物。'] }
+      }),
+      oneMemoryRecallEnabled: true,
+      passiveRecallCooldownReady: false,
+      messages: [createUserMessage('current-user', '草莓蛋糕喜好', 10)],
+      semanticRecallConversations: [
+        createConversation({ id: 'older', title: '草莓', messages: [
+          createUserMessage('old-user', '草莓蛋糕喜好：最喜欢新鲜草莓。', 1)
+        ] })
+      ],
+      activeConversationId: 'active'
+    });
+    expect(prepared.audit.oneMemoryRecallPlan?.selected).toBeNull();
+    expect(prepared.context.segments.some((segment) => segment.kind === 'semantic_recall')).toBe(false);
+    const memory = prepared.context.segments.find((segment) => segment.kind === 'memory');
+    expect(memory?.messages.some((message) => String(message.content).includes('喜欢清淡的食物'))).toBe(true);
+  });
+
   it('keeps cross-conversation recall out of provider context when the collaborator disables it', async () => {
     const persona = createPersonaTemplate({
       id: 'pharos',

@@ -64,6 +64,7 @@ export async function requestCollaboratorReply(params: {
   semanticRecallEnabled?: boolean;
   oneMemoryRecallEnabled?: boolean;
   passiveRecallDeliveries?: PassiveRecallDelivery[];
+  passiveRecallCooldownReady?: boolean;
   semanticRecallConversations?: Conversation[];
   loadSemanticRecallConversations?: (conversationIds: string[]) => Promise<Conversation[]>;
   activeConversationId?: string | null;
@@ -89,6 +90,7 @@ export async function requestCollaboratorReply(params: {
     semanticRecallEnabled,
     oneMemoryRecallEnabled,
     passiveRecallDeliveries,
+    passiveRecallCooldownReady,
     semanticRecallConversations,
     loadSemanticRecallConversations,
     activeConversationId,
@@ -114,6 +116,7 @@ export async function requestCollaboratorReply(params: {
     semanticRecallEnabled,
     oneMemoryRecallEnabled,
     passiveRecallDeliveries,
+    passiveRecallCooldownReady,
     semanticRecallConversations,
     loadSemanticRecallConversations,
     activeConversationId,

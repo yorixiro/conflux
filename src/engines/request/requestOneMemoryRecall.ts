@@ -1,4 +1,5 @@
 import type { AssistantSemanticRecallContextCandidate } from './requestSemanticRecallPlan';
+import { tokenizeMemoryRecallTerms } from '../memoryRecallTerms';
 import {
   planPassiveRecall,
   type PassiveRecallCandidate,
@@ -17,6 +18,35 @@ function normalizedConfidence(score: number | null) {
   return typeof score === 'number' && Number.isFinite(score)
     ? Math.min(1, Math.max(0, score))
     : 0;
+}
+
+const NEGATIVE_PREFERENCE = /不再?(?:喜欢|想|爱|要|吃)|不喜欢|不想|不要|讨厌|拒绝/;
+const TEMPORAL_CUE = /今天|昨天|前天|明天|上周|下周|上个月|下个月|去年|今年|现在|最近/g;
+
+function conflictingRecallCues(query: string, text: string): boolean {
+  if (NEGATIVE_PREFERENCE.test(query) !== NEGATIVE_PREFERENCE.test(text)) return true;
+  const requestedTime = new Set(query.match(TEMPORAL_CUE) ?? []);
+  const sourceTime = new Set(text.match(TEMPORAL_CUE) ?? []);
+  return requestedTime.size > 0 && sourceTime.size > 0
+    && ![...requestedTime].some((cue) => sourceTime.has(cue));
+}
+
+/**
+ * Legacy lexical scores include large anchor bonuses and are ranking scores,
+ * not probabilities. Use query coverage to calibrate the opt-in gate instead.
+ */
+function lexicalRecallConfidence(score: number | null, query: string, text: string): number {
+  if (typeof score !== 'number' || !Number.isFinite(score) || score <= 0) return 0;
+  const queryTerms = tokenizeMemoryRecallTerms(query);
+  if (!queryTerms.length) return 0;
+  const sourceTerms = new Set(tokenizeMemoryRecallTerms(text));
+  const matches = queryTerms.filter((term) => sourceTerms.has(term)).length;
+  if (!matches) return 0;
+
+  const coverage = matches / queryTerms.length;
+  // One vague shared anchor cannot be promoted to a strong autobiographical fact.
+  const strength = matches >= 3 ? 0.96 : matches === 2 ? 0.76 : 0.65;
+  return Math.min(0.96, coverage * strength);
 }
 
 /**
@@ -48,7 +78,11 @@ export async function planOneMemoryRequestRecall(args: {
     sourceRef: canonicalSourceId(candidate),
     sourceConversationId: candidate.sourceConversationId,
     sourceMessageIds: candidate.sourceMessageIds,
-    confidence: normalizedConfidence(candidate.score)
+    confidence: conflictingRecallCues(args.recentContext, candidate.text)
+      ? 0
+      : candidate.kind === 'matched_context'
+        ? lexicalRecallConfidence(candidate.score, args.recentContext, candidate.text)
+        : normalizedConfidence(candidate.score)
   });
   const plan = await planPassiveRecall({
     currentScopeId: args.currentScopeId,

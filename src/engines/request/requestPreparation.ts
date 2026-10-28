@@ -582,6 +582,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   /** Opt-in alternative to the legacy multi-item passive recall path. */
   oneMemoryRecallEnabled?: boolean;
   passiveRecallDeliveries?: PassiveRecallDelivery[];
+  passiveRecallCooldownReady?: boolean;
   exactRecallEvidence?: PassiveRecallEvidence[];
   semanticRecallConversations?: Conversation[];
   loadSemanticRecallConversations?: (conversationIds: string[]) => Promise<Conversation[]>;
@@ -731,8 +732,8 @@ export async function prepareCollaboratorReplyRequest(params: {
   const oneMemoryRecall = params.oneMemoryRecallEnabled === true && semanticRecallEnabled && persona
     ? await planOneMemoryRequestRecall({
         currentScopeId: persona.id,
-        candidates: semanticRecallCandidates,
-        exact: params.exactRecallEvidence,
+        candidates: params.passiveRecallCooldownReady === false ? [] : semanticRecallCandidates,
+        exact: params.passiveRecallCooldownReady === false ? [] : params.exactRecallEvidence,
         recentContext: latestUserRecallQuery(requestSourceMessages),
         deliveries: params.passiveRecallDeliveries,
         now: Date.now()
