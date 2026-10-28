@@ -112,8 +112,6 @@ export function ChatComposer() {
       writeDraftToStore(next, draftConversationIdRef.current);
     }
   });
-  const hasDraftContent = Boolean(localDraft.trim() || attachments.pending.length || resolvedPendingCardReference);
-  const voiceMode = !ui.sending && (dictation.active || !hasDraftContent);
 
   useEffect(() => () => {
     flushDraftToStore();
@@ -353,21 +351,35 @@ export function ChatComposer() {
                 disabled={interactionLocked}
                 onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
               ><KaomojiFaceIcon /></button> : null}
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                value={localDraft}
-                onChange={(event) => updateLocalDraft(event.target.value)}
-                onPointerDown={handleComposerInputEngage}
-                onFocus={handleComposerInputEngage}
-                onBlur={flushDraftToStore}
-                onKeyDown={handleKeyDown}
-                disabled={interactionLocked}
-                placeholder={showKekeChrome ? '说点什么 ๑*˚' : `to ${presentation.assistantName}`}
-              />
+              <div className="composer-text-input">
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  value={localDraft}
+                  onChange={(event) => updateLocalDraft(event.target.value)}
+                  onPointerDown={handleComposerInputEngage}
+                  onFocus={handleComposerInputEngage}
+                  onBlur={flushDraftToStore}
+                  onKeyDown={handleKeyDown}
+                  disabled={interactionLocked}
+                  placeholder={showKekeChrome ? '说点什么 ๑*˚' : `to ${presentation.assistantName}`}
+                />
+                <button
+                  type="button"
+                  className={`voice-input-btn ${dictation.active ? 'is-listening' : ''}`}
+                  aria-label={dictation.active ? '结束语音输入' : '语音转文字'}
+                  aria-pressed={dictation.active}
+                  disabled={interactionLocked || ui.sending}
+                  onClick={(event) => runImpactAction(dictation.toggle, { element: event.currentTarget, style: ImpactStyle.Light })}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      {dictation.active ? <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" /> : <><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3M9 21h6" /></>}
+                    </svg>
+                </button>
+              </div>
               <button
                 type="button"
-                className={`send-btn ${voiceMode ? 'voice-input-btn' : ''} ${dictation.active ? 'is-listening' : ''} ${
+                className={`send-btn ${
                   ui.sending
                   || localDraft.trim()
                   || attachments.pending.length > 0
@@ -376,19 +388,15 @@ export function ChatComposer() {
                     : ''
                 }`}
                 disabled={hasUnsupportedPendingImages || interactionLocked}
-                aria-label={voiceMode ? (dictation.active ? '结束语音输入' : '语音转文字') : ui.sending ? t('chat.composer.stopGeneration') : hasSlashCommandDraft ? t('chat.composer.executeCommand') : t('chat.composer.sendMessage')}
+                aria-label={ui.sending ? t('chat.composer.stopGeneration') : hasSlashCommandDraft ? t('chat.composer.executeCommand') : t('chat.composer.sendMessage')}
                 onClick={(event) => {
-                  runImpactAction(voiceMode ? dictation.toggle : handleSubmitPress, {
+                  runImpactAction(handleSubmitPress, {
                     element: event.currentTarget,
                     style: ui.sending ? ImpactStyle.Medium : ImpactStyle.Light
                   });
                 }}
               >
-                {voiceMode ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    {dictation.active ? <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" /> : <><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3M9 21h6" /></>}
-                  </svg>
-                ) : showKekeChrome && !ui.sending && !hasSlashCommandDraft ? (
+                {showKekeChrome && !ui.sending && !hasSlashCommandDraft ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 20s-8-4.8-8-10.1C4 4.8 10 3.7 12 8c2-4.3 8-3.2 8 1.9C20 15.2 12 20 12 20Z" fill="#fff9f7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>

@@ -340,5 +340,9 @@ html[data-keyboard-open='true'] .chat-box-shell { box-shadow: var(--chat-compose
   }
 }
 
-.voice-input-btn { cursor:pointer; }
+.composer-text-input { position:relative; display:flex; flex:1 1 auto; min-width:0; }
+.chat-box .composer-text-input textarea { width:100%; padding-right:40px; }
+.voice-input-btn { position:absolute; right:4px; bottom:2px; display:grid; place-items:center; width:32px; height:32px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--text-soft); cursor:pointer; }
+.voice-input-btn:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.voice-input-btn:disabled { opacity:.4; cursor:not-allowed; }
 .voice-input-btn.is-listening { color:var(--color-error,#bd6874); outline:2px solid currentColor; outline-offset:2px; }
