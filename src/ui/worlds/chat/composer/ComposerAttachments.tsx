@@ -51,7 +51,7 @@ export function ComposerQuickActions({
     <div className="composer-quick-actions">
       <button
         type="button"
-        className={paperStyle ? `composer-slot-btn-attachment fb${pickerOpen ? ' on' : ''}` : `composer-slot-btn composer-slot-btn-attachment ${pickerOpen ? 'active' : ''}`}
+        className={paperStyle ? `fb${pickerOpen ? ' on' : ''}` : `composer-slot-btn composer-slot-btn-attachment ${pickerOpen ? 'active' : ''}`}
         title={t('chat.composer.attachmentsToggle')}
         aria-label={t('chat.composer.attachmentsToggle')}
         aria-expanded={pickerOpen}

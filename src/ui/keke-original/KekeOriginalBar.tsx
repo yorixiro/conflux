@@ -63,3 +63,25 @@ export function KekeFieldDecor() {
     <span className="fam spk k1">✲</span><span className="fam spk k2">⊹</span><span className="fam spk k3">˚₊</span>
   </>;
 }
+
+const TAB_PI: Record<string, CSSProperties> = {
+  chat: icon('bubble', '16px', '12px'), group: icon('user', '15px'), home: icon('cloud', '17px', '12px'),
+  archive: icon('mail', '16px', '11px'), workshop: icon('folder', '17px', '14px'), settings: icon('flower', '16px')
+};
+const TAB_LINE: Record<string, ReactNode> = {
+  chat: <path d="M8 13.4C2.8 10 2.3 6.4 4.2 4.9s3.2-.3 3.8 1c.6-1.3 1.9-2.5 3.8-1s1.4 5.1-3.8 8.5Z" />,
+  group: <><circle cx="6" cy="6.2" r="2.4" /><path d="M1.8 13.4q.6-3.8 4.2-3.8t4.2 3.8" /><circle cx="11.4" cy="6.8" r="1.9" /><path d="M11 10.2q3 .2 3.4 3" /></>,
+  home: <><path d="M2.4 7.4 8 2.6l5.6 4.8v5.6a.8.8 0 0 1-.8.8H3.2a.8.8 0 0 1-.8-.8Z" /><path d="M6.4 13.8V9.6h3.2v4.2" /></>,
+  archive: <><path d="M3.6 2.6h8a1 1 0 0 1 1 1v9.8H5a1.9 1.9 0 0 1-1.9-1.9V3.1a.5.5 0 0 1 .5-.5Z" /><path d="M5 13.4a1.6 1.6 0 0 1 0-3.2h7.6M6 5.4h4.4" /></>,
+  workshop: <><path d="M2.2 4.6a1.4 1.4 0 0 1 1.4-1.4h2.8l1.2 1.4h4.4a1.4 1.4 0 0 1 1.4 1.4v6a1.4 1.4 0 0 1-1.4 1.4H3.6a1.4 1.4 0 0 1-1.4-1.4Z" /><path d="m6.4 7.8-1.4 1.6 1.4 1.6m3.2-3.2 1.4 1.6-1.4 1.6" /></>,
+  settings: <><path d="M2.4 4.4h11.2M2.4 8h11.2M2.4 11.6h11.2" /><circle cx="6" cy="4.4" r="1.4" /><circle cx="10.4" cy="8" r="1.4" /><circle cx="7.2" cy="11.6" r="1.4" /></>
+};
+
+/** Prototype tab markup (`.dm` diamond, pixel icon for pois, hand-drawn line icon for doodle) for the six real entries. */
+export function KekeTabArt({ id }: { id: string }) {
+  return <>
+    <svg className="dm" width="9" height="9" viewBox="0 0 10 10"><path d="M5 .8L9.2 5 5 9.2.8 5Z" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 1.6" /></svg>
+    <i className="pp ic" style={TAB_PI[id]} />
+    <svg className="dd tico" viewBox="0 0 16 16">{TAB_LINE[id]}</svg>
+  </>;
+}

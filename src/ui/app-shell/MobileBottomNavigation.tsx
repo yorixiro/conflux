@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import type { CollectionShelf, World } from '../../types/domain';
 import './MobileBottomNavigation.css';
+import { useSpaceStore } from '../../stores/spaceStore';
+import { KekeTabArt } from '../keke-original/KekeOriginalBar';
 
 type Section = 'chat' | 'group' | 'home' | 'archive' | 'workshop' | 'settings';
 
@@ -74,6 +76,19 @@ export function MobileBottomNavigation({
     chat: onOpenChat, group: onOpenGroup, home: onOpenHome,
     archive: onOpenArchive, workshop: onOpenWorkshop, settings: onOpenSettings
   };
+
+  const presetId = useSpaceStore((space) => space.theme.activePresetId);
+  if ((presetId === 'keke-doodle' || presetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen && !settingsOpen) {
+    return (
+      <nav className="mobile-bottom-navigation tabs" aria-label="主导航">
+        {items.map(({ id, label }) => (
+          <button key={id} type="button" className={`mobile-bottom-navigation__item${selected === id ? ' on' : ''}`} aria-label={label} aria-current={selected === id ? 'page' : undefined} onClick={actions[id]}>
+            <KekeTabArt id={id} />{label}
+          </button>
+        ))}
+      </nav>
+    );
+  }
 
   return (
     <nav className="mobile-bottom-navigation" aria-label="主导航">

@@ -336,8 +336,8 @@ export function ChatComposer() {
               <span className="chat-submit-flight-trail" />
             </div>
           ) : null}
-          <div className="chat-box-shell chat-box">
-            <div className={showKekeChrome ? 'chat-box-main row' : 'chat-box-main'}>
+          <div className={showKekeChrome ? 'keke-shell' : 'chat-box-shell chat-box'}>
+            <div className={showKekeChrome ? 'row' : 'chat-box-main'}>
               <ComposerQuickActions
                 paperStyle={showKekeChrome}
                 pickerOpen={attachmentPickerOpen}
@@ -354,7 +354,7 @@ export function ChatComposer() {
                 disabled={interactionLocked}
                 onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
               ><KaomojiFaceIcon /></button> : null}
-              <div className={showKekeChrome ? 'composer-text-input fd' : 'composer-text-input'}>
+              <div className={showKekeChrome ? 'fd' : 'composer-text-input'}>
                 <textarea
                   ref={textareaRef}
                   rows={1}
@@ -383,7 +383,7 @@ export function ChatComposer() {
               </div>
               <button
                 type="button"
-                className={`send-btn${showKekeChrome ? ' sd' : ''} ${
+                className={`${showKekeChrome ? 'sd' : 'send-btn'} ${
                   ui.sending
                   || localDraft.trim()
                   || attachments.pending.length > 0
