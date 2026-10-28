@@ -1,0 +1,49 @@
+#chat{--kp:var(--paper,var(--glass,#fbf8f7));--kh:var(--hot,var(--accent2,#c99aa8));--ki:var(--ink,#6a6266);--kf:var(--cn,inherit)}
+:root[data-ct=pois] #chat{--kp:#f3f0f0;--kh:#c99aa8;--ki:#5e5553}
+#chat .b:not(.ket){-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#chat .b.kp{z-index:5;transform:translateY(-2px) scale(1.03);filter:drop-shadow(0 4px 6px rgba(80,60,66,.25))}
+#chat .kmenu{position:absolute;inset:0;z-index:30}
+#chat .kscrim{position:absolute;inset:0}
+#chat .kpop{position:absolute;display:flex;flex-direction:column;gap:9px;align-items:flex-start;transform-origin:50% 100%;animation:kpop .26s cubic-bezier(.3,1.5,.5,1) both}
+#chat .krx,#chat .kac{position:relative;display:flex;flex-wrap:wrap;gap:5px;padding:6px;border-radius:20px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22)}
+#chat .krx button{width:34px;height:34px;border:0;border-radius:50%;background:transparent;font:16px/1 system-ui,sans-serif;color:var(--kh)}
+#chat .krx .on{background:rgba(214,186,191,.45)}
+#chat .kac{max-width:228px}
+#chat .kac button,#chat .ek button{border:0;border-radius:14px;padding:7px 11px;background:transparent;font:800 12px/1 var(--kf);letter-spacing:.08em;color:var(--ki)}
+#chat .ek{position:absolute;top:calc(100% + 11px);right:0;display:flex;gap:7px;white-space:nowrap;z-index:3}
+#chat .m.r .ek{left:0;right:auto}
+#chat .ek button{position:relative;padding:7px 12px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),1.5px 2px 0 2px rgba(176,131,140,.22)}
+#chat .ek .hot{background:var(--kh);color:#fff}
+#chat .m.ing{margin-bottom:40px}
+#chat .b.ket{min-width:min(70vw,280px);outline:1.5px dashed var(--kh);outline-offset:4px}
+#chat textarea.kt{display:block;width:100%;min-height:24px;padding:0;border:0;outline:0;resize:none;overflow:hidden;background:transparent;font:inherit;letter-spacing:inherit;color:inherit;-webkit-user-select:text;user-select:text}
+#chat .ke{margin-left:7px;font:700 10px/1 var(--kf);font-style:normal;opacity:.55;letter-spacing:.08em}
+#chat .kx{position:absolute;bottom:-11px;right:-2px;z-index:2;padding:3px 7px;border-radius:10px;background:var(--kp);color:var(--kh);font:normal 11px/1 system-ui,sans-serif;box-shadow:0 0 0 1.5px var(--kp),1px 2px 0 1.5px rgba(176,131,140,.2)}
+#chat .m.s .kx{right:auto;left:-2px}
+#chat .m:has(.kx){margin-bottom:10px}
+#chat .kq{margin:0 0 6px;padding:3px 8px;max-width:100%;border-left:2.5px solid var(--kh);border-radius:3px 8px 8px 3px;background:rgba(255,255,255,.5);font:600 11.5px/1.5 var(--kf);opacity:.85}
+#chat .kq b{display:block;font-size:10px;letter-spacing:.08em;color:var(--kh)}
+#chat .kqb{display:flex;align-items:center;gap:8px;margin:0 2px 8px;padding:6px 6px 6px 10px;border-left:3px solid var(--kh);border-radius:4px 12px 12px 4px;background:rgba(255,255,255,.72);font:600 12px/1.4 var(--kf);color:var(--ki);animation:kfade .2s both}
+#chat .kqb b{white-space:nowrap;color:var(--kh);letter-spacing:.08em}
+#chat .kqb span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chat .kqb button{border:0;background:none;font-size:16px;line-height:1;color:var(--ki)}
+#chat .kto{position:absolute;left:50%;bottom:130px;z-index:40;transform:translateX(-50%);padding:7px 14px;border-radius:14px;background:var(--kp);color:var(--ki);font:800 12px/1 var(--kf);letter-spacing:.08em;box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22);opacity:0;pointer-events:none;transition:opacity .2s}
+#chat .kto.on{opacity:1}
+@keyframes kpop{from{opacity:0;transform:scale(.82) translateY(8px)}}
+@keyframes kfade{from{opacity:0}}
+/* 贴纸：铅笔描边 + 胶带 + 彩色小便签按钮 */
+:root[data-ct=doodle] #chat :is(.krx,.kac,.ek button){position:relative;box-shadow:none}
+:root[data-ct=doodle] #chat :is(.krx,.kac,.ek button)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat .kac::after{content:"";position:absolute;top:-8px;right:18px;width:36px;height:14px;background:rgba(222,190,198,.75);rotate:5deg}
+:root[data-ct=doodle] #chat .kac button:nth-child(3n+1){background:var(--pk);rotate:-1.5deg}
+:root[data-ct=doodle] #chat .kac button:nth-child(3n+2){background:var(--bl);rotate:1.2deg}
+:root[data-ct=doodle] #chat .kac button:nth-child(3n){background:var(--yl);rotate:-.8deg}
+:root[data-ct=doodle] #chat .kq{border-left-style:dashed}
+:root[data-ct=doodle] #chat .b.ket{outline-color:var(--ink);outline-width:1.2px}
+/* 波点：灰白虚线框 + 波点底 + 像素十字 */
+:root[data-ct=pois] #chat :is(.krx,.kac){border:1.5px dashed #fff;background:#f1eeee radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px;box-shadow:0 0 0 1px rgba(134,103,98,.22),0 8px 14px -8px rgba(60,50,52,.45)}
+:root[data-ct=pois] #chat .kac::after{content:"";position:absolute;top:-9px;right:14px;width:3px;height:3px;color:#c99aa8;background:currentColor;box-shadow:3px 0,-3px 0,0 3px,0 -3px}
+:root[data-ct=pois] #chat .kac button:active,:root[data-ct=pois] #chat .krx button:active{background:#e3d9dc}
+:root[data-ct=pois] #chat .ek button{border:1.5px dashed #fff;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
+:root[data-ct=pois] #chat .kq,:root[data-ct=pois] #chat .kqb{border-left:2.5px dotted #fff;background:rgba(241,238,238,.8)}
+:root[data-ct=pois] #chat .b.ket{outline:1.5px dashed #fff}
