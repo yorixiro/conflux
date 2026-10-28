@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Persona } from '../../types/domain';
 import { useSpaceStore } from '../../stores/spaceStore';
 import { SidebarCalendar } from './SidebarCalendar';
@@ -28,10 +28,11 @@ export function KekeSidebarPaper() {
 
 const TODO_LABELS = ['好好吃饭', '画一点点', '早点睡 ☾'];
 
-export function KekeSidebarProfile({ persona, conversationCount, onEdit }: {
+export function KekeSidebarProfile({ persona, conversationCount, onEdit, modelSettings }: {
   persona: Persona | null;
   conversationCount: number;
   onEdit: () => void;
+  modelSettings?: ReactNode;
 }) {
   const theme = useSpaceStore((state) => state.theme.activePresetId);
   const applyTheme = useSpaceStore((state) => state.applyThemePreset);
@@ -64,6 +65,7 @@ export function KekeSidebarProfile({ persona, conversationCount, onEdit }: {
         <div className="keke-window-frame"><i><span className="keke-rain-cat">{'∧,,∧\n(´･ω･)'}</span></i><i /></div>
       </div>
     </div>
+    {modelSettings}
     <div className="keke-profile-shortcuts">
       <button className="keke-switch-theme" type="button" onClick={() => applyTheme(isPois ? 'keke-doodle' : 'keke-pois')}>
         <span>✣ 换个主题</span><span className="keke-theme-colors" aria-hidden="true"><i /><i /><i /></span>

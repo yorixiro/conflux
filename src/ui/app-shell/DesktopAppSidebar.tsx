@@ -11,6 +11,7 @@ import { SidebarCalendar } from './SidebarCalendar';
 import { KekeSidebarPaper, KekeSidebarProfile } from './KekeSidebarProfile';
 import { useSpaceStore } from '../../stores/spaceStore';
 import './KekeSidebarProfile.css';
+import { SidebarModelSettings } from './SidebarModelSettings';
 
 export type DesktopAppSidebarShelfItem = {
   shelf: CollectionShelf;
@@ -44,6 +45,7 @@ export type DesktopAppSidebarProps = {
   onCreateConversation: () => void;
   onOpenGroupWorld: () => void;
   onOpenSettings: () => void;
+  onOpenApi?: () => void;
 };
 
 function sortSidebarConversations(conversations: ConversationCardSummary[]) {
@@ -90,7 +92,8 @@ export function DesktopAppSidebar({
   onDeleteConversation,
   onCreateConversation,
   onOpenGroupWorld,
-  onOpenSettings
+  onOpenSettings,
+  onOpenApi
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
   const kekeThemeActive = useSpaceStore((state) => state.theme.activePresetId === 'keke-doodle' || state.theme.activePresetId === 'keke-pois');
@@ -107,6 +110,7 @@ export function DesktopAppSidebar({
   const sortedCollaborators = sortSidebarCollaborators(collaborators);
   const collaboratorName = currentCollaborator?.name.trim() || '尚未选择角色';
   const profileName = chatCollaborator?.name.trim() || '尚未选择聊天角色';
+  const modelSettings = chatCollaborator ? <SidebarModelSettings key={chatCollaborator.id} persona={chatCollaborator} onOpenSettings={onOpenApi ?? onOpenSettings} /> : null;
 
   useEffect(() => {
     const liveConversationIds = new Set(conversations.map((conversation) => conversation.id));
@@ -272,7 +276,7 @@ export function DesktopAppSidebar({
           aria-labelledby={presentation === 'sidebar' ? 'conflux-profile-tab' : undefined}
           className={`conflux-sidebar-panel conflux-sidebar-profile${kekeThemeActive ? ' keke-sidebar-profile' : ''}`}
         >
-          {kekeThemeActive ? <KekeSidebarProfile persona={chatCollaborator} conversationCount={conversations.length} onEdit={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} /> : <>
+          {kekeThemeActive ? <KekeSidebarProfile persona={chatCollaborator} conversationCount={conversations.length} modelSettings={modelSettings} onEdit={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} /> : <>
           <div className="conflux-profile-heading">
             {chatCollaborator ? (
               <PersonaAvatar
@@ -300,6 +304,7 @@ export function DesktopAppSidebar({
               <span>角色设置</span>
             </button>
           </div>
+          {modelSettings}
           <SidebarCalendar />
           </>}
         </section>

@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { resolveProviderCapability } from '../../engines/provider-runtime';
-import {
-  discoverProviderModels,
-  type ProviderModelOption
-} from '../../engines/providerModelDiscovery';
+import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
 import { getProviderMissingFields } from './apiProviderDisplay';
@@ -42,16 +39,7 @@ export function ApiProviderConfigForm({
   } = resolveApiProviderFormViewModel(api);
   const [selectedPresetId, setSelectedPresetId] = useState(matchedPreset?.id ?? '');
   const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(api, matchedPreset?.id));
-  const discoveryRequestIdRef = useRef(0);
-  const [modelDiscovery, setModelDiscovery] = useState<{
-    status: 'idle' | 'loading' | 'success' | 'error';
-    models: ProviderModelOption[];
-    error: string | null;
-  }>({
-    status: 'idle',
-    models: [],
-    error: null
-  });
+  const modelDiscovery = useProviderModelDiscovery(api);
   const presetModels = publicTrialProvider ? [] : (matchedPreset?.models ?? []);
 
   useEffect(() => {
@@ -73,58 +61,9 @@ export function ApiProviderConfigForm({
     }
   }, [api.path, api.protocol, matchedPreset?.id]);
 
-  useEffect(() => {
-    discoveryRequestIdRef.current += 1;
-    setModelDiscovery({
-      status: 'idle',
-      models: [],
-      error: null
-    });
-  }, [api.id, api.baseUrl, api.protocol]);
-
-  function formatModelDiscoveryError(error: string, hasPresetFallback: boolean) {
-    if (hasPresetFallback) {
-      return t('apiProvider.model.errorPresetFallback');
-    }
-    if (error.includes('不是 JSON') || error.includes('没有返回可用模型')) {
-      return t('apiProvider.model.errorManualOnly');
-    }
-    return t('apiProvider.model.errorManualSuffix', { error });
-  }
-
   async function handleDiscoverModels() {
-    const requestId = discoveryRequestIdRef.current + 1;
-    discoveryRequestIdRef.current = requestId;
-    setModelDiscovery({
-      status: 'loading',
-      models: [],
-      error: null
-    });
-
-    const result = await discoverProviderModels({ api });
-    if (discoveryRequestIdRef.current !== requestId) return;
-
-    if (result.ok) {
-      setModelDiscovery({
-        status: 'success',
-        models: result.models,
-        error: null
-      });
-      if (!modelPickerOpen) {
-        onToggleModelPicker();
-      }
-      return;
-    }
-
-    const hasPresetFallback = presetModels.length > 0;
-    setModelDiscovery({
-      status: 'error',
-      models: [],
-      error: formatModelDiscoveryError(result.error, hasPresetFallback)
-    });
-    if (hasPresetFallback && !modelPickerOpen) {
-      onToggleModelPicker();
-    }
+    const succeeded = await modelDiscovery.refresh();
+    if (succeeded && !modelPickerOpen) onToggleModelPicker();
   }
 
   function handleModelPickerAction() {
@@ -177,6 +116,7 @@ export function ApiProviderConfigForm({
         modelDiscoveryError={modelDiscovery.error}
         onSetApiConfig={onSetApiConfig}
         onOpenModelPicker={handleModelPickerAction}
+        onRefreshModels={() => void handleDiscoverModels()}
       />
 
       <details className="api-provider-more-settings">

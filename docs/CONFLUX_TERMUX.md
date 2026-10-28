@@ -2,6 +2,30 @@
 
 网页和已安装的 PWA 继续使用原来的 4173 地址。保留安装时的主机名：`localhost` 和 `127.0.0.1` 属于不同来源，不要互换。
 
+## 克克预览版：模型与思考设置更新（2026-10-28）
+
+已核实手机目录为 `~/my_st_termux/conflux`，本地分支 `keke-theme-preview`，起点 `4fd2c49`。本功能远端分支为 `feat/keke-profile-model-effort`，以该起点继续开发，保留全部现有主题提交。
+
+**Git 窗口只更新源码**，保留本地分支名：
+
+```bash
+cd ~/my_st_termux/conflux &&
+git fetch origin feat/keke-profile-model-effort &&
+git merge --ff-only FETCH_HEAD
+```
+
+**Vite 窗口单独运行服务**。原服务还在运行时，更新源码后由 Vite 热更新，刷新页面即可；只有原服务已停时才在 Vite 窗口执行：
+
+```bash
+cd ~/my_st_termux/conflux &&
+npm run termux:dev
+```
+
+不在 Git 窗口启动第二个服务，不需要切换到 `feat/conflux-bottom-navigation`。`--ff-only` 若提示分叉会停止，不执行强制重置。
+
+## 其他早期分支的更新说明
+
+
 首次切换到六入口开发分支：
 
 1. 回到原来挂着 Conflux 的 Termux 窗口，按 Ctrl+C，等命令提示符出现。

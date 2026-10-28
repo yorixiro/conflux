@@ -214,6 +214,7 @@ export function AppShellView({
         <DesktopAppShellFrame
           desktopSidebarProps={{
             ...desktopSidebarProps,
+            onOpenApi: collectionOpenProviderSettings,
             collapsed: effectiveDesktopSidebarCollapsed,
             onToggleCollapsed: toggleDesktopSidebarCollapsed,
             onOpenHome: () => onHomeOpenChange(true)
@@ -235,7 +236,7 @@ export function AppShellView({
         </DesktopAppShellFrame>
       ) : (
         <MobileAppShellFrame
-          sidebarProps={{ ...desktopSidebarProps, onOpenHome: () => onHomeOpenChange(true) }}
+          sidebarProps={{ ...desktopSidebarProps, onOpenApi: collectionOpenProviderSettings, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
             actions: {
