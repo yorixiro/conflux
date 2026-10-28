@@ -158,7 +158,9 @@ export function buildResponsesRequest(input: ProviderRuntimeRequestInput) {
   }
   if (thinkingBudget !== undefined && providerCapability.thinking.sendBudget) {
     body.reasoning = {
-      effort: resolveResponsesReasoningEffort(thinkingBudget)
+      effort: providerCapability.thinking.effortMapping === 'deepseek-effort'
+        ? (thinkingBudget <= 1024 ? 'low' : thinkingBudget >= 16384 ? 'max' : 'high')
+        : resolveResponsesReasoningEffort(thinkingBudget)
     };
   }
   if (providerCapability.streaming.text) {

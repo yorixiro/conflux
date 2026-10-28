@@ -1,19 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { discoverProviderModels, type ProviderModelOption } from '../../engines/providerModelDiscovery';
 import type { ProviderProfile } from '../../types/domain';
 
-/** A list belongs to one connection; never apply a late result to another route. */
+// Session-only discovery results shared by API settings and the chat selectors.
+// Never serialized into settings, exports, or logs.
+const emptyModels: ProviderModelOption[] = [];
+const cache = new Map<string, { connection: ProviderProfile; models: ProviderModelOption[] }>();
+const listeners = new Set<() => void>();
+const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+function sameConnection(a: ProviderProfile, b: ProviderProfile) {
+  return a.id === b.id && a.baseUrl === b.baseUrl && a.path === b.path && a.protocol === b.protocol && a.apiKey === b.apiKey;
+}
+function getModels(api: ProviderProfile) {
+  const entry = cache.get(api.id);
+  return entry && sameConnection(entry.connection, api) ? entry.models : emptyModels;
+}
+
 export function useProviderModelDiscovery(api: ProviderProfile) {
   const request = useRef<AbortController | null>(null);
-  const [state, setState] = useState<{
-    status: 'idle' | 'loading' | 'success' | 'error';
-    models: ProviderModelOption[];
-    error: string | null;
-  }>({ status: 'idle', models: [], error: null });
+  const models = useSyncExternalStore(subscribe, () => getModels(api), () => emptyModels);
+  const [state, setState] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; error: string | null }>({ status: 'idle', error: null });
 
   useEffect(() => {
     request.current?.abort();
-    setState({ status: 'idle', models: [], error: null });
+    const previous = cache.get(api.id);
+    if (previous && !sameConnection(previous.connection, api)) {
+      cache.delete(api.id);
+      listeners.forEach((listener) => listener());
+    }
+    setState({ status: 'idle', error: null });
     return () => { request.current?.abort(); };
   }, [api.id, api.baseUrl, api.path, api.protocol, api.apiKey]);
 
@@ -21,18 +36,18 @@ export function useProviderModelDiscovery(api: ProviderProfile) {
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
-    setState((previous) => ({ ...previous, status: 'loading', error: null }));
+    setState({ status: 'loading', error: null });
     const result = await discoverProviderModels({ api, signal: controller.signal });
     if (controller.signal.aborted || request.current !== controller) return false;
     if (result.ok) {
-      setState({ status: 'success', models: result.models, error: null });
+      cache.set(api.id, { connection: api, models: result.models });
+      listeners.forEach((listener) => listener());
+      setState({ status: 'success', error: null });
       return true;
     }
-    // Keep the last successful list usable when a refresh fails. Do not echo
-    // arbitrary upstream response bodies (which may contain credentials).
-    setState((previous) => ({ ...previous, status: 'error', error: '模型列表拉取失败，请检查地址、密钥和网络后重试；也可以手动填写模型。' }));
+    setState({ status: 'error', error: '模型列表拉取失败，请检查地址、密钥和网络后重试；也可以手动填写模型。' });
     return false;
   }
 
-  return { ...state, refresh };
+  return { ...state, models, refresh };
 }

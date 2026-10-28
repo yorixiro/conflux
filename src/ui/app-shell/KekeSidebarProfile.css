@@ -192,7 +192,3 @@ body[data-polaris-preset='keke-pois'] .app-shell.chat .desktop-app-sidebar.keke-
 }
 
 /* Keep the shared model controls readable on both Keke paper palettes. */
-.app-shell.chat .keke-profile-sheet .conflux-profile-model { flex:none; margin-top:12px; border-block:1px dashed var(--keke-hot); letter-spacing:normal; }
-.app-shell.chat .keke-profile-sheet .conflux-profile-model :is(label,p,summary) { color:var(--keke-ink); }
-.app-shell.chat .keke-profile-sheet .conflux-profile-model :is(select,input,button) { border-color:var(--keke-hot); background:var(--keke-paper); color:var(--keke-ink); }
-.app-shell.chat .keke-profile-sheet .conflux-profile-model :focus-visible { outline-color:var(--keke-hot); }

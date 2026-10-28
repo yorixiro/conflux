@@ -62,6 +62,7 @@ export type ProviderCapabilityThinkingEffortMapping =
   | 'none'
   | 'openai-compatible-budget'
   | 'responses-effort'
+  | 'deepseek-effort'
   | 'anthropic-budget'
   | 'gemini-budget';
 
@@ -437,6 +438,11 @@ export function resolveProviderCapability(
     reasoningTransport,
     sendThinkingBudget: profile.sendThinkingBudget
   });
+  // DeepSeek V4 exposes effort levels, not a token budget.
+  // https://api-docs.deepseek.com/guides/thinking_mode/
+  const deepseekEffort = isDeepSeekHost(host)
+    && /^deepseek-(?:v4|flash$)/i.test(runtimeProvider.model)
+    && (protocol === 'openai-completions' || protocol === 'openai-responses');
   const openAiCompatibleCacheControl = isOpenRouterAnthropicClaudeCacheRoute(runtimeProvider, protocol, host);
   const cacheMode: CanonicalProviderCacheMode = openAiCompatibleCacheControl
     ? 'explicit-cache-control'
@@ -504,8 +510,8 @@ export function resolveProviderCapability(
       openAiHistoryReplay: profile.openAiToolHistoryReplayPolicy
     },
     thinking: {
-      sendBudget: runtimeProvider.capabilities.thinking && profile.sendThinkingBudget,
-      effortMapping: runtimeProvider.capabilities.thinking ? protocolShape.effortMapping : 'none'
+      sendBudget: runtimeProvider.capabilities.thinking && (profile.sendThinkingBudget || deepseekEffort),
+      effortMapping: runtimeProvider.capabilities.thinking ? (deepseekEffort ? 'deepseek-effort' : protocolShape.effortMapping) : 'none'
     },
     budgets: {
       contextWindowTokens: profile.contextWindowTokens,

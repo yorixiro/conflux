@@ -16,6 +16,7 @@ import { Icon, type IconName } from '../../../Icon';
 import { type PersonaTabProps } from '../personaUiShared';
 import { CustomRequestSettingsTab } from './CustomRequestSettingsTab';
 import { EngineSettingsTab } from './EngineSettingsTab';
+import { PersonaModelSettings } from '../../PersonaModelSettings';
 import { PersonaMcpSettingsPage } from './PersonaMcpSettingsPage';
 
 type RequestSettingsTabProps = PersonaTabProps & {
@@ -65,7 +66,7 @@ function RoleConnectionFields({ provider, providers, onUpdateProvider }: {
         onSetApiConfig={update}
       />
       <details className="conflux-role-optional">
-        <summary>图片、流式与备用看图能力</summary>
+        <summary>思考、图片、流式与备用看图能力</summary>
         <ApiProviderCapabilitiesSection api={provider} onSetApiConfig={update} />
         <ApiProviderImageUnderstandingSection api={provider} providers={providers} onSetApiConfig={update} />
       </details>
@@ -88,7 +89,6 @@ function ProviderBindingSettings({
   const routeMode = activePersona?.advanced.providerRouteMode;
   const selectValue = fixedProviderId || (routeMode === 'inherit' ? '' : '__unconfigured__');
   const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim() || routeMode === 'inherit');
-  const fixedProviderBuiltIn = fixedProvider ? isBuiltInProviderDisplay(fixedProvider) : false;
   const globalProvider = providers.find(provider => provider.id === activeProviderId) ?? providers[0];
   const binding = globalProvider ? resolvePersonaProviderBinding({ globalApi: globalProvider, providers, persona: activePersona }) : null;
   const connectionProvider = binding?.fixedProvider ?? globalProvider;
@@ -168,26 +168,7 @@ function ProviderBindingSettings({
         </div>
       </div>
 
-      <div className="ps-field">
-        <div className="ps-field-head">
-          <label className="ps-field-label" htmlFor={`${fieldId}-model`}>{t('request.settings.modelLabel')}</label>
-          <span className="ps-field-hint">
-            {fixedProviderBuiltIn
-              ? t('request.settings.builtInModelHint')
-              : fixedProvider
-                ? t('request.settings.providerModelHint', { name: fixedProvider.name })
-                : t('request.settings.globalModelHint')}
-          </span>
-        </div>
-        <input
-          className="ps-input ps-input--mono"
-          id={`${fieldId}-model`}
-          value={fixedProviderBuiltIn && fixedProvider ? getProviderModelDisplayLabel(fixedProvider) : (activePersona?.advanced.modelOverride || '')}
-          onChange={(event) => onUpdatePersona({ advanced: { modelOverride: event.target.value } })}
-          placeholder={fixedProviderBuiltIn ? t('request.settings.builtInModelPlaceholder') : t('request.settings.modelPlaceholder')}
-          disabled={fixedProviderBuiltIn || (!fixedProvider && binding?.status !== 'ready')}
-        />
-      </div>
+      {activePersona ? <PersonaModelSettings key={activePersona.id} persona={activePersona} settings /> : null}
       {(fixedProvider || binding?.status === 'ready') && connectionProvider
         ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} />
         : null}

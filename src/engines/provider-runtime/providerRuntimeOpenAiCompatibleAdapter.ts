@@ -501,7 +501,12 @@ export function buildOpenAiCompatibleRequest(input: ProviderRuntimeRequestInput)
   }
 
   if (thinkingBudget !== undefined && providerCapability.thinking.sendBudget) {
-    body.thinking = { budget_tokens: thinkingBudget };
+    if (providerCapability.thinking.effortMapping === 'deepseek-effort') {
+      body.thinking = { type: 'enabled' };
+      body.reasoning_effort = thinkingBudget <= 1024 ? 'low' : thinkingBudget >= 16384 ? 'max' : 'high';
+    } else {
+      body.thinking = { budget_tokens: thinkingBudget };
+    }
   }
   if (
     providerCapability.streaming.text &&

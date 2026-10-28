@@ -11,9 +11,7 @@ vi.mock('../collaborator/PersonaAvatar', () => ({ PersonaAvatar: () => null }));
 vi.mock('./useConversationLibrarySearch', () => ({
   useConversationLibrarySearch: () => ({ results: [], status: 'idle' })
 }));
-vi.mock('./SidebarModelSettings', () => ({
-  SidebarModelSettings: ({ persona }: { persona: { id: string } }) => <section data-model-controls={persona.id}>模型与思考</section>
-}));
+
 
 function props(): DesktopAppSidebarProps {
   const chatPersona = createPersonaTemplate({ id: 'chat-ai', name: 'Chat AI', description: '' });
@@ -31,22 +29,12 @@ function props(): DesktopAppSidebarProps {
   };
 }
 
-describe('profile model controls across themes', () => {
-  it.each(['keke-doodle', 'keke-pois', 'polaris'])('renders controls for the chat AI once in %s', (preset) => {
+describe('profile stays focused on the persona across themes', () => {
+  it.each(['keke-doodle', 'keke-pois', 'polaris'])('keeps model configuration out of the %s profile', (preset) => {
     theme.activePresetId = preset;
     const html = renderToStaticMarkup(<DesktopAppSidebar {...props()} />);
-    expect(html.match(/data-model-controls="chat-ai"/g)).toHaveLength(1);
-    expect(html).not.toContain('data-model-controls="editing-ai"');
-    if (preset.startsWith('keke-')) {
-      expect(html.indexOf('keke-profile-sheet')).toBeLessThan(html.indexOf('data-model-controls'));
-      expect(html.indexOf('data-model-controls')).toBeLessThan(html.indexOf('keke-calendar-wrap'));
-      expect(html).toContain('keke-profile-lower');
-    }
-  });
-
-  it('does not attach controls to a different AI when no chat AI is selected', () => {
-    theme.activePresetId = 'keke-doodle';
-    const html = renderToStaticMarkup(<DesktopAppSidebar {...props()} chatCollaborator={null} />);
-    expect(html).not.toContain('data-model-controls=');
+    expect(html).toContain('Chat AI');
+    expect(html).not.toContain('拉取模型列表');
+    expect(html).not.toContain('conflux-profile-model');
   });
 });

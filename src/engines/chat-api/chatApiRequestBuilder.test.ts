@@ -476,7 +476,8 @@ describe('buildApiRequest tool choice', () => {
       content: '我先动手。',
       reasoning_content: '先判断主题工具是否已经写入，再决定下一轮怎么改。'
     });
-    expect(request.body.thinking).toBeUndefined();
+    expect(request.body.thinking).toEqual({ type: 'enabled' });
+    expect(request.body.reasoning_effort).toBe('low');
     expect(request.body).not.toHaveProperty('tool_choice');
   });
 

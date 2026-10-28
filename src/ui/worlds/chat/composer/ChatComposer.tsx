@@ -9,6 +9,7 @@ import {
   useChatAttachments,
   useChatComposer,
   useChatPresentation,
+  useChatStablePayload,
   useChatUi
 } from '../context/ChatContext';
 import { ChatWorkspaceBanner } from './ChatWorkspaceBanner';
@@ -20,6 +21,7 @@ import { KaomojiDrawer, KaomojiFaceIcon } from './kaomoji/KaomojiDrawer';
 import { useComposerFileIngest } from './useComposerFileIngest';
 import { useI18n } from '../../../../i18n';
 import { useSpaceStore } from '../../../../stores/spaceStore';
+import { PersonaModelSettings } from '../../../shell/PersonaModelSettings';
 
 function resolveThemeReviveSpell(input: string): 'restore-default' | 'revive-last' | null {
   const normalized = input.trim().toLowerCase().replace(/\s+/g, '');
@@ -48,6 +50,7 @@ export function ChatComposer() {
   const showKekeChrome = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
   const { t } = useI18n();
   const presentation = useChatPresentation();
+  const { persona } = useChatStablePayload();
   const composer = useChatComposer();
   const ui = useChatUi();
   const attachments = useChatAttachments();
@@ -360,6 +363,7 @@ export function ChatComposer() {
             </div>
           </div>
         </div>
+        {persona ? <PersonaModelSettings key={persona.id} persona={persona} /> : null}
         {showKekeChrome ? <div className="keke-original-marquee" aria-hidden="true"><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span><span>‧₊˚ ✲ ⊹ ๐·° ˚̥ ∗ ˚₊๑ ‧₊˚ ♡ ˚₊‧ ⊹ ✲ ·°๐ ˚̥ ∗ ₊˚๑ ☆ </span></div> : null}
       </div>
     </>
