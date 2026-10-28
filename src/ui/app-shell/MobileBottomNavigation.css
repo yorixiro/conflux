@@ -110,15 +110,36 @@ html[data-keyboard-open="true"] .app-shell.has-mobile-bottom-navigation > .confl
   .mobile-bottom-navigation__icon { transition: none; }
 }
 
-/* The six destinations share the original Keke notebook footer. */
-body[data-polaris-preset^="keke-"] .app-shell.chat.has-mobile-bottom-navigation { --conflux-navigation-height:44px; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation { padding:0 8px env(safe-area-inset-bottom,0px); background:repeating-linear-gradient(transparent 0 21px,rgba(157,171,185,.2) 21px 22px) 0 0,#faf7f5; color:#a39599; backdrop-filter:none; box-shadow:none; }
-body[data-polaris-preset="keke-pois"] .app-shell.chat .mobile-bottom-navigation { background:repeating-linear-gradient(transparent 0 21px,rgba(120,114,116,.12) 21px 22px) 0 0,#f6f5f5; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation::before { display:none; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item { flex-direction:row; gap:3px; min-height:44px; padding:0; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon { width:16px; height:18px; border-radius:0; background:none; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon svg { width:16px; height:16px; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon::after { display:none; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__label { position:relative; font-size:10px; font-weight:750; letter-spacing:.03em; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item[aria-current="page"] { color:#7a6d71; }
-body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item[aria-current="page"] .mobile-bottom-navigation__label::after { content:''; position:absolute; left:-3px; right:-3px; bottom:-2px; height:5px; border-radius:60% 40% 45% 55%; background:rgba(196,151,159,.3); transform:rotate(-3deg); }
+/* One footer grid: readable six-item navigation and matching composer gutters. */
+body[data-polaris-preset^="keke-"] .app-shell.has-mobile-bottom-navigation {
+  --conflux-navigation-height:56px;
+  --keke-footer-gutter:max(12px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px),calc((100% - 720px) / 2));
+  --keke-footer-paper:#faf7f5;
+}
+body[data-polaris-preset="keke-pois"] .app-shell.has-mobile-bottom-navigation { --keke-footer-paper:#f6f5f5; }
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation {
+  padding:3px var(--keke-footer-gutter) calc(3px + env(safe-area-inset-bottom,0px));
+  background:var(--keke-footer-paper); color:#8b7e83;
+  -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none;
+}
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation::before {
+  inset:0 var(--keke-footer-gutter) auto;
+  background:rgba(122,109,113,.15);
+}
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__item {
+  flex-direction:column; gap:2px; min-height:50px; padding:0;
+}
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__icon {
+  width:32px; height:26px; border-radius:12px; background:none;
+}
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__icon svg { width:22px; height:22px; }
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__icon::after { display:none; }
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__label {
+  position:relative; font-size:11px; line-height:16px; font-weight:600; letter-spacing:.03em;
+}
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__item[aria-current="page"] { color:#6c5961; }
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__item[aria-current="page"] .mobile-bottom-navigation__icon { background:rgba(196,151,159,.17); }
+body[data-polaris-preset^="keke-"] .app-shell .mobile-bottom-navigation__item[aria-current="page"] .mobile-bottom-navigation__label::after {
+  content:''; position:absolute; left:-3px; right:-3px; bottom:0; height:4px;
+  border-radius:60% 40% 45% 55%; background:rgba(196,151,159,.23); transform:rotate(-3deg);
+}
