@@ -4,7 +4,7 @@
   inset: auto 0 0;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  height: calc(66px + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--conflux-navigation-height, 66px) + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   padding: 5px max(7px, env(safe-area-inset-right, 0px), calc((100% - 560px) / 2)) calc(6px + env(safe-area-inset-bottom, 0px)) max(7px, env(safe-area-inset-left, 0px), calc((100% - 560px) / 2));
   color: color-mix(in srgb, var(--text) 63%, var(--text-soft) 37%);
@@ -87,11 +87,11 @@
 }
 
 .app-shell.has-mobile-bottom-navigation .app-stage {
-  height: calc(100% - 66px - env(safe-area-inset-bottom, 0px));
+  height: calc(100% - var(--conflux-navigation-height, 66px) - env(safe-area-inset-bottom, 0px));
 }
 .app-shell.has-mobile-bottom-navigation > .conflux-home {
   box-sizing: border-box;
-  padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--conflux-navigation-height, 66px) + env(safe-area-inset-bottom, 0px));
 }
 .app-shell.has-mobile-bottom-navigation.app-layout-wide .app-stage {
   max-width: none;
@@ -109,3 +109,16 @@ html[data-keyboard-open="true"] .app-shell.has-mobile-bottom-navigation > .confl
 @media (prefers-reduced-motion: reduce) {
   .mobile-bottom-navigation__icon { transition: none; }
 }
+
+/* The six destinations share the original Keke notebook footer. */
+body[data-polaris-preset^="keke-"] .app-shell.chat.has-mobile-bottom-navigation { --conflux-navigation-height:44px; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation { padding:0 8px env(safe-area-inset-bottom,0px); background:repeating-linear-gradient(transparent 0 21px,rgba(157,171,185,.2) 21px 22px) 0 0,#faf7f5; color:#a39599; backdrop-filter:none; box-shadow:none; }
+body[data-polaris-preset="keke-pois"] .app-shell.chat .mobile-bottom-navigation { background:repeating-linear-gradient(transparent 0 21px,rgba(120,114,116,.12) 21px 22px) 0 0,#f6f5f5; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation::before { display:none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item { flex-direction:row; gap:3px; min-height:44px; padding:0; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon { width:16px; height:18px; border-radius:0; background:none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon svg { width:16px; height:16px; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__icon::after { display:none; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__label { position:relative; font-size:10px; font-weight:750; letter-spacing:.03em; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item[aria-current="page"] { color:#7a6d71; }
+body[data-polaris-preset^="keke-"] .app-shell.chat .mobile-bottom-navigation__item[aria-current="page"] .mobile-bottom-navigation__label::after { content:''; position:absolute; left:-3px; right:-3px; bottom:-2px; height:5px; border-radius:60% 40% 45% 55%; background:rgba(196,151,159,.3); transform:rotate(-3deg); }

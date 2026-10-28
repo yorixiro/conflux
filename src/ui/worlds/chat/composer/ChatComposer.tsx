@@ -19,6 +19,7 @@ import { ComposerPreviewStrip } from './ComposerPreviewStrip';
 import { SlashCommandSuggestions } from './SlashCommandSuggestions';
 import { KaomojiDrawer, KaomojiFaceIcon } from './kaomoji/KaomojiDrawer';
 import { useComposerFileIngest } from './useComposerFileIngest';
+import { useComposerDictation } from './useComposerDictation';
 import { useI18n } from '../../../../i18n';
 import { useSpaceStore } from '../../../../stores/spaceStore';
 import { PersonaModelSettings } from '../../../shell/PersonaModelSettings';
@@ -48,7 +49,7 @@ function resolveThemeReviveSpell(input: string): 'restore-default' | 'revive-las
 export function ChatComposer() {
   const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
   const showKekeChrome = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const presentation = useChatPresentation();
   const { persona } = useChatStablePayload();
   const composer = useChatComposer();
@@ -99,6 +100,20 @@ export function ChatComposer() {
     // Live keystrokes stay local; draft persistence flushes at interaction boundaries.
     setLocalDraft(value);
   };
+
+  const dictation = useComposerDictation({
+    conversationId: activeConversationId,
+    enabled: presentation.isActiveWorld && !presentation.interactionLocked,
+    language,
+    onText: (text) => {
+      const previous = localDraftRef.current;
+      const next = previous + (previous && !/\s$/.test(previous) ? ' ' : '') + text;
+      updateLocalDraft(next);
+      writeDraftToStore(next, draftConversationIdRef.current);
+    }
+  });
+  const hasDraftContent = Boolean(localDraft.trim() || attachments.pending.length || resolvedPendingCardReference);
+  const voiceMode = !ui.sending && (dictation.active || !hasDraftContent);
 
   useEffect(() => () => {
     flushDraftToStore();
@@ -188,6 +203,7 @@ export function ChatComposer() {
     void actions.submit();
   };
   const handleSubmitPress = () => {
+    if (dictation.active) dictation.cancel();
     if (ui.sending) {
       actions.stopGeneration();
       return;
@@ -197,6 +213,7 @@ export function ChatComposer() {
     void actions.submit();
   };
   const handleComposerInputEngage = () => {
+    if (dictation.active) dictation.cancel();
     if (attachmentPickerOpen) setAttachmentPickerOpen(false);
     if (kaomojiOpen) setKaomojiOpen(false);
   };
@@ -281,6 +298,7 @@ export function ChatComposer() {
             {visibleStatus.text}
           </p>
         ) : null}
+        {dictation.message ? <p className={`command-status ${dictation.isError ? 'error' : ''}`} role="status" aria-live="polite">{dictation.message}</p> : null}
         <SlashCommandSuggestions
           query={slashCommandQuery}
           onPick={handlePickSlashCommand}
@@ -320,11 +338,12 @@ export function ChatComposer() {
           <div className="chat-box-shell chat-box">
             <div className="chat-box-main">
               <ComposerQuickActions
+                paperStyle={showKekeChrome}
                 pickerOpen={attachmentPickerOpen}
                 interactionLocked={interactionLocked}
                 onSetPickerOpen={open => { setAttachmentPickerOpen(open); if (open) setKaomojiOpen(false); }}
               />
-              <button
+              {!showKekeChrome ? <button
                 type="button"
                 className={`composer-slot-btn composer-kaomoji-toggle ${kaomojiOpen ? 'active' : ''}`}
                 aria-label="颜文字"
@@ -333,7 +352,7 @@ export function ChatComposer() {
                 aria-controls="composer-kaomoji-drawer"
                 disabled={interactionLocked}
                 onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
-              ><KaomojiFaceIcon /></button>
+              ><KaomojiFaceIcon /></button> : null}
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -344,11 +363,11 @@ export function ChatComposer() {
                 onBlur={flushDraftToStore}
                 onKeyDown={handleKeyDown}
                 disabled={interactionLocked}
-                placeholder={`to ${presentation.assistantName}`}
+                placeholder={showKekeChrome ? '说点什么 ๑*˚' : `to ${presentation.assistantName}`}
               />
               <button
                 type="button"
-                className={`send-btn ${
+                className={`send-btn ${voiceMode ? 'voice-input-btn' : ''} ${dictation.active ? 'is-listening' : ''} ${
                   ui.sending
                   || localDraft.trim()
                   || attachments.pending.length > 0
@@ -357,15 +376,23 @@ export function ChatComposer() {
                     : ''
                 }`}
                 disabled={hasUnsupportedPendingImages || interactionLocked}
-                aria-label={ui.sending ? t('chat.composer.stopGeneration') : hasSlashCommandDraft ? t('chat.composer.executeCommand') : t('chat.composer.sendMessage')}
+                aria-label={voiceMode ? (dictation.active ? '结束语音输入' : '语音转文字') : ui.sending ? t('chat.composer.stopGeneration') : hasSlashCommandDraft ? t('chat.composer.executeCommand') : t('chat.composer.sendMessage')}
                 onClick={(event) => {
-                  runImpactAction(handleSubmitPress, {
+                  runImpactAction(voiceMode ? dictation.toggle : handleSubmitPress, {
                     element: event.currentTarget,
                     style: ui.sending ? ImpactStyle.Medium : ImpactStyle.Light
                   });
                 }}
               >
-                <Icon name={ui.sending ? 'x' : hasSlashCommandDraft ? 'check' : 'send'} size={16} />
+                {voiceMode ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {dictation.active ? <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" /> : <><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3M9 21h6" /></>}
+                  </svg>
+                ) : showKekeChrome && !ui.sending && !hasSlashCommandDraft ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20s-8-4.8-8-10.1C4 4.8 10 3.7 12 8c2-4.3 8-3.2 8 1.9C20 15.2 12 20 12 20Z" fill="#fff9f7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : <Icon name={ui.sending ? 'x' : hasSlashCommandDraft ? 'check' : 'send'} size={16} />}
               </button>
             </div>
           </div>

@@ -339,3 +339,6 @@ html[data-keyboard-open='true'] .chat-box-shell { box-shadow: var(--chat-compose
     min-height: 42px;
   }
 }
+
+.voice-input-btn { cursor:pointer; }
+.voice-input-btn.is-listening { color:var(--color-error,#bd6874); outline:2px solid currentColor; outline-offset:2px; }

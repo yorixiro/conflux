@@ -29,6 +29,7 @@ type ComposerAttachmentsProps = {
 };
 
 type ComposerQuickActionsProps = {
+  paperStyle?: boolean;
   pickerOpen: boolean;
   interactionLocked: boolean;
   onSetPickerOpen: (open: boolean) => void;
@@ -38,6 +39,7 @@ const FILE_ACCEPT =
   '.zip,.pdf,.docx,.xlsx,.csv,.txt,.md,.markdown,.json,.js,.jsx,.ts,.tsx,.css,.html,.xml,.yml,.yaml,.py,.rb,.go,.rs,.java,.kt,.swift,.sh,.sql';
 
 export function ComposerQuickActions({
+  paperStyle = false,
   pickerOpen,
   interactionLocked,
   onSetPickerOpen
@@ -60,7 +62,7 @@ export function ComposerQuickActions({
           }, { element: event.currentTarget });
         }}
       >
-        <Icon name="plus" size={15} />
+        <Icon name={paperStyle ? 'folder' : 'plus'} size={paperStyle ? 19 : 15} />
       </button>
     </div>
   );
