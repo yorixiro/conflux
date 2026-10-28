@@ -27,6 +27,7 @@ export function AppShell() {
   });
   const appShellView = useAppShellViewController({
     ...controller,
+    homeOpen,
     startupThemeReady: appRuntime.persistentStoreLifecycle.startupThemeReady,
     persistenceReadFailureNotice: appRuntime.persistenceReadFailureNotice,
     onRetryPersistenceReadFailure: appRuntime.retryPersistenceReadFailure,
@@ -35,7 +36,7 @@ export function AppShell() {
 
   return (
     <>
-      <AppShellView {...appShellView} homeOpen={homeOpen} onHomeOpenChange={setHomeOpen} />
+      <AppShellView {...appShellView} onHomeOpenChange={setHomeOpen} />
       {!homeOpen && shouldShowWorldSwitchVeil(controller.activeWorld) ? (
         <WorldSwitchVeil
           activeWorld={controller.activeWorld}

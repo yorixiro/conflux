@@ -123,6 +123,7 @@ describe('createChatReplyRunner', () => {
             personas: [{
               id: 'pharos',
               name: 'Pharos',
+              advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' },
               systemPrompt: '',
               assistantIntro: '',
               userNickname: '',
@@ -168,7 +169,7 @@ describe('createChatReplyRunner', () => {
             name: 'Stale',
             kind: 'custom',
             baseUrl: 'https://stale.example.com',
-            apiKey: '',
+            apiKey: 'test-key',
             model: 'old-model',
             capabilities: { images: false, toolUse: true, thinking: false }
           } as never,
@@ -186,7 +187,7 @@ describe('createChatReplyRunner', () => {
               name: 'Live',
               kind: 'custom',
               baseUrl: 'https://live.example.com',
-              apiKey: '',
+              apiKey: 'test-key',
               model: 'fresh-model',
               capabilities: { images: false, toolUse: true, thinking: false }
             } as never,
@@ -374,6 +375,7 @@ describe('createChatReplyRunner', () => {
             personas: [{
               id: 'pharos',
               name: 'Pharos',
+              advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' },
               systemPrompt: '',
               assistantIntro: '',
               userNickname: '',
@@ -401,7 +403,7 @@ describe('createChatReplyRunner', () => {
             name: 'Provider',
             kind: 'custom',
             baseUrl: 'https://provider.example.com',
-            apiKey: '',
+            apiKey: 'test-key',
             model: 'model',
             capabilities: { images: false, toolUse: true, thinking: false }
           } as never,
@@ -419,7 +421,7 @@ describe('createChatReplyRunner', () => {
               name: 'Provider',
               kind: 'custom',
               baseUrl: 'https://provider.example.com',
-              apiKey: '',
+              apiKey: 'test-key',
               model: 'model',
               capabilities: { images: false, toolUse: true, thinking: false }
             } as never,
@@ -543,6 +545,7 @@ describe('createChatReplyRunner', () => {
     const disabledRecallPersona = {
       id: 'pharos',
       name: 'Pharos',
+      advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' },
       memory: {
         crossConversationRecallEnabled: false
       }
@@ -553,7 +556,7 @@ describe('createChatReplyRunner', () => {
         name: 'Provider',
         kind: 'custom',
         baseUrl: 'https://provider.example.com',
-        apiKey: '',
+        apiKey: 'test-key',
         model: 'model',
         capabilities: { images: false, toolUse: true, thinking: false }
       } as never,
@@ -704,6 +707,7 @@ describe('createChatReplyRunner', () => {
     const persona = {
       id: 'pharos',
       name: 'Pharos',
+      advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' },
       memory: {
         crossConversationRecallEnabled: true
       }
@@ -714,7 +718,7 @@ describe('createChatReplyRunner', () => {
         name: 'Provider',
         kind: 'custom',
         baseUrl: 'https://provider.example.com',
-        apiKey: '',
+        apiKey: 'test-key',
         model: 'model',
         capabilities: { images: false, toolUse: true, thinking: false }
       } as never,

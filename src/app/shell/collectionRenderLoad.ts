@@ -83,6 +83,8 @@ export function resolveCollectionRenderItemCount(args: CollectionRenderLoadArgs)
       return countProjectCards(args);
     case 'image':
       return countImageCards(args);
+    case 'album':
+      return args.imageCards.length;
     case 'info':
       return 0;
   }

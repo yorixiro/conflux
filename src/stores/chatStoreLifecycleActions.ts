@@ -74,12 +74,26 @@ export function createChatLifecycleActions(
     },
 
     ensureConversationMessagesLoaded: async (conversationId) => {
-      return await ensureConversationMessagesLoadedFromState({
+      const initialConversation = get().conversations.find((entry) => entry.id === conversationId);
+      let savedDraft: string | undefined;
+      const conversation = await ensureConversationMessagesLoadedFromState({
         getState: get,
         setState: set,
-        readMessages: readConversationMessages,
-        applyLoadedMessages: applyLoadedConversationMessages
+        readMessages: (id) => readConversationMessages(id, (draft) => { savedDraft = draft; }),
+        applyLoadedMessages: (entry, messages) => applyLoadedConversationMessages({
+          ...entry,
+          // Unloaded directory rows have an empty placeholder, not an empty saved draft.
+          // Keep any draft typed while this body read was in flight.
+          draft: savedDraft !== undefined && entry.draft === initialConversation?.draft
+            ? savedDraft : entry.draft
+        }, messages)
       }, conversationId);
+      if (conversation && savedDraft !== undefined) {
+        set((state) => state.activeConversationId === conversationId
+          && state.inputDraft === initialConversation?.draft
+          ? { inputDraft: conversation.draft ?? '' } : state);
+      }
+      return conversation;
     },
 
     getConversationWritable: (conversationId) => {

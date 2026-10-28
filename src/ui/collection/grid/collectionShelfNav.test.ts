@@ -9,6 +9,7 @@ describe('buildVisibleCollectionShelfNavItems', () => {
     const items = buildVisibleCollectionShelfNavItems(
       {
         dialogue: true,
+        album: false,
         info: true,
         code: true,
         project: true,
@@ -24,6 +25,7 @@ describe('buildVisibleCollectionShelfNavItems', () => {
     const items = buildVisibleCollectionShelfNavItems(
       {
         dialogue: true,
+        album: true,
         info: true,
         code: true,
         project: true,
@@ -32,6 +34,6 @@ describe('buildVisibleCollectionShelfNavItems', () => {
       t
     );
 
-    expect(items.map((item) => item.shelf)).toEqual(['dialogue', 'project', 'code', 'image', 'info']);
+    expect(items.map((item) => item.shelf)).toEqual(['dialogue', 'album', 'project', 'code', 'image', 'info']);
   });
 });

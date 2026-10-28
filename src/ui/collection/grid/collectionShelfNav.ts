@@ -10,6 +10,7 @@ export type CollectionShelfAvailability = Partial<Record<CollectionShelf, boolea
 
 const COLLECTION_SHELF_NAV_ITEM_IDS: CollectionShelf[] = [
   'dialogue',
+  'album',
   'project',
   'code',
   'image',
@@ -18,6 +19,7 @@ const COLLECTION_SHELF_NAV_ITEM_IDS: CollectionShelf[] = [
 
 function collectionShelfLabel(shelf: CollectionShelf, t: I18nTranslator['t']) {
   if (shelf === 'dialogue') return t('collection.nav.dialogue');
+  if (shelf === 'album') return '收藏册';
   if (shelf === 'project') return t('collection.nav.project');
   if (shelf === 'code') return t('collection.nav.code');
   if (shelf === 'image') return t('collection.nav.image');

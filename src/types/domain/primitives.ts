@@ -1,5 +1,5 @@
 export type World = 'collection' | 'chat' | 'group';
-export type CollectionShelf = 'info' | 'code' | 'project' | 'dialogue' | 'image';
+export type CollectionShelf = 'info' | 'code' | 'project' | 'dialogue' | 'image' | 'album';
 export type WorkspaceChatReturnTarget = {
   world: 'chat';
   conversationId: string;

@@ -220,6 +220,7 @@ export type ChatActionStoreBindings = {
   runtime: {
     companionConnections: PolarisCompanionConnection[];
     deleteCompanionConnection: (connectionId: string) => void;
+    readLatestState?: () => { api: ProviderProfile; providers: ProviderProfile[] };
   };
 };
 
@@ -418,6 +419,7 @@ export type ChatToolStoreBindings = {
   runtime: {
     api: ProviderProfile;
     providers: ProviderProfile[];
+    toolPromptPreferences?: PolarisToolPromptPreferences;
     imageGeneration: ImageGenerationSettings;
     imageUnderstanding: ImageUnderstandingSettings;
     search: WebSearchConfig;
@@ -426,6 +428,7 @@ export type ChatToolStoreBindings = {
     readLatestState?: () => {
       api: ProviderProfile;
       providers: ProviderProfile[];
+      toolPromptPreferences?: PolarisToolPromptPreferences;
       imageGeneration: ImageGenerationSettings;
       imageUnderstanding: ImageUnderstandingSettings;
       search: WebSearchConfig;

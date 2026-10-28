@@ -1,5 +1,24 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useRuntimeStore } from './runtimeStore';
+import { selectRuntimeApi, useRuntimeStore } from './runtimeStore';
+
+describe('runtimeStore role-only route creation', () => {
+  it('creates a blank route without changing the global active route', () => {
+    useRuntimeStore.setState(useRuntimeStore.getInitialState(), true);
+    const previousActiveId = useRuntimeStore.getState().activeProviderId;
+    const previousGlobalId = selectRuntimeApi(useRuntimeStore.getState()).id;
+
+    const newId = useRuntimeStore.getState().createProvider('AI 专属线路', { activate: false });
+    const state = useRuntimeStore.getState();
+
+    expect(state.activeProviderId).toBe(previousActiveId);
+    expect(selectRuntimeApi(state).id).toBe(previousGlobalId);
+    expect(state.providers.find((provider) => provider.id === newId)).toMatchObject({
+      apiKey: '',
+      baseUrl: '',
+      model: ''
+    });
+  });
+});
 
 describe('runtimeStore companion connections', () => {
   beforeEach(() => {

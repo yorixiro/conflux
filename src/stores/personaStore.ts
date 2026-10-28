@@ -70,7 +70,8 @@ function createSeedPersona(id: string, template: CreatePersonaOptions['template'
       baseId: 'custom',
       generatedPromptMode: 'vnext',
       builderManaged: false,
-      compiledPrompt: ''
+      compiledPrompt: '',
+      advanced: { providerRouteMode: 'unconfigured' }
     });
   }
 
@@ -79,7 +80,8 @@ function createSeedPersona(id: string, template: CreatePersonaOptions['template'
     name: '新助手',
     description: '刚刚来到这里',
     purpose: '先陪你说话，再一起慢慢长出更清楚的形状。',
-    generatedPromptMode: 'vnext'
+    generatedPromptMode: 'vnext',
+    advanced: { providerRouteMode: 'unconfigured' }
   });
 }
 

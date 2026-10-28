@@ -40,6 +40,11 @@ export type EnvironmentDirectorySnapshot = {
   collectionShelf: CollectionShelf;
   activeConversation?: Pick<Conversation, 'id' | 'collaboratorId' | 'activeProjectId'> & { title?: string } | null;
   activeCollaboratorName?: string | null;
+  albumOwnerId?: string | null;
+  albumImageCards: Array<Pick<ImageAssetCard, 'id' | 'title' | 'assetId' | 'tags' | 'source'>>;
+  albumCanSendImage?: boolean;
+  albumCanInspectImage?: boolean;
+  albumCanSaveAttachment?: boolean;
   activeCardId?: string | null;
   cards: Array<Pick<CodeCard, 'id' | 'title' | 'language' | 'kind' | 'tags'>>;
   imageCards: Array<Pick<ImageAssetCard, 'id' | 'title' | 'assetId' | 'tags' | 'source'>>;
@@ -151,6 +156,7 @@ function buildDirectory(snapshot: EnvironmentDirectorySnapshot): DirectoryIndex 
     childIds: [
       'environment/current-scene',
       'environment/settings',
+      'environment/archive',
       'environment/room',
       'environment/workspace',
       'environment/attachments',
@@ -331,6 +337,69 @@ function buildDirectory(snapshot: EnvironmentDirectorySnapshot): DirectoryIndex 
       `calendarWriteAvailable=${snapshot.calendarWriteAvailable ? 'true' : 'false'}`
     ],
     keywords: ['calendar', 'personal data', 'system data']
+  });
+
+  addNode(nodes, {
+    id: 'environment/archive',
+    parentId: ROOT_NODE_ID,
+    kind: 'directory',
+    title: '档案',
+    summary: '前端档案里的收藏册入口；角色资料与对话档案尚未作为环境工具开放。',
+    childIds: ['environment/archive/album'],
+    actions: [{ label: '查看收藏册目录', toolName: 'inspectEnvironmentNode', target: 'environment/archive/album' }],
+    evidence: ['档案是前端导航分区；环境节点只说明模型当前可访问的功能，不等于读取了整个档案。'],
+    keywords: ['archive', 'profile', '收藏', '照片', '相册', '资料']
+  });
+
+  addNode(nodes, {
+    id: 'environment/archive/album',
+    parentId: 'environment/archive',
+    kind: 'directory',
+    title: '收藏册',
+    summary: '档案中的蓝色 3D 透明收藏册；与图片库共用已保存的图片卡，没有另一套独立存储。前端可切换自己或不同 AI 的收藏册。',
+    status: snapshot.albumOwnerId
+      ? `${snapshot.activeCollaboratorName ?? '当前协作者'} · ${snapshot.albumImageCards.length} 张收藏图片`
+      : '当前没有可读取收藏册的协作者',
+    childIds: snapshot.albumImageCards.map((card) => `environment/archive/album/image/${card.id}`),
+    actions: [
+      { label: '列出当前协作者的收藏项', toolName: 'listEnvironmentNodes', target: 'environment/archive/album' },
+      ...(snapshot.albumOwnerId && snapshot.albumCanSaveAttachment
+        ? [{ label: '把当前对话图片附件收入当前协作者收藏册', toolName: 'saveAttachmentToCollection' }]
+        : []),
+      ...(snapshot.albumOwnerId && snapshot.albumCanSendImage && snapshot.albumImageCards.length > 0
+        ? [{ label: '发送已有收藏图片', toolName: 'sendImageAttachment' }]
+        : [])
+    ],
+    evidence: [
+      `collaboratorId=${snapshot.albumOwnerId ?? 'none'}`,
+      `visibleAlbumImages=${snapshot.albumImageCards.length}`,
+      '只列当前聊天协作者自己的收藏；不列用户私人或其他 AI 的收藏。',
+      '图片内容并没有随目录发送给模型；需要调用已启用的图片工具。',
+      `当前图片发送工具=${snapshot.albumCanSendImage ? '可用' : '未开放'} · 当前附件收藏工具=${snapshot.albumCanSaveAttachment ? '可用' : '未开放'}`,
+      '封套旋转、翻动、体感是用户界面交互，不是模型可调用的工具。'
+    ],
+    keywords: ['album', 'booklet', 'photo album', 'scrapbook', '收藏册', '收藏夹', '相册', '照片', '图片']
+  });
+
+  snapshot.albumImageCards.forEach((card) => {
+    addNode(nodes, {
+      id: `environment/archive/album/image/${card.id}`,
+      parentId: 'environment/archive/album',
+      kind: 'room-card',
+      title: card.title,
+      summary: `收藏图片 · ${card.source} · 标签：${card.tags.join('、') || '无'}`,
+      childIds: [],
+      actions: snapshot.albumCanSendImage
+        ? [
+            { label: '发送这张收藏图片', toolName: 'sendImageAttachment', target: card.id },
+            ...(snapshot.albumCanInspectImage
+              ? [{ label: '检查图片属性', toolName: 'inspectImageAsset', target: card.id, note: '只检查图片属性，不能识别画面语义' }]
+              : [])
+          ]
+        : [],
+      evidence: [`imageCardId=${card.id}`, `assetId=${card.assetId}`],
+      keywords: ['收藏册', '相册', '图片', '照片', card.title, ...card.tags]
+    });
   });
 
   addNode(nodes, {

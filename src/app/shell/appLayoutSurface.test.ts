@@ -25,15 +25,15 @@ describe('normalizeAppLayoutSurface', () => {
 });
 
 describe('resolveAppLayoutSurfaceFromMatches', () => {
-  it('uses the tablet shell for ordinary wide browser layouts even when hover is available', () => {
-    expect(resolveAppLayoutSurfaceFromMatches({ desktop: true, tablet: true })).toBe('tablet');
+  it('uses the desktop shell for wide pointer-class browser layouts', () => {
+    expect(resolveAppLayoutSurfaceFromMatches({ desktop: true, tablet: true })).toBe('desktop');
   });
 
   it('uses tablet for wide touch-class viewports', () => {
     expect(resolveAppLayoutSurfaceFromMatches({ desktop: false, tablet: true })).toBe('tablet');
   });
 
-  it('keeps desktop as an explicit host surface when no tablet viewport match is present', () => {
+  it('keeps desktop when only its viewport match is present', () => {
     expect(resolveAppLayoutSurfaceFromMatches({ desktop: true, tablet: false })).toBe('desktop');
   });
 

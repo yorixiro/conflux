@@ -90,7 +90,8 @@ export function createChatActionStoreBindings(store: ChatStoreBindings): ChatAct
     },
     runtime: {
       companionConnections: store.runtime.companionConnections,
-      deleteCompanionConnection: store.runtime.deleteCompanionConnection
+      deleteCompanionConnection: store.runtime.deleteCompanionConnection,
+      readLatestState: store.runtime.readLatestState
     }
   };
 }
@@ -229,6 +230,7 @@ export function createChatToolStoreBindings(
     runtime: {
       api: store.runtime.api,
       providers: store.runtime.providers,
+      toolPromptPreferences: store.runtime.toolPromptPreferences,
       imageGeneration: store.runtime.imageGeneration,
       imageUnderstanding: store.runtime.imageUnderstanding,
       search: store.runtime.search,

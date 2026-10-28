@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CodeCardActionMode } from '../../../../app/chat/chatDerivedState';
 import { readMessageSpeechCacheBlob, saveMessageSpeechCache } from '../../../../app/chat/messageSpeechCache';
 import { requestGeneratedSpeech } from '../../../../engines/voiceGenerationClient';
@@ -44,7 +43,13 @@ export type MessageTaskReceiptAction = {
 };
 
 type MessageActionsProps = {
-  canCopyAssistant: boolean;
+  canCopyMessage: boolean;
+  canEditUser: boolean;
+  canDelete: boolean;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
+  onEditUser: () => void;
+  onDelete: () => void;
   canEditAssistant: boolean;
   canForkAssistant: boolean;
   canRetryAssistant: boolean;
@@ -70,7 +75,13 @@ type MessageActionsProps = {
 };
 
 export function MessageActions({
-  canCopyAssistant,
+  canCopyMessage,
+  canEditUser,
+  canDelete,
+  menuOpen,
+  onMenuOpenChange,
+  onEditUser,
+  onDelete,
   canEditAssistant,
   canForkAssistant,
   canRetryAssistant,
@@ -99,8 +110,9 @@ export function MessageActions({
   const [nativeSpeechAvailable, setNativeSpeechAvailable] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [speechLoading, setSpeechLoading] = useState(false);
-  const [assistantSheetOpen, setAssistantSheetOpen] = useState(false);
-  const [assistantSheetMode, setAssistantSheetMode] = useState<'menu' | 'edit' | 'memory'>('menu');
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [panelMode, setPanelMode] = useState<'menu' | 'edit' | 'memory'>('menu');
   const [assistantDraft, setAssistantDraft] = useState(messageContent);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -109,30 +121,61 @@ export function MessageActions({
   const showCodeCardAction = codeCardActionMode !== 'hidden';
   const hasMemoryEvidence = role === 'assistant' && Boolean(memoryEvidence?.items.length);
   const hasSpeechCache = role === 'assistant' && Boolean(speechCache?.assetId);
-  const hasAssistantMore = role === 'assistant' && (canEditAssistant || canForkAssistant || canRetryAssistant || hasMemoryEvidence || hasSpeechCache);
+  const hasMore = canCopyMessage || canEditUser || canEditAssistant || canDelete || canForkAssistant || canRetryAssistant || hasMemoryEvidence || hasSpeechCache;
   const speakableContent = speechContent.trim();
   const canUseConfiguredSpeech = voiceGeneration.enabled && Boolean(voiceGeneration.baseUrl?.trim() && voiceGeneration.apiKey?.trim());
   const canSpeakAssistant = role === 'assistant' && Boolean(speakableContent) && (hasSpeechCache || canUseConfiguredSpeech || nativeSpeechAvailable);
   const resolvedRetryAssistantLabel = retryAssistantLabel ?? t('chat.messageActions.retry');
 
   useEffect(() => {
-    if (!assistantSheetOpen) {
+    if (!menuOpen) {
       setAssistantDraft(messageContent);
-      setAssistantSheetMode('menu');
+      setPanelMode('menu');
     }
-  }, [assistantSheetOpen, messageContent]);
+  }, [menuOpen, messageContent]);
 
-  useEffect(() => {
-    if (!assistantSheetOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setAssistantSheetOpen(false);
-      }
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    const trigger = triggerRef.current;
+    if (!menuOpen || !dialog || !trigger) return;
+    if (!dialog.open) dialog.showModal();
+    if (panelMode !== 'menu') {
+      dialog.style.removeProperty('left');
+      dialog.style.removeProperty('top');
+      dialog.style.removeProperty('max-height');
+      return;
+    }
+    const position = () => {
+      const anchor = trigger.getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const flow = trigger.closest('.chat-flow')?.getBoundingClientRect();
+      const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
+      const topEdge = Math.max((viewport?.offsetTop ?? 0) + 8, (flow?.top ?? 0) + 8);
+      const rightEdge = leftEdge + (viewport?.width ?? window.innerWidth) - 16;
+      const bottomEdge = Math.min(
+        (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8,
+        (flow?.bottom ?? window.innerHeight) - 8
+      );
+      dialog.style.maxHeight = `${Math.max(0, bottomEdge - topEdge)}px`;
+      const card = dialog.getBoundingClientRect();
+      const left = role === 'user' ? anchor.right - card.width : anchor.left;
+      const top = anchor.bottom + 6 + card.height <= bottomEdge
+        ? anchor.bottom + 6 : anchor.top - card.height - 6;
+      dialog.style.left = `${Math.max(leftEdge, Math.min(left, rightEdge - card.width))}px`;
+      dialog.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - card.height))}px`;
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [assistantSheetOpen]);
+    position();
+    window.addEventListener('resize', position);
+    window.addEventListener('scroll', position, true);
+    window.visualViewport?.addEventListener('resize', position);
+    window.visualViewport?.addEventListener('scroll', position);
+    return () => {
+      window.removeEventListener('resize', position);
+      window.removeEventListener('scroll', position, true);
+      window.visualViewport?.removeEventListener('resize', position);
+      window.visualViewport?.removeEventListener('scroll', position);
+    };
+  }, [menuOpen, panelMode, role]);
 
   useEffect(() => {
     setNativeSpeechAvailable(typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window);
@@ -142,13 +185,14 @@ export function MessageActions({
     stopSpeechPlayback();
   }, []);
 
-  if (!canCopyAssistant && !canSpeakAssistant && !hasAssistantMore && !showCodeCardAction && !canOpenThinkingSummary && !taskReceiptAction) {
+  if (!canCopyMessage && !canSpeakAssistant && !hasMore && !showCodeCardAction && !canOpenThinkingSummary && !taskReceiptAction) {
     return null;
   }
 
   const copyMessage = async () => {
     if (!messageContent.trim()) return;
     await runSuccessAction(() => writeTextToClipboard(messageContent));
+    onSetCommandStatus(t('chat.messageActions.copied'));
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1400);
   };
@@ -291,64 +335,49 @@ export function MessageActions({
     playNativeSpeech(text);
   };
 
-  const closeAssistantSheet = () => {
-    setAssistantSheetOpen(false);
+  const closeActions = () => {
+    dialogRef.current?.close();
+    onMenuOpenChange(false);
   };
 
   const saveAssistantDraft = () => {
     if (!assistantDraft.trim()) return;
     onEditAssistant(assistantDraft);
-    closeAssistantSheet();
+    closeActions();
   };
-  const assistantSheet = assistantSheetOpen && typeof document !== 'undefined' ? createPortal(
-    <>
-      <button
-        type="button"
-        className="assistant-message-sheet-dismiss"
-        aria-label={t('chat.messageActions.closeAssistantActions')}
-        onClick={closeAssistantSheet}
-      />
-      <div className="assistant-message-action-sheet" role="dialog" aria-modal="true" aria-label={assistantSheetMode === 'edit' ? t('chat.messageActions.editAssistant') : t('chat.messageActions.assistantActions')}>
-        <div className="assistant-message-action-handle" aria-hidden="true" />
-        {assistantSheetMode === 'menu' ? (
-          <div className="assistant-message-action-menu">
-            {hasMemoryEvidence && memoryEvidence ? (
-              <button
-                type="button"
-                className="assistant-message-action-btn"
-                onClick={(event) => {
-                  runSelectionAction(() => {
-                    setAssistantSheetMode('memory');
-                  }, { element: event.currentTarget });
-                }}
-              >
-                <Icon name="memoryMap" size={18} />
-                <span>{t('chat.messageActions.memorySources')}</span>
+  const actionDialog = menuOpen ? (
+    <dialog
+      ref={dialogRef}
+      className={`message-action-dialog ${panelMode}`}
+      aria-label={t('chat.messageActions.userMenuAria')}
+      onCancel={event => { event.preventDefault(); closeActions(); }}
+      onClose={() => onMenuOpenChange(false)}
+      onClick={event => { if (event.target === event.currentTarget) closeActions(); }}
+    >
+      <header className="message-action-header">
+        <span>{t('chat.messageActions.userMenuAria')}</span>
+        <button type="button" onClick={closeActions} aria-label={t('chat.messageActions.closeAssistantActions')}><Icon name="x" size={17} /></button>
+      </header>
+        {panelMode === 'menu' ? (
+          <div className="message-action-menu">
+            {canCopyMessage ? (
+              <button type="button" className="message-action-btn" onClick={() => { void copyMessage(); closeActions(); }}>
+                <Icon name="copy" size={18} /><span>{t('chat.messageActions.copy')}</span>
               </button>
             ) : null}
-            {speechCache?.assetId ? (
-              <button
-                type="button"
-                className="assistant-message-action-btn"
-                onClick={(event) => {
-                  runSelectionAction(() => {
-                    void downloadCachedSpeech(speechCache);
-                    closeAssistantSheet();
-                  }, { element: event.currentTarget });
-                }}
-              >
-                <Icon name="download" size={18} />
-                <span>{t('chat.messageActions.exportSpeechCache')}</span>
+            {canEditUser ? (
+              <button type="button" className="message-action-btn" onClick={() => { closeActions(); onEditUser(); }}>
+                <Icon name="edit" size={18} /><span>{t('chat.messageActions.editAndRetry')}</span>
               </button>
             ) : null}
             {canEditAssistant ? (
               <button
                 type="button"
-                className="assistant-message-action-btn"
+                className="message-action-btn"
                 onClick={(event) => {
                   runSelectionAction(() => {
                     setAssistantDraft(messageContent);
-                    setAssistantSheetMode('edit');
+                    setPanelMode('edit');
                   }, { element: event.currentTarget });
                 }}
               >
@@ -359,11 +388,11 @@ export function MessageActions({
             {canForkAssistant ? (
               <button
                 type="button"
-                className="assistant-message-action-btn"
+                className="message-action-btn"
                 onClick={(event) => {
                   runSelectionAction(() => {
                     onForkAssistant();
-                    closeAssistantSheet();
+                    closeActions();
                   }, { element: event.currentTarget });
                 }}
               >
@@ -374,11 +403,11 @@ export function MessageActions({
             {canRetryAssistant ? (
               <button
                 type="button"
-                className="assistant-message-action-btn"
+                className="message-action-btn"
                 onClick={(event) => {
                   runSelectionAction(() => {
                     onRetryLatestAssistant();
-                    closeAssistantSheet();
+                    closeActions();
                   }, { element: event.currentTarget });
                 }}
               >
@@ -386,14 +415,48 @@ export function MessageActions({
                 <span>{resolvedRetryAssistantLabel}</span>
               </button>
             ) : null}
+            {hasMemoryEvidence && memoryEvidence ? (
+              <button
+                type="button"
+                className="message-action-btn"
+                onClick={(event) => {
+                  runSelectionAction(() => {
+                    setPanelMode('memory');
+                  }, { element: event.currentTarget });
+                }}
+              >
+                <Icon name="memoryMap" size={18} />
+                <span>{t('chat.messageActions.memorySources')}</span>
+              </button>
+            ) : null}
+            {speechCache?.assetId ? (
+              <button
+                type="button"
+                className="message-action-btn"
+                onClick={(event) => {
+                  runSelectionAction(() => {
+                    void downloadCachedSpeech(speechCache);
+                    closeActions();
+                  }, { element: event.currentTarget });
+                }}
+              >
+                <Icon name="download" size={18} />
+                <span>{t('chat.messageActions.exportSpeechCache')}</span>
+              </button>
+            ) : null}
+            {canDelete ? (
+              <button type="button" className="message-action-btn destructive" onClick={() => { closeActions(); onDelete(); }}>
+                <Icon name="trash" size={18} /><span>{t('chat.messageActions.delete')}</span>
+              </button>
+            ) : null}
           </div>
-        ) : assistantSheetMode === 'memory' && memoryEvidence ? (
+        ) : panelMode === 'memory' && memoryEvidence ? (
           <div className="assistant-message-memory">
             <div className="assistant-message-memory-title">
               <button
                 type="button"
                 className="assistant-message-memory-back"
-                onClick={() => setAssistantSheetMode('menu')}
+                onClick={() => setPanelMode('menu')}
                 aria-label={t('chat.messageActions.backToActions')}
               >
                 <Icon name="chevron" size={16} />
@@ -415,22 +478,21 @@ export function MessageActions({
               value={assistantDraft}
               onChange={(event) => setAssistantDraft(event.target.value)}
               rows={8}
+              aria-label={t('chat.messageActions.editAssistant')}
               autoFocus
             />
             <div className="assistant-message-edit-actions">
-              <button type="button" className="assistant-message-edit-btn secondary" onClick={() => setAssistantSheetMode('menu')}>{t('chat.messageActions.cancel')}</button>
+              <button type="button" className="assistant-message-edit-btn secondary" onClick={() => setPanelMode('menu')}>{t('chat.messageActions.cancel')}</button>
               <button type="button" className="assistant-message-edit-btn primary" onClick={saveAssistantDraft} disabled={!assistantDraft.trim()}>{t('chat.messageActions.confirmEdit')}</button>
             </div>
           </div>
         )}
-      </div>
-    </>,
-    document.body
+    </dialog>
   ) : null;
 
   return (
     <div className={`message-inline-actions ${role}`}>
-      {canCopyAssistant && (
+      {role === 'assistant' && canCopyMessage && (
         <button type="button" className={`micro-action-btn ${copied ? 'active' : ''}`} onClick={() => { void copyMessage(); }} aria-label={copied ? t('chat.messageActions.copied') : t('chat.messageActions.copyAssistant')} title={copied ? t('chat.messageActions.copied') : t('chat.messageActions.copyAssistant')}>
           <Icon name="copy" size={14} />
         </button>
@@ -492,24 +554,26 @@ export function MessageActions({
           {codeCardProgressLabel && <span className="message-inline-progress">{codeCardProgressLabel}</span>}
         </>
       )}
-      {hasAssistantMore ? (
+      {hasMore ? (
         <>
           <button
             type="button"
-            className={`micro-action-btn ${assistantSheetOpen ? 'active' : ''}`}
+            ref={triggerRef}
+            className={`micro-action-btn ${menuOpen ? 'active' : ''}`}
             onClick={(event) => {
               runSelectionAction(() => {
-                setAssistantSheetOpen(true);
-                setAssistantSheetMode('menu');
+                onMenuOpenChange(true);
+                setPanelMode('menu');
               }, { element: event.currentTarget });
             }}
-            aria-label={t('chat.messageActions.moreAssistantActions')}
+            aria-label={t('chat.messageActions.moreMessageActions')}
+            aria-haspopup="dialog"
             title={t('chat.messageActions.more')}
-            aria-expanded={assistantSheetOpen}
+            aria-expanded={menuOpen}
           >
             <Icon name="more" size={15} />
           </button>
-          {assistantSheet}
+          {actionDialog}
         </>
       ) : null}
     </div>

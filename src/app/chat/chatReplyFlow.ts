@@ -1,5 +1,5 @@
 import type { ChatMessage } from '../../types/domain';
-import { resolvePersonaProviderBinding } from '../../engines/personaProviderBinding';
+import { resolvePersonaProviderBinding, resolvePersonaProviderStatus } from '../../engines/personaProviderBinding';
 import { isPolarisToolPromptGroupEnabled } from '../../engines/tool-protocol/toolPromptPreferences';
 import { resolvePersonaMcpServers } from '../persona/personaMcpSettings';
 import { requestReply, type ChatReplyRunResult, type RequestReplyChatPort } from './chatReplyRuntime';
@@ -44,6 +44,7 @@ type CreateChatReplyRunnerArgs = {
     activeCollaborator: ChatDerivedStatePort['persona'];
     defaultEnabled: boolean;
   }) => boolean;
+  reportRouteFailure?: (message: string) => void;
 };
 
 export function createChatReplyRunner({
@@ -58,7 +59,8 @@ export function createChatReplyRunner({
   overrideReplyChatPort,
   buildRequestMessages,
   overrideRequestSource,
-  resolveSemanticRecallEnabled
+  resolveSemanticRecallEnabled,
+  reportRouteFailure
 }: CreateChatReplyRunnerArgs) {
   return async (params: {
     conversationId: string;
@@ -74,6 +76,18 @@ export function createChatReplyRunner({
     const activeCollaborator = personaState.personas.find(
       (persona) => persona.id === params.collaboratorId
     ) ?? derived.persona;
+    const routeRuntimeState = store.runtime.readLatestState();
+    const routeStatus = resolvePersonaProviderStatus(
+      activeCollaborator,
+      routeRuntimeState.providers,
+      routeRuntimeState.api
+    );
+    if (routeStatus !== 'ready') {
+      reportRouteFailure?.(routeStatus === 'missing-provider'
+        ? '当前角色绑定的模型线路已不存在，请到档案的请求设置中重新选择。'
+        : '当前角色尚未选择模型线路，请先到档案的请求设置中绑定。');
+      return { status: 'failed' } satisfies ChatReplyRunResult;
+    }
     const requestMessages = buildRequestMessages?.({
       conversationId: params.conversationId,
       collaboratorId: params.collaboratorId,

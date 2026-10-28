@@ -132,6 +132,7 @@ export function PromptCoreSettingsPage({
             className={`ps-textarea ps-textarea--mono ps-textarea--prompt ${promptExpanded ? 'ps-textarea--expanded-inline' : ''} ${promptExpanded && expandedUsesPageScroll ? 'ps-textarea--expanded-page-scroll' : ''}`}
             rows={promptExpanded ? 18 : 10}
             value={pharosDefaultPrompt}
+            aria-label="内置角色人设"
             readOnly
             placeholder="正在读取 Pharos 提示词…"
           />
@@ -171,6 +172,7 @@ export function PromptCoreSettingsPage({
         className={`ps-textarea ps-textarea--mono ps-textarea--prompt ps-textarea--prompt-editor ${promptExpanded ? 'ps-textarea--expanded-inline' : ''} ${promptExpanded && expandedUsesPageScroll ? 'ps-textarea--expanded-page-scroll' : ''}`}
         rows={promptExpanded ? 18 : 10}
         value={promptDisplayValue}
+        aria-label="角色人设"
         onFocus={() => setPromptFocused(true)}
         onBlur={() => setPromptFocused(false)}
         onChange={(e) => {

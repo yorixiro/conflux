@@ -1,16 +1,20 @@
 import { Suspense } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
+import { Icon } from '../Icon';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
+import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
+import { usePersonaStore } from '../../stores/personaStore';
+import { getProviderModelBindingValue } from '../shell/apiProviderDisplay';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
+import { ConfluxQuickSettingsDrawer } from './ConfluxQuickSettingsDrawer';
 import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
 import { WorldFrameBoundary, WorldFrameFallback } from './WorldFrameBoundary';
 import type { useAppShellViewController } from './useAppShellViewController';
 
 type AppShellViewProps = ReturnType<typeof useAppShellViewController> & {
-  homeOpen: boolean;
   onHomeOpenChange: (open: boolean) => void;
 };
 
@@ -28,6 +32,7 @@ export function AppShellView({
   collectionCollaboratorSwitchOpen,
   setCollectionCollaboratorSwitchOpen,
   collectionInfoFullscreenOpen,
+  collectionInfoPageRequest,
   setCollectionInfoFullscreenOpen,
   collectionDetailOpen,
   setCollectionDetailOpen,
@@ -35,6 +40,7 @@ export function AppShellView({
   collectionCreateCustomCollaborator,
   collectionOpenProviderSettings,
   collectionOpenSettings,
+  openQuickMenuPage,
   collectionOpenDesktopLocalSettings,
   collectionDeleteCollaborator,
   collaboratorTransitionKey,
@@ -66,8 +72,27 @@ export function AppShellView({
   collectionScopeDrawerOpen,
   collectionFrameInteractive,
   chatFrameInteractive,
-  groupFrameInteractive
+  groupFrameInteractive,
+  quickSettingsOpen,
+  setQuickSettingsOpen
 }: AppShellViewProps) {
+  const useBottomNavigation = appLayoutSurface !== 'desktop';
+  const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
+  const chatCollaborator = desktopSidebarProps.chatCollaborator;
+  const setChatCollaboratorProvider = (providerId: string) => {
+    if (!chatCollaborator) return;
+    if (providerId === '__unconfigured__' || providerId === '') {
+      usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
+        advanced: { providerId: '', providerRouteMode: providerId ? 'unconfigured' : 'inherit', modelOverride: '' }
+      });
+      return;
+    }
+    const selected = overlaysProps.api.providers.find((item) => item.id === providerId);
+    if (!selected) return;
+    usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
+      advanced: { providerId: selected.id, providerRouteMode: 'fixed', modelOverride: getProviderModelBindingValue(selected) }
+    });
+  };
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     onHomeOpenChange(false);
@@ -81,7 +106,8 @@ export function AppShellView({
     onHomeOpenChange(false);
   };
   const onNewHomeConversation = () => {
-    desktopSidebarProps.onCreateConversation();
+    if (desktopSidebarProps.collaborators.length) desktopSidebarProps.onCreateConversation();
+    else desktopSidebarProps.onCreateCustomCollaborator();
     onHomeOpenChange(false);
   };
 
@@ -98,6 +124,7 @@ export function AppShellView({
           >
             <Suspense fallback={<WorldFrameFallback world="collection" />}>
               <CollectionWorld
+                infoPageRequest={collectionInfoPageRequest}
                 searchOpen={collectionSearchOpen}
                 collaboratorSwitchOpen={collectionScopeDrawerOpen}
                 onCollaboratorSwitchOpenChange={setCollectionCollaboratorSwitchOpen}
@@ -108,8 +135,10 @@ export function AppShellView({
                 onDetailOpenChange={setCollectionDetailOpen}
                 onOpenCollaboratorBuilderForCreate={collectionOpenCollaboratorBuilderForCreate}
                 onCreateCustomCollaborator={collectionCreateCustomCollaborator}
+                onBackToChat={topbarProps.actions.onOpenPreviewChat}
                 onOpenProviderSettings={collectionOpenProviderSettings}
                 onOpenDesktopLocalSettings={collectionOpenDesktopLocalSettings}
+                sectionNavigation={useBottomNavigation}
               />
             </Suspense>
           </WorldFrameBoundary>
@@ -146,7 +175,7 @@ export function AppShellView({
 
   return (
     <main
-      className={`app-shell app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${showDesktopSidebar ? 'has-desktop-sidebar' : ''} ${showDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
+      className={`app-shell ${useBottomNavigation ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >
       {backgroundUrl ? (
@@ -168,8 +197,6 @@ export function AppShellView({
           />
         </div>
       ) : null}
-      <div className="bg-glow bg-glow-top" />
-      <div className="bg-glow bg-glow-bottom" />
       <div className="theme-transition-veil" aria-hidden="true" />
       <div className="collaborator-transition-veil" aria-hidden="true" />
       {!startupThemeReady ? <div className="startup-theme-veil" aria-hidden="true" /> : null}
@@ -183,33 +210,99 @@ export function AppShellView({
           onOpenShelf={onOpenHomeShelf}
           onOpenGroup={onOpenHomeGroup}
         />
-      ) : showDesktopSidebar ? (
+      ) : useDesktopSidebar ? (
         <DesktopAppShellFrame
           desktopSidebarProps={{
             ...desktopSidebarProps,
+            onOpenApi: collectionOpenProviderSettings,
             collapsed: effectiveDesktopSidebarCollapsed,
             onToggleCollapsed: toggleDesktopSidebarCollapsed,
             onOpenHome: () => onHomeOpenChange(true)
           }}
         >
           {worldStack}
+          {activeWorld === 'chat' ? (
+            <button
+              type="button"
+              className="conflux-quick-settings-desktop-trigger"
+              onClick={() => setQuickSettingsOpen(true)}
+              aria-label="打开右侧快捷设置"
+              aria-haspopup="dialog"
+              title="快捷设置"
+            >
+              <Icon name="settings" size={19} />
+            </button>
+          ) : null}
         </DesktopAppShellFrame>
       ) : (
         <MobileAppShellFrame
+          sidebarProps={{ ...desktopSidebarProps, onOpenApi: collectionOpenProviderSettings, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
-            actions: { ...topbarProps.actions, onOpenHome: () => onHomeOpenChange(true) }
+            actions: {
+              ...topbarProps.actions,
+              onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined,
+              onOpenQuickSettings: () => setQuickSettingsOpen(true)
+            }
           }}
         >
           {worldStack}
         </MobileAppShellFrame>
       )}
 
+      {useBottomNavigation ? (
+        <MobileBottomNavigation
+          activeWorld={activeWorld}
+          collectionShelf={topbarProps.state.collectionShelf}
+          homeOpen={homeOpen}
+          settingsOpen={topbarProps.state.menuOpen}
+          onOpenChat={() => {
+            if (activeWorld !== 'chat') topbarProps.actions.onOpenPreviewChat();
+            onHomeOpenChange(false);
+          }}
+          onOpenGroup={() => {
+            if (activeWorld !== 'group') desktopSidebarProps.onOpenGroupWorld();
+            onHomeOpenChange(false);
+          }}
+          onOpenHome={() => onHomeOpenChange(true)}
+          onOpenArchive={() => {
+            if (activeWorld !== 'collection' || !['info', 'dialogue', 'album'].includes(topbarProps.state.collectionShelf)) {
+              desktopSidebarProps.onSelectShelf('dialogue');
+            }
+            onHomeOpenChange(false);
+          }}
+          onOpenWorkshop={() => {
+            if (activeWorld !== 'collection' || !['project', 'code', 'image'].includes(topbarProps.state.collectionShelf)) {
+              desktopSidebarProps.onSelectShelf('project');
+            }
+            onHomeOpenChange(false);
+          }}
+          onOpenSettings={() => {
+            onHomeOpenChange(false);
+            topbarProps.actions.onOpenSettings();
+          }}
+        />
+      ) : null}
+
       <AppReplyNotificationStack {...replyNotificationProps} />
       <PersistenceReadFailureNotice
         notice={persistenceReadFailureNotice}
         onRetry={onRetryPersistenceReadFailure}
         onOpenBackup={onOpenBackupFromReadFailure}
+      />
+      <ConfluxQuickSettingsDrawer
+        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat'}
+        onClose={() => setQuickSettingsOpen(false)}
+        provider={overlaysProps.api}
+        onOpenApi={collectionOpenProviderSettings}
+        onOpenMenu={openQuickMenuPage}
+        onNewConversation={topbarProps.actions.onCreateConversation}
+        currentPersona={chatCollaborator}
+        onSetPersonaProvider={setChatCollaboratorProvider}
+        onOpenPersona={chatCollaborator
+          ? () => desktopSidebarProps.onEditCollaborator(chatCollaborator.id)
+          : undefined}
+        onOpenCodeCards={() => desktopSidebarProps.onSelectShelf('code')}
       />
       <AppShellOverlays {...overlaysProps} />
     </main>

@@ -57,7 +57,11 @@
     "ios:verify-native-plugins": "node scripts/verify_ios_native_plugins.mjs",
     "ios:sync": "npm run build && npx cap sync ios && npm run ios:verify-native-plugins",
     "ios:build-sim": "npm run ios:sync && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build",
-    "ios:build-device": "npm run ios:sync && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build"
+    "ios:build-device": "npm run ios:sync && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build",
+    "termux:dev": "node --import tsx tools/conflux-local-server.ts --dev",
+    "termux:build": "vite build",
+    "termux:pwa": "npm run termux:build && npm run termux:start",
+    "termux:start": "node --import tsx tools/conflux-local-server.ts"
   },
   "dependencies": {
     "@capacitor-community/media": "^9.1.0",
@@ -76,9 +80,11 @@
     "jszip": "^3.10.1",
     "katex": "^0.16.46",
     "pdfjs-dist": "^5.6.205",
+    "planck": "^1.5.1",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "three": "0.186.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -86,6 +92,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "@types/three": "0.186.0",
     "@vercel/node": "^5.6.15",
     "@vitejs/plugin-react": "^4.3.1",
     "electron": "^41.3.0",

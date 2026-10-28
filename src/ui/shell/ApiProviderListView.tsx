@@ -9,7 +9,7 @@ import { useI18n } from '../../i18n/useI18n';
 import type { I18nTranslator } from '../../i18n/translator';
 import type { ProviderProfile } from '../../types/domain';
 import { Icon, type IconName } from '../Icon';
-import { getProviderModelDisplayLabel } from './apiProviderDisplay';
+import { getProviderMissingFields, getProviderModelDisplayLabel } from './apiProviderDisplay';
 
 type ApiProviderListViewProps = {
   providers: ProviderProfile[];
@@ -43,22 +43,18 @@ function createBatchTestCopy(t: I18nTranslator['t']): ProviderBatchConnectionTes
 
 function resolveProviderListStatus(
   provider: ProviderProfile,
-  active: boolean,
   t: I18nTranslator['t']
 ): ProviderListStatus | null {
-  if (active) {
-    return { label: t('apiProvider.list.statusActive'), tone: 'active' };
-  }
-
   if (resolveProviderCapability(provider).route.isBuiltInTrial) {
     return { label: t('apiProvider.list.statusBuiltIn'), tone: 'muted' };
   }
 
-  if (!provider.baseUrl.trim() || !provider.model.trim()) {
+  const missing = getProviderMissingFields(provider);
+  if (missing.includes('baseUrl') || missing.includes('model')) {
     return { label: t('apiProvider.list.statusIncomplete'), tone: 'muted' };
   }
 
-  if (!provider.apiKey.trim()) {
+  if (missing.includes('apiKey')) {
     return { label: t('apiProvider.list.statusMissingKey'), tone: 'warning' };
   }
 
@@ -110,7 +106,48 @@ export function ApiProviderListView({
 
   return (
     <div className="api-provider-list-view">
+      <p className="api-provider-inline-note">{t('apiProvider.setup.routeScope')}</p>
       <div className="api-provider-list-actions">
+        <button type="button" className="btn-secondary api-provider-create-button" onClick={onCreateProvider}>
+          <Icon name="plus" size={14} />
+          <span>{t('apiProvider.defaultRouteNamePrefix')}</span>
+        </button>
+      </div>
+      <div className="api-provider-list-card">
+        {providers.map((provider) => {
+          const active = provider.id === activeProviderId;
+          const builtInProvider = resolveProviderCapability(provider).route.isBuiltInTrial;
+          const status = resolveProviderListStatus(provider, t);
+          return (
+            <button
+              key={provider.id}
+              type="button"
+              className={`api-provider-list-row ${active ? 'active' : ''} ${builtInProvider ? 'readonly' : ''}`}
+              onClick={() => {
+                onSelectProvider(provider.id);
+              }}
+            >
+              <span className="api-provider-list-icon">
+                <Icon name={active ? 'check' : 'providerRoute'} size={17} />
+              </span>
+              <span className="api-provider-list-copy">
+                <strong>{provider.name}</strong>
+                <span>{getProviderListDetail(provider, t)}</span>
+                {active ? <small className="api-provider-default-label">{t('apiProvider.list.statusActive')}</small> : null}
+              </span>
+              {status ? <span className={`api-provider-list-pill ${status.tone}`}>{status.label}</span> : null}
+              {!builtInProvider ? (
+                <span className="api-provider-list-chevron">
+                  <Icon name="chevron" size={16} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+      <details className="api-provider-more-settings">
+        <summary>{t('apiProvider.setup.connectionChecks')}</summary>
+        <p className="api-provider-inline-note">{t('apiProvider.setup.testCost')}</p>
         <div className="api-provider-batch-test">
           <button
             type="button"
@@ -136,80 +173,44 @@ export function ApiProviderListView({
             <span>{resolveBatchTestStatusLabel(batchTestState, t)}</span>
           </button>
         </div>
-        <button type="button" className="btn-secondary api-provider-create-button" onClick={onCreateProvider}>
-          <Icon name="plus" size={14} />
-          <span>{t('apiProvider.defaultRouteNamePrefix')}</span>
-        </button>
-      </div>
-      {detailsOpen && batchTestFailed ? (
-        <div className="api-provider-batch-error-popover" role="dialog" aria-label={t('apiProvider.list.batchErrorTitle')}>
-          <div className="api-provider-batch-error-head">
-            <strong>{t('apiProvider.list.batchErrorTitle')}</strong>
-            <button
-              type="button"
-              className="api-provider-batch-error-close"
-              aria-label={t('apiProvider.list.closeBatchError')}
-              onClick={() => setDetailsOpen(false)}
-            >
-              <Icon name="x" size={13} />
-            </button>
-          </div>
-          <div className="api-provider-batch-error-list">
-            {batchTestState.entries.filter((entry) => entry.status === 'error').map((entry) => (
-              <div key={entry.providerId} className="api-provider-batch-error-item">
-                <strong>{entry.providerName}</strong>
-                <span>{entry.model}</span>
-                <p>{entry.message}</p>
-              </div>
-            ))}
-            {batchTestState.entries.every((entry) => entry.status !== 'error') && batchTestState.message ? (
-              <div className="api-provider-batch-error-item">
-                <p>{batchTestState.message}</p>
-              </div>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            className="btn-secondary compact api-provider-batch-error-copy"
-            onClick={() => { void copyBatchTestReport(); }}
-          >
-            <Icon name="copy" size={13} />
-            <span>{copyCopied ? t('apiProvider.list.copied') : t('apiProvider.list.copyError')}</span>
-          </button>
-        </div>
-      ) : null}
-
-      <div className="api-provider-list-card">
-        {providers.map((provider) => {
-          const active = provider.id === activeProviderId;
-          const builtInProvider = resolveProviderCapability(provider).route.isBuiltInTrial;
-          const status = resolveProviderListStatus(provider, active, t);
-          return (
-            <button
-              key={provider.id}
-              type="button"
-              className={`api-provider-list-row ${active ? 'active' : ''} ${builtInProvider ? 'readonly' : ''}`}
-              onClick={() => {
-                onSelectProvider(provider.id);
-              }}
-            >
-              <span className="api-provider-list-icon">
-                <Icon name={active ? 'check' : 'providerRoute'} size={17} />
-              </span>
-              <span className="api-provider-list-copy">
-                <strong>{provider.name}</strong>
-                <span>{getProviderListDetail(provider, t)}</span>
-              </span>
-              {status ? <span className={`api-provider-list-pill ${status.tone}`}>{status.label}</span> : null}
-              {!builtInProvider ? (
-                <span className="api-provider-list-chevron">
-                  <Icon name="chevron" size={16} />
-                </span>
+        {detailsOpen && batchTestFailed ? (
+          <div className="api-provider-batch-error-popover" role="dialog" aria-label={t('apiProvider.list.batchErrorTitle')}>
+            <div className="api-provider-batch-error-head">
+              <strong>{t('apiProvider.list.batchErrorTitle')}</strong>
+              <button
+                type="button"
+                className="api-provider-batch-error-close"
+                aria-label={t('apiProvider.list.closeBatchError')}
+                onClick={() => setDetailsOpen(false)}
+              >
+                <Icon name="x" size={13} />
+              </button>
+            </div>
+            <div className="api-provider-batch-error-list">
+              {batchTestState.entries.filter((entry) => entry.status === 'error').map((entry) => (
+                <div key={entry.providerId} className="api-provider-batch-error-item">
+                  <strong>{entry.providerName}</strong>
+                  <span>{entry.model}</span>
+                  <p>{entry.message}</p>
+                </div>
+              ))}
+              {batchTestState.entries.every((entry) => entry.status !== 'error') && batchTestState.message ? (
+                <div className="api-provider-batch-error-item">
+                  <p>{batchTestState.message}</p>
+                </div>
               ) : null}
+            </div>
+            <button
+              type="button"
+              className="btn-secondary compact api-provider-batch-error-copy"
+              onClick={() => { void copyBatchTestReport(); }}
+            >
+              <Icon name="copy" size={13} />
+              <span>{copyCopied ? t('apiProvider.list.copied') : t('apiProvider.list.copyError')}</span>
             </button>
-          );
-        })}
-      </div>
+          </div>
+        ) : null}
+      </details>
     </div>
   );
 }

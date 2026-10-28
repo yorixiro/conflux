@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { type PersonaTabProps } from '../personaUiShared';
 import { useI18n } from '../../../../i18n/useI18n';
 import { Icon } from '../../../Icon';
@@ -49,6 +50,7 @@ function ParamSlider({ label, hint, value, onChange, min, max, step, unit = '', 
           value={resolvedValue}
           onChange={(e) => onChange(e.target.value)}
           className="ps-slider-input"
+          aria-label={label}
         />
       </div>
     </div>
@@ -57,6 +59,7 @@ function ParamSlider({ label, hint, value, onChange, min, max, step, unit = '', 
 
 export function EngineSettingsTab({ activePersona, onUpdatePersona }: PersonaTabProps) {
   const { t } = useI18n();
+  const fieldId = useId();
 
   return (
     <>
@@ -88,10 +91,12 @@ export function EngineSettingsTab({ activePersona, onUpdatePersona }: PersonaTab
 
       <div className="ps-field">
         <div className="ps-field-head">
-          <span className="ps-field-label">{t('request.engine.maxTokensLabel')}</span>
+          <label className="ps-field-label" htmlFor={`${fieldId}-max-tokens`}>{t('request.engine.maxTokensLabel')}</label>
         </div>
         <input
           className="ps-input ps-input--mono"
+          id={`${fieldId}-max-tokens`}
+          inputMode="numeric"
           value={activePersona?.advanced.maxTokens || ''}
           onChange={(e) => onUpdatePersona({ advanced: { maxTokens: e.target.value } })}
           placeholder={t('request.engine.maxTokensPlaceholder')}
@@ -100,10 +105,12 @@ export function EngineSettingsTab({ activePersona, onUpdatePersona }: PersonaTab
 
       <div className="ps-field">
         <div className="ps-field-head">
-          <span className="ps-field-label">{t('request.engine.thinkingBudgetLabel')}</span>
+          <label className="ps-field-label" htmlFor={`${fieldId}-thinking`}>{t('request.engine.thinkingBudgetLabel')}</label>
         </div>
         <input
           className="ps-input ps-input--mono"
+          id={`${fieldId}-thinking`}
+          inputMode="numeric"
           value={activePersona?.advanced.thinkingBudget || ''}
           onChange={(e) => onUpdatePersona({ advanced: { thinkingBudget: e.target.value } })}
           placeholder={t('request.engine.thinkingBudgetPlaceholder')}

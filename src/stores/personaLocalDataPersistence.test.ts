@@ -28,6 +28,9 @@ import {
 import type { Persona } from '../types/domain';
 import { readPersonaStateFromLocalDataRepositoryIfActive, writePersonaState } from './personaLocalDataPersistence';
 import { usePersonaStore } from './personaStore';
+import { resolvePersonaProviderBinding } from '../engines/personaProviderBinding';
+import { buildResponsesRequest } from '../engines/provider-runtime/providerRuntimeResponsesAdapter';
+import { createProviderRuntimeTestContext, createProviderRuntimeTestProvider } from '../engines/provider-runtime/providerRuntimeFixtures';
 
 function createMemoryPersistenceBackend(initialKv: PersistedDbEntry[] = []): PersistenceBackend {
   const stores = new Map<string, Map<string, unknown>>();
@@ -173,6 +176,42 @@ describe('persona LocalData persistence', () => {
 
   afterEach(() => {
     setPersistenceBackendForTesting(null);
+  });
+
+  it('persists profile model and depth on the target AI and uses them in the next request', async () => {
+    const route = createProviderRuntimeTestProvider({
+      id: 'profile-route', protocol: 'openai-responses', path: '/responses',
+      capabilities: { images: false, streaming: true, thinking: true }
+    });
+    const target = createPersonaTemplate({
+      id: 'profile-ai', name: 'Profile AI', description: '',
+      advanced: { providerId: route.id, providerRouteMode: 'fixed' }
+    });
+    const other = persona('other-ai');
+    await promotePersonaState({ personas: [target, other], activeCollaboratorId: other.id });
+    await usePersonaStore.getState().hydrateFromDb();
+    usePersonaStore.getState().updateCollaborator(target.id, {
+      advanced: { modelOverride: 'selected-model', thinkingBudget: '8192' }
+    });
+    await usePersonaStore.getState().persistToDb();
+    usePersonaStore.setState({ personas: [], hydrated: false });
+    await usePersonaStore.getState().hydrateFromDb();
+    const restored = usePersonaStore.getState().personas.find((item) => item.id === target.id)!;
+    expect(restored.advanced.modelOverride).toBe('selected-model');
+    expect(restored.advanced.thinkingBudget).toBe('8192');
+    expect(usePersonaStore.getState().personas.find((item) => item.id === other.id)?.advanced).toEqual(other.advanced);
+    expect(route.model).toBe('gpt-5-mini');
+    const binding = resolvePersonaProviderBinding({ persona: restored, providers: [route], globalApi: route });
+    const request = buildResponsesRequest({
+      api: binding.api, advanced: restored.advanced, context: createProviderRuntimeTestContext()
+    });
+    expect(request.body.model).toBe('selected-model');
+    expect(request.body.reasoning).toEqual({ effort: 'high' });
+    usePersonaStore.getState().updateCollaborator(target.id, { advanced: { modelOverride: '', thinkingBudget: '' } });
+    const reset = usePersonaStore.getState().personas.find((item) => item.id === target.id)!;
+    const resetBinding = resolvePersonaProviderBinding({ persona: reset, providers: [route], globalApi: route });
+    expect(buildResponsesRequest({ api: resetBinding.api, advanced: reset.advanced, context: createProviderRuntimeTestContext() }).body).toEqual(expect.objectContaining({ model: route.model }));
+    expect(buildResponsesRequest({ api: resetBinding.api, advanced: reset.advanced, context: createProviderRuntimeTestContext() }).body.reasoning).toBeUndefined();
   });
 
   it('hydrates persona state from repository while keeping memory document bodies split', async () => {

@@ -511,6 +511,21 @@ body[data-polaris-preset='polaris-night'] .collection .pulse-dot {
   margin-left: 0;
   margin-right: auto;
 }
+.topbar--chat-navigation .brand-trigger {
+  --topbar-context-width: min(260px, calc(100% - 210px));
+}
+.topbar--chat-navigation .brand h1 {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-back-btn svg { transform: rotate(180deg); }
+@media (max-width: 480px) {
+  .topbar--chat-navigation .brand-world-mark,
+  .topbar--chat-navigation .brand-trigger::after { display: none; }
+  .topbar--chat-navigation .brand-trigger { gap: 0; }
+}
 .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 12px; border: 1px solid transparent; background: transparent; font-size: var(--type-small); cursor: pointer; backdrop-filter: none; transition: all var(--duration-normal) ease; font-family: inherit; line-height: 1; box-shadow: none; }
 .action-btn svg { display: block; }
 .icon-btn { width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }

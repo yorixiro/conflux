@@ -11,7 +11,7 @@ export function formatTokenCount(
   copy: FormatTokenCountCopy
 ) {
   const totalTokens = tokenUsage?.totalTokens ?? tokenCount;
-  if (!totalTokens || totalTokens <= 0) return '';
+  if (typeof totalTokens !== 'number' || !Number.isFinite(totalTokens) || totalTokens < 0) return '';
 
   return copy.totalLabel(copy.formatNumber(totalTokens));
 }

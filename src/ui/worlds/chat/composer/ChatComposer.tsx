@@ -16,6 +16,7 @@ import { ComposerAttachments, ComposerQuickActions } from './ComposerAttachments
 import { ComposerCardReferenceStrip } from './ComposerCardReferenceStrip';
 import { ComposerPreviewStrip } from './ComposerPreviewStrip';
 import { SlashCommandSuggestions } from './SlashCommandSuggestions';
+import { KaomojiDrawer, KaomojiFaceIcon } from './kaomoji/KaomojiDrawer';
 import { useComposerFileIngest } from './useComposerFileIngest';
 import { useI18n } from '../../../../i18n';
 
@@ -49,6 +50,7 @@ export function ChatComposer() {
   const attachments = useChatAttachments();
   const actions = useChatActions();
   const [attachmentPickerOpen, setAttachmentPickerOpen] = useState(false);
+  const [kaomojiOpen, setKaomojiOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const activeConversationId = presentation.activeConversationId;
   const [localDraft, setLocalDraft] = useState(composer.inputDraft);
@@ -189,16 +191,31 @@ export function ChatComposer() {
     void actions.submit();
   };
   const handleComposerInputEngage = () => {
-    if (!attachmentPickerOpen) return;
-    setAttachmentPickerOpen(false);
+    if (attachmentPickerOpen) setAttachmentPickerOpen(false);
+    if (kaomojiOpen) setKaomojiOpen(false);
   };
   const handleComposerBlankDismiss = (target: EventTarget | null) => {
-    if (!attachmentPickerOpen || !(target instanceof HTMLElement)) return;
+    if ((!attachmentPickerOpen && !kaomojiOpen) || !(target instanceof HTMLElement)) return;
     const interactiveTarget = target.closest(
-      'button, textarea, input, .chat-box-shell, .active-preview-strip, .chat-workspace-banner, .composer-card-reference-strip, .attachment-warning'
+      'button, textarea, input, .chat-box-shell, .kaomoji-drawer, .active-preview-strip, .chat-workspace-banner, .composer-card-reference-strip, .attachment-warning'
     );
     if (interactiveTarget) return;
     setAttachmentPickerOpen(false);
+    setKaomojiOpen(false);
+  };
+  const handlePickKaomoji = (face: string) => {
+    const textarea = textareaRef.current;
+    const draft = localDraftRef.current;
+    const start = textarea?.selectionStart ?? draft.length;
+    const end = textarea?.selectionEnd ?? start;
+    const next = draft.slice(0, start) + face + draft.slice(end);
+    updateLocalDraft(next);
+    writeDraftToStore(next, draftConversationIdRef.current);
+    setKaomojiOpen(false);
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(start + face.length, start + face.length);
+    });
   };
   const handlePickSlashCommand = (insertText: string) => {
     updateLocalDraft(insertText);
@@ -211,21 +228,22 @@ export function ChatComposer() {
 
   return (
     <>
-      {attachmentPickerOpen ? (
+      {attachmentPickerOpen || kaomojiOpen ? (
         <button
           type="button"
           tabIndex={-1}
           className="composer-picker-dismiss-layer"
-          aria-label={t('chat.composer.dismissAttachments')}
+          aria-label="关闭输入工具抽屉"
           onPointerDown={(event) => {
             event.preventDefault();
             setAttachmentPickerOpen(false);
+            setKaomojiOpen(false);
           }}
-          onClick={() => setAttachmentPickerOpen(false)}
+          onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(false); }}
         />
       ) : null}
       <div
-        className={`chat-composer ${attachmentPickerOpen ? 'picker-open' : ''} ${composer.dragActive ? 'drag-active' : ''}`}
+        className={`chat-composer ${attachmentPickerOpen || kaomojiOpen ? 'picker-open' : ''} ${composer.dragActive ? 'drag-active' : ''}`}
         onPointerDownCapture={(event) => handleComposerBlankDismiss(event.target)}
         onClickCapture={(event) => handleComposerBlankDismiss(event.target)}
         onPaste={(event) => { void handleComposerPaste(event); }}
@@ -272,6 +290,7 @@ export function ChatComposer() {
           onPick={handlePickSlashCommand}
         />
         <div className="chat-submit-anchor">
+          {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onClose={() => setKaomojiOpen(false)} /> : null}
           {ui.submitFlight ? (
             <div key={ui.submitFlight.id} className="chat-submit-flight" aria-hidden="true">
               <span className="chat-submit-flight-orbit">
@@ -285,8 +304,18 @@ export function ChatComposer() {
               <ComposerQuickActions
                 pickerOpen={attachmentPickerOpen}
                 interactionLocked={interactionLocked}
-                onSetPickerOpen={setAttachmentPickerOpen}
+                onSetPickerOpen={open => { setAttachmentPickerOpen(open); if (open) setKaomojiOpen(false); }}
               />
+              <button
+                type="button"
+                className={`composer-slot-btn composer-kaomoji-toggle ${kaomojiOpen ? 'active' : ''}`}
+                aria-label="颜文字"
+                title="颜文字"
+                aria-expanded={kaomojiOpen}
+                aria-controls="composer-kaomoji-drawer"
+                disabled={interactionLocked}
+                onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
+              ><KaomojiFaceIcon /></button>
               <textarea
                 ref={textareaRef}
                 rows={1}

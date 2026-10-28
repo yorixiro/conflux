@@ -6,12 +6,14 @@ import { CollectionFloatingCreateAction } from '../collection/grid/CollectionFlo
 import { CollectionShelfTabs } from '../collection/grid/CollectionShelfTabs';
 import { buildVisibleCollectionShelfNavItems } from '../collection/grid/collectionShelfNav';
 import { DialogueCollectionShelf } from '../collection/grid/DialogueCollectionShelf';
-import { CollaboratorInfoShelf } from '../collection/info/CollaboratorInfoShelf';
+import { CollaboratorInfoShelf, type CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 import { ImageCollectionShelf } from '../collection/images/ImageCollectionShelf';
+import { ArchiveAlbumShelf } from '../collection/album/ArchiveAlbumShelf';
 import { CodeProjectCollectionShelfPages } from './collection/CodeProjectCollectionShelfPages';
 import { useI18n } from '../../i18n';
 
 type CollectionWorldProps = {
+  infoPageRequest?: CollaboratorInfoPageRequest | null;
   searchOpen: boolean;
   collaboratorSwitchOpen: boolean;
   onCollaboratorSwitchOpenChange: (open: boolean) => void;
@@ -22,11 +24,14 @@ type CollectionWorldProps = {
   onDetailOpenChange: (open: boolean) => void;
   onOpenCollaboratorBuilderForCreate: () => void;
   onCreateCustomCollaborator: () => void;
+  onBackToChat: () => void;
   onOpenProviderSettings: () => void;
   onOpenDesktopLocalSettings: () => void;
+  sectionNavigation?: boolean;
 };
 
 export function CollectionWorld({
+  infoPageRequest,
   searchOpen,
   collaboratorSwitchOpen,
   onCollaboratorSwitchOpenChange,
@@ -37,8 +42,10 @@ export function CollectionWorld({
   onDetailOpenChange,
   onOpenCollaboratorBuilderForCreate,
   onCreateCustomCollaborator,
+  onBackToChat,
   onOpenProviderSettings,
-  onOpenDesktopLocalSettings
+  onOpenDesktopLocalSettings,
+  sectionNavigation = false
 }: CollectionWorldProps) {
   const { t } = useI18n();
   const controller = useCollectionWorldController({
@@ -53,24 +60,20 @@ export function CollectionWorld({
       window.URL.revokeObjectURL(url);
     }
   });
-  const collaboratorInfoShelfLabel = controller.currentCollaborator?.name.trim() || t('common.collaborator');
   const visibleShelfItems = useMemo(
     () =>
       buildVisibleCollectionShelfNavItems(
         {
           dialogue: true,
+          album: true,
           info: true,
           code: true,
           project: true,
           image: true
         },
         t
-      ).map((item) => (
-        item.shelf === 'info'
-          ? { ...item, label: collaboratorInfoShelfLabel }
-          : item
-      )),
-    [collaboratorInfoShelfLabel, t]
+      ),
+    [t]
   );
   const visibleShelfSet = useMemo(
     () => new Set(visibleShelfItems.map((item) => item.shelf)),
@@ -79,6 +82,18 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue' || activeShelf === 'album';
+  const sectionNavItems = visibleShelfItems.filter((item) => (
+    archiveShelfActive
+      ? item.shelf === 'info' || item.shelf === 'dialogue' || item.shelf === 'album'
+      : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
+  ));
+  const selectShelf = (shelf: typeof activeShelf) => {
+    setCollectionShelf(shelf);
+    if (shelf === 'info' && controller.isAggregateScope && controller.personas.length > 0) {
+      onCollaboratorSwitchOpenChange(true);
+    }
+  };
   useEffect(() => {
     if (visibleShelfSet.has(activeShelf)) return;
     setCollectionShelf(visibleShelfItems[0]?.shelf ?? 'dialogue');
@@ -113,6 +128,21 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
+        {sectionNavigation ? (
+          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '档案分类' : '工坊分类'}>
+            {sectionNavItems.map((item) => (
+              <button
+                key={item.shelf}
+                type="button"
+                aria-current={activeShelf === item.shelf ? 'page' : undefined}
+                onClick={() => selectShelf(item.shelf)}
+              >
+                {item.shelf === 'info' ? '角色资料' : item.shelf === 'dialogue' ? '对话档案' : item.shelf === 'album' ? '收藏册'
+                  : item.shelf === 'project' ? '项目' : item.shelf === 'code' ? '代码卡片' : '图片素材'}
+              </button>
+            ))}
+          </nav>
+        ) : null}
         {searchOpen && controller.collectionShelf !== 'info' ? (
           <div className="collection-shelf-controls">
               <div className="search-wrap">
@@ -125,6 +155,8 @@ export function CollectionWorld({
                       ? t('collection.world.searchCode')
                       : controller.collectionShelf === 'project'
                         ? t('collection.world.searchProject')
+                        : controller.collectionShelf === 'album'
+                          ? '搜索收藏照片'
                         : controller.collectionShelf === 'image'
                           ? t('collection.world.searchImage')
                           : t('collection.world.searchDialogue')
@@ -166,6 +198,7 @@ export function CollectionWorld({
             >
               <div className="collection-shelf-page-body collection-shelf-page-body--info">
                 <CollaboratorInfoShelf
+                  pageRequest={infoPageRequest}
                   isAggregateScope={controller.isAggregateScope}
                   currentCollaboratorId={controller.currentCollaboratorId}
                   currentCollaborator={controller.currentCollaborator}
@@ -177,16 +210,14 @@ export function CollectionWorld({
                   triggerRules={controller.triggerRules}
                   mcpServers={controller.mcpServers}
                   mcpToolTimeoutSeconds={controller.mcpToolTimeoutSeconds}
-                  collaboratorOverviewItems={controller.collaboratorOverviewItems}
-                  editing={searchOpen}
                   onUpdateCollaborator={controller.onUpdateCurrentCollaborator}
-                  onSelectCollaborator={controller.onSelectCollaboratorScope}
-                  onToggleCollaboratorPinned={controller.onCollaboratorPinToggle}
+                  onBackToChat={onBackToChat}
                   onDeleteCollaborator={onDeleteCollaborator}
                   onSelectCollaboratorAvatar={controller.onSelectCurrentCollaboratorAvatar}
-                  onCreateFromBuilder={onOpenCollaboratorBuilderForCreate}
                   onCreateCustomCollaborator={onCreateCustomCollaborator}
+                  onChooseCollaborator={() => onCollaboratorSwitchOpenChange(true)}
                   onOpenProviderSettings={onOpenProviderSettings}
+                  onUpdateProvider={controller.onUpdateProvider}
                   onCreateTriggerRule={controller.onCreateAutomationRule}
                   onUpdateTriggerRule={controller.onUpdateAutomationRule}
                   onDeleteTriggerRule={controller.onDeleteAutomationRule}
@@ -229,6 +260,14 @@ export function CollectionWorld({
             </div>
             ) : null}
 
+            {visibleShelfSet.has('album') && activeShelf === 'album' ? (
+              <div className="collection-shelf-page collection-shelf-page--album collection-shelf-page--active" data-shelf-page="album">
+                <div className="collection-shelf-page-body">
+                  <ArchiveAlbumShelf searchTerm={controller.searchTerm} />
+                </div>
+              </div>
+            ) : null}
+
             {(activeShelf === 'code' || activeShelf === 'project') && visibleShelfSet.has(activeShelf) ? (
               <CodeProjectCollectionShelfPages
                 activeShelf={activeShelf}
@@ -264,11 +303,13 @@ export function CollectionWorld({
             onPress={controller.onCreateConversation}
           />
         ) : null}
-        <CollectionShelfTabs
-          collectionShelf={controller.collectionShelf}
-          navItems={visibleShelfItems}
-          onSetCollectionShelf={controller.setCollectionShelf}
-        />
+        {!sectionNavigation && activeShelf !== 'info' ? (
+          <CollectionShelfTabs
+            collectionShelf={controller.collectionShelf}
+            navItems={visibleShelfItems.filter(item => item.shelf !== 'info')}
+            onSetCollectionShelf={setCollectionShelf}
+          />
+        ) : null}
       </div>
     </section>
   );

@@ -240,6 +240,7 @@ describe('migratePersistedPersonas', () => {
     });
 
     const persona = usePersonaStore.getState().personas.find((item) => item.id === customId);
+    expect(persona?.advanced.providerRouteMode).toBe('unconfigured');
     expect(persona?.compiledPrompt).toBe('');
     expect(persona?.generatedPromptMode).toBe('off');
     expect(persona?.builderManaged).toBe(false);

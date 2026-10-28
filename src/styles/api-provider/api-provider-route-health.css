@@ -4,6 +4,22 @@
   gap: 10px;
 }
 
+.api-provider-setup-note {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--sheet-readable-text);
+  background: var(--surface);
+  font-size: var(--type-small);
+  line-height: 1.5;
+}
+.api-provider-setup-note p { margin: 6px 0 0; color: var(--sheet-readable-muted); }
+.api-provider-more-settings { min-width: 0; }
+.api-provider-more-settings > summary { padding: 14px 4px; color: var(--sheet-readable-text); cursor: pointer; }
+.api-provider-more-settings > section + section { margin-top: 10px; }
+.api-provider-more-settings .api-provider-batch-test { flex-wrap: wrap; }
+.api-provider-default-label { color: var(--accent); font-size: 11px; }
+
 .api-provider-section {
   padding: 16px;
   border-radius: 18px;

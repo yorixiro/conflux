@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { runSelectionAction } from '../../haptics';
 import type { CollaboratorInfoOverviewItem } from '../../../app/collection/buildCollaboratorInfoOverview';
 import { PersonaAvatar } from '../../collaborator/PersonaAvatar';
-import { CollaboratorCreatePicker } from '../../worlds/chat/collaborator/CollaboratorCreatePicker';
-import { CollectionFloatingCreateAction } from '../grid/CollectionFloatingCreateAction';
 import { displayTitleClassName } from '../../titleTypography';
 import { Icon } from '../../Icon';
 import type { I18nKey } from '../../../i18n/messages';
@@ -13,6 +10,7 @@ type CollaboratorOverviewRailProps = {
   items: CollaboratorInfoOverviewItem[];
   editing: boolean;
   onSelectCollaborator: (collaboratorId: string) => void;
+  onEditCollaborator: (collaboratorId: string) => void;
   onToggleCollaboratorPinned: (collaboratorId: string) => void;
   onCreateFromBuilder: () => void;
   onCreateCustomCollaborator: () => void;
@@ -20,14 +18,6 @@ type CollaboratorOverviewRailProps = {
 };
 
 const COUNT_LABEL_KEYS = {
-  collection: {
-    one: 'collaborator.overview.collectionCountOne',
-    many: 'collaborator.overview.collectionCountMany'
-  },
-  image: {
-    one: 'collaborator.overview.imageCountOne',
-    many: 'collaborator.overview.imageCountMany'
-  },
   conversation: {
     one: 'collaborator.overview.conversationCountOne',
     many: 'collaborator.overview.conversationCountMany'
@@ -46,17 +36,28 @@ export function CollaboratorOverviewRail({
   items,
   editing,
   onSelectCollaborator,
+  onEditCollaborator,
   onToggleCollaboratorPinned,
   onCreateFromBuilder,
   onCreateCustomCollaborator,
   onOpenProviderSettings
 }: CollaboratorOverviewRailProps) {
-  const { t, formatNumber } = useI18n();
-  const [createPickerOpen, setCreatePickerOpen] = useState(false);
+  const { t, formatNumber, language } = useI18n();
   const hasCollaborators = items.length > 0;
+  const sortedItems = [...items].sort((a, b) => (b.pinnedAt ?? 0) - (a.pinnedAt ?? 0) || a.name.localeCompare(b.name, language));
 
   return (
     <>
+      <div className="conflux-contacts-toolbar">
+        <h2>{t('collection.nav.info')}</h2>
+        <button type="button" className="btn-secondary" onClick={onCreateCustomCollaborator}>
+          <Icon name="plus" size={16} />{t('collaborator.overview.create')}
+        </button>
+      </div>
+      <details className="conflux-contacts-more">
+        <summary>{t('collaborator.overview.moreCreation')}</summary>
+        <button type="button" className="btn-secondary" onClick={onCreateFromBuilder}>{t('collaborator.overview.aiCreate')}</button>
+      </details>
       <div className="collaborator-overview-rail" role="list" aria-label={t('collaborator.overview.aria')}>
         {!hasCollaborators ? (
           <div className="collaborator-overview-empty empty-state-floating">
@@ -70,16 +71,6 @@ export function CollaboratorOverviewRail({
                 type="button"
                 className="btn-secondary"
                 onClick={(event) => {
-                  runSelectionAction(() => setCreatePickerOpen(true), { element: event.currentTarget });
-                }}
-              >
-                <Icon name="plus" size={15} />
-                <span>{t('collaborator.overview.create')}</span>
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={(event) => {
                   runSelectionAction(onOpenProviderSettings, { element: event.currentTarget });
                 }}
               >
@@ -89,7 +80,7 @@ export function CollaboratorOverviewRail({
             </div>
           </div>
         ) : null}
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <div key={item.id} role="listitem" className="collaborator-overview-slot">
             {editing ? (
               <button
@@ -142,36 +133,21 @@ export function CollaboratorOverviewRail({
                   <p>{item.summary}</p>
                 </div>
                 <div className="collaborator-overview-card-metrics">
-                  <span>{t(countKey('collection', item.collectionCount), { count: formatNumber(item.collectionCount) })}</span>
-                  <span>{t(countKey('image', item.imageCount), { count: formatNumber(item.imageCount) })}</span>
                   <span>{t(countKey('conversation', item.conversationCount), { count: formatNumber(item.conversationCount) })}</span>
                   <span>{t(countKey('memory', item.memoryCount), { count: formatNumber(item.memoryCount) })}</span>
                 </div>
               </div>
             </button>
+            <button type="button" className="conflux-contact-settings"
+              disabled={editing}
+              aria-label={t('collaborator.overview.settingsAria', { name: item.name })}
+              onClick={() => onEditCollaborator(item.id)}>
+              <Icon name="settings" size={17} />
+              <span>{t('collaborator.overview.settings')}</span>
+            </button>
           </div>
         ))}
       </div>
-      <CollectionFloatingCreateAction
-        label={createPickerOpen ? t('collaborator.info.closeCreateAction') : t('collaborator.info.createAction')}
-        expanded={createPickerOpen}
-        onPress={() => setCreatePickerOpen((current) => !current)}
-      >
-        {createPickerOpen ? (
-          <CollaboratorCreatePicker
-            showCloseButton={false}
-            onCloseCreatePicker={() => setCreatePickerOpen(false)}
-            onCreateFromBuilder={() => {
-              setCreatePickerOpen(false);
-              onCreateFromBuilder();
-            }}
-            onCreateCustomCollaborator={() => {
-              setCreatePickerOpen(false);
-              onCreateCustomCollaborator();
-            }}
-          />
-        ) : null}
-      </CollectionFloatingCreateAction>
     </>
   );
 }

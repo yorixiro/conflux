@@ -1,13 +1,12 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { buildCardReference } from '../../../../app/collection/codeCollectionSource';
 import { resolveAssistantStreamingChrome, type ChatMessageLifecycle } from '../../../../app/chat/chatStreamingDisplay';
-import { writeTextToClipboard } from '../../../../infrastructure/clipboard';
 import type { CodeCardActionMode, CodeCardMessageProgress } from '../../../../app/chat/chatDerivedState';
 import type { AvatarDisplaySize, AvatarIconId, AvatarShape, ChatAttachment, ChatCardReference, ChatMessage, ChatMessageVoiceCache, CodeCard } from '../../../../types/domain';
 import { PersonaAvatar } from '../../../collaborator/PersonaAvatar';
 import { resolveChatAvatarSize } from '../../../collaborator/avatarDisplaySize';
 import { Icon } from '../../../Icon';
-import { runSelectionAction, runSuccessAction, selectionHaptic } from '../../../haptics';
+import { selectionHaptic } from '../../../haptics';
 import { ChatAttachmentStrip } from '../ChatAttachmentStrip';
 import type { ChatEditingState } from '../context/ChatUiState';
 import { resolveCodeCardActionCopy, resolveMessageRowRoleClass } from '../messageRowMeta';
@@ -18,6 +17,7 @@ import { MessageCardReference } from './MessageCardReference';
 import { MessageContent } from './MessageContent';
 import { MessageEditInline } from './MessageEditInline';
 import { MessageMeta } from './MessageMeta';
+import { MessageTokenUsage } from './MessageTokenUsage';
 import { MessageGeneratedImages } from './MessageGeneratedImages';
 import { MessageToolEvent } from './MessageToolEvent';
 import { isProjectedCodeToolName } from './projectedCodeTools';
@@ -39,6 +39,7 @@ export type MessageRowState = {
   canEdit: boolean;
   canEditAssistant: boolean;
   canRetry: boolean;
+  canDelete: boolean;
   codeCardActionMode: CodeCardActionMode;
   codeCardProgress: CodeCardMessageProgress | null;
   messageCycleIndex: number | null;
@@ -57,6 +58,7 @@ export type MessageRowActions = {
   codeCardAction: (message: ChatMessage) => void;
   retry: (message: ChatMessage) => Promise<void>;
   editMessage: (message: ChatMessage) => void;
+  deleteMessage: (message: ChatMessage) => Promise<void>;
   editAssistantMessage: (message: ChatMessage, content: string) => void;
   cacheAssistantSpeech: (message: ChatMessage, voiceCache: ChatMessageVoiceCache) => void;
   forkFromMessage: (message: ChatMessage) => void;
@@ -150,9 +152,8 @@ function MessageRowComponent({
   const showAssistantChatIdentity = showChatAvatars && !isAssistantContinuation;
   const assistantAvatarPx = resolveChatAvatarSize(assistantAvatarSize);
   const userAvatarPx = resolveChatAvatarSize(userAvatarSize);
-  const [userActionMenuOpen, setUserActionMenuOpen] = useState(false);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const longPressTimerRef = useRef<number | null>(null);
-  const bubbleFrameRef = useRef<HTMLDivElement>(null);
   const toolProductCardActivationBlockedUntilRef = useRef(0);
   const { label: codeCardActionLabel, progressLabel: codeCardProgressLabel } = resolveCodeCardActionCopy(
     state.codeCardActionMode,
@@ -225,10 +226,16 @@ function MessageRowComponent({
       </>
     );
   };
-  const messageActions = isAssistantReply && !state.editing ? (
+  const messageActions = (isAssistantReply || isUserMessage) && !state.editing ? (
     <MessageActions
-      canCopyAssistant={message.role === 'assistant' && !message.toolInvocation && !isStreamingLike && isTerminalAssistantInUserTurn && Boolean(message.content.trim())}
-      canOpenThinkingSummary={showThinking && showChatAvatars && Boolean(message.thinkingText)}
+      canCopyMessage={!isStreamingLike && Boolean(message.content.trim())}
+      canEditUser={state.canEdit}
+      canDelete={state.canDelete}
+      menuOpen={actionMenuOpen}
+      onMenuOpenChange={setActionMenuOpen}
+      onEditUser={() => actions.editMessage(message)}
+      onDelete={() => void actions.deleteMessage(message)}
+      canOpenThinkingSummary={isAssistantReply && showThinking && showChatAvatars && Boolean(message.thinkingText)}
       memoryEvidence={message.memoryEvidence ?? null}
       canRetryAssistant={state.canRetry}
       canEditAssistant={state.canEditAssistant}
@@ -251,20 +258,6 @@ function MessageRowComponent({
       onForkAssistant={() => actions.forkFromMessage(message)}
     />
   ) : null;
-  useEffect(() => {
-    if (!userActionMenuOpen) return;
-
-    const handlePointerDownOutside = (event: globalThis.PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (bubbleFrameRef.current?.contains(target)) return;
-      setUserActionMenuOpen(false);
-    };
-
-    document.addEventListener('pointerdown', handlePointerDownOutside);
-    return () => document.removeEventListener('pointerdown', handlePointerDownOutside);
-  }, [userActionMenuOpen]);
-
   useEffect(() => () => {
     if (longPressTimerRef.current !== null) {
       window.clearTimeout(longPressTimerRef.current);
@@ -278,26 +271,13 @@ function MessageRowComponent({
   };
 
   const openUserActionMenu = () => {
-    if (!isUserMessage || state.editing || !state.canEdit) return;
+    if (!isUserMessage || state.editing) return;
     void selectionHaptic();
-    setUserActionMenuOpen(true);
-  };
-
-  const copyUserMessage = async () => {
-    if (!message.content.trim()) return;
-    await runSuccessAction(() => writeTextToClipboard(message.content));
-    setUserActionMenuOpen(false);
-  };
-
-  const editUserMessage = () => {
-    runSelectionAction(() => {
-      setUserActionMenuOpen(false);
-      actions.editMessage(message);
-    }, { settle: 'none' });
+    setActionMenuOpen(true);
   };
 
   const handleBubblePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isUserMessage || state.editing || !state.canEdit) return;
+    if (!isUserMessage || state.editing) return;
     if (event.pointerType === 'mouse') return;
     clearLongPressTimer();
     longPressTimerRef.current = window.setTimeout(() => {
@@ -307,15 +287,14 @@ function MessageRowComponent({
   };
 
   const handleBubbleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
-    if (!isUserMessage || state.editing || !state.canEdit) return;
+    if (!isUserMessage || state.editing) return;
     event.preventDefault();
     openUserActionMenu();
   };
 
   const messageBubble = (
     <div
-      ref={bubbleFrameRef}
-      className={`bubble-frame ${message.role === 'assistant' ? 'assistant' : 'user'} ${state.editing ? 'editing' : ''} ${state.lifecycle} ${showStreamingPrelude ? 'streaming-prelude' : ''} ${userActionMenuOpen ? 'action-menu-open' : ''}`}
+      className={`bubble-frame ${message.role === 'assistant' ? 'assistant' : 'user'} ${state.editing ? 'editing' : ''} ${state.lifecycle} ${showStreamingPrelude ? 'streaming-prelude' : ''} ${actionMenuOpen ? 'action-menu-open' : ''}`}
       onContextMenu={handleBubbleContextMenu}
       onPointerDown={handleBubblePointerDown}
       onPointerUp={clearLongPressTimer}
@@ -381,18 +360,6 @@ function MessageRowComponent({
           </>
         )}
       </div>
-      {isUserMessage && !state.editing && state.canEdit && userActionMenuOpen ? (
-        <div className="user-bubble-action-menu" role="menu" aria-label={t('chat.messageActions.userMenuAria')}>
-          <button type="button" className="user-bubble-action-btn" role="menuitem" onClick={() => { void copyUserMessage(); }}>
-            <Icon name="copy" size={14} />
-            <span>{t('chat.messageActions.copy')}</span>
-          </button>
-          <button type="button" className="user-bubble-action-btn" role="menuitem" onClick={editUserMessage}>
-            <Icon name="edit" size={14} />
-            <span>{t('chat.messageActions.editAndRetry')}</span>
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 
@@ -481,6 +448,7 @@ function MessageRowComponent({
                 </div>
               ) : null}
               {messageActions}
+              {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
             </div>
           </div>
         </div>
@@ -489,7 +457,10 @@ function MessageRowComponent({
           <div className="message-turn-body user">
             <div className="message-turn-stack user">
               {messageBubble}
-              {messageActions}
+              {!state.editing ? <div className="user-message-footer">
+                <MessageTokenUsage message={message} />
+                {messageActions}
+              </div> : null}
             </div>
             {showChatAvatars ? (
               <div className="message-avatar-slot user">
@@ -541,6 +512,7 @@ function areMessageRowPropsEqual(previous: MessageRowProps, next: MessageRowProp
     && previous.state.canEdit === next.state.canEdit
     && previous.state.canEditAssistant === next.state.canEditAssistant
     && previous.state.canRetry === next.state.canRetry
+    && previous.state.canDelete === next.state.canDelete
     && previous.state.codeCardActionMode === next.state.codeCardActionMode
     && previous.state.codeCardProgress === next.state.codeCardProgress
     && previous.state.messageCycleIndex === next.state.messageCycleIndex

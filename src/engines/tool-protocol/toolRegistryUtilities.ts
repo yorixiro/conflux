@@ -52,7 +52,7 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     brief: '列出当前环境目录的一层或多层节点',
     schema: {
       name: 'listEnvironmentNodes',
-      description: '列出当前 Polaris 环境目录节点。用于先看设置、工作区、房间卡、附件、本机、MCP、记忆等入口；节点只是取景索引，真实修改继续用对应工具。',
+      description: '列出当前 Polaris 环境目录节点。用于查看档案收藏册、设置、工作区、房间卡、附件、本机、MCP、记忆等入口；节点只是取景索引，真实修改继续用对应工具。',
       parameters: objectParameters({
         parentNodeId: stringProperty('可选父节点 id；不填默认 environment。'),
         depth: numberProperty('可选展开深度；默认 1。'),
@@ -95,7 +95,7 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     brief: '搜索当前环境目录',
     schema: {
       name: 'searchEnvironmentNodes',
-      description: '按关键词搜索当前环境目录节点。适合普通聊天没有明确现场、但需要找到设置项、工具区、工作区文件、MCP、记忆或附件入口时使用。',
+      description: '按关键词搜索当前环境目录节点。适合普通聊天需要找到档案收藏册、设置项、工作区文件、MCP、记忆或附件入口时使用。',
       parameters: objectParameters({
         query: stringProperty('搜索词，例如 provider、导入导出、MCP、记忆、工作区文件。'),
         scopeNodeId: stringProperty('可选范围节点 id；不填搜索整个环境目录。'),

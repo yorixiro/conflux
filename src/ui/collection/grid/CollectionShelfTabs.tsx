@@ -14,6 +14,7 @@ type CollectionShelfTabsProps = {
 
 const SHELF_ICON_BY_ID = {
   dialogue: 'navDialogue',
+  album: 'navImage',
   code: 'navCard',
   project: 'navWorkspace',
   image: 'navImage',

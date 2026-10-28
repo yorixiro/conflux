@@ -13,7 +13,81 @@ const writableSession = (messages: never[] = []) =>
     messages
   }));
 
+const readyPersona = (id: string) => ({ id, advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' } });
+
 describe('submitMessage', () => {
+  it.each([
+    ['new', 'unconfigured'],
+    ['historical', undefined]
+  ])('does not save or send a message for a %s collaborator without a selected model route', async (_label, routeMode) => {
+    const addMessage = vi.fn();
+    const requestReply = vi.fn();
+    const setCommandStatus = vi.fn();
+
+    await submitMessage({
+      inputDraft: '你好',
+      pendingAttachments: [],
+      pendingCardReference: null,
+      sending: false,
+      hasUnsupportedPendingImages: false,
+      conversations: [],
+      activeConversationId: null,
+      frontstageCollaboratorId: 'gpt-contact',
+      activeCollaboratorId: 'gpt-contact',
+      personas: [{
+        id: 'gpt-contact',
+        name: 'gpt',
+        advanced: { providerId: '', providerRouteMode: routeMode, modelOverride: '' }
+      }] as never[],
+      providers: [{ id: 'deepseek', name: 'DeepSeek', model: 'deepseek-flash' }] as never[]
+    }, {
+      createConversation: vi.fn(() => 'conversation-1'),
+      ensureConversationWritable: writableSession(),
+      addMessage,
+      setInputDraft: vi.fn(),
+      clearPendingAttachments: vi.fn(),
+      clearPendingCardReference: vi.fn(),
+      setCommandStatus,
+      submitToolCommand: vi.fn(async () => false),
+      requestReply
+    });
+
+    expect(addMessage).not.toHaveBeenCalled();
+    expect(requestReply).not.toHaveBeenCalled();
+    expect(setCommandStatus).toHaveBeenCalledWith(expect.stringContaining('还没有选择模型线路'), true);
+  });
+
+  it('never reroutes a collaborator with a removed provider to the global provider', async () => {
+    const requestReply = vi.fn();
+    const setCommandStatus = vi.fn();
+    await submitMessage({
+      inputDraft: '继续',
+      pendingAttachments: [],
+      pendingCardReference: null,
+      sending: false,
+      hasUnsupportedPendingImages: false,
+      conversations: [],
+      activeConversationId: null,
+      frontstageCollaboratorId: 'gpt-contact',
+      activeCollaboratorId: 'gpt-contact',
+      personas: [{ id: 'gpt-contact', name: 'gpt', advanced: { providerId: 'deleted-provider', modelOverride: '' } }] as never[],
+      providers: [{ id: 'deepseek', name: 'DeepSeek', model: 'deepseek-flash' }] as never[]
+    }, {
+      createConversation: vi.fn(() => 'conversation-1'),
+      ensureConversationWritable: writableSession(),
+      addMessage: vi.fn(),
+      setInputDraft: vi.fn(),
+      clearPendingAttachments: vi.fn(),
+      clearPendingCardReference: vi.fn(),
+      setCommandStatus,
+      submitToolCommand: vi.fn(async () => false),
+      requestReply
+    });
+
+    expect(requestReply).not.toHaveBeenCalled();
+    expect(setCommandStatus).toHaveBeenCalledWith(expect.stringContaining('线路已不存在'), true);
+  });
+
   it('creates a new conversation under the current collaborator when chat has no active thread', async () => {
     const createConversation = vi.fn(() => 'conv-1');
     const addMessage = vi.fn();
@@ -31,8 +105,8 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'lyra',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' },
-        { id: 'lyra' }
+        readyPersona('pharos'),
+        readyPersona('lyra')
       ] as never[]
     }, {
       createConversation,
@@ -84,7 +158,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -140,7 +214,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -195,8 +269,8 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'lyra',
       activeCollaboratorId: 'lyra',
       personas: [
-        { id: 'pharos' },
-        { id: 'lyra' }
+        readyPersona('pharos'),
+        readyPersona('lyra')
       ] as never[]
     }, {
       createConversation,
@@ -240,7 +314,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,
@@ -322,7 +396,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation: vi.fn(() => 'conv-new'),
@@ -364,7 +438,7 @@ describe('submitMessage', () => {
       frontstageCollaboratorId: 'pharos',
       activeCollaboratorId: 'pharos',
       personas: [
-        { id: 'pharos' }
+        readyPersona('pharos')
       ] as never[]
     }, {
       createConversation,

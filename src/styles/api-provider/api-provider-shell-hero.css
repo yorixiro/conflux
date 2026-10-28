@@ -4,7 +4,7 @@
   overflow: hidden;
   max-height: calc(100% - 8px);
   padding-top: 10px;
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + var(--keyboard-scroll-padding, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--keyboard-scroll-padding, 0px));
   background:
     linear-gradient(
       180deg,
@@ -31,6 +31,9 @@
   display: flex;
   flex-direction: column;
 }
+
+.api-provider-footer { flex: 0 0 auto; display: flex; justify-content: flex-end; padding-top: 10px; }
+.api-provider-footer button { min-width: 96px; min-height: 40px; }
 
 .api-provider-sheet.dragging {
   transition: none;

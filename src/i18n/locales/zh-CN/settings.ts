@@ -1,5 +1,10 @@
 export const settings = {
   'settings.title': '全局设置',
+  'settings.section.chat': '聊天与模型',
+  'settings.section.dataBackup': '数据与备份',
+  'settings.section.extensions': '扩展功能',
+  'settings.extensions.detail': '工具箱、MCP、生图与请求路由',
+  'settings.section.general': '语言与帮助',
   'settings.section.service': '服务',
   'settings.section.capabilities': '能力',
   'settings.section.appearance': '外观',

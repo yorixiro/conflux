@@ -161,6 +161,7 @@ function buildActionsSection(args: {
     },
     retry: args.chatActions.retryLatestAssistant,
     editMessage: args.ui.startEditingMessage,
+    deleteMessage: args.chatActions.deleteMessage,
     editAssistantMessage: args.chatActions.updateAssistantMessage,
     cacheAssistantSpeech: args.chatActions.cacheAssistantSpeech,
     forkFromMessage: args.chatActions.forkConversationFromMessage,
@@ -393,7 +394,8 @@ export function useChatProviderValue({
     },
     store: replyStore,
     derived,
-    toolActions
+    toolActions,
+    reportRouteFailure: (message) => ui.setCommandStatus(message, true)
   });
   const submitSlashCommand = createChatSlashCommandHandler({
     ui: {

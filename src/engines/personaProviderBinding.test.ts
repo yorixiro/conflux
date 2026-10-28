@@ -16,7 +16,7 @@ function createProvider(overrides: Partial<ProviderProfile> & Pick<ProviderProfi
     protocol: overrides.protocol ?? 'openai-completions',
     baseUrl: overrides.baseUrl ?? '/api',
     path: overrides.path ?? '/chat/completions',
-    apiKey: overrides.apiKey ?? '',
+    apiKey: overrides.apiKey ?? 'test-key',
     model: overrides.model,
     capabilities: overrides.capabilities ?? {
       streaming: true,
@@ -113,16 +113,63 @@ describe('resolvePersonaProviderBinding', () => {
   const globalApi = createProvider({ id: 'global', name: 'Global', model: 'global-model' });
   const kimiApi = createProvider({ id: 'kimi', name: 'Kimi', model: 'kimi-default' });
 
-  it('uses the global provider when the collaborator does not pin a provider', () => {
+  it('uses the global provider only after the collaborator opts in to inheriting it', () => {
     const result = resolvePersonaProviderBinding({
       globalApi,
       providers: [globalApi, kimiApi],
-      persona: createPersona({ modelOverride: 'global-override' })
+      persona: createPersona({ providerRouteMode: 'inherit', modelOverride: 'global-override' })
     });
 
     expect(result.fixedProvider).toBeNull();
     expect(result.api.id).toBe('global');
     expect(result.api.model).toBe('global-override');
+    expect(result.status).toBe('ready');
+  });
+
+  it('does not silently inherit DeepSeek for a new or historical unconfigured contact', () => {
+    const result = resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, kimiApi],
+      persona: createPersona({ providerRouteMode: 'unconfigured' })
+    });
+
+    expect(result.status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, kimiApi],
+      persona: createPersona({})
+    }).status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, kimiApi],
+      persona: createPersona({ providerRouteMode: 'inherit' })
+    }).status).toBe('ready');
+  });
+
+  it('rejects a selected provider that has no model, including explicit global inheritance', () => {
+    const blankProvider = createProvider({ id: 'blank', name: 'Blank', model: '' });
+    const missingEndpoint = createProvider({ id: 'empty-endpoint', name: 'Empty endpoint', model: 'gpt-model', baseUrl: '' });
+    const missingKey = createProvider({ id: 'empty-key', name: 'Empty key', model: 'gpt-model', apiKey: '' });
+    expect(resolvePersonaProviderBinding({
+      globalApi: blankProvider,
+      providers: [blankProvider],
+      persona: createPersona({ providerRouteMode: 'inherit' })
+    }).status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, blankProvider],
+      persona: createPersona({ providerId: 'blank', providerRouteMode: 'fixed' })
+    }).status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, missingEndpoint],
+      persona: createPersona({ providerId: 'empty-endpoint', providerRouteMode: 'fixed' })
+    }).status).toBe('unconfigured');
+    expect(resolvePersonaProviderBinding({
+      globalApi,
+      providers: [globalApi, missingKey],
+      persona: createPersona({ providerId: 'empty-key', providerRouteMode: 'fixed' })
+    }).status).toBe('unconfigured');
   });
 
   it('uses the collaborator provider and model together when both are pinned', () => {
@@ -135,6 +182,7 @@ describe('resolvePersonaProviderBinding', () => {
     expect(result.fixedProvider?.id).toBe('kimi');
     expect(result.api.id).toBe('kimi');
     expect(result.api.model).toBe('kimi-thinking');
+    expect(result.status).toBe('ready');
   });
 
   it('does not apply a dangling pinned model to the global provider', () => {
@@ -147,6 +195,7 @@ describe('resolvePersonaProviderBinding', () => {
     expect(result.fixedProvider).toBeNull();
     expect(result.api.id).toBe('global');
     expect(result.api.model).toBe('global-model');
+    expect(result.status).toBe('missing-provider');
   });
 
   it('pins Xiao Assistant to the built-in Polaris product guide model', () => {

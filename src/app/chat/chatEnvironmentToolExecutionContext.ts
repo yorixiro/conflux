@@ -4,6 +4,7 @@ import {
   filterProjectFilesForCollaboratorScope
 } from '../../engines/collectionOwnership';
 import { executeEnvironmentDirectoryAction } from '../../engines/environmentDirectory';
+import { isPolarisToolPromptGroupEnabled } from '../../engines/tool-protocol/toolPromptPreferences';
 import { getDesktopLocalHostBridge } from '../../desktop/localHost';
 import { getNativePersonalDataToolAvailability } from '../../native/personalData';
 import type { ToolContext } from '../../engines/toolExecutorTypes';
@@ -74,6 +75,9 @@ export function buildEnvironmentToolExecutionContext(args: {
       const imageAttachmentCount = attachmentEntries.filter(
         (entry) => entry.attachment.kind === 'image'
       ).length;
+      const toolPreferences = latestRuntime.toolPromptPreferences ?? runtime.toolPromptPreferences;
+      const attachmentToolsEnabled = Boolean(toolPreferences)
+        && isPolarisToolPromptGroupEnabled(toolPreferences, 'attachment');
 
       return executeEnvironmentDirectoryAction({
         activeWorld: space.activeWorld,
@@ -81,6 +85,11 @@ export function buildEnvironmentToolExecutionContext(args: {
         activeConversation: fullConversation ?? conversation,
         activeCollaboratorName:
           persona.personas.find((entry) => entry.id === ownerCollaboratorId)?.name ?? null,
+        albumOwnerId: ownerCollaboratorId,
+        albumImageCards: ownerCollaboratorId ? imageCards : [],
+        albumCanSendImage: attachmentToolsEnabled,
+        albumCanInspectImage: attachmentToolsEnabled && attachmentEntries.length > 0,
+        albumCanSaveAttachment: attachmentToolsEnabled && imageAttachmentCount > 0,
         activeCardId: space.activeCardId,
         cards,
         imageCards,
