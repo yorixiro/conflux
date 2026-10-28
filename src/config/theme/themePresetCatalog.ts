@@ -1,7 +1,4 @@
 import type { ThemePreset } from '../../types/domain';
-import KEKE_SHARED_CSS from './keke-shared.css?raw';
-import KEKE_DOODLE_CSS from './keke-doodle.css?raw';
-import KEKE_POIS_CSS from './keke-pois.css?raw';
 import {
   AURORA_PRESET_CSS,
   GLASS_PRESET_CSS,
@@ -171,7 +168,7 @@ const VISIBLE_THEME_PRESETS: ThemePreset[] = [
       '--radius-xl': '18px',
       '--radius-2xl': '20px'
     },
-    { css: `${KEKE_SHARED_CSS}\n${KEKE_DOODLE_CSS}`, recipe: { name: '铅笔贴纸', note: '原样素材，真实 Conflux 聊天功能。' }, styleLabel: 'Sticker' }
+    { css: '', recipe: { name: '铅笔贴纸', note: '原样素材，真实 Conflux 聊天功能。' }, styleLabel: 'Sticker' }
   ),
   createPreset(
     'keke-pois',
@@ -197,7 +194,7 @@ const VISIBLE_THEME_PRESETS: ThemePreset[] = [
       '--radius-xl': '16px',
       '--radius-2xl': '18px'
     },
-    { css: `${KEKE_SHARED_CSS}\n${KEKE_POIS_CSS}`, recipe: { name: '灰粉波点', note: '低饱和灰粉，像素装饰，真实对话。' }, styleLabel: 'Pois' }
+    { css: '', recipe: { name: '灰粉波点', note: '低饱和灰粉，像素装饰，真实对话。' }, styleLabel: 'Pois' }
   )
 ];
 

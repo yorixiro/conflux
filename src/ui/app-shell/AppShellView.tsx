@@ -6,6 +6,8 @@ import { ConfluxHome } from './ConfluxHome';
 import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
 import { usePersonaStore } from '../../stores/personaStore';
+import { useSpaceStore } from '../../stores/spaceStore';
+import '../keke-original';
 import { getProviderModelBindingValue } from '../shell/apiProviderDisplay';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
@@ -76,6 +78,8 @@ export function AppShellView({
   quickSettingsOpen,
   setQuickSettingsOpen
 }: AppShellViewProps) {
+  const kekePresetId = useSpaceStore((space) => space.theme.activePresetId);
+  const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
@@ -175,6 +179,7 @@ export function AppShellView({
 
   return (
     <main
+      id={kekeOriginalActive ? 'chat' : undefined}
       className={`app-shell ${useBottomNavigation ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >

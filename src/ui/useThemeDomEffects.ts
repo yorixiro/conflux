@@ -321,7 +321,16 @@ export function useThemeDomEffects(theme: ThemeState, activeWorld: World) {
     } else {
       delete document.body.dataset.polarisPreset;
     }
+    if (theme.activePresetId === 'keke-doodle' || theme.activePresetId === 'keke-pois') {
+      document.documentElement.dataset.ct = theme.activePresetId === 'keke-pois' ? 'pois' : 'doodle';
+      document.documentElement.dataset.cf = 'sticker';
+    } else {
+      delete document.documentElement.dataset.ct;
+      delete document.documentElement.dataset.cf;
+    }
     return () => {
+      delete document.documentElement.dataset.ct;
+      delete document.documentElement.dataset.cf;
       delete document.documentElement.dataset.polarisWorld;
       delete document.body.dataset.polarisWorld;
       delete document.body.dataset.polarisBackgroundOverride;
