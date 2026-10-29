@@ -269,10 +269,7 @@ export function AppShellView({
                 collapsed={false}
                 onToggleCollapsed={() => {}}
                 conversations={[]}
-                onBackToChat={() => {
-                  if (desktopSidebarProps.activeConversationId) setChatHubOpen(false);
-                  else onHomeOpenChange(true);
-                }}
+                onBackToChat={() => onHomeOpenChange(true)}
                 onOpenConversation={(id, messageId) => {
                   desktopSidebarProps.onOpenConversation(id, messageId);
                   setChatHubOpen(false);
