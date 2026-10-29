@@ -198,7 +198,7 @@ export function DesktopAppSidebar({
             assetId={collaborator.assistantAvatarAssetId}
             iconId={collaborator.assistantAvatarIconId}
             shape={collaborator.assistantAvatarShape}
-            size={presentation === 'sidebar' ? 34 : 26}
+            size={presentation === 'hub' ? 44 : 34}
           />
           <span className="desktop-sidebar-collaborator-option-copy">
             <strong>{collaborator.name}</strong>
@@ -219,7 +219,7 @@ export function DesktopAppSidebar({
   ) : null;
 
   return (
-    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive && presentation !== 'hub' ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : t('desktop.navLabel')}>
+    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive && presentation !== 'hub' ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : presentation === 'profile' ? '当前 AI 资料' : t('desktop.navLabel')}>
       {presentation === 'hub' ? (
         <>
           <header className="conflux-hub-heading">
