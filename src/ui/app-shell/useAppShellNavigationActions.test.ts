@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { Conversation } from '../../types/domain';
+import type { Conversation, Persona } from '../../types/domain';
 import {
+  useAppShellNavigationActions,
   resolveFallbackChatConversationForWorldReturn,
   resolveFreshConversationProjectId,
   shouldInferChatConversationForWorldReturn
@@ -137,5 +138,80 @@ describe('resolveFallbackChatConversationForWorldReturn', () => {
       frontstageCollaboratorId: 'pharos',
       activeConversationId: 'conversation-old'
     })?.id).toBe('conversation-other-owner');
+  });
+});
+
+describe('entering chat from the collection after switching personas', () => {
+  const personas = [
+    { id: 'existing', name: 'Existing' },
+    { id: 'new-role', name: 'New Role' }
+  ] as Persona[];
+
+  const build = (options: {
+    conversations: Conversation[];
+    previewConversationId?: string | null;
+    activeConversationId?: string | null;
+    activeConversationCollaboratorId?: string | null;
+  }) => {
+    const created: string[] = [];
+    const activated: string[] = [];
+    const worlds: string[] = [];
+    const cleared: string[] = [];
+    const actions = useAppShellNavigationActions({
+      previewConversationId: options.previewConversationId ?? null,
+      personas,
+      conversations: options.conversations,
+      activeWorld: 'collection',
+      frontstageCollaboratorId: 'new-role',
+      collectionProjectId: null,
+      activeCollaboratorId: 'new-role',
+      activeConversationId: options.activeConversationId ?? 'old-chat',
+      activeConversationCollaboratorId: options.activeConversationCollaboratorId ?? 'existing',
+      activeConversationProjectId: null,
+      setWorld: (world) => worlds.push(world),
+      createConversation: (owner) => {
+        created.push(owner ?? 'missing');
+        return 'new-chat';
+      },
+      setActiveConversation: (id) => activated.push(id),
+      clearPendingAttachments: () => cleared.push('attachments'),
+      clearPendingCardReference: () => cleared.push('card')
+    });
+    return { actions, created, activated, worlds, cleared };
+  };
+
+  it('creates a separate conversation for a new persona rather than displaying the old persona history', () => {
+    const state = build({
+      conversations: [{ id: 'old-chat', collaboratorId: 'existing', activeProjectId: null }] as Conversation[]
+    });
+    state.actions.openPreviewChat();
+    expect(state.created).toEqual(['new-role']);
+    expect(state.activated).toEqual([]); // chat store's createConversation activates its new record
+    expect(state.cleared).toEqual(['attachments', 'card']);
+    expect(state.worlds).toEqual(['chat']);
+  });
+
+  it('reopens the selected persona existing thread instead of reusing a different persona conversation', () => {
+    const state = build({
+      conversations: [
+        { id: 'old-chat', collaboratorId: 'existing', activeProjectId: null },
+        { id: 'right-chat', collaboratorId: 'new-role', activeProjectId: null }
+      ] as Conversation[]
+    });
+    state.actions.openPreviewChat();
+    expect(state.created).toEqual([]);
+    expect(state.activated).toEqual(['right-chat']);
+    expect(state.worlds).toEqual(['chat']);
+  });
+
+  it('keeps explicit theme preview navigation intact', () => {
+    const state = build({
+      previewConversationId: 'preview-chat',
+      conversations: [{ id: 'old-chat', collaboratorId: 'existing', activeProjectId: null }] as Conversation[]
+    });
+    state.actions.openPreviewChat();
+    expect(state.created).toEqual([]);
+    expect(state.activated).toEqual(['preview-chat']);
+    expect(state.worlds).toEqual(['chat']);
   });
 });
