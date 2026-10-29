@@ -35,12 +35,9 @@ let buffer = '';
 let sessionId = null;
 let active = null;
 const pending = new Map();
-const waiters = new Set();
+
 let promptReserved = false;
 
-function notify(event) {
-  for (const write of waiters) write(event);
-}
 function failAll(reason) {
   for (const [, entry] of pending) entry.reject(new Error(reason));
   pending.clear();
@@ -175,6 +172,11 @@ const server = createServer(async (req, res) => {
       if (!res.writableEnded) res.write(`data: ${JSON.stringify(event)}\n\n`);
     };
     active = { write };
+    const currentPrompt = active;
+    res.on('close', () => {
+      if (active !== currentPrompt || !sessionId || res.writableEnded) return;
+      try { send({ method: 'session/cancel', params: { sessionId } }); } catch { /* agent already exited */ }
+    });
     const promptId = randomUUID();
     write({ type: 'started', promptId });
     const result = await request('session/prompt', {
