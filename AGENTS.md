@@ -1,31 +1,36 @@
-# Conflux repository instructions for Codex / coding agents
+# Conflux: instructions for coding agents
 
-This is a personal, local-first Polaris fork targeting Android APK and Web/PWA from one shared React/TypeScript core.
+Conflux is the user's independently directed local-first AI conversation and workspace product. Its product, UI and architecture decisions are owned by the Conflux project, not by a previous upstream design.
 
 ## Read first
-- docs/CONFLUX_ARCHITECTURE.md
-- docs/CONFLUX_MIGRATION_MATRIX.md
-- docs/CONFLUX_CODEX_HANDOFF.md
-- docs/open-source/architecture-overview.md
+- docs/UI_LAYOUT_SPEC.md
+- docs/CONFLUX_INDEPENDENCE_PLAN.md
 - docs/handbook/DATA_AND_STORAGE.md
+- docs/PROVENANCE.md
 - package.json and capacitor.config.ts
+- Read older docs only as technical/historical references; do not treat their Polaris-era visual or product preferences as current requirements.
 
-## Hard rules
-- Keep changes small and direct. Reuse existing functions; do not add frameworks, layers or generic infrastructure for UI layout work.
-- Use the existing Polaris domain owners: chat, group, persona, collection, runtime, tool-protocol, request, and LocalData. One canonical chat engine, one context compiler, one tool ledger and one data source.
-- Preserve Polaris visual style and responsive shell; port useful InternalBeyond functionality, NOT its iOS-like home/lock/wallet/skins. This product is Conflux; don't call it Nightward.
-- Keep the business implementation shared between Android and Web/PWA. Platform-dependent storage, secure credentials, permissions, background work, push and media go through explicit adapters.
-- Never edit the original InternalBeyond, huaxin or EH-UI repositories as part of this migration.
-- Do not add unreviewed old-storage fallbacks or startup auto-migration. Import external backups through staging, validation, preview, user confirmation, readback and rollback.
-- Never embed API keys or tokens in browser bundles, UI state, logs or exports. Never send private journal content or local files to AI/Host without explicit scope consent.
-- Do not claim Aru Host/iPhone protocol compatibility until verified against the published Host contract.
-- Treat third-party license boundaries seriously (Polaris AGPL-3.0-only, IB-Mobile PolyForm Noncommercial, Aru Host Apache-2.0); review before copying source across them.
-- Do not delete, overwrite or silently refactor existing user content. No duplicate implementation of memory, tool registry or local storage.
-- Do not report fake passing builds. State exactly which commands ran and which platforms were tested.
+## Product and interface
+- Never restore upstream brand, UI styling, navigation conventions or arbitrary product rules merely because they existed in the inherited source.
+- Prioritize the currently selected, user-provided theme/prototype. Preserve its real assets and CSS when adapting to the React DOM; never imitate instead of porting.
+- Use the layout contract for meaningful sizing and device adaptation. Themes may have their own presentation variants; do not sacrifice touchability, keyboard avoidance or readable content.
+- Fix root causes of broken UX (conversation/persona identity, routing, overlays, responsiveness), not cosmetic symptoms alone.
+- Do not create new visual frameworks or duplicate components for small layout fixes; change only the relevant implementation.
 
-## Work order
-P0 baseline -> P1 shared platform/xAI -> P2 IB staged import/memory -> P3 journal/letters/calendar/coread -> P4 social/media -> P5 optional Aru Host -> P6 release/sync.
-Implement one phase at a time in a small reviewable PR, with durable data/permission tests and a rollback path. Begin with P0 baseline only.
+## Architecture and technical independence
+- New product direction is unconstrained by upstream architecture preferences. Audit inherited modules, replace poor abstractions incrementally, and maintain an explicit dependency/removal list.
+- Current facts still matter: keep chat sessions, data ownership, context compilation, tool receipts and the existing LocalData boundaries working until a replacement is implemented and verified.
+- Do not silently delete user data, reassign conversation/persona ownership or rename persistence keys. Migrations require a defined compatibility strategy and readback.
+- Prefer one implementation for shared Android and Web/PWA features, with thin platform adapters.
+- Do not change unrelated repositories, expose secrets, or send private data to external models without explicit scope.
 
-## Verification
-Read package.json for current scripts. For UI layout and entry changes, use typecheck/build plus relevant existing tests or focused browser checks. Run full verify for changes to storage, request/provider behavior, shared contracts, or when explicitly requested. Do not add tests that merely mirror trivial presentation code. Clearly distinguish existing regression checks from newly added tests; do not present the repository-wide test count as this change’s work. Browser and Android actual-device testing remain separate acceptance gates.
+## Independent repository and attribution
+- Independent GitHub ownership and visual identity do not require a GitHub fork relationship. The eventual new repository starts from a verified Conflux snapshot, **not** an obsolete default main.
+- Keep applicable original copyright, AGPL-3.0-only and third-party notices; see LICENSE and docs/PROVENANCE.md. These belong in technical/legal documentation, not in the product's branding or UI.
+- Historical function names and filenames may stay temporarily while dependencies are unwound. Do not mass-rename storage keys, packages or APIs just to change the logo.
+
+## Process and delivery
+- Make small, reviewable changes. Keep current theme, user data, ACP and Android/PWA functionality intact.
+- Check status and exact base commit before code edits. No force push/reset, branch deletion, or PR merge unless explicitly requested.
+- For UI changes run relevant typecheck/build and focused tests, then provide mobile/tablet acceptance steps. For storage or request changes, run corresponding stronger verification.
+- Never claim tests or real-device checks that did not occur. State commit SHA, changed files, and remaining blockers.
