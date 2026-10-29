@@ -36,6 +36,7 @@ let sessionId = null;
 let active = null;
 const pending = new Map();
 const waiters = new Set();
+let promptReserved = false;
 
 function notify(event) {
   for (const write of waiters) write(event);
@@ -144,7 +145,7 @@ const server = createServer(async (req, res) => {
     return writeJson(res, 200, { running: !agent.killed && agent.exitCode === null, sessionReady: !!sessionId });
   }
   if (req.method === 'POST' && req.url === '/cancel') {
-    if (active && sessionId) {
+    if (promptReserved && sessionId) {
       send({ method: 'session/cancel', params: { sessionId } });
       return writeJson(res, 200, { cancelled: true });
     }
@@ -153,7 +154,8 @@ const server = createServer(async (req, res) => {
   if (req.method !== 'POST' || req.url !== '/prompt') {
     return writeJson(res, 404, { error: 'Not found' });
   }
-  if (active) return writeJson(res, 409, { error: 'Another ACP prompt is active' });
+  if (promptReserved) return writeJson(res, 409, { error: 'Another ACP prompt is active' });
+  promptReserved = true;
   let raw = '';
   try {
     for await (const chunk of req) {
@@ -184,6 +186,7 @@ const server = createServer(async (req, res) => {
     else writeJson(res, 400, { error: error.message });
   } finally {
     active = null;
+    promptReserved = false;
     if (!res.writableEnded) res.end();
   }
 });
