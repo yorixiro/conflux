@@ -161,7 +161,6 @@ const server = createServer(async (req, res) => {
     }
     const body = JSON.parse(raw);
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) throw new Error('Missing prompt');
-    if (req.destroyed) throw new Error('Client disconnected');
     await initialize();
     res.writeHead(200, {
       'content-type': 'text/event-stream; charset=utf-8',
