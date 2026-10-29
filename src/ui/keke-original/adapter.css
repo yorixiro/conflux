@@ -26,10 +26,38 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .keke-original-wall{display:none}
 #chat header.keke-original-topbar{position:relative}
 /* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
-#chat .conflux-sidebar-dialog{width:min(78vw,340px);max-width:340px;background:none;overflow:visible}
+#chat .conflux-sidebar-dialog{width:340px;max-width:92vw;background:none;overflow:visible}
+#chat .conflux-sidebar-dialog[open]{animation:kkDrawerIn .65s var(--ease,cubic-bezier(.2,.8,.2,1)) both}
+#chat .conflux-sidebar-dialog[open]::backdrop{animation:kkFadeIn .5s ease both}
+@keyframes kkDrawerIn{from{transform:translateX(-112%)}to{transform:none}}
+@keyframes kkFadeIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#chat .conflux-sidebar-dialog[open],#chat .conflux-sidebar-dialog[open]::backdrop{animation:none}}
 #chat .conflux-sidebar-dialog::backdrop{background:rgba(60,50,54,.22)}
 #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub),#chat .desktop-app-sidebar.keke-themed:not(.collapsed){position:relative;box-sizing:border-box;height:100%;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) 18px max(14px,env(safe-area-inset-bottom,0px)) 38px;border:0;box-shadow:none;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper)}
 #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub)::after,#chat .desktop-app-sidebar.keke-themed:not(.collapsed)::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
 #chat .desktop-app-sidebar .keke-original-side{position:relative;display:flex;transform:none;width:100%;max-width:none;flex:1;min-height:0;padding:8px 0 14px;overflow-y:auto;overflow-x:hidden;background:none}
 #chat .desktop-app-sidebar .keke-original-side::after{display:none}
 #chat .keke-original-side .kk-cal{margin:22px 0 18px}
+:root #chat .desktop-app-sidebar .side.keke-original-side{width:100%;max-width:none;padding:8px 0 14px}
+/* Library tab, built from the prototype's tokens (.tg pill, .fd input, dashed paper rules). */
+#chat .conflux-sidebar-dialog-actions button{border:1.2px dashed var(--hot);border-radius:50%;background:rgba(255,255,255,.7);color:var(--hot)}
+#chat .desktop-app-sidebar .conflux-sidebar-tabs{gap:8px;padding:0}
+#chat .desktop-app-sidebar .conflux-sidebar-tabs button{position:relative;min-width:0;min-height:30px;height:30px;padding:0 14px;border:1.2px solid var(--ink);border-radius:999px;background:#fff;color:var(--rt);font:700 12px/1 var(--cn);letter-spacing:.12em;box-shadow:1.5px 2px 0 rgba(176,131,140,.22)}
+#chat .desktop-app-sidebar .conflux-sidebar-tabs button[aria-selected=true]{background:var(--pk);color:var(--rt);box-shadow:1.5px 2px 0 rgba(176,131,140,.4)}
+:root[data-ct=doodle] #chat .desktop-app-sidebar .conflux-sidebar-tabs button{border-color:transparent}
+:root[data-ct=doodle] #chat .desktop-app-sidebar .conflux-sidebar-tabs button::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+#chat .desktop-app-sidebar .conflux-hub-tabs{gap:0;border-bottom:1.5px dashed var(--margin)}
+#chat .desktop-app-sidebar .conflux-hub-tabs button{flex:1;min-height:34px;border:0;border-radius:0;background:none;color:var(--dim);font:700 12px/1 var(--cn);letter-spacing:.16em}
+#chat .desktop-app-sidebar .conflux-hub-tabs button[aria-selected=true]{color:var(--hot);box-shadow:inset 0 -2px 0 var(--hot)}
+#chat .desktop-app-sidebar .conflux-sidebar-create{min-height:36px;border:1.3px dashed var(--hot);border-radius:999px;background:rgba(255,255,255,.7);color:var(--hot);font:700 12px/1 var(--cn);letter-spacing:.14em;box-shadow:none}
+#chat .desktop-app-sidebar .conflux-sidebar-search{color:var(--dim);font:500 11px/1 var(--cn);letter-spacing:.14em}
+#chat .desktop-app-sidebar .conflux-sidebar-search input{height:34px;border:1.2px solid var(--ink);border-radius:17px;background:#fff;color:var(--rt);font:700 13px/1 var(--cn);box-shadow:1.5px 2px 0 rgba(176,131,140,.18)}
+#chat .desktop-app-sidebar .conflux-sidebar-search input::placeholder{color:#b8acb0}
+#chat .desktop-app-sidebar .desktop-sidebar-thread-row{border:0;border-bottom:1px dashed var(--margin);border-radius:0;background:none;box-shadow:none}
+#chat .desktop-app-sidebar .desktop-sidebar-thread-row.active{border-radius:12px;background:var(--pk);box-shadow:inset 3px 0 0 var(--hot)}
+#chat .desktop-app-sidebar .desktop-sidebar-thread-title{color:var(--rt);font:800 14px/1.3 var(--cn);letter-spacing:.06em}
+#chat .desktop-app-sidebar .desktop-sidebar-thread-meta,#chat .desktop-app-sidebar .desktop-sidebar-thread-project{color:var(--dim);font:500 11px/1.3 var(--cn);letter-spacing:.1em}
+#chat .desktop-app-sidebar .desktop-sidebar-thread-more{color:var(--dim)}
+#chat .desktop-app-sidebar .conflux-library-role,#chat .desktop-app-sidebar .conflux-sidebar-contact-row{border:0;border-bottom:1px dashed var(--margin);border-radius:0;background:none}
+#chat .desktop-app-sidebar .conflux-library-role-select span{color:var(--rt);font:800 14px/1.3 var(--cn);letter-spacing:.06em}
+#chat .desktop-app-sidebar .conflux-sidebar-status,#chat .desktop-app-sidebar .desktop-sidebar-thread-empty{color:var(--dim);font:500 12px/1.5 var(--cn);letter-spacing:.08em}
