@@ -102,11 +102,11 @@ export function useAppShellController() {
     knownCollaboratorIds: collaboratorIds
   });
   const sidebarCollaborator = collaborators.find((persona) => persona.id === sidebarScopeId) ?? null;
-  const desktopSidebarConversations = useMemo(
+  const allChatConversations = useMemo(
     () => {
       const projectTitleById = new Map(roomProjects.map((project) => [project.id, project.title.trim() || t('common.untitledWorkspace')]));
       return conversations
-        .filter((conversation) => conversationMatchesCollaboratorScope(conversation, sidebarScopeId, collaboratorIds))
+        .filter((conversation) => conversationMatchesCollaboratorScope(conversation, null, collaboratorIds))
         .map((conversation) => {
           const summary = buildConversationCardSummary(conversation);
           return {
@@ -115,7 +115,11 @@ export function useAppShellController() {
           };
         });
     },
-    [collaboratorIds, conversations, sidebarScopeId, roomProjects, t]
+    [collaboratorIds, conversations, roomProjects, t]
+  );
+  const desktopSidebarConversations = useMemo(
+    () => allChatConversations.filter((conversation) => !sidebarScopeId || conversation.collaboratorId === sidebarScopeId),
+    [allChatConversations, sidebarScopeId]
   );
   const desktopSidebarShelfItems = useMemo(
     () => [
@@ -299,6 +303,11 @@ export function useAppShellController() {
       }
     },
     onCreateConversation: navigationActions.openFreshConversation,
+    onCreateConversationForCollaborator: (collaboratorId: string) => {
+      if (!collaboratorIds.includes(collaboratorId)) return;
+      setFrontstageCollaboratorId(collaboratorId);
+      navigationActions.openFreshConversationForCollaborator(collaboratorId);
+    },
     onOpenGroupWorld: () => {
       clearPendingAttachments();
       clearPendingCardReference();
@@ -359,6 +368,8 @@ export function useAppShellController() {
     chatWorldProps: world.chatWorldProps,
     groupWorldProps: world.groupWorldProps,
     desktopSidebarProps,
+    chatHubConversations: allChatConversations,
+    openChatList: () => setWorld('chat'),
     replyNotificationProps: {
       notifications: replyNotifications,
       activeWorld,
