@@ -32,10 +32,15 @@ function props(): DesktopAppSidebarProps {
 describe('chat list and profile separation', () => {
   it('places the AI directory on the conversation page, not inside the profile drawer', () => {
     const sidebar = props();
-    const hubHtml = renderToStaticMarkup(<DesktopAppSidebar {...sidebar} presentation="hub" />);
+    const hubHtml = renderToStaticMarkup(<DesktopAppSidebar {...sidebar} presentation="hub" onBackToChat={vi.fn()} />);
     const profileHtml = renderToStaticMarkup(<DesktopAppSidebar {...sidebar} presentation="profile" />);
-    expect(hubHtml).toContain('最近对话');
     expect(hubHtml).toContain('AI 通讯录');
+    expect(hubHtml).toContain('所有 AI 角色');
+    expect(hubHtml).toContain('新建角色');
+    expect(hubHtml).toContain('aria-label="返回"');
+    expect(hubHtml).not.toContain('最近对话');
+    expect(hubHtml).not.toContain('搜索聊天记录');
+    expect(hubHtml).toContain('Chat AI');
     expect(profileHtml).not.toContain('AI 通讯录');
     expect(profileHtml).toContain('Chat AI');
   });
