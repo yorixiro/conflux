@@ -26,7 +26,7 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .keke-original-wall{display:none}
 #chat header.keke-original-topbar{position:relative}
 /* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
-#chat .conflux-sidebar-dialog{width:340px;max-width:92vw;background:none;overflow:visible}
+#chat .conflux-sidebar-dialog{width:min(388px,calc(100vw - 18px));max-width:none;background:none;overflow:visible}
 #chat .conflux-sidebar-dialog[open]{animation:kkDrawerIn .65s var(--ease,cubic-bezier(.2,.8,.2,1)) both}
 #chat .conflux-sidebar-dialog[open]::backdrop{animation:kkFadeIn .5s ease both}
 @keyframes kkDrawerIn{from{transform:translateX(-112%)}to{transform:none}}
