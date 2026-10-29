@@ -123,10 +123,108 @@ const chs=hd?[G('dd'),G('pp')]:[];
  document.addEventListener('scroll',sh=ev=>{const L=ev.target;if(!(L instanceof HTMLElement)||!L.classList.contains('chat-flow'))return;const r=L.scrollHeight-L.clientHeight;if(r<60)return;const q=Math.min(1,Math.max(0,L.scrollTop/r));m.style.top=(118+q*(120-22))+'px';m.style.setProperty('--r',q*300+'deg');t.classList.add('on');m.classList.add('on');clearTimeout(h);h=setTimeout(()=>{t.classList.remove('on');m.classList.remove('on')},900)},{passive:true,capture:true})}
 
   const hv=hav;if(hv&&chs.length)hv.addEventListener('click',()=>{chs.forEach(c=>{if(!c)return;c.classList.remove('big');void c.offsetWidth;c.classList.add('big');setTimeout(()=>c.classList.remove('big'),1500)})})
+  const pg = document.createElement('div'); pg.className = 'prog'; pg.innerHTML = '<i></i>'; hd.appendChild(pg);
+  const ap = document.querySelector('#chat .app');
+  const ph = (ev) => { const L = ev.target; if (!(L instanceof HTMLElement) || !L.classList.contains('chat-flow')) return; const m = L.scrollHeight - L.clientHeight; ap && ap.style.setProperty('--p', m > 0 ? (L.scrollTop / m).toFixed(3) : 1); };
+  document.addEventListener('scroll', ph, { passive: true, capture: true });
   return () => {
+    pg.remove(); document.removeEventListener('scroll', ph, true);
     delete hd.dataset.kkMounted;
     hd.querySelectorAll(':scope > .kk-gl').forEach((n) => n.remove());
     app?.querySelectorAll(':scope > .kk-trk, :scope > .kk-thm').forEach((n) => n.remove());
     if (sh) document.removeEventListener('scroll', sh, true);
   };
+}
+
+const PC = ['#c4979f', '#9dabb9', '#c3b38c', '#a5b6aa', '#b2a4bc'];
+const GL = ['✲', '⊹', '˚', '♡', '∗', '๑', '₊', '☆'];
+const POEM = [['‧₊˚ ☆ ♡ ☆ ˚₊‧', '18%', 'left:8%', '-5deg'], ['ʚ ♡ ɞ  きょうもいっしょ', '54%', 'right:6%', '4deg'], ['(っ´ω`c) ✲ ⊹', '80%', 'left:12%', '-3deg']];
+const PXG = { big: ['....#....', '....#....', '...###...', '..#####..', '#########', '..#####..', '...###...', '....#....', '....#....'], plus: ['..#..', '..#..', '#####', '..#..', '..#..'], sm: ['.#.', '###', '.#.'], dia: ['.#.', '#.#', '.#.'], dot: ['#'] };
+const px = (k, s) => { const g = PXG[k]; let d = ''; g.forEach((w, y) => [...w].forEach((c, x) => { if (c == '#') d += `M${x} ${y}h1v1h-1z`; })); return `<svg class=pxs width=${g[0].length * s} height=${g.length * s} viewBox="0 0 ${g[0].length} ${g.length}"><path fill=currentColor d="${d}"/></svg>`; };
+const PXP = [['big', 3, '7%', '15%'], ['dia', 2, '88%', '11%'], ['plus', 2, '72%', '29%'], ['sm', 2, '13%', '43%'], ['big', 2, '91%', '50%'], ['dot', 3, '42%', '21%'], ['dia', 2, '5%', '69%'], ['plus', 2, '82%', '74%'], ['sm', 2, '55%', '58%'], ['dot', 3, '27%', '84%']];
+const BURST = { doodle: PC, pois: ['#b9939a', '#8f8b8c', '#d4b9be', '#ffffff', '#a9a5a6'] };
+
+/* atmos(): drifting glyph petals / pixel stars and the three poem lines, refilled whenever the skin changes. */
+export function mountKekeAtmos() {
+  const root = document.documentElement;
+  const run = () => {
+    const pe = document.querySelector('#chat .petals'), po = document.querySelector('#chat .poem');
+    if (!pe || !po) return;
+    const r = Math.random, f = (n) => n.toFixed(1), pick = (a) => a[r() * a.length | 0], dd = root.dataset.ct == 'doodle';
+    pe.innerHTML = dd ? Array.from({ length: 16 }, () => `<i style="--x:${f(r() * 100)}%;--s:${f(9 + r() * 9)}px;--d:${f(16 + r() * 16)}s;--dl:${f(-r() * 32)}s;--sw:${f(r() * 90 - 45)}px;--o:${(.55 + r() * .4).toFixed(2)};color:${pick(PC)}">${pick(GL)}</i>`).join('')
+      : root.dataset.ct == 'pois' ? PXP.map(([k, s, x, y], j) => `<b class=px style="left:${x};top:${y};--d:${(2.6 + j % 4 * .7).toFixed(1)}s;--dl:${(-j * .83).toFixed(2)}s">${px(k, s)}</b>`).join('') : '';
+    po.innerHTML = dd ? POEM.map((p, j) => `<p style="top:${p[1]};${p[2]};--r:${p[3]};--dl:${j * 7}s">${p[0]}</p>`).join('') : '';
+  };
+  run();
+  const mo = new MutationObserver(run);
+  mo.observe(root, { attributes: true, attributeFilter: ['data-ct'] });
+  return () => mo.disconnect();
+}
+
+/* stamp() + burst(): the wax-stamp press on the send button and the sticker-skin particle burst. */
+export function mountKekeSendFx() {
+  const root = document.documentElement;
+  const burst = (sd) => {
+    const row = sd.closest('.row') || sd.parentElement; if (!row) return;
+    if (getComputedStyle(row).position == 'static') row.style.position = 'relative';
+    const o = row.getBoundingClientRect(), b = sd.getBoundingClientRect(), tz = parseFloat(getComputedStyle(root).getPropertyValue('--tz')) || 1, x = (b.left - o.left + b.width / 2) / tz, y = (b.top - o.top + b.height / 2) / tz, pc = BURST[root.dataset.ct] || PC;
+    for (let i = 0; i < 9; i++) {
+      const s = document.createElement('i'), a = Math.PI * 2 * i / 9 + Math.random() * .5, d = 28 + Math.random() * 24;
+      s.className = 'pop'; if (root.dataset.ct == 'pois') s.innerHTML = px(['big', 'sm', 'dia', 'plus'][i % 4], 2); else s.textContent = GL[i % GL.length];
+      s.style.cssText = `left:${x}px;top:${y}px;--dx:${(Math.cos(a) * d).toFixed(1)}px;--dy:${(Math.sin(a) * d - 12).toFixed(1)}px;color:${pc[i % pc.length]}`;
+      row.appendChild(s); setTimeout(() => s.remove(), 1000);
+    }
+  };
+  const fire = () => {
+    const sd = document.querySelector('#chat .sd'); if (!sd) return;
+    sd.classList.remove('stamp'); void sd.offsetWidth; sd.classList.add('stamp');
+    if (root.dataset.cf == 'sticker') burst(sd);
+  };
+  const onClick = (e) => { const t = e.target; if (t && t.closest && t.closest('#chat .sd.has-content')) fire(); };
+  const onKey = (e) => { const t = e.target; if (e.key == 'Enter' && !e.isComposing && !e.shiftKey && t && t.closest && t.closest('#chat .fd textarea') && t.value.trim()) fire(); };
+  document.addEventListener('click', onClick, true);
+  document.addEventListener('keydown', onKey, true);
+  return () => { document.removeEventListener('click', onClick, true); document.removeEventListener('keydown', onKey, true); };
+}
+
+/* Bubble grouping from the prototype's render(): per-position corner radii, group spacing and the group-end sketch / sticker. */
+const SK = ['<svg class=sk width=21 height=21 viewBox="0 0 22 22"><path d="M11 1.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L11 15.9 5.1 19.5l1.7-6.7L1.5 8.4l6.9-.5z"/></svg>', '<svg class=sk width=28 height=19 viewBox="0 0 28 18"><path d="M14 9C9 2 2 3 3 8c.6 4 8 3 11 1zM14 9c5-7 12-6 11-1-.6 4-8 3-11 1zM14 9l-3 7M14 9l3 7"/></svg>', '<svg class=sk width=17 height=21 viewBox="0 0 20 24"><path style="fill:#ead0d8" d="M8 2h4v6h6v4h-6v10H8V12H2V8h6z"/></svg>'];
+const STK = ['s1', 's2', 's3', 's4', 's5', 's6'], ROT = [-14, 10, -6, 16, -10, 8];
+export function mountKekeBubbles() {
+  const root = document.documentElement;
+  let raf = 0, flow = null, mo = null;
+  const role = (row) => (row.classList.contains('user') ? 's' : row.classList.contains('assistant') ? 'r' : '');
+  const pass = () => {
+    raf = 0;
+    const rows = [...document.querySelectorAll('#chat .chat-flow .msg-row')];
+    rows.forEach((row, i) => {
+      const w = role(row); if (!w) return;
+      const f = !rows[i - 1] || role(rows[i - 1]) != w, l = !rows[i + 1] || role(rows[i + 1]) != w;
+      const p = f && l ? 's' : f ? 'f' : l ? 'l' : 'm';
+      if (row.dataset.kkP !== p) row.dataset.kkP = p;
+      if (f) { if (row.dataset.kkG !== '1') row.dataset.kkG = '1'; } else delete row.dataset.kkG;
+      const b = row.querySelector('.bubble'); if (!b) return;
+      const cur = b.querySelector(':scope > .kk-deco');
+      if (!l) { if (cur) cur.remove(); return; }
+      const key = root.dataset.ct + i;
+      if (cur && cur.dataset.k === key) return;
+      if (cur) cur.remove();
+      const d = document.createElement('span'); d.className = w + ' kk-deco'; d.dataset.k = key; d.style.display = 'contents'; d.setAttribute('aria-hidden', 'true');
+      d.innerHTML = root.dataset.ct == 'pois' ? `<i class=stk style="--u:var(--pi-${STK[i % 6]});rotate:${ROT[i % 6]}deg"></i>` : SK[(i / 3 | 0) % 3];
+      b.appendChild(d);
+    });
+  };
+  const sched = () => { if (!raf) raf = requestAnimationFrame(pass); };
+  const attach = () => {
+    const el = document.querySelector('#chat .chat-flow');
+    if (el === flow) return;
+    mo && mo.disconnect(); flow = el;
+    if (el) { mo = new MutationObserver(sched); mo.observe(el, { childList: true, subtree: true }); }
+    sched();
+  };
+  const top = new MutationObserver(attach);
+  top.observe(document.body, { childList: true, subtree: true });
+  const tm = new MutationObserver(sched); tm.observe(root, { attributes: true, attributeFilter: ['data-ct'] });
+  attach();
+  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco').forEach((n) => n.remove()); };
 }

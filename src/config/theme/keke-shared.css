@@ -55,13 +55,6 @@
   box-shadow: var(--keke-bubble-shadow);
 }
 
-.app-shell.chat .msg-row.user .bubble::after,
-.app-shell.chat .msg-row.assistant .bubble::after {
-  position: absolute;
-  pointer-events: none;
-  z-index: 2;
-}
-
 .app-shell.chat .message-meta,
 .app-shell.chat .message-identity-meta,
 .app-shell.chat .message-timestamp {

@@ -84,24 +84,6 @@
 .app-shell.chat .msg-row.user:nth-child(3n) .bubble.user { background: #f6eeee; rotate: -.4deg; }
 .app-shell.chat .msg-row.assistant:nth-child(4n) .bubble.assistant { rotate: -.5deg; }
 
-.app-shell.chat .msg-row.user .bubble::after {
-  content: '✧';
-  top: -15px;
-  right: -7px;
-  font: 800 21px/1 system-ui, sans-serif;
-  color: #b0838c;
-  text-shadow: -1px -1px #faf7f5, 1px 1px #faf7f5;
-}
-
-.app-shell.chat .msg-row.assistant .bubble::after {
-  content: '☆';
-  right: -10px;
-  bottom: -12px;
-  font: 800 18px/1 system-ui, sans-serif;
-  color: #9dabb9;
-  text-shadow: 0 0 2px #faf7f5;
-}
-
 .app-shell.chat .topbar-surface {
   background: repeating-linear-gradient(transparent 0 21px, rgba(157, 171, 185, .18) 21px 22px), #faf7f5;
 }

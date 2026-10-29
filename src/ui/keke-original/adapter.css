@@ -60,3 +60,9 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .desktop-app-sidebar .conflux-library-role,#chat .desktop-app-sidebar .conflux-sidebar-contact-row{border:0;border-bottom:1px dashed var(--margin);border-radius:0;background:none}
 #chat .desktop-app-sidebar .conflux-library-role-select span{color:var(--rt);font:800 14px/1.3 var(--cn);letter-spacing:.06em}
 #chat .desktop-app-sidebar .conflux-sidebar-status,#chat .desktop-app-sidebar .desktop-sidebar-thread-empty{color:var(--dim);font:500 12px/1.5 var(--cn);letter-spacing:.08em}
+/* Bubble grouping from the prototype (data-kk-p is set by mountKekeBubbles): s single, f first, m middle, l last. */
+#chat .msg-row .bubble{position:relative}
+#chat .msg-row.assistant .bubble{border-radius:var(--R,18px) var(--R,18px) var(--R,18px) 6px}
+#chat .msg-row.assistant:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:6px var(--R,18px) var(--R,18px) 6px}
+#chat .msg-row.user .bubble{border-radius:var(--R,18px) var(--R,18px) 6px var(--R,18px)}
+#chat .msg-row.user:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:var(--R,18px) 6px 6px var(--R,18px)}

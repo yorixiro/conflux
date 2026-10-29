@@ -14,7 +14,7 @@ import {
 } from './chat/context/ChatContext';
 import type { ChatUiState } from './chat/context/ChatUiState';
 import { useSpaceStore } from '../../stores/spaceStore';
-import { mountKekeWall } from '../keke-original/kekeRuntime';
+import { mountKekeBubbles, mountKekeSendFx, mountKekeWall } from '../keke-original/kekeRuntime';
 import { KekeBarDeco, KekeBarTapes } from '../keke-original/KekeOriginalBar';
 
 const ThinkingSheet = lazy(() => loadThinkingSheetModule().then((module) => ({ default: module.ThinkingSheet })));
@@ -32,7 +32,12 @@ type ChatWorldProps = {
 function ChatWorldLayout({ shell }: ChatWorldProps) {
   const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginal = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
-  useEffect(() => { if (kekeOriginal) mountKekeWall(document.querySelector('#chat .world-chat')); }, [kekeOriginal]);
+  useEffect(() => {
+    if (!kekeOriginal) return undefined;
+    mountKekeWall(document.querySelector('#chat .world-chat'));
+    const stops = [mountKekeSendFx(), mountKekeBubbles()];
+    return () => stops.forEach((stop) => stop());
+  }, [kekeOriginal]);
   const stablePayload = useChatStablePayload();
   const presentation = useChatPresentation();
   const composer = useChatComposer();

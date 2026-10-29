@@ -11,7 +11,7 @@ describe('themePresets', () => {
 
   it.each([
     ['keke-doodle', 'doodle-lettering.svg', 'doodle-paper-cat.webp'],
-    ['keke-pois', 'pois-background.jpg', 'pois-sticker-1.png']
+    ['keke-pois', 'pois-background.jpg', 'pois-charm.webp']
   ])('keeps %s art and real-chat selectors after runtime CSS normalization', (id, background, sticker) => {
     const frame = buildThemeFrameFromPresetId(id);
     // Vitest stubs CSS imports (including ?raw); read the actual source to test the layer.
@@ -22,6 +22,5 @@ describe('themePresets', () => {
     expect(runtimeCss).toContain(background);
     expect(runtimeCss).toContain(sticker);
     expect(runtimeCss).toContain('.app-shell.chat .chat-box-shell');
-    expect(runtimeCss).toContain('.app-shell.chat .msg-row');
   });
 });

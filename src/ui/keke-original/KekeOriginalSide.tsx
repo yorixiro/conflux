@@ -32,6 +32,13 @@ export function KekeOriginalSide({ persona, conversationCount, onEdit }: {
   const drops = useMemo(() => Array.from({ length: 18 }, (_, j) => ({
     left: (j * 53) % 236, top: (j * 37) % 104, d: (1.6 + (j % 5) * 0.35).toFixed(2), dl: (-j * 0.41).toFixed(2), ch: 'i;°.i˚'[j % 6]
   })), []);
+  const swapTheme = () => {
+    const stage = document.getElementById('chat');
+    if (stage?.classList.contains('swap')) return;
+    stage?.classList.add('swap');
+    window.setTimeout(() => applyTheme(isPois ? 'keke-doodle' : 'keke-pois'), 520);
+    window.setTimeout(() => stage?.classList.remove('swap'), 700);
+  };
   const today = new Date();
   const sideRef = useRef<HTMLElement>(null);
   useEffect(() => { mountKekeSide(sideRef.current); }, []);
@@ -48,7 +55,7 @@ export function KekeOriginalSide({ persona, conversationCount, onEdit }: {
     </dl>
     <nav className="smn">
       <button type="button" onClick={onEdit} disabled={!persona}><Px k="sm" />聊天资料<small>profil</small></button>
-      <button type="button" onClick={() => applyTheme(isPois ? 'keke-doodle' : 'keke-pois')}><Px k="sm" />换个主题<small>{isPois ? '贴纸' : '波点'}</small></button>
+      <button type="button" onClick={swapTheme}><Px k="sm" />换个主题<small>{isPois ? '贴纸' : '波点'}</small></button>
     </nav>
     <div className="rain" aria-hidden="true">
       <div className="win"><i><span className="cat">{'∧,,∧\n(´･ω･)'}</span></i><i /></div>

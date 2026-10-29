@@ -1,4 +1,5 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useEffect, useMemo, type CSSProperties } from 'react';
+import { mountKekeAtmos } from './kekeRuntime';
 import { buildKekePaperSvg } from './kekePaper';
 
 export const KEKE_APP_STYLE = {
@@ -10,6 +11,7 @@ export const KEKE_APP_STYLE = {
 /** Background layers exactly as the original prototype's chat `.app` builds them. */
 export function KekeOriginalLayers() {
   const paper = useMemo(() => `url("data:image/svg+xml,${encodeURIComponent(buildKekePaperSvg())}")`, []);
+  useEffect(() => mountKekeAtmos(), []);
   return <>
     <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true"><filter id="wob" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="n" /><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" /></filter></svg>
     <div className="layer kk-paper" style={{ '--pp': paper } as CSSProperties} aria-hidden="true" />
