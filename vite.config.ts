@@ -30,19 +30,29 @@ function resolveManualChunk(id: string) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiOrigin = env.VITE_POLARIS_API_ORIGIN?.trim();
+  const acpToken = env.DEVIN_ACP_BRIDGE_TOKEN?.trim();
+  const acpPort = Number(env.DEVIN_ACP_BRIDGE_PORT || 47831);
 
   return {
     plugins: [react()],
-    server: apiOrigin
-      ? {
-        proxy: {
-          '/api': {
-            target: apiOrigin,
-            changeOrigin: true
+    server: {
+      proxy: {
+        ...(apiOrigin ? { '/api': { target: apiOrigin, changeOrigin: true } } : {}),
+        ...(acpToken && acpToken.length >= 24 && Number.isInteger(acpPort) && acpPort >= 1024 && acpPort <= 65535 ? {
+          '/devin-acp': {
+            target: `http://127.0.0.1:${acpPort}`,
+            changeOrigin: true,
+            rewrite: (path: string) => path.replace(/^\\/devin-acp/, ''),
+            configure: (proxy: { on: (event: string, callback: (req: import('node:http').ClientRequest) => void) => void }) => {
+              proxy.on('proxyReq', (request) => {
+                request.setHeader('x-acp-bridge-token', acpToken);
+                request.removeHeader('origin');
+              });
+            }
           }
-        }
+        } : {})
       }
-      : undefined,
+    },
     build: {
       rollupOptions: {
         input: {
