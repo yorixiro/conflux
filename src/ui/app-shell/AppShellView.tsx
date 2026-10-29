@@ -51,7 +51,6 @@ export function AppShellView({
   chatWorldProps,
   groupWorldProps,
   desktopSidebarProps,
-  chatHubConversations,
   openChatList,
   replyNotificationProps,
   overlaysProps,
@@ -269,7 +268,11 @@ export function AppShellView({
                 initialTab="library"
                 collapsed={false}
                 onToggleCollapsed={() => {}}
-                conversations={chatHubConversations}
+                conversations={[]}
+                onBackToChat={() => {
+                  if (desktopSidebarProps.activeConversationId) setChatHubOpen(false);
+                  else onHomeOpenChange(true);
+                }}
                 onOpenConversation={(id, messageId) => {
                   desktopSidebarProps.onOpenConversation(id, messageId);
                   setChatHubOpen(false);
@@ -308,8 +311,8 @@ export function AppShellView({
           }}
           onOpenHome={() => onHomeOpenChange(true)}
           onOpenArchive={() => {
-            if (activeWorld !== 'collection' || !['info', 'dialogue', 'album'].includes(topbarProps.state.collectionShelf)) {
-              desktopSidebarProps.onSelectShelf('dialogue');
+            if (activeWorld !== 'collection' || !['info', 'album'].includes(topbarProps.state.collectionShelf)) {
+              desktopSidebarProps.onSelectShelf('album');
             }
             onHomeOpenChange(false);
           }}
