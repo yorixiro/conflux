@@ -185,9 +185,19 @@ export function useAppShellNavigationActions({
     enterChatWorld({ setWorld });
   };
 
+  const openFreshConversationForCollaborator = (collaboratorId: string) => {
+    if (!personas.some((persona) => persona.id === collaboratorId)) return;
+    const conversationId = createConversation(collaboratorId, { activeProjectId: null });
+    clearPendingAttachments();
+    clearPendingCardReference();
+    setActiveConversation(conversationId);
+    enterChatWorld({ setWorld });
+  };
+
   return {
     openPreviewChat,
     prepareChatForWorldReturn,
-    openFreshConversation
+    openFreshConversation,
+    openFreshConversationForCollaborator
   };
 }
