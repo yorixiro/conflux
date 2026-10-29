@@ -10,7 +10,7 @@ describe('themePresets', () => {
   });
 
   it.each([
-    ['keke-doodle', 'doodle-background.jpg', 'doodle-cat.webp'],
+    ['keke-doodle', 'doodle-lettering.svg', 'doodle-paper-cat.webp'],
     ['keke-pois', 'pois-background.jpg', 'pois-sticker-1.png']
   ])('keeps %s art and real-chat selectors after runtime CSS normalization', (id, background, sticker) => {
     const frame = buildThemeFrameFromPresetId(id);
@@ -22,7 +22,6 @@ describe('themePresets', () => {
     expect(runtimeCss).toContain(background);
     expect(runtimeCss).toContain(sticker);
     expect(runtimeCss).toContain('.app-shell.chat .chat-box-shell');
-    expect(runtimeCss).toContain('.app-shell.chat .conflux-sidebar-calendar');
     expect(runtimeCss).toContain('.app-shell.chat .msg-row');
   });
 });

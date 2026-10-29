@@ -23,7 +23,6 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .fd{height:auto;min-height:32px;border-radius:16px}
 #chat .fd textarea,:root[data-cf=sticker] #chat .fd textarea{line-height:1.45;min-height:32px;padding-top:7px;padding-bottom:7px}
 #chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
-#chat .keke-original-wall{display:none}
 #chat header.keke-original-topbar{position:relative}
 /* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
 #chat .conflux-sidebar-dialog{width:min(388px,calc(100vw - 18px));max-width:none;background:none;overflow:visible}

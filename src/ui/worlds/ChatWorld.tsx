@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react';
-import { Suspense, lazy, useRef } from 'react';
+import { Suspense, lazy, useEffect, useRef } from 'react';
 import { loadThinkingSheetModule } from '../app-shell/appShellLazyModules';
 import { ChatComposer } from './chat/composer/ChatComposer';
 import { useComposerFileIngest } from './chat/composer/useComposerFileIngest';
@@ -14,7 +14,7 @@ import {
 } from './chat/context/ChatContext';
 import type { ChatUiState } from './chat/context/ChatUiState';
 import { useSpaceStore } from '../../stores/spaceStore';
-import { KekeChatMotionLayers } from '../app-shell/KekeOriginalDecor';
+import { mountKekeWall } from '../keke-original/kekeRuntime';
 import { KekeBarDeco, KekeBarTapes } from '../keke-original/KekeOriginalBar';
 
 const ThinkingSheet = lazy(() => loadThinkingSheetModule().then((module) => ({ default: module.ThinkingSheet })));
@@ -32,6 +32,7 @@ type ChatWorldProps = {
 function ChatWorldLayout({ shell }: ChatWorldProps) {
   const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginal = kekePreset === 'keke-doodle' || kekePreset === 'keke-pois';
+  useEffect(() => { if (kekeOriginal) mountKekeWall(document.querySelector('#chat .world-chat')); }, [kekeOriginal]);
   const stablePayload = useChatStablePayload();
   const presentation = useChatPresentation();
   const composer = useChatComposer();
@@ -80,7 +81,6 @@ function ChatWorldLayout({ shell }: ChatWorldProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {kekePreset === 'keke-doodle' || kekePreset === 'keke-pois' ? <KekeChatMotionLayers pois={kekePreset === 'keke-pois'} /> : null}
       <div className="chat-body">
         <MessageTimeline isWorldSettled={shell.isActiveWorld && !shell.isWorldSwitching} />
       </div>
