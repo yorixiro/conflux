@@ -12,7 +12,6 @@ type QuickSettingsProps = {
   provider: Pick<ApiOverlayProps, 'providers' | 'activeProviderId' | 'api' | 'onSetActiveProvider'>;
   onOpenApi: () => void;
   onOpenMenu: (page: MenuOverlayPage) => void;
-  onNewConversation: () => void;
   currentPersona: Persona | null;
   onSetPersonaProvider: (providerId: string) => void;
   onOpenPersona?: () => void;
@@ -49,7 +48,6 @@ export function ConfluxQuickSettingsDrawer({
   provider,
   onOpenApi,
   onOpenMenu,
-  onNewConversation,
   currentPersona,
   onSetPersonaProvider,
   onOpenPersona,
@@ -91,7 +89,7 @@ export function ConfluxQuickSettingsDrawer({
           <div>
             <span className="conflux-quick-settings-eyebrow">CHAT / CONFLUX</span>
             <h2>快捷设置</h2>
-            <p>当前对话 · 常用操作与设置</p>
+            <p>当前 AI · 模型与常用设置</p>
           </div>
           <button type="button" className="conflux-quick-settings-close" onClick={onClose} aria-label="关闭快捷设置">
             <Icon name="x" size={20} />
@@ -137,8 +135,7 @@ export function ConfluxQuickSettingsDrawer({
           </section>
 
           <section className="conflux-quick-settings-section" aria-labelledby="quick-chat-heading">
-            <h3 id="quick-chat-heading">对话操作</h3>
-            <QuickAction icon="plus" label="新建对话" onClick={() => closeAndRun(onNewConversation)} />
+            <h3 id="quick-chat-heading">角色与工具</h3>
             {onOpenPersona ? (
               <QuickAction icon="persona" label="当前 AI 角色设置" onClick={() => closeAndRun(onOpenPersona)} />
             ) : null}
