@@ -15,3 +15,4 @@
 #chat nav.tabs{justify-content:space-around;gap:0;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))}
 #chat nav.tabs button{padding:0 2px;letter-spacing:.1em}
 html[data-keyboard-open="true"] #chat nav.tabs{display:none}
+#chat .chat-dock.bar{width:100%;max-width:none;margin-inline:0}
