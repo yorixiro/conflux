@@ -2,11 +2,15 @@
 
 > **用户更正（优先级最高）**：银河教程是为了把 `心弦 → 记忆图谱` 从四张统计卡片升级成有动态粒子/星系感的**真实、可操作的记忆关系图**。它不是无关的独立数字艺术实验。之前本工单中的“禁止接入心弦”要求已废止，本文件完全取代旧版工单。
 
+## 2026-10-30 视觉返工（覆盖此前自由设计方向）
+
+继续原 PR #8 分支，执行最新三条视觉评论，最后确认以 https://github.com/yorixiro/conflux/pull/8#issuecomment-6509945650 为准。作者视频是视觉参考，当前下载模板是技术参考；必须分别记录原版与集成版运行结果。使用银河下缘轻阅读区与下方四类按钮，不能再使用覆盖星盘的实体大浮窗。用户已有 4173 Vite，复用其原地址。
+
 ## 仓库与基线
 
 - 仓库：`yorixiro/conflux`
 - 基线：`feat/keke-devin-acp-preview-20261030`。撰写时 HEAD 为 `3bca958a61504cfe8ed318ceb8218acea8cc9901`；Work 开工时必须核对远端 HEAD 并从当前最新开发提交派生**隔离功能分支**，不能使用旧 main。
-- 教程参考：https://chat.xiaoke.love/galaxy-tutorial/ 。截图是教程提示，不是目标效果截图；先访问真实教程观察色彩、中心光晕、粒子分布、旋转及交互，再决定视觉实现；站点无法访问就注明参考未核实，不得声称精确复刻。
+- 教程参考：https://chat.xiaoke.love/galaxy-tutorial/ 。原作者视频截图是本轮视觉参考；当前教程可能与视频版本不同，需运行截图对照，优先保留原始渲染参数；站点无法访问就注明参考未核实，不得声称精确复刻。
 - 技术：现有 React + TypeScript + `three@0.186.0`；优先复用已有 Three.js、性能和资源释放实践，不为小改动重造引擎。
 - 目标页面：`src/ui/collection/heartstring/HeartstringMemoryAtlas.tsx`、`heartstring.css`、`heartstringMemoryModel.ts`；旧有 `MemorySettingsTab`、`usePersonaStore` 保持原数据管理入口。
 
@@ -51,11 +55,13 @@
 
 ### Galaxy 记忆图谱 · 本轮交付进度
 
-- 状态：**PR 待验收**；更新日期：2026-10-30。
+- 状态：**PR 待验收（视觉返工代码已提交，视觉尚未验收）**；更新日期：2026-10-30。
 - 功能分支：`feat/heartstring-memory-galaxy`；功能 PR：https://github.com/yorixiro/conflux/pull/8 。未合并。
-- 运行代码 Commit：`aeff4ed089592f286b7c6efa18bfabe783d5e812`（后续纯文档同步提交另计）。
-- 已完成：真实记忆/资料/摘要星点、Three.js 银河场景、点选详情与归属线、原编辑器定位、目录降级、分类搜索分页、可见性停帧和资源释放。
-- 验证：定向 Vitest 两文件 8 项通过；唯一一次类型检查 exit 2，8 处诊断均在未修改的 AppShellView / DesktopAppSidebar；编辑回写、角色切换、空数据、523 实体分页、320/720/1440 容器和心弦标签卸载已作隔离检查。
-- 未验收：云端浏览器禁用 WebGL，实际 GPU 图像/着色器与触摸未测；**Android 平板真机未测**，未提供实测 FPS/显存结论。未运行全量、冒烟、门禁或收费 API。
-- 下一步：按 `docs/work-orders/WORK_GALAXY_IMPLEMENTATION_RESULT.md` 在 Termux 独立 5175 端口验收。共享分支进度通过独立文档 PR 提交，同步前仍是待验收，不视为功能已落地。
+- 本轮运行代码 Commit：`5526629085b16a441962ac2e5a39d61ce804954e`（进度文档提交另计）。
+- 已处理：按 PR #8 最后三条返工评论，恢复教程双旋臂/14000 盘面粒子/6400 远星、原配色与相机、Sprite 中心光晕和 Bloom；下缘轻阅读区取代覆盖浮窗，长文在自然页面流展开，点选/关闭不滚动整页；四类按钮筛选星点和目录，编辑沿用原记忆库。
+- 验证：相关 Vitest 两文件合计 10 项通过；唯一一次类型检查 exit 2，仍是未修改 AppShellView / DesktopAppSidebar 的 8 处诊断，本轮图谱文件未新增诊断；720px iframe 中短文/长文/分类/编辑回写通过，320px iframe 无页面横向溢出；离开图谱后 DOM 卸载。
+- 实际截图：`docs/evidence/galaxy-rework/` 包含平板短文、长文和 320px 默认布局，以及原教程未能渲染的截图。**均不能作为 GPU 视觉合格证据**；当前云浏览器 WebGL 被禁用。
+- 未验收：作者视频 vs 当前教程 vs 集成版的 GPU 同视角对照、着色器实机效果、Android 平板触摸/FPS/显存/底部导航覆盖；教程未附独立 OSS 许可证，通用公开再分发授权尚未明确。
+- 预览：复用用户当前 **4173 Vite** 与原地址，不再安排 5175。更新步骤见 `docs/work-orders/WORK_GALAXY_IMPLEMENTATION_RESULT.md`。
+- 共享分支进度继续经 [文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 同步，未合并前仍待同步；未运行全量、冒烟、门禁、哈希或收费 API。
 
