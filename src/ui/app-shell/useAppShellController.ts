@@ -368,7 +368,6 @@ export function useAppShellController() {
     chatWorldProps: world.chatWorldProps,
     groupWorldProps: world.groupWorldProps,
     desktopSidebarProps,
-    chatHubConversations: allChatConversations,
     openChatList: () => setWorld('chat'),
     replyNotificationProps: {
       notifications: replyNotifications,
