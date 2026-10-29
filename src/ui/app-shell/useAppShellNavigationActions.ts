@@ -106,6 +106,23 @@ export function useAppShellNavigationActions({
         clearPendingCardReference();
       }
       setActiveConversation(previewConversationId);
+    } else if (
+      frontstageCollaboratorId
+      && personas.some((persona) => persona.id === frontstageCollaboratorId)
+      && (activeConversationId === null || activeConversationCollaboratorId !== frontstageCollaboratorId)
+    ) {
+      // The bottom "Chat" tab must not show another persona's active thread
+      // after creating or selecting a collaborator in the collection world.
+      openConversationForCollaborator({
+        conversations,
+        personas,
+        activeCollaboratorId
+      }, {
+        createConversation,
+        setActiveConversation,
+        clearPendingAttachments,
+        clearPendingCardReference
+      }, frontstageCollaboratorId);
     }
     enterChatWorld({ setWorld });
   };
