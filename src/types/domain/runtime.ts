@@ -4,6 +4,8 @@ export interface ProviderProfile {
   id: string;
   name: string;
   protocol: ProviderProtocol;
+  /** Non-HTTP agent transport; absent for legacy HTTP providers. */
+  agentTransport?: 'devin-acp';
   baseUrl: string;
   path: string;
   apiKey: string;
