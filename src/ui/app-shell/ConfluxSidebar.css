@@ -90,6 +90,11 @@
 }
 .conflux-hub-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; flex:none; }
 .conflux-hub-heading span { font-size:10px; letter-spacing:.16em; color:var(--text-muted); }
+.conflux-hub-title { display:flex; align-items:center; gap:10px; min-width:0; }
+.conflux-hub-title > div { min-width:0; }
+.conflux-hub-heading .conflux-hub-back { flex:none; width:44px; min-width:44px; padding:0; }
+.conflux-hub-heading .conflux-hub-new-role { display:inline-flex; align-items:center; justify-content:center; gap:6px; width:auto; min-width:108px; padding:0 10px; white-space:nowrap; font-size:12px; }
+.conflux-hub-new-role span { color:inherit; font-size:12px; letter-spacing:0; }
 .conflux-hub-heading h1 { margin:2px 0 0; font:inherit; font-size:23px; font-weight:680; }
 .conflux-hub-heading button { display:grid; place-items:center; width:44px; min-height:44px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); cursor:pointer; }
 .conflux-hub-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; flex:none; border-bottom:1px solid var(--border); }
@@ -105,7 +110,7 @@
 .conflux-chat-hub .conflux-sidebar-contact-list { gap:12px; }
 .conflux-chat-hub .conflux-sidebar-contact-list > header { padding:0 4px; color:var(--text-soft); }
 .conflux-chat-hub .conflux-sidebar-contact-list .desktop-sidebar-collaborator-picker {
-  flex:0 1 auto; min-height:0; max-height:calc(100dvh - 245px); padding:0;
+  flex:1 1 auto; min-height:0; max-height:none; padding:0;
   border:0; border-radius:0; background:transparent; box-shadow:none;
 }
 .conflux-chat-hub .conflux-sidebar-contact-row { border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent); }
