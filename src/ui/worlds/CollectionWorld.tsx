@@ -8,7 +8,7 @@ import { buildVisibleCollectionShelfNavItems } from '../collection/grid/collecti
 import { DialogueCollectionShelf } from '../collection/grid/DialogueCollectionShelf';
 import { CollaboratorInfoShelf, type CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 import { ImageCollectionShelf } from '../collection/images/ImageCollectionShelf';
-import { ArchiveAlbumShelf } from '../collection/album/ArchiveAlbumShelf';
+import { HeartstringHub } from '../collection/heartstring/HeartstringHub';
 import { CodeProjectCollectionShelfPages } from './collection/CodeProjectCollectionShelfPages';
 import { useI18n } from '../../i18n';
 
@@ -128,7 +128,7 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
-        {sectionNavigation && activeShelf !== 'info' ? (
+        {sectionNavigation && activeShelf !== 'info' && activeShelf !== 'album' ? (
           <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '心弦分类' : '工坊分类'}>
             {sectionNavItems.map((item) => (
               <button
@@ -263,7 +263,7 @@ export function CollectionWorld({
             {visibleShelfSet.has('album') && activeShelf === 'album' ? (
               <div className="collection-shelf-page collection-shelf-page--album collection-shelf-page--active" data-shelf-page="album">
                 <div className="collection-shelf-page-body">
-                  <ArchiveAlbumShelf searchTerm={controller.searchTerm} />
+                  <HeartstringHub searchTerm={controller.searchTerm} />
                 </div>
               </div>
             ) : null}
