@@ -85,7 +85,7 @@ export function CollectionWorld({
   const archiveShelfActive = activeShelf === 'info' || activeShelf === 'album';
   const sectionNavItems = visibleShelfItems.filter((item) => (
     archiveShelfActive
-      ? item.shelf === 'info' || item.shelf === 'album'
+      ? item.shelf === 'album'
       : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
   ));
   const selectShelf = (shelf: typeof activeShelf) => {
@@ -128,8 +128,8 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
-        {sectionNavigation ? (
-          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '档案分类' : '工坊分类'}>
+        {sectionNavigation && activeShelf !== 'info' ? (
+          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '心弦分类' : '工坊分类'}>
             {sectionNavItems.map((item) => (
               <button
                 key={item.shelf}
