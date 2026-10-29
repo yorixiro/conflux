@@ -57,6 +57,15 @@ function shouldRequestStreamUsage(capability: ProviderCapability) {
   return capability.streaming.usage && isMoonshotHost(host);
 }
 
+function resolveOpenAiCacheRoutingKey(baseUrl: string, sessionId?: string) {
+  // OpenAI supports prompt_cache_key for affinity. Do not send this extension to
+  // DeepSeek or arbitrary OpenAI-compatible relays that may reject the field.
+  const id = sessionId?.trim();
+  return parseProviderHost(baseUrl) === 'api.openai.com' && id
+    ? `conflux:${id.slice(0, 128)}`
+    : undefined;
+}
+
 function buildOpenAiReasoningContent(
   message: ProviderRuntimeRequestInput['context']['segments'][number]['messages'][number],
   capability: ProviderCapability
@@ -481,6 +490,10 @@ export function buildOpenAiCompatibleRequest(input: ProviderRuntimeRequestInput)
   const openRouterSessionId = resolveOpenRouterSessionId(api.baseUrl, sessionId);
   if (openRouterSessionId) {
     body.session_id = openRouterSessionId;
+  }
+  const openAiCacheRoutingKey = resolveOpenAiCacheRoutingKey(api.baseUrl, sessionId);
+  if (openAiCacheRoutingKey) {
+    body.prompt_cache_key = openAiCacheRoutingKey;
   }
   if (providerCapability.cache.sendsTopLevelCacheControl) {
     body.cache_control = { type: 'ephemeral' };

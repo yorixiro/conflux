@@ -223,6 +223,22 @@ const parityCases: OpenAiCompatibleAdapterParityCase[] = [
     })
   },
   {
+    id: 'openai-first-party-uses-stable-conversation-cache-routing-key',
+    input: {
+      api: createProviderRuntimeTestProvider({
+        baseUrl: 'https://api.openai.com/v1',
+        path: '/chat/completions',
+        model: 'gpt-5-mini'
+      }),
+      context: createProviderRuntimeTestContext({ withTools: false }),
+      sessionId: 'conversation-cache-42',
+      advanced: createProviderRuntimeAdvanced()
+    },
+    verify(request) {
+      expect(request.body.prompt_cache_key).toBe('conflux:conversation-cache-42');
+    }
+  },
+  {
     id: 'deepseek-omits-volatile-system-layers-for-prefix-cache',
     input: {
       api: createProviderRuntimeTestProvider({
@@ -239,6 +255,7 @@ const parityCases: OpenAiCompatibleAdapterParityCase[] = [
       advanced: createProviderRuntimeAdvanced()
     },
     verify(request) {
+      expect(request.body).not.toHaveProperty('prompt_cache_key');
       expect(request.body.messages).toEqual([
         expect.objectContaining({ role: 'system', content: 'Stable identity.' }),
         expect.objectContaining({ role: 'system', content: 'Stable memory lane.' }),

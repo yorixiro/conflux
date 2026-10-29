@@ -5,6 +5,7 @@ import type { AssistantRequestAudit } from './requestAudit';
 
 type RequestDebugRecordOptions = {
   phase?: 'prepared' | 'completed' | 'failed';
+  conversationId?: string;
   reply?: AssistantReply;
   error?: unknown;
   builtRequest?: ProviderHttpRequest | null;

@@ -377,7 +377,6 @@ describe('assembleAssistantContext', () => {
     expect(historySummary?.messages).toEqual([
       {
         role: 'system',
-        cachePrefixEligible: true,
         content: expect.stringContaining('[历史摘要，不是原文]')
       }
     ]);

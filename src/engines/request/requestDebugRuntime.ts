@@ -4,11 +4,14 @@ import type { AssistantRequestAudit } from './requestAudit';
 import { buildRequestInspectorModel, type AssistantRequestInspectorModel } from './requestInspector';
 import type { AssistantReply } from '../chatApi';
 import type { ProviderHttpRequest } from '../provider-runtime';
+import { compareRequestCachePrefixes, type RequestCachePrefixDiagnostic } from './requestCachePrefixDiagnostics';
 
 export type RequestDebugEntry = {
   requestId: string;
   at: number;
   phase: 'prepared' | 'completed' | 'failed';
+  conversationId?: string;
+  cachePrefixDiagnostic?: RequestCachePrefixDiagnostic | null;
   assistantName: string;
   providerId?: string;
   providerName?: string;
@@ -68,6 +71,7 @@ export function recordRequestDebugEntry(
   audit: AssistantRequestAudit,
   options?: {
     phase?: RequestDebugEntry['phase'];
+    conversationId?: string;
     reply?: AssistantReply;
     error?: unknown;
     builtRequest?: ProviderHttpRequest | null;
@@ -83,10 +87,25 @@ export function recordRequestDebugEntry(
       : typeof options?.error === 'string'
         ? options.error
         : null;
+  const previousCompletedRequest = options?.builtRequest && options.conversationId
+    ? [...requestDebugLog.read()].reverse().find((previous) => (
+        previous.phase === 'completed'
+        && previous.requestId !== audit.requestId
+        && previous.conversationId === options.conversationId
+        && previous.providerId === audit.providerId
+        && previous.modelId === audit.modelId
+        && previous.outboundRequest?.provider === options.builtRequest?.provider
+      ))
+    : undefined;
+  const cachePrefixDiagnostic = previousCompletedRequest?.outboundRequest && options?.builtRequest
+    ? compareRequestCachePrefixes(previousCompletedRequest.outboundRequest.body, options.builtRequest.body)
+    : null;
   const entry: RequestDebugEntry = {
     requestId: audit.requestId,
     at: Date.now(),
     phase: options?.phase ?? 'prepared',
+    conversationId: options?.conversationId,
+    cachePrefixDiagnostic,
     assistantName: audit.assistantName,
     providerId: audit.providerId,
     providerName: audit.providerName,
@@ -139,6 +158,7 @@ export function recordRequestDebugEntry(
     tools: entry.tooling.toolNames,
     toolChoice: entry.tooling.toolChoice,
     requestFingerprint: entry.requestReceipt.fingerprints.fullRequest,
+    cachePrefixDiagnostic: entry.cachePrefixDiagnostic,
     duplicateInfo: entry.requestReceipt.duplicateInfo.length,
     topographyOverlap: entry.requestReceipt.topographyOverlap.length,
     topographyEvidenceOverlap: entry.requestReceipt.topographyEvidenceOverlap.length,

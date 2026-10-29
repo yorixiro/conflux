@@ -64,7 +64,11 @@ function isStableSystemMessage(message: OrderedContextMessage) {
 }
 
 function shouldKeepDeepSeekVolatileSystemMessage(message: OrderedContextMessage) {
-  return message.contextSegmentKind === 'semantic_recall';
+  // A history summary changes as the sliding context window moves. Keeping it
+  // after conversation history preserves the reusable prefix without dropping
+  // the summary from the model's request.
+  return message.contextSegmentKind === 'semantic_recall'
+    || message.contextSegmentKind === 'history_summary';
 }
 
 function buildSystemMessageGroup(

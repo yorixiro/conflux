@@ -69,6 +69,15 @@ function formatTokenUsage(usage: ReturnType<typeof readRequestDebugEntries>[numb
   ]) || 'usage reported';
 }
 
+function formatCachePrefixDiagnostic(entry: ReturnType<typeof readRequestDebugEntries>[number]) {
+  const report = entry.cachePrefixDiagnostic;
+  if (!report || report.status === 'unavailable') return null;
+  if (report.status === 'stable') return `本地前缀匹配 ${report.sharedMessageCount} 条`;
+  if (report.changedPart === 'tools') return '本地前缀变化：工具列表';
+  if (report.changedPart === 'system') return '本地前缀变化：系统说明';
+  return `本地前缀变化：第 ${(report.changedMessageIndex ?? 0) + 1} 条消息`;
+}
+
 function streamTitle(phase: ReturnType<typeof readStreamDebugEntries>[number]['phase']) {
   switch (phase) {
     case 'request-path':
@@ -203,6 +212,7 @@ export function readLocalRuntimeLogEntries(limit = 20): LocalRuntimeLogEntry[] {
       `prep ${Math.round(entry.timings.totalPreparationMs)} ms`,
       `preflight ${entry.inspector.totals.preflightStatus}`,
       `tools ${entry.tooling.toolCount}`,
+      formatCachePrefixDiagnostic(entry),
       entry.responseSummary.nativeToolCallCount ? `tool calls ${entry.responseSummary.nativeToolCallCount}` : null,
       entry.responseSummary.finishReason ? `finish ${entry.responseSummary.finishReason}` : null,
       entry.responseSummary.transportIncomplete ? 'stream incomplete' : null,

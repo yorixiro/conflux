@@ -131,7 +131,7 @@ export async function requestCollaboratorReply(params: {
     throw new Error('当前模型没有直接图片能力，也没有可用的看图/OCR 模型；请切换支持图片的聊天模型，或在设置里配置看图/OCR 路线后再发送。');
   }
 
-  recordRequestDebug(prepared.audit, { phase: 'prepared' });
+  recordRequestDebug(prepared.audit, { phase: 'prepared', conversationId: activeConversationId ?? undefined });
 
   let reply: AssistantReply;
   let builtRequestForDebug: ProviderHttpRequest | null = null;
@@ -151,12 +151,18 @@ export async function requestCollaboratorReply(params: {
         : undefined
     });
   } catch (error) {
-    recordRequestDebug(prepared.audit, { phase: 'failed', error, builtRequest: builtRequestForDebug });
+    recordRequestDebug(prepared.audit, {
+      phase: 'failed',
+      conversationId: activeConversationId ?? undefined,
+      error,
+      builtRequest: builtRequestForDebug
+    });
     throw error;
   }
 
   recordRequestDebug(prepared.audit, {
     phase: 'completed',
+    conversationId: activeConversationId ?? undefined,
     reply,
     builtRequest: builtRequestForDebug
   });
