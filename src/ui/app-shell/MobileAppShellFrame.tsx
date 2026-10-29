@@ -21,7 +21,10 @@ export function MobileAppShellFrame({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const presetId = useSpaceStore((space) => space.theme.activePresetId);
   const kekeOriginal = (presetId === 'keke-doodle' || presetId === 'keke-pois') && topbarProps.state.activeWorld === 'chat';
-  const canOpenSidebar = Boolean(sidebarProps) && kekeOriginal;
+  const canOpenSidebar = Boolean(sidebarProps) && kekeOriginal && !chatHubOpen;
+  useEffect(() => {
+    if (chatHubOpen) setSidebarOpen(false);
+  }, [chatHubOpen]);
   useEffect(() => {
     if (!canOpenSidebar) return undefined;
     let x0: number | null = null;
@@ -44,7 +47,7 @@ export function MobileAppShellFrame({
         onOpenSidebar: sidebarProps && topbarProps.state.activeWorld === 'chat' ? () => setSidebarOpen(true) : undefined
       }} /> : null}
       {children}
-      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} initialTab="profile" sidebarProps={sidebarProps} /> : null}
+      {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && !chatHubOpen && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} initialTab="profile" sidebarProps={sidebarProps} /> : null}
     </div>
   );
 }
