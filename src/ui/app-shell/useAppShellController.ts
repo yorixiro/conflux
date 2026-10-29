@@ -7,7 +7,8 @@ import { useAppShellStoreBindings } from '../../app/shell/useAppShellStoreBindin
 import { createCompanionPersonaProjection } from '../../engines/companion';
 import {
   conversationMatchesCollaboratorScope,
-  resolveConversationCollaboratorId
+  resolveConversationCollaboratorId,
+  resolveChatSidebarScope
 } from '../../engines/conversationOwnership';
 import { useCollectionShellState } from './useCollectionShellState';
 import { useAppShellNavigationActions } from './useAppShellNavigationActions';
@@ -93,11 +94,19 @@ export function useAppShellController() {
   const frontstageCollaborator = collaborators.find((persona) => persona.id === frontstageCollaboratorId) ?? null;
   const frontstageCollaboratorName = frontstageCollaborator?.name ?? null;
   const collaboratorIds = useMemo(() => collaborators.map((collaborator) => collaborator.id), [collaborators]);
+  const sidebarScopeId = resolveChatSidebarScope({
+    activeWorld,
+    activeConversationId,
+    activeConversationCollaboratorId,
+    frontstageCollaboratorId,
+    knownCollaboratorIds: collaboratorIds
+  });
+  const sidebarCollaborator = collaborators.find((persona) => persona.id === sidebarScopeId) ?? null;
   const desktopSidebarConversations = useMemo(
     () => {
       const projectTitleById = new Map(roomProjects.map((project) => [project.id, project.title.trim() || t('common.untitledWorkspace')]));
       return conversations
-        .filter((conversation) => conversationMatchesCollaboratorScope(conversation, frontstageCollaboratorId, collaboratorIds))
+        .filter((conversation) => conversationMatchesCollaboratorScope(conversation, sidebarScopeId, collaboratorIds))
         .map((conversation) => {
           const summary = buildConversationCardSummary(conversation);
           return {
@@ -106,7 +115,7 @@ export function useAppShellController() {
           };
         });
     },
-    [collaboratorIds, conversations, frontstageCollaboratorId, roomProjects, t]
+    [collaboratorIds, conversations, sidebarScopeId, roomProjects, t]
   );
   const desktopSidebarShelfItems = useMemo(
     () => [
@@ -237,8 +246,8 @@ export function useAppShellController() {
     activeWorld,
     activeConversationId,
     collectionShelf,
-    collaboratorScopeId: frontstageCollaboratorId,
-    currentCollaborator: frontstageCollaborator,
+    collaboratorScopeId: sidebarScopeId,
+    currentCollaborator: sidebarCollaborator,
     chatCollaborator: collaborators.find((collaborator) => collaborator.id === activeConversationCollaboratorId) ?? (activeConversationId ? null : frontstageCollaborator),
     collaborators,
     conversations: desktopSidebarConversations,
@@ -272,6 +281,8 @@ export function useAppShellController() {
         clearPendingAttachments();
         clearPendingCardReference();
       }
+      const owner = conversations.find((conversation) => conversation.id === conversationId)?.collaboratorId ?? null;
+      setFrontstageCollaboratorId(owner && collaboratorIds.includes(owner) ? owner : null);
       setActiveConversation(conversationId);
       useSpaceStore.getState().setFocusedMessageTarget(messageId ? { conversationId, messageId } : null);
       setWorld('chat');
