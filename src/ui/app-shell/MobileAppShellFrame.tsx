@@ -9,12 +9,14 @@ type MobileAppShellFrameProps = {
   topbarProps: AppTopbarProps;
   sidebarProps?: Omit<DesktopAppSidebarProps, 'collapsed' | 'onToggleCollapsed'>;
   children: ReactNode;
+  chatHubOpen?: boolean;
 };
 
 export function MobileAppShellFrame({
   topbarProps,
   sidebarProps,
-  children
+  children,
+  chatHubOpen = false
 }: MobileAppShellFrameProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const presetId = useSpaceStore((space) => space.theme.activePresetId);
@@ -36,11 +38,11 @@ export function MobileAppShellFrame({
     return () => { document.removeEventListener('touchstart', start); document.removeEventListener('touchend', end); };
   }, [canOpenSidebar, sidebarOpen]);
   return (
-    <div className={kekeOriginal ? 'app-stage app' : 'app-stage'} style={kekeOriginal ? KEKE_APP_STYLE : undefined}>
+    <div className={`${kekeOriginal ? 'app-stage app' : 'app-stage'}${chatHubOpen ? ' conflux-chat-hub-open' : ''}`} style={kekeOriginal ? KEKE_APP_STYLE : undefined}>
       {kekeOriginal ? <KekeOriginalLayers /> : null}
-      <AppTopbar {...topbarProps} chatCollaborator={sidebarProps?.chatCollaborator} actions={{ ...topbarProps.actions,
+      {!chatHubOpen ? <AppTopbar {...topbarProps} chatCollaborator={sidebarProps?.chatCollaborator} actions={{ ...topbarProps.actions,
         onOpenSidebar: sidebarProps && topbarProps.state.activeWorld === 'chat' ? () => setSidebarOpen(true) : undefined
-      }} />
+      }} /> : null}
       {children}
       {sidebarProps ? <ConfluxSidebarDialog open={sidebarOpen && topbarProps.state.activeWorld === 'chat'} onClose={() => setSidebarOpen(false)} initialTab="profile" sidebarProps={sidebarProps} /> : null}
     </div>
