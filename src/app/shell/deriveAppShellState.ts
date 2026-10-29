@@ -72,7 +72,7 @@ export function deriveAppShellState({
     : effectiveWorld === 'chat' && hasActiveConversation
       ? activeConversationCollaborator
       : null;
-  const topbarTitle = topbarCollaborator?.name || 'Polaris';
+  const topbarTitle = topbarCollaborator?.name || 'Conflux';
   const topbarTitleTone: 'brand' | 'collaborator' = topbarCollaborator ? 'collaborator' : 'brand';
 
   return {
