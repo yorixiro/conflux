@@ -8,7 +8,7 @@ import { PersonaAvatar } from '../collaborator/PersonaAvatar';
 import { collectionRelativeDateLabel } from '../collection/collectionUtils';
 import { useI18n } from '../../i18n';
 import { SidebarCalendar } from './SidebarCalendar';
-import { KekeSidebarPaper, KekeSidebarProfile } from './KekeSidebarProfile';
+import { KekeOriginalSide } from '../keke-original/KekeOriginalSide';
 import { useSpaceStore } from '../../stores/spaceStore';
 import './KekeSidebarProfile.css';
 
@@ -218,7 +218,6 @@ export function DesktopAppSidebar({
 
   return (
     <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive && presentation !== 'hub' ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : t('desktop.navLabel')}>
-      {kekeThemeActive && presentation !== 'hub' && !collapsed ? <KekeSidebarPaper /> : null}
       {presentation === 'hub' ? (
         <>
           <header className="conflux-hub-heading">
@@ -274,7 +273,7 @@ export function DesktopAppSidebar({
           aria-labelledby={presentation === 'sidebar' ? 'conflux-profile-tab' : undefined}
           className={`conflux-sidebar-panel conflux-sidebar-profile${kekeThemeActive ? ' keke-sidebar-profile' : ''}`}
         >
-          {kekeThemeActive ? <KekeSidebarProfile persona={chatCollaborator} conversationCount={conversations.length} onEdit={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} /> : <>
+          {kekeThemeActive ? <KekeOriginalSide persona={chatCollaborator} conversationCount={conversations.length} onEdit={() => chatCollaborator && onEditCollaborator(chatCollaborator.id)} /> : <>
           <div className="conflux-profile-heading">
             {chatCollaborator ? (
               <PersonaAvatar
