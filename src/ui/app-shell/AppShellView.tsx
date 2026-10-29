@@ -308,7 +308,7 @@ export function AppShellView({
           }}
           onOpenHome={() => onHomeOpenChange(true)}
           onOpenArchive={() => {
-            if (activeWorld !== 'collection' || !['info', 'album'].includes(topbarProps.state.collectionShelf)) {
+            if (activeWorld !== 'collection' || topbarProps.state.collectionShelf !== 'album') {
               desktopSidebarProps.onSelectShelf('album');
             }
             onHomeOpenChange(false);
