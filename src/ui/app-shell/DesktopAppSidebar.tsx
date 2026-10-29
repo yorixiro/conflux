@@ -10,7 +10,6 @@ import { useI18n } from '../../i18n';
 import { SidebarCalendar } from './SidebarCalendar';
 import { KekeOriginalSide } from '../keke-original/KekeOriginalSide';
 import { useSpaceStore } from '../../stores/spaceStore';
-import './KekeSidebarProfile.css';
 
 export type DesktopAppSidebarShelfItem = {
   shelf: CollectionShelf;

@@ -17,9 +17,6 @@
   --keke-rose: #a5858c;
   --keke-active-tab: rgba(227, 217, 220, .8);
   --keke-bubble-shadow: 0 2px 10px rgba(70, 64, 66, .05);
-  --keke-sidebar-background: radial-gradient(#e3d9dc 1.2px, transparent 1.6px) 0 0/10px 10px, #f3f0f0;
-  --keke-calendar-background: radial-gradient(#e3d9dc 1.2px, transparent 1.6px) 0 0/10px 10px, #f3f0f0;
-  --keke-calendar-cat: url('/theme-assets/keke/pois-disc.webp');
   --keke-side-decoration: url('/theme-assets/keke/pois-decoration.webp');
   --keke-chat-charm: url('/theme-assets/keke/pois-charm.webp');
   --keke-washi: repeating-linear-gradient(45deg, #e3d9dc 0 4px, #f6f3f3 4px 8px);
@@ -109,16 +106,4 @@
 .app-shell.chat .send-btn.has-content {
   border: 1.5px dashed #fff;
   box-shadow: 0 0 0 1px rgba(134, 103, 98, .24);
-}
-
-.app-shell.chat .conflux-sidebar-calendar {
-  border: 1.5px dashed #fff;
-  box-shadow: 0 0 0 1px rgba(134, 103, 98, .22);
-}
-
-.app-shell.chat .conflux-sidebar-search input,
-.app-shell.chat .conflux-sidebar-create,
-.app-shell.chat .conflux-profile-edit {
-  border: 1.5px dashed #fff;
-  box-shadow: 0 0 0 1px rgba(134, 103, 98, .22);
 }

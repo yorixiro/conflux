@@ -23,11 +23,13 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .fd{height:auto;min-height:32px;border-radius:16px}
 #chat .fd textarea,:root[data-cf=sticker] #chat .fd textarea{line-height:1.45;min-height:32px;padding-top:7px;padding-bottom:7px}
 #chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
-#chat .desktop-app-sidebar.keke-themed:not(.collapsed):has(.keke-original-side){padding:0;gap:0;background:none;overflow:visible;border:0;box-shadow:none}
-#chat .desktop-app-sidebar.keke-themed .keke-original-side{position:relative;display:flex;transform:none;width:100%;max-width:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
-#chat .conflux-sidebar-dialog:has(.keke-original-side){width:min(84vw,310px);background:none;overflow:visible}
-#chat .conflux-sidebar-dialog:has(.keke-original-side) .desktop-app-sidebar{padding:0;background:none}
-#chat .keke-original-side .keke-calendar-wrap{margin:12px 0 4px}
 #chat .keke-original-wall{display:none}
-#chat .keke-original-side .kk-cal{margin:22px 0 18px}
 #chat header.keke-original-topbar{position:relative}
+/* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
+#chat .conflux-sidebar-dialog{width:min(78vw,340px);max-width:340px;background:none;overflow:visible}
+#chat .conflux-sidebar-dialog::backdrop{background:rgba(60,50,54,.22)}
+#chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub),#chat .desktop-app-sidebar.keke-themed:not(.collapsed){position:relative;box-sizing:border-box;height:100%;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) 18px max(14px,env(safe-area-inset-bottom,0px)) 38px;border:0;box-shadow:none;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper)}
+#chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub)::after,#chat .desktop-app-sidebar.keke-themed:not(.collapsed)::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
+#chat .desktop-app-sidebar .keke-original-side{position:relative;display:flex;transform:none;width:100%;max-width:none;flex:1;min-height:0;padding:8px 0 14px;overflow-y:auto;overflow-x:hidden;background:none}
+#chat .desktop-app-sidebar .keke-original-side::after{display:none}
+#chat .keke-original-side .kk-cal{margin:22px 0 18px}

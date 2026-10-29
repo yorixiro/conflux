@@ -17,9 +17,6 @@
   --keke-rose: #b0838c;
   --keke-active-tab: rgba(244, 222, 228, .94);
   --keke-bubble-shadow: 0 0 0 2.5px #faf7f5, 2px 3px 0 2.5px rgba(157, 171, 185, .25);
-  --keke-sidebar-background: repeating-linear-gradient(0deg, transparent 0 21px, rgba(157, 171, 185, .18) 21px 22px), #faf7f5;
-  --keke-calendar-background: rgba(255, 255, 255, .69);
-  --keke-calendar-cat: url('/theme-assets/keke/doodle-cat.webp');
   --keke-side-decoration: url('/theme-assets/keke/doodle-decoration.webp');
   --keke-chat-charm: url('/theme-assets/keke/doodle-charm.webp');
   --chat-bubble-assistant-fill: #faf7f5;
@@ -138,15 +135,4 @@
 .app-shell.chat .send-btn.has-content {
   border: 1.2px solid #7a6d71;
   box-shadow: 0 0 0 2px #faf7f5, 2px 3px 0 2px rgba(122, 109, 113, .14);
-}
-
-.app-shell.chat .conflux-sidebar-calendar {
-  background: rgba(255, 255, 255, .58);
-}
-
-.app-shell.chat .conflux-sidebar-search input,
-.app-shell.chat .conflux-sidebar-create,
-.app-shell.chat .conflux-profile-edit {
-  border: 1.2px solid #7a6d71;
-  box-shadow: 1.5px 2px 0 rgba(176, 131, 140, .18);
 }
