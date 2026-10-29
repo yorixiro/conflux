@@ -23,7 +23,7 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .fd{height:auto;min-height:32px;border-radius:16px}
 #chat .fd textarea,:root[data-cf=sticker] #chat .fd textarea{line-height:1.45;min-height:32px;padding-top:7px;padding-bottom:7px}
 #chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
-#chat .desktop-app-sidebar.keke-themed:not(.collapsed){padding:0;gap:0;background:none;overflow:visible;border:0;box-shadow:none}
+#chat .desktop-app-sidebar.keke-themed:not(.collapsed):has(.keke-original-side){padding:0;gap:0;background:none;overflow:visible;border:0;box-shadow:none}
 #chat .desktop-app-sidebar.keke-themed .keke-original-side{position:relative;display:flex;transform:none;width:100%;max-width:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
 #chat .conflux-sidebar-dialog:has(.keke-original-side){width:min(84vw,310px);background:none;overflow:visible}
 #chat .conflux-sidebar-dialog:has(.keke-original-side) .desktop-app-sidebar{padding:0;background:none}
