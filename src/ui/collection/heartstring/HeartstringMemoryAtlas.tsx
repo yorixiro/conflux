@@ -1,27 +1,8 @@
 import { useState } from 'react';
 import { usePersonaStore } from '../../../stores/personaStore';
 import { MemorySettingsTab } from '../../shell/persona/settings/MemorySettingsTab';
+import { countMemoryAtlasSources } from './heartstringMemoryModel';
 
-export type MemoryAtlasCounts = {
-  entries: number;
-  docs: number;
-  summaries: number;
-  indexed: number;
-};
-
-export function countMemoryAtlasSources(memory: {
-  personalMemories: string[];
-  referenceDocs: unknown[];
-  conversationSummaries: unknown[];
-  vectorIndex?: { indexedChunkCount?: number } | null;
-}): MemoryAtlasCounts {
-  return {
-    entries: memory.personalMemories.filter((entry) => entry.trim().length > 0).length,
-    docs: memory.referenceDocs.length,
-    summaries: memory.conversationSummaries.length,
-    indexed: Math.max(0, memory.vectorIndex?.indexedChunkCount ?? 0)
-  };
-}
 
 export function HeartstringMemoryAtlas() {
   const personas = usePersonaStore((state) => state.personas);
