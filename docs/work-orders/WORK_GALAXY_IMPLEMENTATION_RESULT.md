@@ -2,7 +2,7 @@
 
 开发基线：`feat/keke-devin-acp-preview-20261030` 的 `f553d80cdc197ca7aa6f492e2175a2ef8d8e0ebd`。
 收尾时上游新增的三个提交仅变更 AGENTS 与路线图文档，已基于 `45e5ad275a1c78f3b32404826299a8b27acf1352` 接续交付；运行代码基线未变。
-功能分支：`feat/heartstring-memory-galaxy`。仅提交 PR，未合并或部署。
+功能分支：`feat/heartstring-memory-galaxy`；[PR #8](https://github.com/yorixiro/conflux/pull/8)。运行代码提交：`aeff4ed089592f286b7c6efa18bfabe783d5e812`。状态：PR 待验收，未合并或部署。
 
 ## 实现
 
