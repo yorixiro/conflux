@@ -302,7 +302,6 @@ export function AppShellView({
         provider={overlaysProps.api}
         onOpenApi={collectionOpenProviderSettings}
         onOpenMenu={openQuickMenuPage}
-        onNewConversation={topbarProps.actions.onCreateConversation}
         currentPersona={chatCollaborator}
         onSetPersonaProvider={setChatCollaboratorProvider}
         onOpenPersona={chatCollaborator
