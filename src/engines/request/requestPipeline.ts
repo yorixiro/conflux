@@ -1,4 +1,5 @@
 import type { AssistantToolContext } from '../assistantToolProtocol';
+import { DEVIN_ACP_PROVIDER_ID, requestDevinAcpReply } from './devinAcpReply';
 import type { OpenAiToolHistoryMode } from '../provider-runtime/providerRuntimeOpenAiToolHistory';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
@@ -97,6 +98,11 @@ export async function requestCollaboratorReply(params: {
     onAudit,
     onImageUnderstandingResults
   } = params;
+  if (api.id === DEVIN_ACP_PROVIDER_ID) {
+    const latestUser = [...messages].reverse().find((message) => message.role === 'user');
+    if (!latestUser?.content?.trim()) throw new Error('Devin ACP requires a text message');
+    return requestDevinAcpReply({ prompt: latestUser.content, signal, onProgress });
+  }
   const prepared = await prepareCollaboratorReplyRequest({
     api,
     providers,
