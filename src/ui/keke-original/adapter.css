@@ -30,3 +30,4 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .keke-original-side .keke-calendar-wrap{margin:12px 0 4px}
 #chat .keke-original-wall{display:none}
 #chat .keke-original-side .kk-cal{margin:22px 0 18px}
+#chat header.keke-original-topbar{position:relative}

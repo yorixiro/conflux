@@ -12,7 +12,7 @@ import { runSelectionAction } from '../haptics';
 import { WorldAnchor } from './WorldAnchor';
 import { useI18n } from '../../i18n';
 import { useSpaceStore } from '../../stores/spaceStore';
-import { KekeTopGarland } from '../app-shell/KekeOriginalDecor';
+import { mountKekeHeader } from '../keke-original/kekeRuntime';
 import '../app-shell/KekeOriginalChrome.css';
 
 export type AppTopbarState = {
@@ -62,6 +62,11 @@ export function AppTopbar({
   const { t } = useI18n();
   const kekePreset = useSpaceStore((space) => space.theme.activePresetId);
   const showKekeChrome = state.activeWorld === 'chat' && (kekePreset === 'keke-doodle' || kekePreset === 'keke-pois');
+  useEffect(() => {
+    if (!showKekeChrome) return undefined;
+    const hd = document.querySelector<HTMLElement>('header.keke-original-topbar');
+    return mountKekeHeader(hd, document.querySelector('#chat .world-chat'), hd?.querySelector('.keke-original-header-avatar'));
+  }, [showKekeChrome]);
   const [brandSpinning, setBrandSpinning] = useState(false);
   const spinResetTimeoutRef = useRef<number | null>(null);
 
@@ -253,7 +258,6 @@ export function AppTopbar({
               </button>
             )}
           </div>
-          {showKekeChrome ? <KekeTopGarland pois={kekePreset === 'keke-pois'} /> : null}
         </div>
       </div>
 

@@ -98,3 +98,35 @@ export function mountKekeWall(app) {
   });
   app.appendChild(w);
 }
+
+export function mountKekeHeader(hd, app, hav) {
+  if (!hd || hd.dataset.kkMounted) return () => {};
+  hd.dataset.kkMounted = '1';
+  let sh;
+  const el = (t, c, h) => { const e = document.createElement(t); e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const im = (c, k) => { const e = document.createElement('img'); e.className = c; e.src = I[k]; e.alt = ''; e.setAttribute('aria-hidden', 'true'); return e; };
+  const kk = (t, c) => { const e = document.createElement(t); e.className = 'kk ' + c; return e; };
+  const IT=[[5,'i','heart',12],[11,'i','cloud',28],[18,'k','(๑•ᴗ•๑)',4],[26,'i','cherry',24],[31,'k','(=^･ω･^=)',2],[40,'g','✦',0],[46,'g','♡',2],[52,'g','˚₊',0],[58,'g','⋆',2],[64,'g','✧',0],[69,'i','cat',4],[74,'c','',0],[83,'k','ʕ•ᴥ•ʔ',6],[89,'i','bunny',28],[94,'i','note',12],[98,'s','',6]];
+
+  const G=cls=>{const g=kk('div','kk-gl '+cls),pp=cls=='pp';let ch=null;
+ g.innerHTML='<svg class="ln" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 0Q50 16 100 0" vector-effect="non-scaling-stroke"/></svg><u style="left:-8px"></u><u style="right:-8px"></u>';
+ IT.forEach(([x,k,v,l],n)=>{const p=document.createElement('i'),t=x/100;
+  p.style.cssText=`left:${x}%;top:${Math.round(32*t*(1-t))}px;--l:${l}px;--dl:${-n*.9}s;--du:${4.6+(n*37%29)/10}s;--am:${k=='c'?3:5}deg`;
+  if(k=='c'){const m=im('',pp?'charmg':'charm');m.style.height='86px';p.append(m);ch=p}
+  else if(k=='s'){const m=im('',pp?'thmg':'thm');m.style.width='18px';p.append(m)}
+  else if(k=='i')p.insertAdjacentHTML('beforeend',`<svg viewBox="0 0 20 20" width="19" height="19" style="fill:var(--f${IC[v][0]})">${IC[v][1]}</svg>`);
+  else{const b=document.createElement('b');b.className=k;b.textContent=v;p.append(b)}
+  g.append(p)});hd.appendChild(g);return ch};
+const chs=hd?[G('dd'),G('pp')]:[];
+
+  if(app){const t=im('kk kk-trk','trk'),m=im('kk kk-thm','thm');app.append(t,m);let h;
+ document.addEventListener('scroll',sh=ev=>{const L=ev.target;if(!(L instanceof HTMLElement)||!L.classList.contains('chat-flow'))return;const r=L.scrollHeight-L.clientHeight;if(r<60)return;const q=Math.min(1,Math.max(0,L.scrollTop/r));m.style.top=(118+q*(120-22))+'px';m.style.setProperty('--r',q*300+'deg');t.classList.add('on');m.classList.add('on');clearTimeout(h);h=setTimeout(()=>{t.classList.remove('on');m.classList.remove('on')},900)},{passive:true,capture:true})}
+
+  const hv=hav;if(hv&&chs.length)hv.addEventListener('click',()=>{chs.forEach(c=>{if(!c)return;c.classList.remove('big');void c.offsetWidth;c.classList.add('big');setTimeout(()=>c.classList.remove('big'),1500)})})
+  return () => {
+    delete hd.dataset.kkMounted;
+    hd.querySelectorAll(':scope > .kk-gl').forEach((n) => n.remove());
+    app?.querySelectorAll(':scope > .kk-trk, :scope > .kk-thm').forEach((n) => n.remove());
+    if (sh) document.removeEventListener('scroll', sh, true);
+  };
+}
