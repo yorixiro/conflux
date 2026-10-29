@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { mountKekeWall } from '../keke-original/kekeRuntime';
 
 type SketchName = 'heart' | 'cloud' | 'cherry' | 'cat' | 'bunny' | 'note';
 
@@ -67,6 +68,7 @@ const WALL_SYMBOLS = [
 export function KekeChatMotionLayers({ pois }: { pois: boolean }) {
   const trackRef = useRef<HTMLImageElement>(null);
   const thumbRef = useRef<HTMLImageElement>(null);
+  useEffect(() => { mountKekeWall(document.querySelector('#chat .world-chat')); }, []);
   useEffect(() => {
     const flow = document.querySelector<HTMLElement>('.chat-flow');
     const track = trackRef.current;

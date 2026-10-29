@@ -1,0 +1,100 @@
+// @ts-nocheck
+/* eslint-disable */
+/* Verbatim port of the prototype runtime (克克 ˚.ₒ (6).html, last script): side drawer decorations,
+   calendar with chat heat map, falling-particle pile, sway/jelly motion and the todo note. */
+import { KEKE_IMG as I } from './assets';
+
+const IC={heart:[1,'<path d="M10 17C3 12 2 7.5 5 5.5c2-1.3 4 0 5 2 1-2 3-3.3 5-2 3 2 2 6.5-5 11.5z"/>'],
+cloud:[3,'<path d="M5 15c-3 0-3.5-4 0-4.5C5 7 9 6 11 8.5c1.5-1.5 5-.5 4.5 3 3 .3 3 3.5.5 3.5z"/>'],
+cherry:[1,'<path d="M6 10.5C7 6 10 3 12 2.5M14 12C13 7 12.5 4 12 2.5" fill="none"/><path d="M12 2.5c2-1 4 0 5 1.5-2 .5-4 .3-5-1.5z" style="fill:var(--f3)"/><circle cx="6" cy="14" r="3.4"/><circle cx="14" cy="15" r="3.2"/>'],
+cat:[2,'<path d="M3 8l1-5 4 2.5h4L16 3l1 5c1 4-1 9-7 9S2 12 3 8z"/><circle cx="7" cy="11" r=".9" style="fill:var(--st)"/><circle cx="13" cy="11" r=".9" style="fill:var(--st)"/><path d="M9.3 13.3h1.4" fill="none"/>'],
+bunny:[1,'<path d="M6.5 9C4.5 3.5 5 1.8 7 2.6 8.5 3.6 8.6 7 8.2 9M13.5 9c2-5.500 1.5-7.200-.5-6.400-1.500 1-1.600 4.400-1.200 6.400"/><ellipse cx="10" cy="13.300" rx="6" ry="4.800"/><circle cx="7.800" cy="12.600" r=".8" style="fill:var(--st)"/><circle cx="12.200" cy="12.600" r=".8" style="fill:var(--st)"/>'],
+note:[3,'<path d="M7 15V4.5l8-1.5V13" fill="none"/><circle cx="5.200" cy="15" r="2.200"/><circle cx="13.200" cy="13" r="2.200"/>']};
+
+export function mountKekeSide(sd) {
+  if (!sd || sd.dataset.kkMounted) return;
+  sd.dataset.kkMounted = '1';
+  let oh, mh;
+  const $ = (q) => document.querySelector(q);
+  const app = $('#chat .world-chat');
+  const rain = sd.querySelector('.rain');
+  const sv = sd.querySelector('.sav');
+  const el = (t, c, h) => { const e = document.createElement(t); e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const im = (c, k) => { const e = document.createElement('img'); e.className = c; e.src = I[k]; e.alt = ''; e.setAttribute('aria-hidden', 'true'); return e; };
+  const kk = (t, c) => { const e = document.createElement(t); e.className = 'kk ' + c; return e; };
+  if (sv) sv.appendChild(im('kk kk-disc', 'disc'));
+  sd.appendChild(im('kk kk-bar', 'bar'));
+  const p0 = kk('div', 'kk-print'); p0.append(im('', 'stp'));
+  [['♡','left:8px;top:22px;font-size:14px;rotate:-12deg'],['✦','right:0;top:12px;font-size:13px'],['⋆','left:0;bottom:46px;font-size:12px'],['˚ ₊ ·','right:-4px;bottom:64px;font-size:11px;letter-spacing:.2em'],['♡','right:8px;bottom:32px;font-size:10px;opacity:.7'],['sweet no.128','left:16px;bottom:-12px;font-size:9px;letter-spacing:.2em;rotate:-3deg;white-space:nowrap']].forEach(([t, c]) => { const i = document.createElement('i'); i.textContent = t; i.style.cssText = c; p0.append(i); });
+  sd.appendChild(p0);
+  if(sd){
+ const sp=(cx,cy,r,tn,dir)=>{let d='';const N=Math.round(tn*14);for(let i=0;i<=N;i++){const t=i/N,a=dir*t*tn*2*Math.PI,q=r*t;d+=(i?'L':'M')+(cx+q*Math.cos(a)).toFixed(1)+' '+(cy+q*Math.sin(a)).toFixed(1)}return d};
+ sd.insertAdjacentHTML('afterbegin',`<svg class="kk2 kk-spir" aria-hidden="true"><defs><pattern id="kkSp" width="72" height="72" patternUnits="userSpaceOnUse"><path d="${sp(18,18,10,2.3,1)}"/><path d="${sp(54,54,10,2.3,-1)}"/></pattern></defs><rect width="100%" height="100%" fill="url(#kkSp)"/></svg>`);
+ sd.append(el('div','kk2 kk-holes','<i></i><i></i><i></i><i></i>'),el('div','kk2 kk-stamp','✧ profile no.01'));
+ const sinfo=sd.querySelector('.sinfo'),smn=sd.querySelector('.smn');if(rain&&sinfo)sinfo.appendChild(rain);
+ const T=new Date(),MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];let y=T.getFullYear(),m=T.getMonth(),sel='';
+ const CK='kk-chatcnt',tk=(d=T)=>`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;let CN={};try{CN=JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){}
+ if(!Object.keys(CN).length){for(let i=1;i<75;i++){const d=new Date(T.getFullYear(),T.getMonth(),T.getDate()-i),v=(d.getDate()*7+d.getMonth()*5+i*3)%17;CN[tk(d)]=v<4?0:v<8?v-2:v*1.2|0}CN[tk()]=11}
+ const lv=n=>n<1?0:n<4?1:n<9?2:n<16?3:4;
+ const cal=el('div','kk2 kk-cal','<div class="cb"></div>');const body=cal.firstChild;
+ if(I&&I.cat){const c=el('img','kk2 kk-catst');c.src=I.cat;c.alt='';cal.append(c)}
+ const draw=()=>{const f=(new Date(y,m,1).getDay()+6)%7,dm=new Date(y,m+1,0).getDate(),pd=new Date(y,m,0).getDate(),cur=y==T.getFullYear()&&m==T.getMonth();
+  let h=`<div class="ch"><button data-d="-1" aria-label="上个月">‹</button><span class="ct"><b>${m+1}</b>月 <em>${MN[m]} ${y}</em></span><button data-d="1" aria-label="下个月">›</button></div><div class="cw">${[...'一二三四五六日'].map(c=>`<span>${c}</span>`).join('')}</div><div class="cg">`;
+  for(let i=0;i<42;i++){const d=i-f+1,o=d<1||d>dm,n=d<1?pd+d:d>dm?d-dm:d,k=`${y}-${m}-${d}`;let c=o?'o':'';if(!o&&cur&&d==T.getDate())c+=' t';if(!o&&sel==k)c+=' s';if(i%7>4)c+=' w';h+=`<i class="${c}" data-k="${k}"${o?'':` data-h="${lv(CN[k]||0)}" title="${CN[k]||0} 条"`}>${n}</i>`}
+  h+=`</div><div class="cf">${cur?`✦ today · ${m+1}.${T.getDate()}`:'<button class="cb2">↺ 回到今天</button>'}</div>`;body.innerHTML=h};
+ cal.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){m+=+b.dataset.d;if(m<0){m=11;y--}if(m>11){m=0;y++}draw();return}
+  if(e.target.closest('.ct,.cb2')){y=T.getFullYear();m=T.getMonth();draw();return}
+  const c=e.target.closest('.cg i:not(.o)');if(c){sel=sel==c.dataset.k?'':c.dataset.k;draw()}});
+ draw();(smn||sd).after?.call(smn||sd,cal);
+ /* 聊天粒子堆积 + 陀螺仪/划动晃动 */
+ {const cv=el('canvas','kk2 kk-pile'),cx=cv.getContext('2d'),P=[],PAL=['#e7c3cc','#d9e3ec','#efe4c8','#d9d2d6','#cdb7c4'],KD={mist:[0,0,1],doodle:[2,1,0],pois:[3,1,3]};cal.append(cv);
+  let SPR=[];const buildSpr=()=>{const out=[];document.querySelectorAll('#chat .kk-wall > svg, #petals svg').forEach(sv=>{try{const ix=[...sv.parentNode.querySelectorAll(':scope > svg')].indexOf(sv),wt=sv.closest('.kk-wall')&&(ix==4||ix==5)?.2:1,vb=sv.viewBox&&sv.viewBox.baseVal,w=(vb&&vb.width)||parseFloat(sv.getAttribute('width'))||16,h=(vb&&vb.height)||parseFloat(sv.getAttribute('height'))||16,c=sv.cloneNode(true);if(!c.getAttribute('viewBox'))c.setAttribute('viewBox','0 0 '+w+' '+h);c.setAttribute('xmlns','http://www.w3.org/2000/svg');c.setAttribute('width',w);c.setAttribute('height',h);const cs=getComputedStyle(sv);['fill','stroke','stroke-width','stroke-linecap','stroke-linejoin'].forEach(k=>c.setAttribute(k,cs.getPropertyValue(k)));c.removeAttribute('style');c.removeAttribute('class');const im=new Image();im.onload=()=>run();im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(c).replace(/currentColor/g,'#a58f98'));out.push({img:im,ar:w/h,r:6.5,wt})}catch(e){}});document.querySelectorAll('#petals i').forEach(e=>{const t=e.textContent;if(t&&!e.querySelector('svg'))out.push({g:t,c:getComputedStyle(e).color,r:4.4})});SPR=out};
+  const pickSprite=()=>{if(!SPR.length||Math.random()>.3)return null;let t=0;for(const s of SPR)t+=s.wt||1;let r=Math.random()*t;for(const s of SPR){r-=s.wt||1;if(r<=0)return s}return SPR[0]};
+  const drawSprite=p=>{const s=p.sp;if(!s)return 0;if(s.g){cx.font=(p.r*2.6)+'px system-ui,sans-serif';cx.fillStyle=s.c;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(s.g,0,0);return 1}if(s.img&&s.img.complete&&s.img.naturalWidth){const h=p.r*2.4,w=h*s.ar;cx.drawImage(s.img,-w/2,-h/2,w,h);return 1}return 0};
+  let fr=0,W=0,H=0,raf=0,idle=0,g={x:0,y:1},tg={x:0,y:1},lp=null,lm=0,ls=0;
+  const mt=Object.keys(CN).filter(k=>k.startsWith(`${T.getFullYear()}-${T.getMonth()}-`)).reduce((a,k)=>a+CN[k],0);
+  const spawn=top=>{const ks=KD[document.documentElement.dataset.ct]||[0,1,2],sp=pickSprite();P.push({sp,w:0,x:8+Math.random()*(Math.max(W-16,0)||200),y:top?-6:Math.random()*(H||200)*.6,vx:0,vy:0,r:sp?sp.r*(.8+Math.random()*.5):3+Math.random()*2.6,a:Math.random()*6.28,va:(Math.random()-.5)*.08,k:ks[Math.random()*ks.length|0],c:PAL[Math.random()*PAL.length|0]})};
+  const size=()=>{W=cal.offsetWidth;H=cal.offsetHeight;const d=Math.min(2,devicePixelRatio||1);cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};
+  for(let i=0;i<Math.min(64,18+Math.round(mt/3));i++)spawn();
+  const shape=p=>{if(drawSprite(p))return;const r=p.r;cx.beginPath();if(p.k==0)cx.ellipse(0,0,r*1.25,r*.7,0,0,6.3);else if(p.k==3)cx.arc(0,0,r*.75,0,6.3);else if(p.k==1){const R=r*1.5;cx.moveTo(0,-R);cx.quadraticCurveTo(0,0,R,0);cx.quadraticCurveTo(0,0,0,R);cx.quadraticCurveTo(0,0,-R,0);cx.quadraticCurveTo(0,0,0,-R)}else{cx.moveTo(0,r*.9);cx.bezierCurveTo(-r*1.6,-r*.2,-r*.7,-r*1.4,0,-r*.5);cx.bezierCurveTo(r*.7,-r*1.4,r*1.6,-r*.2,0,r*.9)}cx.fill()};
+  const tick=()=>{raf=0;if(!sd.classList.contains('o')||!sd.isConnected)return;if(++fr>420)for(const p of P){p.z=1;p.vx=p.vy=p.va=0}if(!W)size();g.x+=(tg.x-g.x)*.12;g.y+=(tg.y-g.y)*.12;let mv=0;
+   for(const p of P){if(p.z)continue;if(p.w>0){p.w--;continue}p.ox=p.x;p.oy=p.y;p.vx+=g.x*.22;p.vy+=g.y*.22;p.vx*=.97;p.vy*=.97;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;if(p.x<p.r){p.x=p.r;p.vx*=-.3}if(p.x>W-p.r){p.x=W-p.r;p.vx*=-.3}if(p.y<p.r-30)p.y=p.r-30;if(p.y>H-p.r-5){p.y=H-p.r-5;p.vy=Math.abs(p.vy)<.6?0:p.vy*-.2;p.vx*=.85;p.va*=.8}}
+   for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),mm=(a.r+b.r)*.9;if(d<mm&&d>.01){const sa=a.z?0:1,sb=b.z?0:1,tt=sa+sb;if(tt){const f=(mm-d)/d/tt;a.x-=dx*f*sa;a.y-=dy*f*sa;b.x+=dx*f*sb;b.y+=dy*f*sb;if(sa){a.vx*=.8;a.vy*=.8;a.va*=.8}if(sb){b.vx*=.8;b.vy*=.8;b.va*=.8}}}}
+   cx.clearRect(0,0,W,H);for(const p of P){{const md=Math.abs(p.x-(p.ox??p.x))+Math.abs(p.y-(p.oy??p.y)),wt=p.w>0;mv+=md+(wt?5:0);p.q=md<.3&&!wt?(p.q||0)+1:0;if(p.q>10){p.z=1;p.vx=p.vy=p.va=0}}cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.globalAlpha=.9;shape(p);cx.restore()}
+   idle=mv/P.length<.04&&Math.abs(tg.x-g.x)<.01&&Math.abs(tg.y-g.y)<.01?idle+1:0;if(idle<40)raf=requestAnimationFrame(tick)};
+  const run=()=>{idle=0;fr=0;if(!raf)raf=requestAnimationFrame(tick)};
+  let ang=0,av=0,tgt=0,sraf=0;cal.style.transformOrigin='50% 0';
+  const swStep=()=>{sraf=0;av+=-.05*(ang-tgt)-.06*av;ang+=av;cal.style.rotate=ang.toFixed(2)+'deg';if(Math.abs(ang-tgt)>.03||Math.abs(av)>.01)sraf=requestAnimationFrame(swStep);else{ang=tgt;cal.style.rotate=ang.toFixed(2)+'deg'}};
+  const swing=()=>{if(!sraf)sraf=requestAnimationFrame(swStep)};
+  const jelly=k=>{cal.querySelectorAll('.cg i').forEach((e,i)=>{if(e.animate)e.animate([{rotate:'0deg',scale:'1'},{rotate:(i%2?-1:1)*10*k+'deg',scale:'1.18 .86'},{rotate:(i%2?1:-1)*6*k+'deg',scale:'.94 1.1'},{rotate:(i%2?-1:1)*2*k+'deg',scale:'1.03'},{rotate:'0deg',scale:'1'}],{duration:720,delay:(i%7)*18+(i/7|0)*30,easing:'cubic-bezier(.3,.7,.4,1)'})})};
+  const wobble=k=>{av+=(Math.random()<.5?-1:1)*2.4*k;swing();jelly(k);cal.classList.remove('kk-wob');void cal.offsetWidth;cal.classList.add('kk-wob');if(navigator.vibrate)navigator.vibrate(14)};
+  cal.addEventListener('click',e=>{if(e.target.closest('.ct'))wobble(1.1)});
+  cal.addEventListener('pointerdown',e=>{const c=e.target.closest('.cg i');if(c&&c.animate)c.animate([{scale:'1'},{scale:'1.35 .75'},{scale:'.9 1.12'},{scale:'1'}],{duration:420,easing:'ease-out'})});
+  const shake=k=>{wobble(k);for(const p of P){p.z=0;p.vx+=(Math.random()-.5)*7*k;p.vy-=Math.random()*6*k}run()};
+  cal.addEventListener('pointermove',e=>{const r=cal.getBoundingClientRect(),s=r.width/(W||r.width),px=(e.clientX-r.left)/s,py=(e.clientY-r.top)/s;if(lp){const vx=px-lp.x,vy=py-lp.y;av=Math.max(-3,Math.min(3,av+vx*.03));swing();for(const p of P)if(Math.hypot(p.x-px,p.y-py)<36){p.z=0;p.vx+=vx*.35;p.vy+=vy*.35}run()}lp={x:px,y:py}});
+  cal.addEventListener('pointerleave',()=>lp=null);
+  cal.addEventListener('pointerdown',()=>{[window.DeviceOrientationEvent,window.DeviceMotionEvent].forEach(o=>o&&o.requestPermission&&o.requestPermission().catch(()=>{}))},{once:true});
+  addEventListener('deviceorientation',oh=e=>{if(!sd.isConnected){removeEventListener('deviceorientation',oh);return}if(e.gamma==null||e.beta==null)return;const gm=e.gamma*Math.PI/180,bt=e.beta*Math.PI/180,x=Math.sin(gm),yy=Math.max(-1,Math.min(1,Math.sin(bt))),a=((screen.orientation&&screen.orientation.angle)||0)*Math.PI/180;const nx=x*Math.cos(a)+yy*Math.sin(a),ny=-x*Math.sin(a)+yy*Math.cos(a);if(Math.hypot(nx-tg.x,ny-tg.y)>.08){tg.x=nx;tg.y=ny;tgt=-nx*8;swing();for(const p of P)p.z=0;run()}});
+  addEventListener('devicemotion',mh=e=>{if(!sd.isConnected){removeEventListener('devicemotion',mh);return}const a=e.accelerationIncludingGravity;if(!a)return;const mg=Math.hypot(a.x||0,a.y||0,a.z||0),nw=performance.now();if(Math.abs(mg-lm)>10&&nw-ls>400){ls=nw;shake(1.3)}lm=mg});
+  let wasO=false,lastT='';const onOpen=()=>{av+=3.2;swing();const t=document.documentElement.dataset.ct;if(!SPR.length||t!=lastT){lastT=t;buildSpr();for(const q of P){q.sp=pickSprite();q.r=q.sp?q.sp.r*(.8+Math.random()*.5):3+Math.random()*2.6}}if(!W)size();for(const q of P){q.x=8+Math.random()*Math.max(W-16,40);q.y=-12-Math.random()*30;q.vx=q.vy=0;q.z=0;q.q=0;q.w=Math.random()*100|0}};
+  new MutationObserver(()=>{const o=sd.classList.contains('o');if(o&&!wasO)onOpen();wasO=o;run()}).observe(sd,{attributes:true,attributeFilter:['class']});new ResizeObserver(size).observe(cal);
+  onOpen();wasO=true;window.kkCnt=()=>{const k=tk();CN[k]=(CN[k]||0)+1;try{localStorage.setItem(CK,JSON.stringify(CN))}catch(e){}if(P.length<64)spawn(1);if(y==T.getFullYear()&&m==T.getMonth())draw();run()};
+ }
+ const K='kk-todo';let st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){}
+ const n=el('div','kk2 kk-note','<b>今日小事 ♡</b>'+['好好吃饭','画一点点','早点睡 ☾'].map((t,i)=>`<p data-i="${i}" class="${st[i]?'on':''}"><u></u>${t}</p>`).join(''));
+ n.addEventListener('click',e=>{const p=e.target.closest('p');if(!p)return;p.classList.toggle('on');st[p.dataset.i]=p.classList.contains('on')?1:0;try{localStorage.setItem(K,JSON.stringify(st))}catch(x){}});
+ const low=el('div','kk2 kk-low');low.append(n);const pr=sd.querySelector('.kk-print');if(pr)low.append(pr);cal.after(low)}
+  const d = el('img', 'kk pp kk-disc'); d.src = I.discg; d.alt = ''; if (sv) sv.appendChild(d);
+  const b = el('img', 'kk pp kk-bar'); b.src = I.barg; b.alt = ''; sd.appendChild(b);
+  const pr = sd.querySelector('.kk-print');
+  if (pr) { const c = pr.cloneNode(true); c.classList.add('pp'); c.querySelector('img').src = I.stpg; pr.after(c); }
+}
+
+export function mountKekeWall(app) {
+  if (!app || app.querySelector(':scope > .kk-wall')) return;
+  const w = document.createElement('div'); w.className = 'kk kk-wall';
+  [[8,26,20,-14,'heart'],[88,34,22,10,'cloud'],[14,52,18,12,'note'],[82,60,20,-8,'cherry'],[6,78,22,8,'bunny'],[90,82,18,-12,'cat'],[48,70,16,16,'heart'],[44,30,16,-6,'note']].forEach(([x, y, s, r, n]) => {
+    w.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 20 20" width="${s}" height="${s}" style="left:${x}%;top:${y}%;translate:-50% -50%;rotate:${r}deg;fill:var(--f${IC[n][0]})">${IC[n][1]}</svg>`);
+  });
+  app.appendChild(w);
+}

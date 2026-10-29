@@ -28,3 +28,5 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .conflux-sidebar-dialog:has(.keke-original-side){width:min(84vw,310px);background:none;overflow:visible}
 #chat .conflux-sidebar-dialog:has(.keke-original-side) .desktop-app-sidebar{padding:0;background:none}
 #chat .keke-original-side .keke-calendar-wrap{margin:12px 0 4px}
+#chat .keke-original-wall{display:none}
+#chat .keke-original-side .kk-cal{margin:22px 0 18px}

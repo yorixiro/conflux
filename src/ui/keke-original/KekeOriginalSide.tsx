@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { Persona } from '../../types/domain';
 import { useSpaceStore } from '../../stores/spaceStore';
-import { SidebarCalendar } from '../app-shell/SidebarCalendar';
+import { mountKekeSide } from './kekeRuntime';
 
 const PXG = {
   big: ['....#....', '....#....', '...###...', '..#####..', '#########', '..#####..', '...###...', '....#....', '....#....'],
@@ -33,7 +33,9 @@ export function KekeOriginalSide({ persona, conversationCount, onEdit }: {
     left: (j * 53) % 236, top: (j * 37) % 104, d: (1.6 + (j % 5) * 0.35).toFixed(2), dl: (-j * 0.41).toFixed(2), ch: 'i;°.i˚'[j % 6]
   })), []);
   const today = new Date();
-  return <aside className="fam side o keke-original-side" aria-label={`${name}的资料`}>
+  const sideRef = useRef<HTMLElement>(null);
+  useEffect(() => { mountKekeSide(sideRef.current); }, []);
+  return <aside ref={sideRef} className="fam side o keke-original-side" aria-label={`${name}的资料`}>
     <i className="dd tape t1" /><i className="pp ptape p1" />
     <div className="sav">{name.slice(0, 1)}<Px k="big" /><Px k="dia" /></div>
     <div className="snm"><b>{name}</b><span className="skao">{isPois ? '(=^･ω･^=)' : '(*´ω`*)'}</span></div>
@@ -48,7 +50,6 @@ export function KekeOriginalSide({ persona, conversationCount, onEdit }: {
       <button type="button" onClick={onEdit} disabled={!persona}><Px k="sm" />聊天资料<small>profil</small></button>
       <button type="button" onClick={() => applyTheme(isPois ? 'keke-doodle' : 'keke-pois')}><Px k="sm" />换个主题<small>{isPois ? '贴纸' : '波点'}</small></button>
     </nav>
-    <div className="keke-calendar-wrap"><SidebarCalendar variant="keke" /></div>
     <div className="rain" aria-hidden="true">
       <div className="win"><i><span className="cat">{'∧,,∧\n(´･ω･)'}</span></i><i /></div>
       <p className="rtx">It's Raining<b>.</b><b>.</b><b>.</b></p>
