@@ -146,7 +146,7 @@ export function AppShellView({
                 onDetailOpenChange={setCollectionDetailOpen}
                 onOpenCollaboratorBuilderForCreate={collectionOpenCollaboratorBuilderForCreate}
                 onCreateCustomCollaborator={collectionCreateCustomCollaborator}
-                onBackToChat={useBottomNavigation ? openChatList : topbarProps.actions.onOpenPreviewChat}
+                onBackToChat={useBottomNavigation ? () => { openChatList(); setChatHubOpen(true); } : topbarProps.actions.onOpenPreviewChat}
                 onOpenProviderSettings={collectionOpenProviderSettings}
                 onOpenDesktopLocalSettings={collectionOpenDesktopLocalSettings}
                 sectionNavigation={useBottomNavigation}
