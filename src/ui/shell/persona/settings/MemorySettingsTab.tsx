@@ -492,7 +492,11 @@ function MemoryReferenceDocCard({
   );
 }
 
-export function MemorySettingsTab({ activePersona, onUpdatePersona }: PersonaTabProps) {
+export type MemoryEditorFocus = {
+  personaId: string;
+} & ({ kind: 'entry'; index: number; expectedText: string } | { kind: 'doc' | 'summary'; id: string });
+
+export function MemorySettingsTab({ activePersona, onUpdatePersona, focusTarget }: PersonaTabProps & { focusTarget?: MemoryEditorFocus | null }) {
   const i18n = useI18n();
   const { t } = i18n;
   const memories = activePersona?.memory.personalMemories ?? [];
@@ -558,7 +562,7 @@ export function MemorySettingsTab({ activePersona, onUpdatePersona }: PersonaTab
     'overview',
     'entries',
     'docs',
-    ...(MEMORY_RELEASE_GATES.showCollaboratorConversationSummaryStatus
+    ...(MEMORY_RELEASE_GATES.showCollaboratorConversationSummaryStatus || focusTarget?.kind === 'summary'
       ? ['conversations' as const]
       : []),
     ...(MEMORY_RELEASE_GATES.showVectorIndexSettings
@@ -567,6 +571,7 @@ export function MemorySettingsTab({ activePersona, onUpdatePersona }: PersonaTab
   ];
   const isMemoryPageDisabled = (page: MemoryPage) => (
     (page === 'conversations' || page === 'index') && !crossConversationRecallEnabled
+      && !(page === 'conversations' && focusTarget?.kind === 'summary' && focusTarget.personaId === activePersona?.id)
   );
 
   useEffect(() => {
@@ -818,6 +823,20 @@ export function MemorySettingsTab({ activePersona, onUpdatePersona }: PersonaTab
       setEditingDocId(doc.id);
     }
   };
+
+  // Atlas navigation only: all mutations, body loading and confirmation stay in this editor.
+  useEffect(() => {
+    if (!focusTarget || focusTarget.personaId !== activePersona?.id) return;
+    if (focusTarget.kind === 'entry') {
+      if (memories[focusTarget.index] === focusTarget.expectedText) setActiveMemoryPage('entries');
+    } else if (focusTarget.kind === 'doc') {
+      const doc = referenceDocs.find((item) => item.id === focusTarget.id);
+      if (doc) { setActiveMemoryPage('docs'); void openReferenceDoc(doc, false); }
+    } else {
+      const summary = conversationSummaries.find((item) => item.id === focusTarget.id);
+      if (summary) { setActiveMemoryPage('conversations'); startEditingConversationSummary(summary); }
+    }
+  }, [focusTarget, activePersona?.id]);
 
   const updateConversationSummaries = async () => {
     if (summarizingConversations) {
@@ -1377,6 +1396,8 @@ export function MemorySettingsTab({ activePersona, onUpdatePersona }: PersonaTab
           {memories.map((m, i) => (
             <EditablePill
               key={i}
+              editRequest={focusTarget?.kind === 'entry' && focusTarget.personaId === activePersona?.id
+                && focusTarget.index === i && focusTarget.expectedText === m ? focusTarget : undefined}
               text={m}
               display="div"
               baseClassName="ps-mc"
