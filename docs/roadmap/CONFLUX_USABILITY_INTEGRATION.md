@@ -28,6 +28,16 @@
 
 `docs/work-orders/WORK_GALAXY_GENERATIVE_ART.md` 专门负责「心弦 → 记忆图谱」的 Three.js 星系可视化。它在独立分支开发时，**不要并行更改同一批 heartstring UI 文件**。P2 消息收藏只先改聊天侧/来源契约；心弦接线等银河 PR 明确稳定后再做，以免互相覆盖。
 
+### Galaxy 记忆图谱 · 本轮交付进度
+
+- 状态：**PR 待验收**；更新日期：2026-10-30。
+- 功能分支：`feat/heartstring-memory-galaxy`；功能 PR：https://github.com/yorixiro/conflux/pull/8 。未合并。
+- 运行代码 Commit：`aeff4ed089592f286b7c6efa18bfabe783d5e812`（后续纯文档同步提交另计）。
+- 已完成：真实记忆/资料/摘要星点、Three.js 银河场景、点选详情与归属线、原编辑器定位、目录降级、分类搜索分页、可见性停帧和资源释放。
+- 验证：定向 Vitest 两文件 8 项通过；唯一一次类型检查 exit 2，8 处诊断均在未修改的 AppShellView / DesktopAppSidebar；编辑回写、角色切换、空数据、523 实体分页、320/720/1440 容器和心弦标签卸载已作隔离检查。
+- 未验收：云端浏览器禁用 WebGL，实际 GPU 图像/着色器与触摸未测；**Android 平板真机未测**，未提供实测 FPS/显存结论。未运行全量、冒烟、门禁或收费 API。
+- 下一步：按 `docs/work-orders/WORK_GALAXY_IMPLEMENTATION_RESULT.md` 在 Termux 独立 5175 端口验收。共享分支进度通过独立文档 PR 提交，同步前仍是待验收，不视为功能已落地。
+
 ## 开发与验收
 
 - 每项启动前核对最新实际开发分支、未提交改动和 PR 依赖，不以旧 `main` 为基础；先遵循 `AGENTS.md`。
