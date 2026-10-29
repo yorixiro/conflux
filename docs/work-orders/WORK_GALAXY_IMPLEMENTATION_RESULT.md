@@ -1,64 +1,91 @@
-# 心弦记忆银河：实现与定向验收
+# PR #8 银河视觉返工记录
 
-开发基线：`feat/keke-devin-acp-preview-20261030` 的 `f553d80cdc197ca7aa6f492e2175a2ef8d8e0ebd`。
-收尾时上游新增的三个提交仅变更 AGENTS 与路线图文档，已基于 `45e5ad275a1c78f3b32404826299a8b27acf1352` 接续交付；运行代码基线未变。
-功能分支：`feat/heartstring-memory-galaxy`；[PR #8](https://github.com/yorixiro/conflux/pull/8)。运行代码提交：`aeff4ed089592f286b7c6efa18bfabe783d5e812`。状态：PR 待验收，未合并或部署。
+状态：**PR 待验收；GPU 视觉尚未验收**。更新日期：2026-10-30。
 
-## 实现
+- PR：https://github.com/yorixiro/conflux/pull/8
+- 继续分支：`feat/heartstring-memory-galaxy`，返工起点 `89cddd2b6886d20e80d6562479e1522842c694a5`。
+- 返工运行代码：`5526629085b16a441962ac2e5a39d61ce804954e`；后续进度文档提交另计。
+- 已读取最近的三条视觉返工评论（6509583298、6509738745、6509945650），最后一条已确认的「银河 + 下缘轻阅读区 + 下方真实分类」为布局依据。未合并、未部署。
 
-- `HeartstringMemoryAtlas.tsx`：在原「心弦 → 记忆图谱」中挂载 Three.js 场景。支持触摸旋转、缩放、点选、归属高亮、分类、查找、星域分页、文字目录及原编辑器定位。
-- `heartstringMemoryModel.ts`：角色为根节点；非空字符串记忆、具有 ID 的资料与摘要分别形成实体。保留重复字符串及其原数组下标；条目变化、删除或换角色时不把旧选择套到相邻条目。下标仅是视图定位，没有写入记忆 ID。
-- 选中实体时绘制一条角色归属线。摘要的登记来源只显示计数，未展开未加载对话、未绘制猜测关系；无自动语义关联。
-- 未加载资料显示摘要和明确提示。进入原资料编辑器时才调用既有正文读取。图谱不会自动读取所有资料或触发索引、embedding、模型调用。
-- `MemorySettingsTab.tsx` 与 `EditablePill.tsx` 只增加可选定位请求；增改删、确认、正文读取与回写全部沿用旧编辑器。没有第二份持久化数据。
-- `memoryGalaxyScene.ts`：独立编写三旋臂星尘、空间远星、中心光晕和带光环的实体星点。装饰与实体使用不同点云，单个选中实体额外绘制归属线；无纹理下载、无后处理依赖。修改文字不会重建 GPU 场景。
+## 原版核实与来源
 
-## 与教程的差别
+已实际下载以下公开资源，而不是仅根据视频截图推测源码：
 
-已读取 https://chat.xiaoke.love/galaxy-tutorial/ 的正文与模板源码。浏览器访问模板停在加载页；当前云端浏览器明确报告 WebGL 被禁用，故未核实教程的实际动态图像，也未声称精确复刻。
+- 教程页：https://chat.xiaoke.love/galaxy-tutorial/
+- 完整 HTML/JS 模板：https://chat.xiaoke.love/galaxy-tutorial/galaxy-template.html
+- 配套教程：https://chat.xiaoke.love/galaxy-tutorial/记忆银河搭建教程.md
 
-本实现参考紫粉蓝星尘、旋臂、核心和轻微呼吸的方向，接入 Conflux 原数据和编辑器；不复制模板的内嵌演示记忆、同类星座猜测关系、流星或 Bloom。无时间戳的字符串条目不伪装成按时间排列，根节点使用角色。
+教程提供的是可直接运行的单文件模板及定制说明，未提供 GitHub 仓库入口。原模板从 jsDelivr 加载 Three.js 0.160.0 及字体；有内嵌演示记忆，在 memory.json 读取失败时使用。作者在教程中明确邀请读者将模板交给 AI 定制；页面署名为作者与“小克”的共同作品，但未列出独立 OSS 许可证或通用公开再分发授权。Conflux 的来源、有限定制语境及尚未明确的再分发边界已写入 `docs/PROVENANCE.md`，没有擅自声明该模板为 AGPL。
 
-## 性能与释放
+本轮实际打开原模板时，浏览器控制台报告 `GL_VENDOR = Disabled / GL_RENDERER = Disabled / Error creating WebGL context`，页面停留在加载状态。证据为 `docs/evidence/galaxy-rework/conflux-original-blocked.png`。**当前环境无法完成原版运行画面与作者视频的同视角对照。**
 
-- 小视口或粗指针设备：装饰最多 5200 点、DPR 上限 1.35、每星域最多 240 条记忆，粗指针动画上限 30fps。
-- 桌面：装饰最多 10500 点、DPR 上限 1.75、每星域最多 480 条记忆，动画上限 45fps。上述是代码预算，不是实测帧率。
-- Resize 更新画布、相机、DPR、装饰 draw range；暂停或系统减少动态效果时按交互重绘。
-- document.hidden、IntersectionObserver 离屏、零尺寸停止 RAF。切换心弦标签会卸载图谱，原收藏册与图谱不同时挂载。
-- 卸载或 context lost：取消 RAF；断开 ResizeObserver、IntersectionObserver；移除 visibility、媒体查询、pointer、context 事件；dispose OrbitControls、4 个 geometry、4 个 material、renderLists、renderer；主动释放 WebGL context 并移除 canvas。重复 dispose 安全。
-- 星域分页只分配绘制窗口，完整数据仍可通过分类、全局目录搜索、翻页和旧编辑器管理。
+用户视频截图呈现白粉色高亮宽核心、横向密集星盘。当前源码的注释明确提到压低白色中心、核心不再巨大，但这不能证明视频与模板属于哪个具体版本。本轮恢复可核对的模板算法与参数，不把恢复源码参数等同于复刻视频成功。
 
-## 实际验证
+## 具体修改
 
-1. `node node_modules/vitest/vitest.mjs run src/ui/collection/heartstring/heartstringMemoryModel.test.ts src/ui/collection/heartstring/memoryGalaxyScene.test.ts`：初次数据测试 6/6 通过；生命周期测试中相机 mock 没有朝向原点导致 1 项失败，修正 mock 后生命周期 2/2 通过。后续场景 Resize/镜头调整后，仅重新运行生命周期文件，2/2 通过。合计两个文件 8 项通过。
-2. 唯一一次 `npm run typecheck`：exit 2，8 处错误全部来自未修改的壳层文件：
-   - `src/ui/app-shell/AppShellView.tsx:256`：TS2339，actions 类型中没有 onOpenHome。
-   - `src/ui/app-shell/DesktopAppSidebar.tsx:189,192,221,223,333,409,490`：TS2367，hub/sidebar 已收窄分支内的不可达比较。
-   - 上述两个文件与开发基线没有 diff。图谱及编辑接线文件未报类型错误；没有第二次类型检查或借本工单修改无关 UI。
-3. 云端 Chromium 隔离页面直接挂载真实 `HeartstringMemoryAtlas` / `HeartstringHub` / stores，以虚构数据验收。初始：36 条字符串 + 2 份资料 + 1 条摘要 = 39 颗记忆星，角色根节点另计。999 个向量片段只显示索引状态。
-4. 实际点击演示记录：目录搜索「第一次」→选中条目→原编辑器自动切到条目并聚焦→修改并按 Enter→目录查到修改后的原文；资料星点打开原文编辑器，修改后字数更新；摘要星点打开旧对话编辑器，保存后的详情正文更新且原来源计数保留。
-5. 切换到空白角色：真实记忆数为 0，旧选中详情消失。将条目增加为 520 条后，523 个实体可在目录与下一星域继续访问。桌面第二页实际显示剩余 43 条，未遗漏资料/摘要。
-6. 检查 320px、720px 容器与 1440px 桌面容器（正文受现有 1080px max-width 限制）：图谱区 scrollWidth 与 clientWidth 相等，未发生横向溢出；目视检查了窄栏详情与目录。属于容器宽度验收，不等同于 Android 设备或真实移动视口验收。
-7. 「心弦 → 记忆图谱 → 共读」实际切换后，图谱 DOM 与画布计数为 0；返回后重新挂载。
-8. 当前云端 Chromium WebGL context 创建失败（GL_VENDOR/GL_RENDERER Disabled）。已实测非 WebGL 自动目录降级与编辑可用；GPU 图像、着色器实际编译/效果、触摸双指缩放、Android 真机 FPS/显存未实测。生命周期测试使用真实 Three.js 几何/材质与替身 renderer/controls，不是 GPU 显存实测。
+`galaxyTemplateVisual.ts` 将教程视觉层与 Conflux 数据接线分开：
 
-未运行 build、全量测试、verify、PWA 冒烟、发布门禁、哈希矩阵或收费 API 测试。
+| 项目 | 本轮处理 |
+| --- | --- |
+| 粒子盘 | 恢复原半径 5、双臂、旋转系数 1.15、半径幂 1.7、散射 .55 与原上下厚度分布；14000 个粒子 |
+| 空间远星 | 恢复原半径/高度分布、五色远星、6400 个粒子 |
+| 粒子颜色和 Shader | 恢复原白粉→紫→蓝与 6% 金色、原点精灵尺寸和呼吸；将反向 smoothstep 写为等价的正向表达式以消除未定义边界顺序 |
+| 光晕 | 恢复 128px 径向渐变 CanvasTexture / Sprite，原 1.8 尺寸和透明度呼吸；不再用被 120px 限制的巨大单点模拟光晕 |
+| 后处理 | 恢复 ACES exposure 1.05、Bloom strength .6 / radius .62 / threshold .12 和 OutputPass |
+| 镜头 | 恢复 FOV 55、默认位置 (0,3.1,6.3)、控制阻尼 .05、自转 .32 与距离 2.2–14；保留用户旋转缩放 |
+| 原有环境细节 | 恢复四条淡金轨道环、原流星分布与更新算法 |
 
-## Android / Termux 隔离预览
+没有将教程演示记忆、分类语义连线、虚假“喜欢”状态或外部 memory.json 接进用户数据。真实星点使用现有角色/条目/资料/摘要；无日期条目不虚构时间、重要度或相遇事件。节点位置使用模板双臂几何和稳定视图顺序，资料和摘要仅显示实际 updatedAt。
 
-在新的 Termux 会话执行，保留原目录、原服务器及 ACP 会话：
+与未改动模板仍有的适配差异：运行于项目现有 Three.js 0.186.0；受 React 容器尺寸而非全屏尺寸约束；粗指针 DPR 上限 1.5、其他设备上限 2，分别限 30/45fps（代码预算，不是实测帧率）；不移植启动黑幕和初始推镜头；选中时装饰层透明度轻降至 .86；实体统一可读尺寸而不推断原模型没有的重要度。未提供“已精确复刻”的结论。
+
+## 阅读与分类布局
+
+- 移除绝对定位的厚重右下角浮窗、圆角边框和大阴影。银河主舞台独立；阅读区在其下缘接入自然页面流，弱渐变与细分隔线承托文字。
+- 短内容直接阅读；超过 240 字的内容提供展开/收起，在页面向下延伸，没有覆盖主星盘的固定面板或内部长文滚动窗。
+- 点选和关闭不调用 scrollIntoView，也不调整相机。只有明确点击「编辑」才展开既有 MemorySettingsTab 并定位原条目；原增改删与确认保留。
+- 下方保留「全部 / 记忆条目 / 长期资料 / 对话摘要」与真实数量；点击同时筛选实体星点和目录。搜索、分页保留，分类切换自动打开目录。
+- 分类/分页/删除/角色切换导致选中实体不可见时清理详情。过滤时仅替换实体几何并释放旧实体缓冲，不重建装饰星尘、Bloom 或相机。
+- 窄屏分类横向滚动；阅读区/目录正常占据页面空间，页末保留安全区间隔。原记忆管理表单默认折叠，可主动打开，未移除功能。
+
+## GPU 生命周期
+
+document.hidden、离屏和零尺寸停止 RAF。暂停或减少动态效果时按交互重绘。卸载与 context lost 断开观察器/事件/OrbitControls，释放所属实体/连线几何、模板盘面/远星/轨道几何、材质、CanvasTexture、存活流星、Bloom/RenderPass/OutputPass、composer 的 render targets、renderer/context，并移除 canvas。初始化失败也回收已创建的静态对象和 renderer。心弦各页仍互斥挂载。
+
+本轮资源释放使用真实 Three.js 几何/材质/纹理与替身 renderer/后处理的定向测试验证；不是 GPU 显存实测。
+
+## 实际验证结果
+
+- 首轮只运行原有两个相关测试文件：8 项通过。
+- 补充「不可见选中节点清理」「仅使用真实日期」两个数据测试后，仅重跑数据文件：8 项通过；加上场景生命周期 2 项，相关测试合计 **10 项通过**。
+- **唯一一次** `npm run typecheck`：exit 2。仍为未修改的 `AppShellView.tsx:256`（TS2339）和 `DesktopAppSidebar.tsx:189,192,221,223,333,409,490`（TS2367），共 8 处；本轮图谱文件未新增诊断。没有重跑类型检查或修改无关壳层 UI。
+- 云端 Chromium / 720px iframe 实际点击：7 个真实实体（4 条文字、2 份资料、1 条摘要），999 索引片段只显示状态；未选中、短文、长文展开、四类筛选、目录进入、返回、原编辑器修改后目录更新均已检查。
+- 点选时 iframe 的 scrollY 为 0；阅读区 position:relative，顶部位于主舞台下缘 36px 内，无覆盖核心的独立浮窗。长文展开为 516 字、约 804px 高、overflow:visible 的自然页面内容。
+- 320px iframe 的 window.innerWidth=320，图谱 clientWidth/scrollWidth 均为 320，页面无横向溢出；分类可用宽度 264、内容宽度 372，通过自身横向滚动访问。
+- 未加载资料显示摘要和明确提示，未伪造日期；换角色后旧详情数为 0。离开到「共读」后图谱 DOM 数为 0。
+- **没有 WebGL 图像验收**：原教程和集成版在当前云浏览器均无法创建 WebGL context。Shader 实际编译/亮度、原版对照、Android 平板双指触摸/FPS/显存、原 AppShell 底栏覆盖及安装版 PWA 仍未验收。
+
+没有运行 build、全量测试、verify、PWA 冒烟、发布门禁、哈希矩阵或收费 API 测试。
+
+## 实际截图（仅布局/降级证据）
+
+以下来自实际浏览器、虚构验收数据，未用参考图片或生成图片填充星空。**这些截图不证明银河 GPU 效果合格。**
+
+- [720px 短记忆下缘阅读](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-rework/tablet-short.png)
+- [720px 长文自然展开](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-rework/conflux-tablet-long.png)
+- [320px 默认目录与可横滚分类](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-rework/conflux-mobile-default.png)
+- [原教程 WebGL 无法创建的实际页面](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-rework/conflux-original-blocked.png)
+
+## 继续使用原来的 4173
+
+原来运行 4173 的 Termux 窗口保持开着。在另一个命令窗口执行：
 
 ```bash
-cd ~/my_st_termux/conflux
-git fetch origin feat/heartstring-memory-galaxy
-git worktree add ../conflux-galaxy-preview -b preview/heartstring-galaxy FETCH_HEAD
-cd ../conflux-galaxy-preview
-ln -s ../conflux/node_modules node_modules
-npm run dev -- --host 127.0.0.1 --port 5175 --strictPort
+cd ~/my_st_termux/conflux &&
+git fetch origin feat/heartstring-memory-galaxy &&
+git switch --detach FETCH_HEAD
 ```
 
-浏览器打开 `http://127.0.0.1:5175/`，进入「心弦 → 记忆图谱」。5175 是独立浏览器数据区，初始没有原 PWA 的私有记忆；可手动添加几条测试记忆，或自行导入备份后查看。不要在当前聊天/ACP 服务窗口停止服务或切换分支。命令复用原目录已安装的同版本依赖，不覆盖旧源码。
+成功后刷新原来 **4173 的同一个地址**，主机名也保持原样，打开「心弦 → 记忆图谱」。不另开 5175，不切换浏览器数据来源，不安装依赖或清除缓存。若 Git 报未提交修改会被覆盖，保留修改并停止，不强制切换。此操作预览原 PR 分支，不合并 PR。
 
-真机重点：不同类型星点的光环和正文可读性；点选/旋转/双指缩放；资料编辑后回图谱；角色切换和空数据；横竖屏；前后台与共读/收藏册切换后动画是否停止并恢复。尚未跑过这些真机验收，不把代码帧率上限当作性能承诺。
-
-结束预览只在新窗口 Ctrl+C，原 PWA 与 ACP 保持原状。回滚本功能只需不合并此分支；本次没有 schema、缓存或存储迁移。
+下一步仍需有 WebGL 的设备完成原视频/原模板/集成版同视角截图、短/长内容与分类交互、横竖屏、底部导航和前后台资源行为验收。未验收前继续保持 Draft。
