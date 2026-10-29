@@ -64,7 +64,7 @@ export function CollectionWorld({
     () =>
       buildVisibleCollectionShelfNavItems(
         {
-          dialogue: true,
+          dialogue: false,
           album: true,
           info: true,
           code: true,
@@ -82,10 +82,10 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
-  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue' || activeShelf === 'album';
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'album';
   const sectionNavItems = visibleShelfItems.filter((item) => (
     archiveShelfActive
-      ? item.shelf === 'info' || item.shelf === 'dialogue' || item.shelf === 'album'
+      ? item.shelf === 'info' || item.shelf === 'album'
       : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
   ));
   const selectShelf = (shelf: typeof activeShelf) => {
@@ -96,7 +96,7 @@ export function CollectionWorld({
   };
   useEffect(() => {
     if (visibleShelfSet.has(activeShelf)) return;
-    setCollectionShelf(visibleShelfItems[0]?.shelf ?? 'dialogue');
+    setCollectionShelf('album');
   }, [activeShelf, setCollectionShelf, visibleShelfItems, visibleShelfSet]);
 
   useEffect(() => {
