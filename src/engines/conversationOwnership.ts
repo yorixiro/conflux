@@ -41,6 +41,19 @@ export function conversationMatchesCollaboratorScope(
   return conversationCollaboratorId === collaboratorId && !isConversationOrphaned(conversation, knownCollaboratorIds);
 }
 
+export function resolveChatSidebarScope(args: {
+  activeWorld: 'chat' | 'collection' | 'group';
+  activeConversationId: string | null;
+  activeConversationCollaboratorId: string | null;
+  frontstageCollaboratorId: string | null;
+  knownCollaboratorIds: KnownCollaboratorIds;
+}): string | null {
+  if (args.activeWorld !== 'chat' || !args.activeConversationId) return args.frontstageCollaboratorId;
+  // In chat, the visible message thread — not a previously browsed persona — owns the sidebar.
+  const ownerId = args.activeConversationCollaboratorId;
+  return ownerId && hasKnownCollaboratorId(args.knownCollaboratorIds, ownerId) ? ownerId : null;
+}
+
 export function resolveConversationCollaboratorName(
   conversation: Pick<Conversation, 'collaboratorId'>,
   personas: Persona[]
