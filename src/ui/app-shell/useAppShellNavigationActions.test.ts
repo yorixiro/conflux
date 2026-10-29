@@ -204,6 +204,24 @@ describe('entering chat from the collection after switching personas', () => {
     expect(state.worlds).toEqual(['chat']);
   });
 
+  it('creates a fresh chat owned by the explicitly picked contact', () => {
+    const state = build({
+      conversations: [{ id: 'old-chat', collaboratorId: 'existing', activeProjectId: null }] as Conversation[]
+    });
+    state.actions.openFreshConversationForCollaborator('new-role');
+    expect(state.created).toEqual(['new-role']);
+    expect(state.activated).toEqual(['new-chat']);
+    expect(state.cleared).toEqual(['attachments', 'card']);
+    expect(state.worlds).toEqual(['chat']);
+  });
+
+  it('refuses to create a conversation for an unknown contact', () => {
+    const state = build({ conversations: [] });
+    state.actions.openFreshConversationForCollaborator('removed-role');
+    expect(state.created).toEqual([]);
+    expect(state.worlds).toEqual([]);
+  });
+
   it('keeps explicit theme preview navigation intact', () => {
     const state = build({
       previewConversationId: 'preview-chat',
