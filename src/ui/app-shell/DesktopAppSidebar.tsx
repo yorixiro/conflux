@@ -41,6 +41,7 @@ export type DesktopAppSidebarProps = {
   onToggleConversationPinned: (conversationId: string) => void;
   onDeleteConversation: (conversationId: string, title: string) => void;
   onCreateConversation: () => void;
+  onCreateConversationForCollaborator?: (collaboratorId: string) => void;
   onOpenGroupWorld: () => void;
   onOpenSettings: () => void;
   onOpenApi?: () => void;
@@ -89,6 +90,7 @@ export function DesktopAppSidebar({
   onToggleConversationPinned,
   onDeleteConversation,
   onCreateConversation,
+  onCreateConversationForCollaborator,
   onOpenGroupWorld,
   onOpenSettings,
   onOpenApi
@@ -177,7 +179,7 @@ export function DesktopAppSidebar({
     clearLongPress();
   };
 
-  const rolePicker = collaboratorPickerOpen ? (
+  const rolePicker = presentation === 'hub' && collaboratorPickerOpen ? (
     <section id="conflux-role-picker" className={`conflux-sidebar-contact-list ${presentation === 'sidebar' ? 'conflux-sidebar-contact-list--sidebar' : ''}`} aria-label="AI 通讯录">
       <header><strong>{presentation === 'hub' ? '所有 AI 角色' : `角色 · ${sortedCollaborators.length}`}</strong>{presentation !== 'hub' ? <button type="button" className="conflux-sidebar-create" onClick={onCreateCustomCollaborator}><Icon name="plus" size={14} />新建角色</button> : null}</header>
       <div className={`desktop-sidebar-collaborator-picker ${presentation === 'sidebar' ? 'conflux-sidebar-flat-contacts' : ''}`} role="list" aria-label="角色列表">
@@ -204,14 +206,15 @@ export function DesktopAppSidebar({
           </span>
           {collaborator.pinnedAt ? <Icon name="polarisStar" size={11} /> : null}
         </button>
+        {presentation === 'hub' && onCreateConversationForCollaborator ? <button type="button" className="conflux-library-role-settings" aria-label={`与${collaborator.name}新建对话`} title="新建对话" onClick={() => onCreateConversationForCollaborator(collaborator.id)}><Icon name="plus" size={18} /></button> : null}
         <button type="button" className="conflux-library-role-settings" aria-label={`设置${collaborator.name}`} title="角色设置" onClick={() => onEditCollaborator(collaborator.id)}><Icon name="settings" size={16} /></button>
         </div>
       ))}
-      {presentation === 'hub' && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色。使用右上角的＋创建第一个角色。</p> : null}
+      {presentation === 'hub' && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色。点击「新建角色」开始创建。</p> : null}
       {presentation === 'sidebar' && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色，可以新建一个开始聊天。</p> : null}
       </div>
       {presentation === 'sidebar' ? <button type="button" className="conflux-sidebar-contact-reset" onClick={() => handleSelectCollaborator(null)}>查看全部对话</button> : null}
-      <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>AI 生成人设（会调用模型）</button></details>
+      {presentation !== 'hub' ? <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>人设生成器</button></details> : null}
     </section>
   ) : null;
 
@@ -224,7 +227,7 @@ export function DesktopAppSidebar({
               <span>CONFLUX / CHAT</span>
               <h1>对话</h1>
             </div>
-            <button type="button" onClick={collaboratorPickerOpen ? onCreateCustomCollaborator : (collaborators.length ? onCreateConversation : onCreateCustomCollaborator)} aria-label={collaboratorPickerOpen ? '新建 AI 角色' : '新建对话'} title={collaboratorPickerOpen ? '新建 AI 角色' : '新建对话'}><Icon name="plus" size={20} /></button>
+            <button type="button" onClick={collaboratorPickerOpen ? onCreateCollaboratorFromBuilder : () => setCollaboratorPickerOpen(true)} aria-label={collaboratorPickerOpen ? '新建 AI 角色' : '选择 AI 开始聊天'} title={collaboratorPickerOpen ? '新建 AI 角色' : '选择 AI 开始聊天'}><Icon name="plus" size={20} /></button>
           </header>
           <div className="conflux-hub-tabs" role="tablist" aria-label="对话内容">
             <button type="button" id="conflux-hub-recent-tab" role="tab" aria-controls="conflux-library-panel" aria-selected={!collaboratorPickerOpen} onClick={() => setCollaboratorPickerOpen(false)}>最近对话</button>
@@ -307,10 +310,7 @@ export function DesktopAppSidebar({
 
       {(presentation === 'hub' || (presentation === 'sidebar' && sidebarTab === 'library')) ? (
       <section id="conflux-library-panel" role="tabpanel" aria-labelledby={presentation === 'hub' ? (collaboratorPickerOpen ? 'conflux-hub-contacts-tab' : 'conflux-hub-recent-tab') : 'conflux-library-tab'} className="desktop-sidebar-section desktop-sidebar-threads conflux-sidebar-panel">
-        {presentation === 'sidebar' ? <div className="conflux-hub-tabs" role="tablist" aria-label="对话库内容">
-          <button type="button" role="tab" aria-selected={!collaboratorPickerOpen} onClick={() => setCollaboratorPickerOpen(false)}>最近对话</button>
-          <button type="button" role="tab" aria-selected={collaboratorPickerOpen} onClick={() => setCollaboratorPickerOpen(true)}>AI 通讯录</button>
-        </div> : null}
+        {presentation === 'hub' && collaboratorPickerOpen ? <button type="button" className="conflux-hub-create-role" onClick={onCreateCollaboratorFromBuilder}><Icon name="plus" size={17} /> 新建角色</button> : null}
         {presentation !== 'hub' && !collaboratorPickerOpen ? <>
         <div className="conflux-library-role">
           <button type="button" className="conflux-library-role-select" onClick={() => setSidebarTab('profile')} title="查看聊天角色资料">
@@ -322,7 +322,7 @@ export function DesktopAppSidebar({
         </div>
         </> : null}
         {rolePicker}
-        {!collaboratorPickerOpen ? <>
+        {(!collaboratorPickerOpen || presentation === 'sidebar') ? <>
         {presentation !== 'hub' && collapsed ? <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
           {collaborators.length ? '新建对话' : '创建角色并开始聊天'}
         </button> : null}
@@ -335,6 +335,7 @@ export function DesktopAppSidebar({
         <div className="desktop-sidebar-thread-list">
           {sortedConversations.length > 0 ? (
             sortedConversations.map((conversation, index) => {
+              const owner = collaborators.find((collaborator) => collaborator.id === conversation.collaboratorId) ?? null;
               const active = conversation.id === activeConversationId;
               const menuOpen = actionMenuConversationId === conversation.id;
               const editing = editingConversationId === conversation.id;
@@ -398,19 +399,28 @@ export function DesktopAppSidebar({
                           onOpenConversation(conversation.id);
                         }}
                       >
-                        <span className="desktop-sidebar-thread-title">
-                          {conversation.pinnedAt ? <Icon name="polarisStar" size={10} /> : null}
-                          <span>{conversation.displayTitle}</span>
-                        </span>
-                        <span className="desktop-sidebar-thread-meta">
-                          {conversation.activeProjectTitle ? (
-                            <>
-                              <span className="desktop-sidebar-thread-project">{conversation.activeProjectTitle}</span>
-                              <span aria-hidden="true"> · </span>
-                            </>
-                          ) : null}
-                          {collectionRelativeDateLabel(conversation.updatedAt, language)}
-                        </span>
+                        {presentation === 'hub' ? <>
+                          <span className="conflux-hub-thread-avatar">{owner ? <PersonaAvatar role="assistant" seed={owner.id} assetId={owner.assistantAvatarAssetId} iconId={owner.assistantAvatarIconId} shape={owner.assistantAvatarShape} size={42} /> : <Icon name="persona" size={24} />}</span>
+                          <span className="conflux-hub-thread-copy">
+                            <strong>{owner?.name || '未归属历史'}</strong>
+                            <span className="conflux-hub-thread-preview">{conversation.displayTitle === '新对话' ? conversation.latestExcerpt : `${conversation.displayTitle} · ${conversation.latestExcerpt}`}</span>
+                          </span>
+                          <span className="conflux-hub-thread-time">{collectionRelativeDateLabel(conversation.updatedAt, language)}</span>
+                        </> : <>
+                          <span className="desktop-sidebar-thread-title">
+                            {conversation.pinnedAt ? <Icon name="polarisStar" size={10} /> : null}
+                            <span>{conversation.displayTitle}</span>
+                          </span>
+                          <span className="desktop-sidebar-thread-meta">
+                            {conversation.activeProjectTitle ? (
+                              <>
+                                <span className="desktop-sidebar-thread-project">{conversation.activeProjectTitle}</span>
+                                <span aria-hidden="true"> · </span>
+                              </>
+                            ) : null}
+                            {collectionRelativeDateLabel(conversation.updatedAt, language)}
+                          </span>
+                        </>}
                       </button>
                       <button
                         type="button"
@@ -468,7 +478,10 @@ export function DesktopAppSidebar({
               );
             })
           ) : (
-            <p className="desktop-sidebar-thread-empty">{librarySearch.busy ? '正在读取记录' : searchQuery.trim() ? '没有找到匹配的对话' : t('desktop.noChats')}</p>
+            <div className="conflux-hub-empty">
+              <p className="desktop-sidebar-thread-empty">{librarySearch.busy ? '正在读取记录' : searchQuery.trim() ? '没有找到匹配的对话' : t('desktop.noChats')}</p>
+              {presentation === 'hub' && !searchQuery.trim() ? <button type="button" onClick={() => setCollaboratorPickerOpen(true)}>选择 AI 开始聊天</button> : null}
+            </div>
           )}
         </div>
         </> : null}
