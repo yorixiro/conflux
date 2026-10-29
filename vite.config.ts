@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
             target: `http://127.0.0.1:${acpPort}`,
             changeOrigin: true,
             rewrite: (path: string) => path.replace(/^\\/devin-acp/, ''),
-            configure: (proxy: { on: (event: string, callback: (req: import('node:http').ClientRequest) => void) => void }) => {
+            configure: (proxy) => {
               proxy.on('proxyReq', (request) => {
                 request.setHeader('x-acp-bridge-token', acpToken);
                 request.removeHeader('origin');
