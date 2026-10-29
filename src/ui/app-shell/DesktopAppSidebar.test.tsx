@@ -29,6 +29,18 @@ function props(): DesktopAppSidebarProps {
   };
 }
 
+describe('chat list and profile separation', () => {
+  it('places the AI directory on the conversation page, not inside the profile drawer', () => {
+    const sidebar = props();
+    const hubHtml = renderToStaticMarkup(<DesktopAppSidebar {...sidebar} presentation="hub" />);
+    const profileHtml = renderToStaticMarkup(<DesktopAppSidebar {...sidebar} presentation="profile" />);
+    expect(hubHtml).toContain('最近对话');
+    expect(hubHtml).toContain('AI 通讯录');
+    expect(profileHtml).not.toContain('AI 通讯录');
+    expect(profileHtml).toContain('Chat AI');
+  });
+});
+
 describe('profile stays focused on the persona across themes', () => {
   it.each(['keke-doodle', 'keke-pois', 'polaris'])('keeps model configuration out of the %s profile', (preset) => {
     theme.activePresetId = preset;
