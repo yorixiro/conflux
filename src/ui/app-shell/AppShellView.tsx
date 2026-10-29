@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { AppShellOverlays } from '../AppShellOverlays';
 import { Icon } from '../Icon';
 import { AppReplyNotificationStack } from './AppReplyNotificationStack';
@@ -10,6 +10,7 @@ import { useSpaceStore } from '../../stores/spaceStore';
 import '../keke-original';
 import { getProviderModelBindingValue } from '../shell/apiProviderDisplay';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
+import { DesktopAppSidebar } from './DesktopAppSidebar';
 import { MobileAppShellFrame } from './MobileAppShellFrame';
 import { ConfluxQuickSettingsDrawer } from './ConfluxQuickSettingsDrawer';
 import { PersistenceReadFailureNotice } from './PersistenceReadFailureNotice';
@@ -50,6 +51,8 @@ export function AppShellView({
   chatWorldProps,
   groupWorldProps,
   desktopSidebarProps,
+  chatHubConversations,
+  openChatList,
   replyNotificationProps,
   overlaysProps,
   startupThemeReady,
@@ -82,6 +85,8 @@ export function AppShellView({
   const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
+  const [chatHubOpen, setChatHubOpen] = useState(true);
+  const showChatHub = useBottomNavigation && !homeOpen && activeWorld === 'chat' && chatHubOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
   const setChatCollaboratorProvider = (providerId: string) => {
     if (!chatCollaborator) return;
@@ -99,6 +104,7 @@ export function AppShellView({
   };
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
+    setChatHubOpen(false);
     onHomeOpenChange(false);
   };
   const onOpenHomeShelf = (shelf: CollectionShelf) => {
@@ -111,7 +117,8 @@ export function AppShellView({
   };
   const onNewHomeConversation = () => {
     if (desktopSidebarProps.collaborators.length) desktopSidebarProps.onCreateConversation();
-    else desktopSidebarProps.onCreateCustomCollaborator();
+    else desktopSidebarProps.onCreateCollaboratorFromBuilder();
+    setChatHubOpen(false);
     onHomeOpenChange(false);
   };
 
@@ -241,17 +248,44 @@ export function AppShellView({
         </DesktopAppShellFrame>
       ) : (
         <MobileAppShellFrame
+          chatHubOpen={showChatHub}
           sidebarProps={{ ...desktopSidebarProps, onOpenApi: collectionOpenProviderSettings, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
             actions: {
               ...topbarProps.actions,
-              onOpenHome: activeWorld === 'chat' ? () => onHomeOpenChange(true) : undefined,
+              onOpenHome: activeWorld === 'chat' ? undefined : topbarProps.actions.onOpenHome,
+              onOpenConversationList: activeWorld === 'chat' ? () => setChatHubOpen(true) : undefined,
               onOpenQuickSettings: () => setQuickSettingsOpen(true)
             }
           }}
         >
-          {worldStack}
+          {showChatHub ? (
+            <div className="conflux-chat-hub">
+              <DesktopAppSidebar
+                {...desktopSidebarProps}
+                presentation="hub"
+                initialTab="library"
+                collapsed={false}
+                onToggleCollapsed={() => {}}
+                conversations={chatHubConversations}
+                onOpenConversation={(id, messageId) => {
+                  desktopSidebarProps.onOpenConversation(id, messageId);
+                  setChatHubOpen(false);
+                }}
+                onSelectCollaborator={(id) => {
+                  if (!id) return;
+                  desktopSidebarProps.onSelectCollaborator(id);
+                  setChatHubOpen(false);
+                }}
+                onCreateConversationForCollaborator={(id) => {
+                  desktopSidebarProps.onCreateConversationForCollaborator?.(id);
+                  setChatHubOpen(false);
+                }}
+                onCreateCustomCollaborator={desktopSidebarProps.onCreateCollaboratorFromBuilder}
+              />
+            </div>
+          ) : worldStack}
         </MobileAppShellFrame>
       )}
 
@@ -263,7 +297,8 @@ export function AppShellView({
           homeOpen={homeOpen}
           settingsOpen={topbarProps.state.menuOpen}
           onOpenChat={() => {
-            if (activeWorld !== 'chat') topbarProps.actions.onOpenPreviewChat();
+            if (activeWorld !== 'chat') openChatList();
+            setChatHubOpen(true);
             onHomeOpenChange(false);
           }}
           onOpenGroup={() => {
@@ -290,14 +325,17 @@ export function AppShellView({
         />
       ) : null}
 
-      <AppReplyNotificationStack {...replyNotificationProps} />
+      <AppReplyNotificationStack {...replyNotificationProps} onOpen={(notification) => {
+          setChatHubOpen(false);
+          replyNotificationProps.onOpen(notification);
+        }} />
       <PersistenceReadFailureNotice
         notice={persistenceReadFailureNotice}
         onRetry={onRetryPersistenceReadFailure}
         onOpenBackup={onOpenBackupFromReadFailure}
       />
       <ConfluxQuickSettingsDrawer
-        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat'}
+        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat' && !showChatHub}
         onClose={() => setQuickSettingsOpen(false)}
         provider={overlaysProps.api}
         onOpenApi={collectionOpenProviderSettings}
