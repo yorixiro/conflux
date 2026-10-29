@@ -260,6 +260,7 @@ export function AppShellView({
             }
           }}
         >
+          {worldStack}
           {showChatHub ? (
             <div className="conflux-chat-hub">
               <DesktopAppSidebar
@@ -285,7 +286,7 @@ export function AppShellView({
                 onCreateCustomCollaborator={desktopSidebarProps.onCreateCollaboratorFromBuilder}
               />
             </div>
-          ) : worldStack}
+          ) : null}
         </MobileAppShellFrame>
       )}
 
