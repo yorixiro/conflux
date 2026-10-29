@@ -19,3 +19,7 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat.app-shell{width:100%;max-width:none;margin-inline:0}
 #chat .world-chat,#chat .chat-body{width:100%}
 #chat .app-stage{padding-inline:0;max-width:none}
+#chat .fd{min-height:44px;align-items:flex-end}
+:root[data-cf=sticker] #chat .fd{height:auto;min-height:32px;border-radius:16px}
+#chat .fd textarea,:root[data-cf=sticker] #chat .fd textarea{line-height:1.45;min-height:32px;padding-top:7px;padding-bottom:7px}
+#chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
