@@ -35,10 +35,10 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .conflux-sidebar-dialog::backdrop{background:rgba(60,50,54,.22)}
 #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub),#chat .desktop-app-sidebar.keke-themed:not(.collapsed){position:relative;box-sizing:border-box;height:100%;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) 18px max(14px,env(safe-area-inset-bottom,0px)) 38px;border:0;box-shadow:none;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper)}
 #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub)::after,#chat .desktop-app-sidebar.keke-themed:not(.collapsed)::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
-#chat .desktop-app-sidebar .keke-original-side{position:relative;display:flex;transform:none;width:100%;max-width:none;flex:1;min-height:0;padding:8px 0 14px;overflow-y:auto;overflow-x:hidden;background:none}
+#chat .desktop-app-sidebar .keke-original-side{position:relative;display:flex;transform:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;background:none}
 #chat .desktop-app-sidebar .keke-original-side::after{display:none}
 #chat .keke-original-side .kk-cal{margin:22px 0 18px}
-:root #chat .desktop-app-sidebar .side.keke-original-side{width:100%;max-width:none;padding:8px 0 14px}
+:root #chat .desktop-app-sidebar .side.keke-original-side{width:auto;max-width:none;margin:0 -18px 0 -38px;padding:34px 20px 14px 38px}
 /* Library tab, built from the prototype's tokens (.tg pill, .fd input, dashed paper rules). */
 #chat .conflux-sidebar-dialog-actions button{border:1.2px dashed var(--hot);border-radius:50%;background:rgba(255,255,255,.7);color:var(--hot)}
 #chat .desktop-app-sidebar .conflux-sidebar-tabs{gap:8px;padding:0}
