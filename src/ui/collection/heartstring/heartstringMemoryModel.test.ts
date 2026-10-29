@@ -60,4 +60,21 @@ describe('Heartstring memory source diagram', () => {
     expect(buildMemoryStars({ id:'p', name:'空', memory:memory() })).toHaveLength(1);
     expect(buildMemoryStars({ id:'p', name:'文档', memory:memory({ referenceDocs:[{ id:'doc', title:'资料', summary:'摘要', content:'完整正文', contentLoaded:true, source:'user', updatedAt:0 }] }) })[1].content).toBe('完整正文');
   });
+
+  it('clears a selection when filtering or paging removes its visible node', () => {
+    const stars = buildMemoryStars({ id:'p', name:'角色', memory:memory({ personalMemories:['一','二'] }) });
+    expect(resolveMemoryStarSelection([stars[0], stars[2]], stars[1])).toBeNull();
+    expect(resolveMemoryStarSelection(stars, stars[2])?.content).toBe('二');
+  });
+
+  it('uses only actual document and summary timestamps, leaving string entries undated', () => {
+    const stars = buildMemoryStars({ id:'p', name:'角色', memory:memory({
+      personalMemories:['无日期'],
+      referenceDocs:[{id:'doc',title:'资料',summary:'',content:'',contentLoaded:true,source:'user',updatedAt:1234}],
+      conversationSummaries:[{id:'summary',kind:'recent_topic',title:'摘要',content:'原文',sequence:1,sourceConversationIds:[],sourceMessageIds:[],sourceCharCount:0,generator:'manual',generatedAt:100,updatedAt:2345}]
+    }) });
+    expect(stars[1].updatedAt).toBeUndefined();
+    expect(stars[2].updatedAt).toBe(1234);
+    expect(stars[3].updatedAt).toBe(2345);
+  });
 });
