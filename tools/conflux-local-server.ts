@@ -1,4 +1,4 @@
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, request as httpRequest, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -50,6 +50,44 @@ self.addEventListener('activate', (event) => {
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const maxBodyBytes = 32 * 1024 * 1024;
 
+function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) {
+  const token = process.env.DEVIN_ACP_BRIDGE_TOKEN?.trim();
+  const port = Number(process.env.DEVIN_ACP_BRIDGE_PORT || 47831);
+  if (!token || token.length < 24 || !Number.isInteger(port) || port < 1024 || port > 65535) {
+    json(res, 503, { error: 'Devin ACP bridge is not configured for this local server.' });
+    return;
+  }
+  const endpoint = path === '/devin-acp/health' && req.method === 'GET' ? '/health'
+    : path === '/devin-acp/prompt' && req.method === 'POST' ? '/prompt'
+    : path === '/devin-acp/cancel' && req.method === 'POST' ? '/cancel' : null;
+  if (!endpoint) { json(res, 404, { error: 'Unknown ACP endpoint.' }); return; }
+  if (endpoint === '/prompt' && (!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '')
+    || Number(req.headers['content-length'] || 0) > 256 * 1024)) {
+    json(res, 413, { error: 'ACP prompt must be JSON of at most 256 KiB.' }); return;
+  }
+  const upstream = httpRequest({
+    hostname: '127.0.0.1', port, path: endpoint, method: req.method,
+    headers: {
+      'x-acp-bridge-token': token,
+      ...(endpoint === '/prompt' ? { 'content-type': 'application/json' } : {})
+    }
+  }, (reply) => {
+    res.writeHead(reply.statusCode || 502, {
+      'Content-Type': reply.headers['content-type'] || 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    reply.pipe(res);
+  });
+  upstream.on('error', () => {
+    if (!res.headersSent) json(res, 502, { error: 'Devin ACP bridge is unavailable.' });
+    else res.end();
+  });
+  req.on('aborted', () => upstream.destroy());
+  res.on('close', () => { if (!res.writableEnded) upstream.destroy(); });
+  req.pipe(upstream);
+}
+
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(body));
@@ -73,6 +111,14 @@ export async function startLocalServer({ dev = false, port = 4173, root = resolv
         json(res, 403, { error: 'Only the local device may access this server.' }); return;
       }
       const url = new URL(req.url || '/', `http://${host}`);
+      if (url.pathname === '/devin-acp' || url.pathname.startsWith('/devin-acp/')) {
+        if ((req.headers.origin && req.headers.origin !== `http://${host}`)
+          || req.headers['sec-fetch-site'] === 'cross-site') {
+          json(res, 403, { error: 'Same-origin requests only.' }); return;
+        }
+        proxyDevinAcp(req, res, url.pathname);
+        return;
+      }
       // A production PWA opened against the hot-dev port will update its old
       // worker to this tiny handoff worker, then continue to live Vite assets.
       if (dev && url.pathname === '/sw.js') {

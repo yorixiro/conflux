@@ -1,6 +1,7 @@
 import type { ProviderProfile } from '../../types/domain';
 import { useI18n } from '../../i18n/useI18n';
 import { Icon } from '../Icon';
+import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
 import { ApiProviderRouteCardSection } from './ApiProviderRouteCardSection';
 
 type ApiProviderAddViewProps = {
@@ -29,6 +30,26 @@ export function ApiProviderAddView({
           <span>{t('apiProvider.add.emptyAction')}</span>
         </button>
       </section>
+
+      <DevinAcpConnectionPanel />
+      <button
+        type="button"
+        className="btn-secondary api-provider-add-primary"
+        onClick={() => {
+          onImportProvider({
+            agentTransport: 'devin-acp',
+            name: 'Devin ACP',
+            model: 'Devin ACP',
+            protocol: 'openai-completions',
+            baseUrl: '',
+            apiKey: '',
+            path: ''
+          } as Partial<ProviderProfile>);
+          onImported();
+        }}
+      >
+        在正式聊天中使用 Devin ACP
+      </button>
 
       <ApiProviderRouteCardSection
         api={api}

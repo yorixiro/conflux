@@ -94,6 +94,7 @@ function normalizeCustomProvider(provider: Partial<ProviderProfile>, index: numb
     id: provider.id || createUid(`provider-${index}`),
     name: provider.name?.trim() || matchedPreset?.name || `线路 ${index + 1}`,
     protocol: matchedPreset?.protocol ?? protocol,
+    ...(provider.agentTransport === 'devin-acp' ? { agentTransport: 'devin-acp' as const } : {}),
     baseUrl: normalizedBaseUrl,
     path: normalizedPath,
     apiKey: provider.apiKey?.trim() ?? '',

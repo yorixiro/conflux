@@ -1,4 +1,5 @@
 import type { AssistantToolContext } from '../assistantToolProtocol';
+import { requestDevinAcpReply } from './devinAcpReply';
 import type { OpenAiToolHistoryMode } from '../provider-runtime/providerRuntimeOpenAiToolHistory';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
@@ -119,6 +120,34 @@ export async function requestCollaboratorReply(params: {
   onAudit?.(prepared.audit);
   if (prepared.imageUnderstandingResults.length > 0) {
     onImageUnderstandingResults?.(prepared.imageUnderstandingResults);
+  }
+  if (api.agentTransport === 'devin-acp') {
+    if (prepared.context.attachmentSlots.pending.length) {
+      throw new Error('Devin ACP bridge currently supports text only; attachments were not sent.');
+    }
+    const prompt = prepared.context.segments.flatMap((segment) =>
+      segment.messages.map((message) => {
+        if (typeof message.content !== 'string') {
+          throw new Error('Devin ACP bridge cannot serialize non-text request content');
+        }
+        return '[' + message.role + ']\n' + message.content;
+      })
+    ).join('\n\n');
+    recordRequestDebug(prepared.audit, { phase: 'prepared' });
+    try {
+      const reply = await requestDevinAcpReply({
+        prompt,
+        signal,
+        onProgress: onProgress
+          ? (partial) => onProgress(normalizeAssistantOutput(partial, persona))
+          : undefined
+      });
+      recordRequestDebug(prepared.audit, { phase: 'completed', reply });
+      return normalizeAssistantOutput(reply, persona);
+    } catch (error) {
+      recordRequestDebug(prepared.audit, { phase: 'failed', error });
+      throw error;
+    }
   }
   const supportsImageInput = providerRuntimeSupportsImageInput(api, persona?.advanced);
   const conversation = prepared.conversation;

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { requestCollaboratorReply } from './requestPipeline';
 import { getAssetBlob } from '../../infrastructure/assetStore';
 import type { ChatMessage, ProviderProfile } from '../../types/domain';
@@ -59,6 +59,7 @@ const imageMessage: ChatMessage = {
 };
 
 describe('requestPipeline', () => {
+  afterEach(() => vi.unstubAllGlobals());
   beforeEach(() => {
     vi.mocked(getAssetBlob).mockReset();
     requestAssistantReplyMock.mockReset();
@@ -66,6 +67,29 @@ describe('requestPipeline', () => {
 
   it('exports the collaborator request entrypoint', () => {
     expect(typeof requestCollaboratorReply).toBe('function');
+  });
+
+  it('routes a selected Devin ACP provider through chat with real context separators and streamed output', async () => {
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string) as { prompt: string };
+      expect(body.prompt).toContain('[user]\nhello');
+      expect(body.prompt).not.toContain(']\\\\n');
+      return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"hi"}}}\n\ndata: {"type":"done"}\n\n', {
+        headers: { 'Content-Type': 'text/event-stream' }
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const progress = vi.fn();
+    const reply = await requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [{ id: 'user-1', role: 'user', content: 'hello', timestamp: 1 }],
+      onProgress: progress
+    });
+    expect(reply.content).toBe('hi');
+    expect(progress).toHaveBeenCalledWith(expect.objectContaining({ content: 'hi' }));
+    expect(fetchMock).toHaveBeenCalledWith('/devin-acp/prompt', expect.objectContaining({ method: 'POST' }));
+    expect(requestAssistantReplyMock).not.toHaveBeenCalled();
   });
 
   it('blocks image turns before sending when the effective model is text-only and OCR is unavailable', async () => {
