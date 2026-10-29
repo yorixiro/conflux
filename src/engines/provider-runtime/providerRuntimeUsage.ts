@@ -17,6 +17,40 @@ function compactTokenUsage(usage: ChatTokenUsage): ChatTokenUsage | undefined {
   return Object.keys(compacted).length > 0 ? compacted : undefined;
 }
 
+// Anthropic reports uncached input separately from cache reads and writes.
+// Normalize it to the same total-input convention as OpenAI-compatible usage.
+export function parseAnthropicUsage(rawUsage: unknown): ChatTokenUsage | undefined {
+  const usage = readObject(rawUsage);
+  if (!usage) return undefined;
+
+  const uncachedInputTokens = readNumber(usage.input_tokens);
+  const cachedInputTokens = readNumber(usage.cache_read_input_tokens);
+  const cacheCreationInputTokens = readNumber(usage.cache_creation_input_tokens);
+  const outputTokens = readNumber(usage.output_tokens);
+  const hasInput = [uncachedInputTokens, cachedInputTokens, cacheCreationInputTokens]
+    .some((value) => typeof value === 'number');
+  const inputTokens = hasInput
+    ? (uncachedInputTokens ?? 0) + (cachedInputTokens ?? 0) + (cacheCreationInputTokens ?? 0)
+    : undefined;
+  // A plain input_tokens field does not prove that the provider reported cache
+  // accounting. Preserve 'not reported' until a cache-specific field appears.
+  const hasCacheReport = cachedInputTokens !== undefined || cacheCreationInputTokens !== undefined;
+  const cacheMissInputTokens = hasCacheReport
+    ? (uncachedInputTokens ?? 0) + (cacheCreationInputTokens ?? 0)
+    : undefined;
+
+  return compactTokenUsage({
+    totalTokens: inputTokens !== undefined || outputTokens !== undefined
+      ? (inputTokens ?? 0) + (outputTokens ?? 0)
+      : undefined,
+    inputTokens,
+    outputTokens,
+    cachedInputTokens,
+    cacheMissInputTokens,
+    cacheCreationInputTokens
+  });
+}
+
 export function parseOpenAiCompatibleUsage(rawUsage: unknown): ChatTokenUsage | undefined {
   const usage = readObject(rawUsage);
   if (!usage) return undefined;

@@ -13,6 +13,19 @@ function totalFromUsage(usage: UsageStreamEvent['usage']) {
     );
 }
 
+function mergeStreamingUsage(
+  previous: UsageStreamEvent['usage'] | undefined,
+  incoming: UsageStreamEvent['usage']
+): UsageStreamEvent['usage'] {
+  // A streaming provider can send input/cache usage in message_start and only
+  // updated output usage in message_delta. Missing fields are not zeroes.
+  const merged = { ...previous, ...incoming };
+  if (typeof merged.inputTokens === 'number' && typeof merged.outputTokens === 'number') {
+    merged.totalTokens = merged.inputTokens + merged.outputTokens;
+  }
+  return merged;
+}
+
 type ToolCallStreamEvent = Extract<
   CanonicalProviderStreamEvent,
   { type: 'tool_call.start' | 'tool_call.delta' | 'tool_call.done' }
@@ -80,8 +93,8 @@ export function applyProviderRuntimeStreamEvents(
       return;
     }
     if (event.type === 'usage') {
-      target.tokenUsage = event.usage;
-      const tokenCount = totalFromUsage(event.usage);
+      target.tokenUsage = mergeStreamingUsage(target.tokenUsage, event.usage);
+      const tokenCount = totalFromUsage(target.tokenUsage);
       if (typeof tokenCount === 'number') {
         target.tokenCount = tokenCount;
       }

@@ -175,6 +175,32 @@ function createSummary(): MenuTokenUsageSummary {
 }
 
 describe('MenuUsagePage', () => {
+  it('does not present unreported cache usage as a zero-percent cache hit', () => {
+    const summary = {
+      ...createSummary(),
+      cachedInputTokens: 0,
+      cacheMissInputTokens: 0,
+      cacheObservedInputTokens: 0,
+      cacheReportedReplyCount: 0,
+      cacheUnreportedReplyCount: 1
+    };
+    const html = renderToStaticMarkup(<MenuUsagePage summary={summary} onBack={() => {}} />);
+
+    expect(html).toContain('缓存覆盖率</span><strong>未记录</strong>');
+    expect(html).toContain('已报告命中率</span><strong>未记录</strong>');
+  });
+
+  it('keeps the reported-only rate when some replies have no cache report', () => {
+    const summary = {
+      ...createSummary(),
+      cacheUnreportedReplyCount: 1
+    };
+    const html = renderToStaticMarkup(<MenuUsagePage summary={summary} onBack={() => {}} />);
+
+    expect(html).toContain('缓存覆盖率</span><strong>未记录</strong>');
+    expect(html).toContain('已报告命中率</span><strong>50%</strong>');
+  });
+
   it('renders expandable request trend details', () => {
     const html = renderToStaticMarkup(<MenuUsagePage summary={createSummary()} onBack={() => {}} />);
 
