@@ -4,6 +4,7 @@ Conflux is the user's independently directed local-first AI conversation and wor
 
 ## Read first
 - docs/UI_LAYOUT_SPEC.md
+- docs/roadmap/CONFLUX_USABILITY_INTEGRATION.md (for usability/navigation work; check current status and pending PRs before starting)
 - docs/CONFLUX_INDEPENDENCE_PLAN.md
 - docs/handbook/DATA_AND_STORAGE.md
 - docs/PROVENANCE.md
@@ -34,3 +35,4 @@ Conflux is the user's independently directed local-first AI conversation and wor
 - Check status and exact base commit before code edits. No force push/reset, branch deletion, or PR merge unless explicitly requested.
 - For UI changes run relevant typecheck/build and focused tests, then provide mobile/tablet acceptance steps. For storage or request changes, run corresponding stronger verification.
 - Never claim tests or real-device checks that did not occur. State commit SHA, changed files, and remaining blockers.
+- At the end of every Work ticket, update the ticket's progress and the relevant roadmap entry with PR URL, Commit SHA, completed/unresolved scope, test results and actual Android validation status. A submitted PR is 'PR 待验收', not '已验收'. Ensure the progress update is visible on the shared development branch (or explicitly create a doc-only PR and report pending synchronization).
