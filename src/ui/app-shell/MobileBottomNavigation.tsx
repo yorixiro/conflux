@@ -59,7 +59,7 @@ const items: { id: Section; label: string }[] = [
   { id: 'chat', label: '对话' },
   { id: 'group', label: '群组' },
   { id: 'home', label: '主页' },
-  { id: 'archive', label: '档案' },
+  { id: 'archive', label: '心弦' },
   { id: 'workshop', label: '工坊' },
   { id: 'settings', label: '设置' }
 ];
