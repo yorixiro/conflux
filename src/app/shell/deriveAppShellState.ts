@@ -34,9 +34,8 @@ export function deriveAppShellState({
     : null;
   const previewConversationId = activeThemePreview?.conversationId ?? null;
   const activeConversationCollaborator = activeConversationCollaboratorId
-    ? personas.find((persona) => persona.id === activeConversationCollaboratorId) ?? currentCollaborator
+    ? personas.find((persona) => persona.id === activeConversationCollaboratorId) ?? null
     : null;
-  const chatCollaborator = currentCollaborator ?? activeConversationCollaborator;
   const hasActiveConversation = Boolean(activeConversationTitle);
   const activeRenderLoad = effectiveWorld === 'collection'
     ? collectionRenderItemCount
@@ -71,7 +70,7 @@ export function deriveAppShellState({
   const topbarCollaborator = effectiveWorld === 'collection'
     ? currentCollaborator
     : effectiveWorld === 'chat' && hasActiveConversation
-      ? chatCollaborator
+      ? activeConversationCollaborator
       : null;
   const topbarTitle = topbarCollaborator?.name || 'Polaris';
   const topbarTitleTone: 'brand' | 'collaborator' = topbarCollaborator ? 'collaborator' : 'brand';
