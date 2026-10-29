@@ -35,4 +35,35 @@
 .heartstring-memory__disclaimer { font-size:12px; line-height:1.65; color:var(--text-soft); margin:0; }
 .heartstring-memory__editor { min-width:0; border-top:1px solid var(--border); padding-top:18px; }
 .heartstring-memory__editor h4 { font-size:16px; font-weight:600; margin:0 0 14px; }
+
+/* MemorySettingsTab is also used outside .collaborator-info-content. Its old
+   .collaborator-info-content .room-theme-page-nav rules do not reach Heartstring. */
+.heartstring-memory__editor .memory-settings-flow {
+  display:flex; flex-direction:column; gap:16px; min-width:0;
+}
+.heartstring-memory__editor .room-theme-page-nav.memory-page-nav {
+  display:flex; align-items:stretch; gap:6px; width:100%; min-width:0;
+  margin:0; padding:4px; overflow-x:auto; overscroll-behavior-x:contain;
+  border:1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius:14px; background:color-mix(in srgb, var(--surface-solid) 74%, transparent);
+  scrollbar-width:thin;
+}
+.heartstring-memory__editor .memory-page-nav > button {
+  display:inline-flex; flex:1 0 auto; align-items:center; justify-content:center; gap:5px;
+  min-width:80px; min-height:44px; padding:8px 10px;
+  border:0; border-radius:10px; background:transparent; box-shadow:none;
+  color:var(--text-muted); font:inherit; font-size:13px; line-height:1.2; white-space:nowrap;
+  cursor:pointer;
+}
+.heartstring-memory__editor .memory-page-nav > button.active {
+  background:color-mix(in srgb, var(--accent-soft) 82%, var(--surface-solid) 18%);
+  color:var(--text); font-weight:600;
+}
+.heartstring-memory__editor .memory-page-nav > button:disabled {
+  opacity:.42; cursor:default;
+}
+.heartstring-memory__editor .memory-page-nav svg { flex:none; width:14px; height:14px; }
+.heartstring-memory__editor .memory-page-nav > button:focus-visible {
+  outline:2px solid var(--accent); outline-offset:-2px;
+}
 @media (max-width:580px) { .heartstring-memory__branches { grid-template-columns:repeat(2,minmax(0,1fr)); } .heartstring-sections button { min-width:88px; } .heartstring-future { margin:12px; } }
