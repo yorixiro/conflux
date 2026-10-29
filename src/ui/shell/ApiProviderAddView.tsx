@@ -1,6 +1,7 @@
 import type { ProviderProfile } from '../../types/domain';
 import { useI18n } from '../../i18n/useI18n';
 import { Icon } from '../Icon';
+import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
 import { ApiProviderRouteCardSection } from './ApiProviderRouteCardSection';
 
 type ApiProviderAddViewProps = {
@@ -29,6 +30,8 @@ export function ApiProviderAddView({
           <span>{t('apiProvider.add.emptyAction')}</span>
         </button>
       </section>
+
+      <DevinAcpConnectionPanel />
 
       <ApiProviderRouteCardSection
         api={api}
