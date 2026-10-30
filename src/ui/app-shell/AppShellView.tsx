@@ -84,6 +84,9 @@ export function AppShellView({
   const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
+  // Omit the home action in chat rather than assigning undefined to an exact optional callback.
+  const mobileTopbarActions = { ...topbarProps.actions };
+  if (activeWorld === 'chat') delete mobileTopbarActions.onOpenHome;
   const [chatHubOpen, setChatHubOpen] = useState(true);
   const showChatHub = useBottomNavigation && !homeOpen && activeWorld === 'chat' && chatHubOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
@@ -252,8 +255,7 @@ export function AppShellView({
           topbarProps={{
             ...topbarProps,
             actions: {
-              ...topbarProps.actions,
-              onOpenHome: activeWorld === 'chat' ? undefined : topbarProps.actions.onOpenHome,
+              ...mobileTopbarActions,
               onOpenConversationList: activeWorld === 'chat' ? () => setChatHubOpen(true) : undefined,
               onOpenQuickSettings: () => setQuickSettingsOpen(true)
             }

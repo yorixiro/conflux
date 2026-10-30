@@ -185,11 +185,14 @@ export function DesktopAppSidebar({
     clearLongPress();
   };
 
+  // Boolean aliases keep the existing presentation branches without impossible literal comparisons.
+  const isHubPresentation = presentation === 'hub';
+  const isSidebarPresentation = presentation === 'sidebar';
   const rolePicker = presentation === 'hub' ? (
-    <section id="conflux-role-picker" className={`conflux-sidebar-contact-list ${presentation === 'sidebar' ? 'conflux-sidebar-contact-list--sidebar' : ''}`} aria-label="AI 通讯录">
+    <section id="conflux-role-picker" className={`conflux-sidebar-contact-list ${isSidebarPresentation ? 'conflux-sidebar-contact-list--sidebar' : ''}`} aria-label="AI 通讯录">
       <header><strong>所有 AI 角色 · {sortedCollaborators.length}</strong></header>
       <label className="conflux-sidebar-search"><span>搜索 AI</span><input type="search" value={contactQuery} onChange={(event) => setContactQuery(event.target.value)} placeholder="搜索角色名字或简介" /></label>
-      <div className={`desktop-sidebar-collaborator-picker ${presentation === 'sidebar' ? 'conflux-sidebar-flat-contacts' : ''}`} role="list" aria-label="角色列表">
+      <div className={`desktop-sidebar-collaborator-picker ${isSidebarPresentation ? 'conflux-sidebar-flat-contacts' : ''}`} role="list" aria-label="角色列表">
       {filteredCollaborators.map(collaborator => (
         <div key={collaborator.id} className="conflux-sidebar-contact-row" role="listitem">
         <button
@@ -218,9 +221,9 @@ export function DesktopAppSidebar({
         </div>
       ))}
       {presentation === 'hub' && filteredCollaborators.length === 0 ? <p className="conflux-sidebar-status">{sortedCollaborators.length ? '没有找到匹配的 AI 角色。' : '还没有 AI 角色。点击「新建角色」开始创建。'}</p> : null}
-      {presentation === 'sidebar' && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色，可以新建一个开始聊天。</p> : null}
+      {isSidebarPresentation && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色，可以新建一个开始聊天。</p> : null}
       </div>
-      {presentation === 'sidebar' ? <button type="button" className="conflux-sidebar-contact-reset" onClick={() => handleSelectCollaborator(null)}>查看全部对话</button> : null}
+      {isSidebarPresentation ? <button type="button" className="conflux-sidebar-contact-reset" onClick={() => handleSelectCollaborator(null)}>查看全部对话</button> : null}
       {presentation !== 'hub' ? <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>人设生成器</button></details> : null}
     </section>
   ) : null;
@@ -330,7 +333,7 @@ export function DesktopAppSidebar({
         </> : null}
         {rolePicker}
         {presentation !== 'hub' && !collaboratorPickerOpen ? <>
-        {presentation !== 'hub' && collapsed ? <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
+        {!isHubPresentation && collapsed ? <button type="button" className="conflux-sidebar-create" onClick={collaborators.length ? onCreateConversation : onCreateCustomCollaborator}>
           {collaborators.length ? '新建对话' : '创建角色并开始聊天'}
         </button> : null}
         <label className="conflux-sidebar-search">
@@ -406,7 +409,7 @@ export function DesktopAppSidebar({
                           onOpenConversation(conversation.id);
                         }}
                       >
-                        {presentation === 'hub' ? <>
+                        {isHubPresentation ? <>
                           <span className="conflux-hub-thread-avatar">{owner ? <PersonaAvatar role="assistant" seed={owner.id} assetId={owner.assistantAvatarAssetId} iconId={owner.assistantAvatarIconId} shape={owner.assistantAvatarShape} size={42} /> : <Icon name="persona" size={24} />}</span>
                           <span className="conflux-hub-thread-copy">
                             <strong>{owner?.name || '未归属历史'}</strong>
@@ -487,7 +490,7 @@ export function DesktopAppSidebar({
           ) : (
             <div className="conflux-hub-empty">
               <p className="desktop-sidebar-thread-empty">{librarySearch.busy ? '正在读取记录' : searchQuery.trim() ? '没有找到匹配的对话' : t('desktop.noChats')}</p>
-              {presentation === 'hub' && !searchQuery.trim() ? <button type="button" onClick={() => setCollaboratorPickerOpen(true)}>选择 AI 开始聊天</button> : null}
+              {isHubPresentation && !searchQuery.trim() ? <button type="button" onClick={() => setCollaboratorPickerOpen(true)}>选择 AI 开始聊天</button> : null}
             </div>
           )}
         </div>
