@@ -1,6 +1,6 @@
 # Devin ACP 原生工具桥接 P1：验收与回滚
 
-状态：**2026-10-31 用户在 Termux 隔离目录已验证原模拟 1/1、Vitest 9/9 通过，叠加 PR #12 后 tsc --noEmit 退出码 0。后续取消修复的新增模拟用例尚待重跑，真实 Devin/Fable 和 Android 仍未验收。**
+状态：**2026-10-31 用户在 Termux 隔离目录已验证原模拟 1/1、Vitest 9/9 通过，叠加 PR #12 后 tsc --noEmit 退出码 0。新增取消恢复模拟用例与记忆回执 4 项单测仍待复跑，真实 Devin/Fable 和 Android 仍未验收。**
 仓库 yorixiro/conflux，基线 feat/keke-devin-acp-preview-20261030，基线 SHA 135b8901930bd931b3111fce550ed21480ee278b。
 实现分支 feat/devin-acp-native-tools-p1-20261030。独立 Draft PR，禁止合并。
 
@@ -99,3 +99,12 @@
 打开 4174 的 Android 浏览器，只创建虚拟测试数据，启用记忆读取/环境工具，用一次真实 Devin ACP Fable 测试 searchMemory；必须能看到工具调用及结果内容，Fable 才能依据结果继续回复。追加验证正常聊天、取消后恢复、模型选项和 Token 显示。否则停在 Draft / PR 待验收，不合并。
 
 停止 4174 和 47832 即可退出独立预览，不触碰 4173 / 47831 或用户存储。
+
+## 2026-10-31 记忆权限状态回执补丁
+
+本轮发现并修正 ACP 回调的错误成功宣告：原有 Conflux 记忆执行器将 writeMemoryDoc 和高风险 writeMemory 写入预览卡，**需要用户确认，并非已提交**；低风险 writeMemory 可以直接写入。现在从当前对话中按 toolCallId 读取真实 ToolInvocation，区分 executed/applied、preview、failed/rolled_back，不再统一返回“已写入”。
+
+- 新增 `src/app/chat/chatAcpMemoryReceipt.ts` 和 `chatAcpMemoryReceipt.test.ts`（4 项断言），修改 `chatReplyRuntime.ts` 内 ACP memory 回执调用。未修改记忆隔离、数据库、角色人格或 UI。
+- 这一增量提交尚无 Termux 测试通过日志，不能把前次 9/9 当作最新提交已验收。
+- 按独立工作树新增定向测试：`./node_modules/.bin/vitest run src/app/chat/chatAcpMemoryReceipt.test.ts`，随后 `npm run typecheck`；与其他分支同时修改时先检查 `git status --short` 和 `git log -3 --oneline`，勿重复 cherry-pick 或覆盖冲突文件。
+- 真实 Fable/Android 必须看到 `searchMemory` 工具请求、具体候选和后续回复；如果模型仅输出工具名/JSON 字符串不算通过。
