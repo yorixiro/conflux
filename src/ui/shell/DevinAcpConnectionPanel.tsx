@@ -11,7 +11,6 @@ type Props = {
 export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: Props) {
   const modelId = useId();
   const [status, setStatus] = useState('正在连接本机 Devin…');
-  const [online, setOnline] = useState(false);
   const [checking, setChecking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [models, setModels] = useState<AcpModel[]>([]);
@@ -27,10 +26,8 @@ export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: P
       } | null;
       if (!response.ok) throw new Error(data?.error || 'HTTP ' + response.status);
       const running = data?.running === true;
-      setOnline(running);
       setStatus(running ? 'Devin 桥接在线' : 'Devin 进程未运行，请检查本机桥接');
     } catch (error) {
-      setOnline(false);
       setStatus(error instanceof Error ? '连接失败：' + error.message : '无法连接 Devin 桥接');
     } finally {
       setChecking(false);
@@ -56,7 +53,6 @@ export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: P
         ? data.models.filter((model) => typeof model?.id === 'string' && typeof model?.label === 'string')
         : [];
       setModels(next);
-      setOnline(true);
       setModelMessage(next.length
         ? '可用模型已更新'
         : 'Devin 未公开可选模型，仍可直接使用默认模型聊天');
