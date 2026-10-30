@@ -139,9 +139,9 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
                 <dd>{typeof value === 'number' ? formatNumber(value) : t('settings.usage.notRecorded')}</dd>
               </div>
             ))}
-          </dl> : isDevinAcp ? (
-            <p className="message-token-empty">Devin 未提供可确认的单轮 Token 用量。</p>
-          ) : <p className="message-token-empty">{t('chat.messageMeta.noTokenUsage')}</p>}
+          </dl> : isDevinAcp && !acpReport && !context ? (
+            <p className="message-token-empty">Devin 未上报 Token 用量。</p>
+          ) : !isDevinAcp ? <p className="message-token-empty">{t('chat.messageMeta.noTokenUsage')}</p> : null}
           {hasUsage ? <details className="message-token-note">
             <summary>{t('chat.messageMeta.tokenUsageAbout')}</summary>
             <p>{t('chat.messageMeta.tokenUsageNote')}</p>
