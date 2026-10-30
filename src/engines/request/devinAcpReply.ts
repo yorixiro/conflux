@@ -41,6 +41,7 @@ export async function requestDevinAcpReply(params: {
   const decoder = new TextDecoder();
   let buffer = '';
   let content = '';
+  let thinkingText = '';
   let finished = false;
   try {
     while (true) {
@@ -61,11 +62,17 @@ export async function requestDevinAcpReply(params: {
         };
         if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
         if (event.type === 'done') finished = true;
-        if (event.type === 'update' && event.update?.sessionUpdate === 'agent_message_chunk') {
-          const chunk = event.update.content?.text;
+        if (event.type === 'update') {
+          const chunk = event.update?.content?.text;
           if (typeof chunk === 'string') {
-            content += chunk;
-            params.onProgress?.({ content, model: 'Devin ACP' });
+            if (event.update?.sessionUpdate === 'agent_message_chunk') content += chunk;
+            else if (event.update?.sessionUpdate === 'agent_thought_chunk') thinkingText += chunk;
+            else continue;
+            params.onProgress?.({
+              content,
+              model: 'Devin ACP',
+              ...(thinkingText ? { thinkingText } : {})
+            });
           }
         }
       }
@@ -85,7 +92,11 @@ export async function requestDevinAcpReply(params: {
     }
     if (!finished) throw new Error('Devin ACP stream ended without completion');
     if (!content.trim()) throw new Error('Devin ACP returned no text');
-    return { content, model: 'Devin ACP' };
+    return {
+      content,
+      model: 'Devin ACP',
+      ...(thinkingText ? { thinkingText } : {})
+    };
   } finally {
     reader.releaseLock();
   }

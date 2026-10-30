@@ -271,7 +271,7 @@ export function AppShellView({
                 initialTab="library"
                 collapsed={false}
                 onToggleCollapsed={() => {}}
-                conversations={[]}
+                conversations={desktopSidebarProps.conversations}
                 onBackToChat={() => onHomeOpenChange(true)}
                 onOpenConversation={(id, messageId) => {
                   desktopSidebarProps.onOpenConversation(id, messageId);

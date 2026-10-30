@@ -88,7 +88,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
         aria-label={t('chat.messageMeta.openTokenUsage')}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-      >{tokenLabel || 'Token'}</button>
+      >{tokenLabel || (message.providerName === 'Devin ACP' ? 'Token 未提供' : 'Token')}</button>
       {open ? (
         <dialog
           ref={dialogRef}

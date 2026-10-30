@@ -28,6 +28,10 @@ const paths = [
   'src/ui/shell/DevinAcpConnectionPanel.tsx',
   'src/ui/shell/ApiProviderConfigForm.tsx',
   'src/ui/shell/ApiProviderAddView.tsx',
+  'src/ui/app-shell/AppShellView.tsx',
+  'src/ui/app-shell/ConfluxSidebarDialog.tsx',
+  'src/ui/worlds/chat/message/MessageTokenUsage.tsx',
+  'src/engines/request/devinAcpReply.test.ts',
   'vite.config.ts',
 ];
 const repo = process.cwd();
@@ -85,7 +89,7 @@ try {
     for (const item of written.reverse()) writeFileSync(resolve(repo, item.path), item.before);
     throw error;
   }
-  say('ACP 代码同步完成：' + remote.slice(0, 9));
+  say('ACP 与会话显示修复同步完成：' + remote.slice(0, 9));
   say('更新文件：' + planned.length + '；不修改主题、导航、数据、Git 提交或索引。');
   if (conflicts.length) {
     say('以下文件保留本地修改，未覆盖：');

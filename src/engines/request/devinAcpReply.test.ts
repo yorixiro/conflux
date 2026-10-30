@@ -60,4 +60,16 @@ describe('ACP chat reply over the existing request pipeline', () => {
     await expect(requestDevinAcpReply({ prompt: '你好' }))
       .rejects.toThrow('4173 的本地 ACP 代理配置无效');
   });
+  it('retains only ACP reasoning chunks actually emitted by the agent', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_thought_chunk","content":{"type":"text","text":"先检查"}}}', '',
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"你好"}}}', '',
+      'data: {"type":"done","result":{}}', ''
+    ].join('\\n') + '\\n', { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: '测试' });
+    expect(answer.content).toBe('你好');
+    expect(answer.thinkingText).toBe('先检查');
+    expect(answer.tokenUsage).toBeUndefined();
+  });
+
 });
