@@ -787,6 +787,5 @@ describe('resolvePreparedAdvancedSettings', () => {
     const context = JSON.stringify(prepared.context.segments);
     expect(context).toContain('柯老自己的长期记忆。');
     expect(context).not.toContain('DeepSeek 专属秘密记忆');
-    expect(context).not.toContain('persona 是你在这段关系里的名字和轮廓');
     expect(prepared.audit.memoryPlan.selectedLines).toEqual(['柯老自己的长期记忆。']);
   });

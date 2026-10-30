@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildAssistantPromptParts } from './requestPromptLayers';
 
 describe('buildAssistantPromptParts', () => {
-  it('uses only the selected persona identity, without a global product-identity prompt', () => {
+  it('prepends system identity before persona and capability layers', () => {
     const parts = buildAssistantPromptParts({
       personaPrompt: '你是一个温柔的协作者。',
       personaPromptSource: 'custom',
@@ -24,11 +24,19 @@ describe('buildAssistantPromptParts', () => {
       messages: []
     });
 
-    expect(parts[0]?.name).toBe('persona_identity');
+    expect(parts[0]?.name).toBe('system_identity');
+    expect(parts[1]?.name).toBe('persona_identity');
+    expect(parts.findIndex((part) => part.name === 'system_identity')).toBeLessThan(
+      parts.findIndex((part) => part.name === 'persona_identity')
+    );
+    expect(parts.findIndex((part) => part.name === 'system_identity')).toBeLessThan(
+      parts.findIndex((part) => part.name === 'tool_capability')
+    );
+    expect(parts.findIndex((part) => part.name === 'tool_capability')).toBeLessThan(
+      parts.findIndex((part) => part.name === 'tool_catalog_capability')
+    );
     expect(parts[0]?.layer).toBe('identity');
-    expect(parts[0]?.content).toBe('你是一个温柔的协作者。');
-    expect(parts.some((part) => part.name === 'system_identity')).toBe(false);
-    expect(parts.map((part) => part.content).join('\n')).not.toContain('你是这间房里持续存在的一个“你”');
+    expect(parts[0]?.content).toContain('你是这间房里持续存在的一个“你”');
     expect(parts.map((part) => part.content).join('\n')).not.toContain('当前本地完整时间');
     expect(parts.map((part) => part.content).join('\n')).not.toContain('当前时区');
   });
