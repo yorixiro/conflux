@@ -3,20 +3,29 @@ import { useRef, useState } from 'react';
 /** Development-only ACP connection surface. Credentials stay in Vite's server. */
 export function DevinAcpConnectionPanel() {
   const [status, setStatus] = useState('尚未检测');
+  const [connectionAvailable, setConnectionAvailable] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [answer, setAnswer] = useState('');
   const [busy, setBusy] = useState(false);
   const controller = useRef<AbortController | null>(null);
 
   async function check() {
+    if (busy) return;
     setStatus('正在检测…');
+    setConnectionAvailable(false);
     try {
       const response = await fetch('/devin-acp/health', { cache: 'no-store' });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const data = await response.json() as { running?: boolean; sessionReady?: boolean };
-      setStatus(data.running ? (data.sessionReady ? 'Devin ACP 已连接' : '桥接在线，等待建立会话') : 'Devin ACP 进程未运行');
-    } catch {
-      setStatus('无法连接桥接服务：请确认 Ubuntu 中已启动桥接，并配置 Vite 代理');
+      if (!data.running) {
+        setStatus('Devin ACP 进程未运行');
+        return;
+      }
+      setConnectionAvailable(true);
+      setStatus(data.sessionReady ? '桥接在线，ACP 会话已建立' : '桥接在线；可发送测试消息建立 ACP 会话');
+    } catch (error) {
+      const detail = error instanceof Error ? `（${error.message}）` : '';
+      setStatus(`无法连接本地 ACP 桥接${detail}。请检查 Ubuntu 中的桥接进程及 Conflux 本地服务。`);
     }
   }
 
@@ -82,19 +91,26 @@ export function DevinAcpConnectionPanel() {
     <section className="api-provider-section api-provider-section-config">
       <div className="api-provider-section-head">
         <span className="api-provider-section-kicker">ACP Agent</span>
-        <h3>Devin CLI · ACP</h3>
-        <p>独立于 Base URL / API Key 的本地 Agent 连接。开发预览仅通过同源桥接访问。</p>
+        <h3>Devin ACP</h3>
+        <p>通过设备本地的 Devin 桥接连接编程代理，无需填写普通 API 地址或密钥。</p>
       </div>
       <div className="provider-stack">
         <p role="status">{status}</p>
-        <button type="button" className="btn-secondary" onClick={() => { void check(); }}>检测 ACP 连接</button>
-        <label htmlFor="devin-acp-prompt">发送测试消息</label>
-        <textarea id="devin-acp-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={3} placeholder="向 Devin 发送一条消息" />
-        <div className="provider-inline-actions">
-          <button type="button" className="btn-secondary" disabled={busy || !prompt.trim()} onClick={() => { void send(); }}>发送到 Devin</button>
-          <button type="button" className="btn-secondary" disabled={!busy} onClick={() => { void cancel(); }}>停止</button>
-        </div>
-        {answer ? <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }} aria-live="polite">{answer}</pre> : null}
+        <button type="button" className="btn-secondary" disabled={busy} onClick={() => { void check(); }}>检测 ACP 连接</button>
+        {connectionAvailable ? (
+          <>
+            <label htmlFor="devin-acp-prompt">测试消息（可选）</label>
+            <textarea id="devin-acp-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={3} placeholder="向 Devin 发送一条测试消息" />
+            <div className="provider-inline-actions">
+              <button type="button" className="btn-secondary" disabled={busy || !prompt.trim()} onClick={() => { void send(); }}>发送测试消息</button>
+              <button type="button" className="btn-secondary" disabled={!busy} onClick={() => { void cancel(); }}>停止</button>
+            </div>
+            {answer ? <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }} aria-live="polite">{answer}</pre> : null}
+          </>
+        ) : (
+          <p className="api-provider-inline-note">先检测连接。桥接在线后才显示测试消息入口。</p>
+        )}
+        <p className="api-provider-inline-note">ACP 的模型配置发现尚未接入，此页面不使用普通 API 的“拉取模型列表”。</p>
       </div>
     </section>
   );
