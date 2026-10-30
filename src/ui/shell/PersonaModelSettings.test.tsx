@@ -51,7 +51,7 @@ describe('model and effort controls', () => {
     expect(html).toContain('模型 ID（也可手动填写）');
     expect(html).toContain('deepseek-v4-flash');
     expect(html).not.toContain('启用线路思考能力');
-    expect(html).not.toContain('id=":r0:-model" disabled');
+    expect(html).not.toContain('disabled=""');
   });
   it('does not let an unconfigured persona inherit and change the global route', () => {
     const persona = setup();
