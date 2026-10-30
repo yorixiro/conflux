@@ -176,6 +176,9 @@ function filmMaterial(T: Tracker, u: FilmU, normal: THREE.Texture): THREE.MeshPh
     blendSrc: THREE.OneFactor,
     blendDst: THREE.OneMinusSrcAlphaFactor,
     side: THREE.DoubleSide,
+    // Each film is a single-valued surface (front mesh and back mesh are
+    // separate). A second back/front transparency pass only repeats its pixels.
+    forceSinglePass: true,
     normalMap: normal,
     normalScale: new THREE.Vector2(0.4, 0.4),
   });

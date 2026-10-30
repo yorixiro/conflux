@@ -158,7 +158,6 @@ export function ArchiveFolio({
   const liveStampProfile = useRef<Profile | null>(null);
   const liveStampPageOpen = useRef(false);
   const livePicturesReady = useRef(false);
-  const liveDetailOpen = useRef(false);
 
   const count = Math.max(1, Math.ceil(cards.length / PHOTOS_PER_POUCH));
   const index = Math.min(group, count - 1);
@@ -172,8 +171,6 @@ export function ArchiveFolio({
   liveStampProfile.current = postageProfile;
   liveStampPageOpen.current = stampPageOpen;
   livePicturesReady.current = pictures.ready;
-  liveDetailOpen.current = !!detailId;
-  useEffect(() => { bookRef.current?.book?.setAmbient(!detailId); }, [detailId]);
   useEffect(() => {
     if (pictures.ready) setLoadedOwner(ownerId);
   }, [ownerId, pictures.ready]);
@@ -393,9 +390,9 @@ export function ArchiveFolio({
           tilt
           autoOpen
           prewarmCovers={false}
+          ambient={!detailId}
           onBook={(book) => {
             if (!book) return;
-            book.setAmbient(!liveDetailOpen.current);
             if (livePicturesReady.current) pagesRef.current?.setPhoto(livePhotoProfile.current!);
             pagesRef.current?.select(liveStampPageOpen.current);
           }}

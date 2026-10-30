@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import type { SceneAddon } from "./addon";
 import type { CaseSpec } from "./binder";
 import { createPocketGrid, type ContentSource } from "./content/grid";
@@ -37,6 +37,8 @@ export type BookViewHandle = {
 
 export type BookViewProps = {
   prewarmCovers?: boolean;
+  /** Run the ambient window-light sway while in view. Hidden views pause it without destroying their WebGL state. */
+  ambient?: boolean;
   /** The card binder's items (shorthand; `content` or `items` win) */
   cards?: BookCard[];
   /**
@@ -106,6 +108,7 @@ const capable = () => typeof window !== "undefined" && canRender3d();
 
 export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookView({
   prewarmCovers,
+  ambient = true,
   cards,
   content: contentProp,
   layout: layoutProp,
@@ -140,6 +143,23 @@ export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookV
   const footRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<Book | null>(null);
+  const ambientRef = useRef(ambient);
+  ambientRef.current = ambient;
+  const inViewRef = useRef(true);
+  const syncAmbient = useCallback(() => {
+    bookRef.current?.setAmbient(ambientRef.current && inViewRef.current);
+  }, []);
+  useEffect(() => { syncAmbient(); }, [ambient, syncAmbient]);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      inViewRef.current = entry?.isIntersecting ?? true;
+      syncAmbient();
+    });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [syncAmbient]);
   const [can3d] = useState(capable);
   const [failed, setFailed] = useState(false);
   const kind: "3d" | "flat" = failed || mode === "flat" || (mode === "auto" && !can3d) ? "flat" : "3d";
@@ -285,6 +305,7 @@ export const BookView = forwardRef<BookViewHandle, BookViewProps>(function BookV
         if (now.content !== content && !b.setContent(now.content)) return setFresh((n) => n + 1);
         b.setCover(now.cover, now.caseSpec ?? {});
         now.onBook?.(b);
+        syncAmbient();
       })
       .catch((err: unknown) => {
         if (dead) return;
