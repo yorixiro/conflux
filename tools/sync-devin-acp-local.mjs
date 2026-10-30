@@ -25,6 +25,9 @@ const paths = [
   'src/engines/request/devinAcpReply.ts',
   'src/engines/request/requestPipeline.ts',
   'src/ui/shell/persona/settings/PersonaApiConnectionPanel.tsx',
+  'src/ui/shell/DevinAcpConnectionPanel.tsx',
+  'src/ui/shell/ApiProviderConfigForm.tsx',
+  'src/ui/shell/ApiProviderAddView.tsx',
   'vite.config.ts',
 ];
 const repo = process.cwd();
@@ -89,7 +92,7 @@ try {
     for (const path of conflicts) say('  - ' + path);
     say('注意：这些文件的远端功能尚未同步，不能宣称全部交付。');
   } else {
-    say('六个目标文件均已安全同步或无须更新。');
+    say('所有目标文件均已安全同步或无须更新。');
   }
   say('下一步：在 Termux 窗口用新桥接代码启动 Ubuntu 中的 Devin，之后重新加载原来的 4173 服务。');
   try {

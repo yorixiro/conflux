@@ -1,7 +1,7 @@
 import type { ProviderProfile } from '../../types/domain';
 import { useI18n } from '../../i18n/useI18n';
 import { Icon } from '../Icon';
- import { ApiProviderRouteCardSection } from './ApiProviderRouteCardSection';
+import { ApiProviderRouteCardSection } from './ApiProviderRouteCardSection';
 
 type ApiProviderAddViewProps = {
   api: ProviderProfile;
@@ -30,7 +30,7 @@ export function ApiProviderAddView({
         </button>
       </section>
 
-       <button
+      <button
         type="button"
         className="btn-secondary api-provider-add-primary"
         onClick={() => {
