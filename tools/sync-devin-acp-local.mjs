@@ -31,7 +31,6 @@ const paths = [
   'src/ui/app-shell/AppShellView.tsx',
   'src/ui/app-shell/ConfluxSidebarDialog.tsx',
   'src/ui/worlds/chat/message/MessageTokenUsage.tsx',
-  'src/engines/request/devinAcpReply.test.ts',
   'vite.config.ts',
 ];
 const repo = process.cwd();
@@ -98,7 +97,11 @@ try {
   } else {
     say('所有目标文件均已安全同步或无须更新。');
   }
-  say('下一步：在 Termux 窗口用新桥接代码启动 Ubuntu 中的 Devin，之后重新加载原来的 4173 服务。');
+  if (planned.some(({ path }) => path === 'tools/devin-acp-bridge.mjs' || path === 'tools/conflux-local-server.ts' || path === 'vite.config.ts')) {
+    say('后端文件已更新；若运行中服务还是旧版本，才需要分别重新加载对应进程。');
+  } else {
+    say('本次仅前端/请求模块更新：刷新 Conflux 即可，无需重启 4173 或 Devin 桥接。');
+  }
   try {
     const response = await fetch('http://127.0.0.1:4173/devin-acp/health', {
       signal: AbortSignal.timeout(2500)
