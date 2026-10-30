@@ -16,26 +16,31 @@ persona.advanced = {
   ...persona.advanced, providerId: api.id, providerRouteMode: 'fixed', modelOverride: api.model
 };
 
-describe('role API settings surface', () => {
-  it('only selects an existing provider, edits credentials in the original manager', () => {
+describe('one-page persona API configuration', () => {
+  it('shows name, address, key, role model and test without leaving the page', () => {
     const html = renderToStaticMarkup(<PersonaApiConnectionPanel
       activePersona={persona} providers={[api]} onUpdatePersona={vi.fn()}
-      onOpenProviderSettings={vi.fn()} />);
+      onUpdateProvider={vi.fn()} />);
     expect(html.match(/<select/g)).toHaveLength(1);
     expect(html).toContain('使用的 API');
-    expect(html).toContain('管理 API（地址、密钥与模型）');
+    expect(html).toContain('API Base URL');
+    expect(html).toContain('API Key');
     expect(html).toContain('角色模型');
+    expect(html).toContain('测试连接');
+    expect(html).toContain('＋ 新建 API');
     expect(html).not.toContain('复制成');
     expect(html).not.toContain('跟随全局');
-    expect(html).not.toContain('API Key');
+    expect(html).not.toContain('管理 API（地址、密钥与模型）');
   });
 
-  it('keeps ACP model settings off the ordinary provider form', () => {
+  it('hides ordinary API credentials for ACP', () => {
     const acp = { ...api, agentTransport: 'devin-acp' as const };
     const acpPersona = { ...persona, advanced: { ...persona.advanced, providerId: acp.id } };
     const html = renderToStaticMarkup(<PersonaApiConnectionPanel
-      activePersona={acpPersona} providers={[acp]} onUpdatePersona={vi.fn()} />);
-    expect(html).toContain('通过本地桥接发送聊天消息');
+      activePersona={acpPersona} providers={[acp]}
+      onUpdatePersona={vi.fn()} onUpdateProvider={vi.fn()} />);
+    expect(html).toContain('检查桥接状态');
+    expect(html).not.toContain('API Base URL');
     expect(html).not.toContain('角色模型');
   });
 });

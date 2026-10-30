@@ -1,36 +1,38 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { addSavedPersonaApiId, listSavedPersonaApiIds } from '../../../../engines/personaApiConnections';
+import { testApiConnection } from '../../../../engines/providerConnectionTest';
+import { useRuntimeStore } from '../../../../stores/runtimeStore';
 import type { ProviderProfile } from '../../../../types/domain';
+import { isBuiltInProviderDisplay } from '../../apiProviderDisplay';
+import { ApiProviderConnectionFields } from '../../ApiProviderConnectionSection';
 import { PersonaModelSettings } from '../../PersonaModelSettings';
 import type { PersonaTabProps } from '../personaUiShared';
 
 type Props = Pick<PersonaTabProps, 'activePersona' | 'providers' | 'onUpdatePersona'> & {
-  onOpenProviderSettings?: () => void;
-  onUpdateProvider?: (providerId: string, patch: Partial<ProviderProfile>) => void;
+  onUpdateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
 };
 
-/**
- * Only the role-to-API binding lives here. Credentials and endpoint editing use
- * the existing API manager, so there is a single source of truth for the form.
- */
+/** A single screen for choosing, creating and configuring the current persona's API. */
 export function PersonaApiConnectionPanel({
-  activePersona, providers = [], onUpdatePersona, onOpenProviderSettings, onUpdateProvider
+  activePersona, providers = [], onUpdatePersona, onUpdateProvider
 }: Props) {
   const fieldId = useId();
+  const createProvider = useRuntimeStore((state) => state.createProvider);
+  const [testStatus, setTestStatus] = useState('');
+  const [testing, setTesting] = useState(false);
 
   if (!activePersona) return <p className="ps-footnote">请先选择一个 AI 角色。</p>;
 
-  const activeId = activePersona.advanced.providerId?.trim() || '';
-  const current = providers.find((provider) => provider.id === activeId) ?? null;
-  const missing = Boolean(activeId && !current);
+  const providerId = activePersona.advanced.providerId?.trim() || '';
+  const current = providers.find((provider) => provider.id === providerId) ?? null;
+  const missing = Boolean(providerId && !current);
+  const savedIds = listSavedPersonaApiIds(activePersona.advanced);
   const isAcp = current?.agentTransport === 'devin-acp';
   const legacyAcp = Boolean(current && !isAcp && current.name.trim() === 'Devin ACP'
     && !current.baseUrl.trim() && !current.apiKey.trim());
-  const savedIds = listSavedPersonaApiIds(activePersona.advanced);
+  const builtIn = current ? isBuiltInProviderDisplay(current) : false;
 
-  function selectProvider(id: string) {
-    const provider = providers.find((item) => item.id === id);
-    if (!provider) return;
+  function bindProvider(provider: ProviderProfile) {
     onUpdatePersona({
       advanced: {
         providerId: provider.id,
@@ -39,53 +41,111 @@ export function PersonaApiConnectionPanel({
         savedProviderIds: addSavedPersonaApiId(savedIds, provider.id)
       }
     });
+    setTestStatus('');
+  }
+
+  function selectProvider(value: string) {
+    if (value === '__new_api__' || value === '__new_acp__') {
+      const isNewAcp = value === '__new_acp__';
+      const id = createProvider(isNewAcp ? 'Devin ACP' : '我的 API', { activate: false });
+      if (isNewAcp) {
+        useRuntimeStore.getState().updateProvider(id, {
+          agentTransport: 'devin-acp', model: '', baseUrl: '', apiKey: ''
+        });
+      }
+      const provider = useRuntimeStore.getState().providers.find((item) => item.id === id);
+      if (provider) bindProvider(provider);
+      return;
+    }
+    const provider = providers.find((item) => item.id === value);
+    if (provider) bindProvider(provider);
+  }
+
+  function patchProvider(patch: Partial<ProviderProfile>) {
+    if (!current || builtIn) return;
+    // The named API is edited in place; never silently duplicate a connection.
+    onUpdateProvider(current.id, patch);
+    setTestStatus('');
+  }
+
+  async function testConnection() {
+    if (!current || testing) return;
+    setTesting(true);
+    setTestStatus('正在检测…');
+    try {
+      if (current.agentTransport === 'devin-acp') {
+        const result = await fetch('/devin-acp/health', { cache: 'no-store' });
+        if (!result.ok) throw new Error('桥接服务 HTTP ' + result.status);
+        const body = await result.json() as { running?: boolean; sessionReady?: boolean };
+        setTestStatus(body.running
+          ? (body.sessionReady ? '桥接在线，会话已建立' : '桥接在线，首次聊天时将建立会话')
+          : 'Devin ACP 代理未运行');
+      } else {
+        const result = await testApiConnection({
+          api: {
+            ...current,
+            model: activePersona.advanced.modelOverride?.trim() || current.model
+          },
+          advanced: activePersona.advanced
+        });
+        setTestStatus(result.ok ? (result.message || '连接成功') : result.error);
+      }
+    } catch (error) {
+      setTestStatus(error instanceof Error ? error.message : '连接失败');
+    } finally {
+      setTesting(false);
+    }
   }
 
   return (
     <section className="conflux-role-connection" aria-label="角色 API 设置">
       <div className="ps-field">
         <label className="ps-field-label" htmlFor={fieldId}>使用的 API</label>
-        <select className="ps-input" id={fieldId}
-          value={current?.id ?? ''}
+        <select className="ps-input" id={fieldId} value={current?.id ?? ''}
           onChange={(event) => selectProvider(event.target.value)}>
-          <option value="" disabled>
-            {missing ? '原 API 已不存在，请重新选择' : '选择已有 API'}
-          </option>
-          {providers.map((provider: ProviderProfile) => (
+          <option value="" disabled>{missing ? '原 API 已不存在' : '选择已有 API'}</option>
+          {providers.map((provider) => (
             <option key={provider.id} value={provider.id}>{provider.name}</option>
           ))}
+          <option value="__new_api__">＋ 新建 API</option>
+          <option value="__new_acp__">＋ 新建 Devin ACP</option>
         </select>
       </div>
 
-      {!activeId && activePersona.advanced.providerRouteMode === 'inherit' ? (
-        <p className="ps-footnote">旧角色连接仍保持原样；选择一个 API 后将固定使用它。</p>
-      ) : null}
-      {missing ? <p className="ps-footnote">原绑定不会被自动替换。</p> : null}
+      {missing ? <p className="ps-footnote" role="status">原绑定已失效，请选择其他 API；旧配置未被删除。</p> : null}
+      {!providerId && activePersona.advanced.providerRouteMode === 'inherit'
+        ? <p className="ps-footnote">原角色连接保持不变；选定 API 后将固定使用它。</p> : null}
 
-      {legacyAcp && current && onUpdateProvider ? (
+      {current && legacyAcp ? (
         <button type="button" className="btn-secondary compact"
-          onClick={() => onUpdateProvider(current.id, { agentTransport: 'devin-acp' })}>
-          将旧 Devin ACP 连接标记为代理类型
+          onClick={() => patchProvider({ agentTransport: 'devin-acp' })}>
+          将此旧连接识别为 Devin ACP
         </button>
       ) : null}
-      {current && !isAcp && !legacyAcp ? (
-        <PersonaModelSettings key={activePersona.id + ':' + current.id}
-          persona={activePersona} settings />
-      ) : null}
-      {isAcp ? (
-        <p className="ps-footnote" role="status">
-          Devin ACP 通过本地桥接发送聊天消息，无需 API Key 或模型 ID。桥接必须先在线。
-        </p>
+      {current && isAcp ? (
+        <p className="ps-footnote">Devin ACP 由本地代理管理，无需输入 API 地址、密钥或模型。</p>
+      ) : current && !builtIn && !legacyAcp ? (
+        <>
+          <div className="settings-form conflux-role-credentials">
+            <ApiProviderConnectionFields api={current} onSetApiConfig={patchProvider} />
+          </div>
+          <PersonaModelSettings key={activePersona.id + ':' + current.id}
+            persona={activePersona} settings />
+          <p className="ps-footnote">修改此 API 将同步到所有使用它的角色；角色的模型选择独立保存。</p>
+        </>
+      ) : current && builtIn ? (
+        <p className="ps-footnote">当前使用内置连接，无需填写 API 地址或密钥。</p>
       ) : null}
 
-      {onOpenProviderSettings ? (
-        <button type="button" className="btn-secondary compact"
-          onClick={onOpenProviderSettings}>
-          管理 API（地址、密钥与模型）
-        </button>
-      ) : (
-        <p className="ps-footnote">请从应用的 API 设置中创建或编辑连接。</p>
-      )}
+      {current && !legacyAcp ? (
+        <div className="conflux-role-test">
+          <button type="button" className="btn-secondary compact"
+            disabled={testing} onClick={() => void testConnection()}>
+            {testing ? '检测中…' : isAcp ? '检查桥接状态' : '测试连接'}
+          </button>
+          {testStatus ? <p className="ps-footnote" role="status" aria-live="polite">{testStatus}</p> : null}
+        </div>
+      ) : null}
     </section>
   );
 }

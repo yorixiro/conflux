@@ -62,6 +62,60 @@ export function ApiProviderConnectionSection({
           ))}
         </select>
 
+        <ApiProviderConnectionFields api={api} onSetApiConfig={onSetApiConfig} />
+      </div>
+      <div className="provider-health-note api-provider-connection-note">
+        <strong>{matchedPresetName || t('apiProvider.connection.defaultPathNote')}</strong>
+        <span>{getLocalizedProviderProtocolLabel(api.protocol, t)} · {interfacePath}</span>
+      </div>
+      <button
+        type="button"
+        className="btn-secondary compact api-provider-advanced-toggle"
+        onClick={() => onSetAdvancedOpen((previous) => !previous)}
+      >
+        {advancedOpen ? t('apiProvider.connection.collapseAdvanced') : t('apiProvider.connection.expandAdvanced')}
+      </button>
+      {advancedOpen ? (
+        <div className="settings-form api-provider-advanced-panel">
+          <label>{t('apiProvider.connection.protocolLabel')}</label>
+          <select
+            value={api.protocol}
+            onChange={(event) => {
+              const protocol = event.target.value as ProviderProfile['protocol'];
+              onSetApiConfig({
+                protocol,
+                path: getDefaultProviderPath(protocol)
+              });
+            }}
+          >
+            <option value="openai-completions">{getLocalizedProviderProtocolLabel('openai-completions', t)}</option>
+            <option value="anthropic-messages">{getLocalizedProviderProtocolLabel('anthropic-messages', t)}</option>
+            <option value="openai-responses">{getLocalizedProviderProtocolLabel('openai-responses', t)}</option>
+            <option value="gemini-generate-content">{getLocalizedProviderProtocolLabel('gemini-generate-content', t)}</option>
+          </select>
+          <label>API Path</label>
+          <input
+            value={api.path}
+            onChange={(event) => onSetApiConfig({ path: event.target.value })}
+            placeholder="/chat/completions"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="off"
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+
+/** Shared name, URL and credential controls, used by API manager and role editor. */
+export function ApiProviderConnectionFields({ api, onSetApiConfig }: Pick<ApiProviderConnectionSectionProps, 'api' | 'onSetApiConfig'>) {
+  const { t } = useI18n();
+  const fieldId = useId();
+  return (
+    <>
         <label htmlFor={`${fieldId}-name`}>{t('apiProvider.connection.nameLabel')}</label>
         <input
           id={`${fieldId}-name`}
@@ -111,48 +165,6 @@ export function ApiProviderConnectionSection({
           spellCheck={false}
           autoComplete="off"
         />
-      </div>
-      <div className="provider-health-note api-provider-connection-note">
-        <strong>{matchedPresetName || t('apiProvider.connection.defaultPathNote')}</strong>
-        <span>{getLocalizedProviderProtocolLabel(api.protocol, t)} · {interfacePath}</span>
-      </div>
-      <button
-        type="button"
-        className="btn-secondary compact api-provider-advanced-toggle"
-        onClick={() => onSetAdvancedOpen((previous) => !previous)}
-      >
-        {advancedOpen ? t('apiProvider.connection.collapseAdvanced') : t('apiProvider.connection.expandAdvanced')}
-      </button>
-      {advancedOpen ? (
-        <div className="settings-form api-provider-advanced-panel">
-          <label>{t('apiProvider.connection.protocolLabel')}</label>
-          <select
-            value={api.protocol}
-            onChange={(event) => {
-              const protocol = event.target.value as ProviderProfile['protocol'];
-              onSetApiConfig({
-                protocol,
-                path: getDefaultProviderPath(protocol)
-              });
-            }}
-          >
-            <option value="openai-completions">{getLocalizedProviderProtocolLabel('openai-completions', t)}</option>
-            <option value="anthropic-messages">{getLocalizedProviderProtocolLabel('anthropic-messages', t)}</option>
-            <option value="openai-responses">{getLocalizedProviderProtocolLabel('openai-responses', t)}</option>
-            <option value="gemini-generate-content">{getLocalizedProviderProtocolLabel('gemini-generate-content', t)}</option>
-          </select>
-          <label>API Path</label>
-          <input
-            value={api.path}
-            onChange={(event) => onSetApiConfig({ path: event.target.value })}
-            placeholder="/chat/completions"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            autoComplete="off"
-          />
-        </div>
-      ) : null}
-    </section>
+    </>
   );
 }

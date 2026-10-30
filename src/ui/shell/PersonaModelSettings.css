@@ -60,3 +60,43 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
   max-width: 100%;
   font-size: var(--type-label);
 }
+
+/* One-page role API form: reuse existing field rhythm and theme tokens. */
+.conflux-role-connection .conflux-role-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.conflux-role-credentials > label {
+  margin-top: 5px;
+  font-size: var(--type-label);
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.conflux-role-credentials > input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  border: var(--control-border);
+  border-radius: var(--radius-sm);
+  background: var(--control-surface);
+  color: var(--control-text);
+  box-shadow: var(--control-shadow);
+  padding: 10px 13px;
+  font: inherit;
+  font-size: var(--type-body);
+  line-height: 1.5;
+}
+.conflux-role-credentials > input:focus {
+  outline: none;
+  border: var(--control-border-focus);
+  background: var(--control-surface-focus);
+  box-shadow: var(--control-focus-shadow);
+}
+.conflux-role-connection .ps-input { min-height: 48px; font-size: var(--type-body); }
+.conflux-role-connection .persona-model-settings { gap: 8px; }
+.conflux-role-connection .persona-model-settings > button { margin-top: 0; }
+.conflux-role-test { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.conflux-role-test .ps-footnote { flex: 1 1 160px; }
+.conflux-role-connection .btn-secondary { font-size: var(--type-label); }

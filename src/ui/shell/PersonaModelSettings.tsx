@@ -61,7 +61,7 @@ export function PersonaModelSettings({
     return <div className="persona-model-settings" aria-label="当前角色模型">
       <div className="ps-field">
         <label className="ps-field-label" htmlFor={id + '-model'}>模型</label>
-        <input className="ps-input ps-input--mono"
+        <input className="ps-input"
           id={id + '-model'} list={id + '-model-options'}
           disabled={!editable} value={binding.modelOverride}
           placeholder={binding.api.model || '输入或选择模型 ID'}
