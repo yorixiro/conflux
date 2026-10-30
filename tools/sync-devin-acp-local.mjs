@@ -31,6 +31,9 @@ const paths = [
   'src/ui/app-shell/AppShellView.tsx',
   'src/ui/app-shell/ConfluxSidebarDialog.tsx',
   'src/ui/worlds/chat/message/MessageTokenUsage.tsx',
+  'src/types/domain/chat.ts',
+  'src/engines/provider-runtime/providerRuntimeTypes.ts',
+  'src/engines/chatMessageNormalization.ts',
   'vite.config.ts',
 ];
 const repo = process.cwd();

@@ -42,7 +42,28 @@ export async function requestDevinAcpReply(params: {
   let buffer = '';
   let content = '';
   let thinkingText = '';
+  let contextUsage: { used: number; size: number } | undefined;
+  let reportedUsage: AssistantReply['acpTokenReport'];
   let finished = false;
+  const validTokens = (value: unknown): value is number =>
+    typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+  const readAgentUsage = (value: unknown) => {
+    if (!value || typeof value !== 'object') return;
+    const fields = value as Record<string, unknown>;
+    const result: NonNullable<AssistantReply['acpTokenReport']> = {};
+    const mapping: Record<string, keyof typeof result> = {
+      totalTokens: 'totalTokens',
+      inputTokens: 'inputTokens',
+      outputTokens: 'outputTokens',
+      thoughtTokens: 'reasoningTokens',
+      cachedReadTokens: 'cachedInputTokens',
+      cachedWriteTokens: 'cacheCreationInputTokens'
+    };
+    for (const [source, target] of Object.entries(mapping)) {
+      if (validTokens(fields[source])) result[target] = fields[source] as number;
+    }
+    if (Object.keys(result).length) reportedUsage = result;
+  };
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -57,11 +78,19 @@ export async function requestDevinAcpReply(params: {
         if (!data) continue;
         const event = JSON.parse(data) as {
           type: string;
-          update?: { sessionUpdate?: string; content?: { type?: string; text?: string } };
+          update?: { sessionUpdate?: string; content?: { type?: string; text?: string }; used?: number; size?: number };
+          result?: { usage?: unknown };
           error?: string;
         };
         if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
-        if (event.type === 'done') finished = true;
+        if (event.type === 'done') {
+          finished = true;
+          readAgentUsage(event.result?.usage);
+        }
+        if (event.type === 'update' && event.update?.sessionUpdate === 'usage_update'
+          && validTokens(event.update.used) && validTokens(event.update.size)) {
+          contextUsage = { used: event.update.used, size: event.update.size };
+        }
         if (event.type === 'update') {
           const chunk = event.update?.content?.text;
           if (typeof chunk === 'string') {
@@ -82,9 +111,20 @@ export async function requestDevinAcpReply(params: {
         if (trailing) {
           const data = trailing.split('\n').filter((line) => line.startsWith('data: ')).map((line) => line.slice(6)).join('\n');
           if (data) {
-            const event = JSON.parse(data) as { type: string; error?: string };
+            const event = JSON.parse(data) as {
+              type: string; error?: string;
+              result?: { usage?: unknown };
+              update?: { sessionUpdate?: string; used?: number; size?: number };
+            };
             if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
-            if (event.type === 'done') finished = true;
+            if (event.type === 'done') {
+              finished = true;
+              readAgentUsage(event.result?.usage);
+            }
+            if (event.type === 'update' && event.update?.sessionUpdate === 'usage_update'
+              && validTokens(event.update.used) && validTokens(event.update.size)) {
+              contextUsage = { used: event.update.used, size: event.update.size };
+            }
           }
         }
         break;
@@ -95,7 +135,9 @@ export async function requestDevinAcpReply(params: {
     return {
       content,
       model: 'Devin ACP',
-      ...(thinkingText ? { thinkingText } : {})
+      ...(thinkingText ? { thinkingText } : {}),
+      ...(contextUsage ? { acpContextUsage: contextUsage } : {}),
+      ...(reportedUsage ? { acpTokenReport: reportedUsage } : {})
     };
   } finally {
     reader.releaseLock();

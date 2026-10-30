@@ -72,4 +72,25 @@ describe('ACP chat reply over the existing request pipeline', () => {
     expect(answer.tokenUsage).toBeUndefined();
   });
 
+  it('keeps ACP context occupancy separate from per-turn token usage', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"usage_update","used":53000,"size":200000}}', '',
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"收到"}}}', '',
+      'data: {"type":"done","result":{"stopReason":"end_turn"}}', ''
+    ].join('\n') + '\n', { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: '测试' });
+    expect(answer.content).toBe('收到');
+    expect(answer.acpContextUsage).toEqual({ used: 53000, size: 200000 });
+    expect(answer.tokenUsage).toBeUndefined();
+  });
+  it('keeps agent-reported usage separate when its accumulation scope is unknown', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"收到"}}}', '',
+      'data: {"type":"done","result":{"usage":{"totalTokens":219,"inputTokens":184,"outputTokens":35}}}', ''
+    ].join('\n') + '\n', { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: '测试' });
+    expect(answer.acpTokenReport).toEqual({ totalTokens: 219, inputTokens: 184, outputTokens: 35 });
+    expect(answer.tokenUsage).toBeUndefined();
+  });
+
 });

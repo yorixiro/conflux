@@ -228,6 +228,8 @@ export type AssistantReply = {
   model?: string;
   tokenCount?: number;
   tokenUsage?: ChatTokenUsage;
+  acpContextUsage?: { used: number; size: number };
+  acpTokenReport?: ChatTokenUsage;
   thinkingText?: string;
   nativeToolCalls?: AssistantNativeToolCall[];
   usedNativeToolCalls?: boolean;
