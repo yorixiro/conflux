@@ -40,6 +40,7 @@ const legacySessionModels = new Map();
 const pending = new Map();
 
 let promptReserved = false;
+let agentFailure = null;
 
 function failAll(reason) {
   for (const [, entry] of pending) entry.reject(new Error(reason));
@@ -109,8 +110,16 @@ agent.stdout.on('data', (chunk) => {
   }
 });
 agent.stderr.on('data', () => {}); // Do not expose potentially sensitive CLI logs.
-agent.on('error', (error) => failAll(error.message));
-agent.on('exit', (code) => failAll(`Devin ACP exited (${code})`));
+agent.on('error', (error) => {
+  agentFailure = error.code === 'ENOENT'
+    ? 'Ubuntu 中找不到 devin 命令，请确认 Devin CLI 已安装并在 PATH 中'
+    : error.message;
+  failAll(agentFailure);
+});
+agent.on('exit', (code) => {
+  agentFailure ||= `Devin ACP 子进程已退出（代码 ${code}）`;
+  failAll(agentFailure);
+});
 
 let ready;
 async function initialize() {
@@ -220,7 +229,11 @@ const server = createServer(async (req, res) => {
     return writeJson(res, 401, { error: 'Unauthorized' });
   }
   if (req.method === 'GET' && req.url === '/health') {
-    return writeJson(res, 200, { running: !agent.killed && agent.exitCode === null, sessionReady: !!sessionId });
+    return writeJson(res, 200, {
+      running: !agentFailure && !agent.killed && agent.exitCode === null,
+      sessionReady: !!sessionId,
+      ...(agentFailure ? { error: agentFailure } : {})
+    });
   }
   if (req.method === 'GET' && req.url === '/models') {
     try {

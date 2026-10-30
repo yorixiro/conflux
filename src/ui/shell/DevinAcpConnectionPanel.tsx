@@ -26,7 +26,7 @@ export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: P
       } | null;
       if (!response.ok) throw new Error(data?.error || 'HTTP ' + response.status);
       const running = data?.running === true;
-      setStatus(running ? 'Devin 桥接在线' : 'Devin 进程未运行，请检查本机桥接');
+      setStatus(running ? 'Devin 桥接在线' : (data?.error || 'Devin 子进程未运行，请检查 Ubuntu 里的 Devin CLI'));
     } catch (error) {
       setStatus(error instanceof Error ? '连接失败：' + error.message : '无法连接 Devin 桥接');
     } finally {
