@@ -90,7 +90,10 @@ export function ApiProviderConfigForm({
   if (api.agentTransport === 'devin-acp') {
     return (
       <div className="api-provider-console">
-        <DevinAcpConnectionPanel />
+        <DevinAcpConnectionPanel
+          selectedModel={api.model === 'Devin ACP' ? '' : api.model}
+          onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
+        />
       </div>
     );
   }

@@ -1,7 +1,6 @@
 import type { ProviderProfile } from '../../types/domain';
 import { useI18n } from '../../i18n/useI18n';
 import { Icon } from '../Icon';
-import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
 import { ApiProviderRouteCardSection } from './ApiProviderRouteCardSection';
 
 type ApiProviderAddViewProps = {
@@ -31,7 +30,6 @@ export function ApiProviderAddView({
         </button>
       </section>
 
-      <DevinAcpConnectionPanel />
       <button
         type="button"
         className="btn-secondary api-provider-add-primary"
@@ -39,7 +37,7 @@ export function ApiProviderAddView({
           onImportProvider({
             agentTransport: 'devin-acp',
             name: 'Devin ACP',
-            model: 'Devin ACP',
+            model: '',
             protocol: 'openai-completions',
             baseUrl: '',
             apiKey: '',

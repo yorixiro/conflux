@@ -22,7 +22,7 @@ export function ConfluxSidebarDialog({ open, onClose, initialTab = 'library', si
       onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
       {open ? <button type="button" className="conflux-sidebar-profile-close" onClick={onClose} aria-label="关闭资料侧栏" title="关闭"><Icon name="x" size={18}/></button> : null}
-      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} presentation="profile" collapsed={false} onToggleCollapsed={onClose}
+      {open ? <DesktopAppSidebar {...sidebarProps} key={initialTab} initialTab={initialTab} presentation="sidebar" collapsed={false} onToggleCollapsed={onClose}
         onOpenHome={sidebarProps.onOpenHome ? () => closeAfter(sidebarProps.onOpenHome!) : undefined}
         onOpenConversation={(id, messageId) => closeAfter(() => sidebarProps.onOpenConversation(id, messageId))}
         onCreateConversation={() => closeAfter(sidebarProps.onCreateConversation)}

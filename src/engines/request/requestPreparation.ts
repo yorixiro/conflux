@@ -596,7 +596,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   conversation: RequestMessage[];
   imageUnderstandingResults: RequestImageUnderstandingResult[];
 }> {
-  const { api, persona, personas, messages, toolLedger, toolContext, currentTask, nickname } = params;
+  const { api, persona, messages, toolLedger, toolContext, currentTask, nickname } = params;
   const startedAt = runtimeNow();
   const requestId = createUid('request');
   const preparedAdvanced = resolvePreparedAdvancedSettings({
@@ -661,13 +661,10 @@ export async function prepareCollaboratorReplyRequest(params: {
   });
   const truncationMs = runtimeNow() - stepStartedAt;
   stepStartedAt = runtimeNow();
+  // Private role memory only. Sharing across personas must never happen
+  // implicitly just because their settings contain a legacy global flag.
   const memoryPlan = resolveRequestMemoryPlan({
     memory: persona?.memory,
-    inheritedMemorySources: persona
-      ? (personas ?? [])
-          .filter((candidate) => candidate.id !== persona.id)
-          .map((candidate) => ({ id: candidate.id, memory: candidate.memory }))
-      : [],
     maxTokens: budgetPlan.buckets.memory.maxTokens
   });
   const memoryPlanMs = runtimeNow() - stepStartedAt;

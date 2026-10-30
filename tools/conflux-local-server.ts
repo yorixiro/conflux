@@ -53,11 +53,12 @@ const maxBodyBytes = 32 * 1024 * 1024;
 function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) {
   const token = process.env.DEVIN_ACP_BRIDGE_TOKEN?.trim();
   const port = Number(process.env.DEVIN_ACP_BRIDGE_PORT || 47831);
-  if (!token || token.length < 24 || !Number.isInteger(port) || port < 1024 || port > 65535) {
-    json(res, 503, { error: 'Devin ACP bridge is not configured for this local server.' });
+  if ((token && token.length < 24) || !Number.isInteger(port) || port < 1024 || port > 65535) {
+    json(res, 503, { error: 'Invalid local ACP bridge configuration.' });
     return;
   }
   const endpoint = path === '/devin-acp/health' && req.method === 'GET' ? '/health'
+    : path === '/devin-acp/models' && req.method === 'GET' ? '/models'
     : path === '/devin-acp/prompt' && req.method === 'POST' ? '/prompt'
     : path === '/devin-acp/cancel' && req.method === 'POST' ? '/cancel' : null;
   if (!endpoint) { json(res, 404, { error: 'Unknown ACP endpoint.' }); return; }
@@ -68,7 +69,7 @@ function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) 
   const upstream = httpRequest({
     hostname: '127.0.0.1', port, path: endpoint, method: req.method,
     headers: {
-      'x-acp-bridge-token': token,
+      ...(token ? { 'x-acp-bridge-token': token } : {}),
       ...(endpoint === '/prompt' ? { 'content-type': 'application/json' } : {})
     }
   }, (reply) => {

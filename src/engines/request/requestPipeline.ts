@@ -133,10 +133,22 @@ export async function requestCollaboratorReply(params: {
         return '[' + message.role + ']\n' + message.content;
       })
     ).join('\n\n');
+    const conversationUserMessages = prepared.context.segments
+      .filter((segment) => segment.kind === 'conversation')
+      .flatMap((segment) => segment.messages)
+      .filter((message) => message.role === 'user');
+    const latestUser = conversationUserMessages[conversationUserMessages.length - 1]?.content;
     recordRequestDebug(prepared.audit, { phase: 'prepared' });
     try {
       const reply = await requestDevinAcpReply({
-        prompt,
+        prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
+        initialContext: prompt,
+        modelId: persona?.advanced.modelOverride?.trim()
+          || (api.model !== 'Devin ACP' ? api.model.trim() : '')
+          || undefined,
+        conversationId: activeConversationId
+          ? `${activeConversationId}::${persona?.id ?? 'default'}`
+          : undefined,
         signal,
         onProgress: onProgress
           ? (partial) => onProgress(normalizeAssistantOutput(partial, persona))
