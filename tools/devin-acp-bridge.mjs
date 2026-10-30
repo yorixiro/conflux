@@ -168,6 +168,7 @@ const server = createServer(async (req, res) => {
   if (promptReserved) return writeJson(res, 409, { error: 'Another ACP prompt is active' });
   promptReserved = true;
   let raw = '';
+  let activeConversationKey = null;
   try {
     for await (const chunk of req) {
       raw += chunk;
@@ -182,7 +183,8 @@ const server = createServer(async (req, res) => {
       typeof body.initialContext !== 'string' || body.initialContext.length > 160000
     )) throw new Error('Invalid conversation context');
     await initialize();
-    const chat = await acquireChatSession(body.conversationId || null);
+    activeConversationKey = body.conversationId || null;
+    const chat = await acquireChatSession(activeConversationKey);
     const promptText = chat.isNew && body.initialContext?.trim()
       ? body.initialContext
       : body.prompt;
@@ -208,6 +210,9 @@ const server = createServer(async (req, res) => {
     }, 10 * 60 * 1000);
     write({ type: 'done', result });
   } catch (error) {
+    // After a failed/aborted turn, rebuild the ACP session with the full
+    // transcript next time instead of continuing an uncertain conversation.
+    if (activeConversationKey) chatSessions.delete(activeConversationKey);
     if (res.headersSent) active?.write({ type: 'error', error: error.message });
     else writeJson(res, 400, { error: error.message });
   } finally {

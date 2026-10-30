@@ -75,7 +75,16 @@ export function PersonaApiConnectionPanel({
     try {
       if (current.agentTransport === 'devin-acp') {
         const result = await fetch('/devin-acp/health', { cache: 'no-store' });
-        if (!result.ok) throw new Error('桥接服务 HTTP ' + result.status);
+        if (!result.ok) {
+          const payload = await result.json().catch(() => null) as { error?: string } | null;
+          const hint = result.status === 503
+            ? '4173 服务未配置 ACP 桥接密钥'
+            : result.status === 502
+              ? 'Devin ACP 桥接进程不可达'
+              : result.status === 401 ? 'ACP 桥接密钥不一致' : 'ACP 连接失败';
+          throw new Error(hint + '（HTTP ' + result.status + '）'
+            + (payload?.error ? '：' + payload.error : ''));
+        }
         const body = await result.json() as { running?: boolean; sessionReady?: boolean };
         setTestStatus(body.running
           ? (body.sessionReady ? '桥接在线，会话已建立' : '桥接在线，首次聊天时将建立会话')

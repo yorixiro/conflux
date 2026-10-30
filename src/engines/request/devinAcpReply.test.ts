@@ -35,4 +35,29 @@ describe('ACP chat reply over the existing request pipeline', () => {
     await expect(requestDevinAcpReply({ prompt: '测试' }))
       .rejects.toThrow('without completion');
   });
+  it('reads an SSE completion split across response chunks without a trailing empty line', async () => {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"已连接"}}}\r'));
+        controller.enqueue(encoder.encode('\n\r'));
+        controller.enqueue(encoder.encode('\ndata: {"type":"done","result":{}}'));
+        controller.close();
+      }
+    });
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response(stream, {
+      status: 200, headers: { 'content-type': 'text/event-stream' }
+    }));
+    const reply = await requestDevinAcpReply({ prompt: '你好' });
+    expect(reply.content).toBe('已连接');
+  });
+
+  it('explains a missing ACP server token instead of showing raw JSON', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response(
+      JSON.stringify({ error: 'Devin ACP bridge is not configured for this local server.' }),
+      { status: 503, headers: { 'content-type': 'application/json' } }
+    ));
+    await expect(requestDevinAcpReply({ prompt: '你好' }))
+      .rejects.toThrow('4173 本地服务未配置 ACP 桥接密钥');
+  });
 });
