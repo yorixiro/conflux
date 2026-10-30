@@ -1,116 +1,105 @@
-import { useRef, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
-/** Development-only ACP connection surface. Credentials stay in Vite's server. */
-export function DevinAcpConnectionPanel() {
-  const [status, setStatus] = useState('尚未检测');
-  const [connectionAvailable, setConnectionAvailable] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [busy, setBusy] = useState(false);
-  const controller = useRef<AbortController | null>(null);
+type AcpModel = { id: string; label: string };
+
+type Props = {
+  selectedModel?: string;
+  onSelectModel?: (modelId: string) => void;
+};
+
+/** ACP settings only: native agent status and models, never ordinary API credentials. */
+export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: Props) {
+  const modelId = useId();
+  const [status, setStatus] = useState('正在连接本机 Devin…');
+  const [online, setOnline] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [models, setModels] = useState<AcpModel[]>([]);
+  const [modelMessage, setModelMessage] = useState('');
 
   async function check() {
-    if (busy) return;
-    setStatus('正在检测…');
-    setConnectionAvailable(false);
+    if (checking) return;
+    setChecking(true);
     try {
       const response = await fetch('/devin-acp/health', { cache: 'no-store' });
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      const data = await response.json() as { running?: boolean; sessionReady?: boolean };
-      if (!data.running) {
-        setStatus('Devin ACP 进程未运行');
-        return;
-      }
-      setConnectionAvailable(true);
-      setStatus(data.sessionReady ? '桥接在线，ACP 会话已建立' : '桥接在线；可发送测试消息建立 ACP 会话');
+      const data = await response.json().catch(() => null) as {
+        running?: boolean; sessionReady?: boolean; error?: string;
+      } | null;
+      if (!response.ok) throw new Error(data?.error || 'HTTP ' + response.status);
+      const running = data?.running === true;
+      setOnline(running);
+      setStatus(running ? 'Devin 桥接在线' : 'Devin 进程未运行，请检查本机桥接');
     } catch (error) {
-      const detail = error instanceof Error ? `（${error.message}）` : '';
-      setStatus(`无法连接本地 ACP 桥接${detail}。请检查 Ubuntu 中的桥接进程及 Conflux 本地服务。`);
-    }
-  }
-
-  async function send() {
-    if (!prompt.trim() || busy) return;
-    setBusy(true);
-    setAnswer('');
-    const abort = new AbortController();
-    controller.current = abort;
-    try {
-      const response = await fetch('/devin-acp/prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-        signal: abort.signal
-      });
-      if (!response.ok || !response.body) {
-        const error = await response.text();
-        throw new Error(error || 'HTTP ' + response.status);
-      }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let output = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        let boundary;
-        while ((boundary = buffer.indexOf('\n\n')) >= 0) {
-          const event = buffer.slice(0, boundary);
-          buffer = buffer.slice(boundary + 2);
-          const line = event.split('\n').find((part) => part.startsWith('data: '));
-          if (!line) continue;
-          const message = JSON.parse(line.slice(6)) as {
-            type: string;
-            update?: { sessionUpdate?: string; content?: { type?: string; text?: string } };
-            error?: string;
-          };
-          if (message.type === 'update' && message.update?.sessionUpdate === 'agent_message_chunk') {
-            output += message.update.content?.text ?? '';
-            setAnswer(output);
-          } else if (message.type === 'error') {
-            throw new Error(message.error || 'ACP error');
-          }
-        }
-      }
-      if (!output) setAnswer('ACP 请求已结束，但未收到文本消息。');
-    } catch (error) {
-      if (!abort.signal.aborted) setAnswer(error instanceof Error ? error.message : String(error));
+      setOnline(false);
+      setStatus(error instanceof Error ? '连接失败：' + error.message : '无法连接 Devin 桥接');
     } finally {
-      controller.current = null;
-      setBusy(false);
+      setChecking(false);
     }
   }
 
-  async function cancel() {
-    try { await fetch('/devin-acp/cancel', { method: 'POST' }); }
-    finally { controller.current?.abort(); setBusy(false); }
+  useEffect(() => {
+    // Check once when this API detail view opens; no polling or paid model calls.
+    void check();
+  }, []);
+
+  async function refreshModels() {
+    if (loading) return;
+    setLoading(true);
+    setModelMessage('正在获取 Devin 模型…');
+    try {
+      const response = await fetch('/devin-acp/models', { cache: 'no-store' });
+      const data = await response.json().catch(() => null) as {
+        models?: AcpModel[]; error?: string;
+      } | null;
+      if (!response.ok) throw new Error(data?.error || 'HTTP ' + response.status);
+      const next = Array.isArray(data?.models)
+        ? data.models.filter((model) => typeof model?.id === 'string' && typeof model?.label === 'string')
+        : [];
+      setModels(next);
+      setOnline(true);
+      setModelMessage(next.length
+        ? '可用模型已更新'
+        : 'Devin 未公开可选模型，仍可直接使用默认模型聊天');
+    } catch (error) {
+      setModelMessage(error instanceof Error ? error.message : '无法获取模型列表');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <section className="api-provider-section api-provider-section-config">
+    <section className="api-provider-section api-provider-section-config" aria-label="Devin ACP 连接">
       <div className="api-provider-section-head">
-        <span className="api-provider-section-kicker">ACP Agent</span>
         <h3>Devin ACP</h3>
-        <p>通过设备本地的 Devin 桥接连接编程代理，无需填写普通 API 地址或密钥。</p>
+        <p>本机代理连接，无需填写普通 API 地址、密钥或 Token。</p>
       </div>
       <div className="provider-stack">
-        <p role="status">{status}</p>
-        <button type="button" className="btn-secondary" disabled={busy} onClick={() => { void check(); }}>检测 ACP 连接</button>
-        {connectionAvailable ? (
-          <>
-            <label htmlFor="devin-acp-prompt">测试消息（可选）</label>
-            <textarea id="devin-acp-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={3} placeholder="向 Devin 发送一条测试消息" />
-            <div className="provider-inline-actions">
-              <button type="button" className="btn-secondary" disabled={busy || !prompt.trim()} onClick={() => { void send(); }}>发送测试消息</button>
-              <button type="button" className="btn-secondary" disabled={!busy} onClick={() => { void cancel(); }}>停止</button>
-            </div>
-            {answer ? <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }} aria-live="polite">{answer}</pre> : null}
-          </>
-        ) : (
-          <p className="api-provider-inline-note">先检测连接。桥接在线后才显示测试消息入口。</p>
-        )}
-        <p className="api-provider-inline-note">ACP 的模型配置发现尚未接入，此页面不使用普通 API 的“拉取模型列表”。</p>
+        <div className="provider-inline-actions">
+          <p role="status" aria-live="polite">{status}</p>
+          <button className="btn-secondary compact" type="button" onClick={() => void check()} disabled={checking}>
+            {checking ? '连接中…' : '重试连接'}
+          </button>
+        </div>
+        <div className="settings-form">
+          <label htmlFor={modelId}>聊天模型</label>
+          <select id={modelId} value={selectedModel}
+            disabled={!onSelectModel}
+            onChange={(event) => onSelectModel?.(event.target.value)}>
+            <option value="">Devin 默认模型</option>
+            {models.map((model) => <option key={model.id} value={model.id}>{model.label}</option>)}
+            {selectedModel && !models.some((model) => model.id === selectedModel)
+              ? <option value={selectedModel}>{selectedModel}（已保存）</option>
+              : null}
+          </select>
+          <button className="btn-secondary compact" type="button"
+            disabled={loading} onClick={() => void refreshModels()}>
+            {loading ? '拉取中…' : '拉取模型列表'}
+          </button>
+          {modelMessage ? <p className="api-provider-inline-note" role="status">{modelMessage}</p> : null}
+        </div>
+        {onSelectModel ? <p className="api-provider-inline-note">
+          选好后返回正式聊天窗口发送消息。无可选模型时直接使用默认模型。
+        </p> : null}
       </div>
     </section>
   );

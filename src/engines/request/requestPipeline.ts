@@ -143,7 +143,9 @@ export async function requestCollaboratorReply(params: {
       const reply = await requestDevinAcpReply({
         prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
         initialContext: prompt,
-        modelId: persona?.advanced.modelOverride?.trim() || undefined,
+        modelId: persona?.advanced.modelOverride?.trim()
+          || (api.model !== 'Devin ACP' ? api.model.trim() : '')
+          || undefined,
         conversationId: activeConversationId
           ? `${activeConversationId}::${persona?.id ?? 'default'}`
           : undefined,
