@@ -7,6 +7,7 @@ import { buildRegexTriggerContext } from '../regexTriggerProcessor';
 import { buildCapabilityEntries } from './requestPromptCapabilities';
 import { buildIdentityEntries } from './requestPromptIdentity';
 import { buildModelRuntimeEntry, buildRuntimeClockEntry, buildWorkRuntimeEntry } from './requestPromptRuntime';
+import { buildSystemIdentityEntries } from './requestPromptSystemIdentity';
 import type { AssistantToolPromptProtocolMode } from '../tool-protocol/assistantToolProtocolPrompt';
 
 export function buildAssistantPromptLayers(params: {
@@ -39,6 +40,7 @@ export function buildAssistantPromptParts(params: {
   toolProtocolMode?: AssistantToolPromptProtocolMode;
 }): AssistantPromptPart[] {
   const { personaPrompt, personaPromptSource, templateContext, messages, regexTriggers, currentTask, includeRuntimeClockContext, promptInjections, toolContext, toolProtocolMode } = params;
+  const systemIdentityEntries = buildSystemIdentityEntries();
   const identityEntries = buildIdentityEntries({
     personaPrompt,
     personaPromptSource,
@@ -60,6 +62,7 @@ export function buildAssistantPromptParts(params: {
   const capabilityEntries = buildCapabilityEntries({ messages, toolContext, toolProtocolMode });
 
   return [
+    ...systemIdentityEntries,
     ...identityEntries,
     ...capabilityEntries,
     ...(runtimeClockEntry ? [runtimeClockEntry] : []),

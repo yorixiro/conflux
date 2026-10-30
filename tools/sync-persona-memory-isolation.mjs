@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const join = (...lines) => lines.join('\n');
+// Only fix persona-memory isolation; keep the product's existing system identity and caching rules unchanged.
 const edits = {
   'src/engines/request/requestPreparation.ts': [
     ['const { api, persona, personas, messages, toolLedger, toolContext, currentTask, nickname } = params;',
@@ -24,11 +25,6 @@ const edits = {
       '    memory: persona?.memory,',
       '    maxTokens: budgetPlan.buckets.memory.maxTokens',
       '  });')]
-  ],
-  'src/engines/request/requestPromptLayers.ts': [
-    ["import { buildSystemIdentityEntries } from './requestPromptSystemIdentity';\n", ''],
-    ['  const systemIdentityEntries = buildSystemIdentityEntries();\n', ''],
-    ['    ...systemIdentityEntries,\n', '']
   ],
   'src/engines/request/requestContextContent.ts': [
     ['以下是当前协作者可调用的长期记忆线索。', '以下仅是当前角色自己的长期记忆线索。'],
@@ -77,7 +73,7 @@ try {
     for (const change of written.reverse()) writeFileSync(change.file, change.before);
     throw error;
   }
-  console.log('记忆隔离已同步，修改文件 ' + written.length + ' 个。');
+  console.log('记忆隔离已同步，修改文件 ' + written.length + ' 个；未修改全局身份、角色设定或缓存。');
   console.log('无需重启 4173；未修改本地数据、API 页面或 Devin 桥接。');
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
