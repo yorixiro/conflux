@@ -218,7 +218,7 @@ async function acquireChatSession(conversationId) {
   if (!conversationId) return { id: sessionId, isNew: false };
   const existing = chatSessions.get(conversationId);
   if (existing) return { id: existing, isNew: false };
-  const result = await request('session/new', { cwd, mcpServers: [] });
+  const result = await request('session/new', { cwd, mcpServers });
   if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
   // Bound the local routing index. An evicted chat starts a fresh ACP session
   // with its full transcript on the next request rather than reusing another chat.
