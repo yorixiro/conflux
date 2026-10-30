@@ -229,7 +229,7 @@ function buildMemoryReferenceDocLines(docs: MemoryReferenceDocDirectoryItem[]) {
   return [
     '',
     '[长期资料目录]',
-    '这些是当前协作者可按需读取的长期资料。你现在只看到了目录；需要具体背景时，先调用 readMemoryDoc 读取全文，不要凭目录假装读过正文。',
+    '这些是当前角色可按需读取的长期资料。你现在只看到了目录；需要具体背景时，先调用 readMemoryDoc 读取全文，不要凭目录假装读过正文。',
     ...docs.map((doc, index) => {
       const summary = doc.summary || '无摘要';
       return `${index + 1}. ${doc.title}（docId: ${doc.id}，${doc.charCount} 字）— ${summary}`;
@@ -354,7 +354,7 @@ export function buildMemorySegment(args: {
       {
         role: 'system',
         content: [
-          '以下是当前协作者可调用的长期记忆线索。',
+          '以下仅是当前角色自己的长期记忆线索。',
           '只在相关时自然使用，不要逐条复述，也不要把它们说成系统说明。',
           ...buildMemorySegmentLines(args.lines),
           ...buildMemoryReferenceDocLines(referenceDocs)

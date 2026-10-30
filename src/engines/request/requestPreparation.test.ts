@@ -758,3 +758,35 @@ describe('resolvePreparedAdvancedSettings', () => {
     expect(advanced?.maxTokens).toBe('4096');
   });
 });
+
+
+  it('keeps each persona memory private even when legacy global-inheritance flags are enabled', async () => {
+    const keke = createPersonaTemplate({
+      id: 'keke',
+      name: '柯老',
+      memory: {
+        inheritGlobal: true,
+        personalMemories: ['柯老自己的长期记忆。']
+      }
+    });
+    const deepseek = createPersonaTemplate({
+      id: 'deepseek',
+      name: 'DeepSeek',
+      memory: {
+        inheritGlobal: true,
+        personalMemories: ['DeepSeek 专属秘密记忆，不应提供给柯老。']
+      }
+    });
+    const prepared = await prepareCollaboratorReplyRequest({
+      api: textProvider,
+      persona: keke,
+      personas: [keke, deepseek],
+      messages: [createUserMessage('hello', '你好', 10)],
+      semanticRecallEnabled: false
+    });
+    const context = JSON.stringify(prepared.context.segments);
+    expect(context).toContain('柯老自己的长期记忆。');
+    expect(context).not.toContain('DeepSeek 专属秘密记忆');
+    expect(context).not.toContain('persona 是你在这段关系里的名字和轮廓');
+    expect(prepared.audit.memoryPlan.selectedLines).toEqual(['柯老自己的长期记忆。']);
+  });

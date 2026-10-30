@@ -213,9 +213,10 @@ export function createChatMemoryActions({
     conversationId?: string | null
   ) => {
     const targetCollaborator = resolveTargetCollaborator(conversationId);
+    if (!targetCollaborator) return { ok: false as const, error: '当前没有可读取记忆的角色。' };
     const opened = openConversationMemorySource({
       conversations: store.chat.conversations.filter((candidate) =>
-        !targetCollaborator || candidate.collaboratorId === targetCollaborator.id
+        candidate.collaboratorId === targetCollaborator.id
       ),
       sourceConversationId,
       sourceMessageIds,
