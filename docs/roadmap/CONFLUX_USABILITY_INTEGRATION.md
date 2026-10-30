@@ -30,16 +30,18 @@
 
 ### Galaxy 记忆图谱 · 本轮交付进度
 
-- 状态：**PR 待验收（视觉返工代码已提交，视觉尚未验收）**；更新日期：2026-10-30。
-- 功能分支：`feat/heartstring-memory-galaxy`；功能 PR：https://github.com/yorixiro/conflux/pull/8 。未合并。
-- 本轮运行代码 Commit：`5526629085b16a441962ac2e5a39d61ce804954e`（进度文档提交另计）。
-- 已处理：按 PR #8 最后三条返工评论，恢复教程双旋臂/14000 盘面粒子/6400 远星、原配色与相机、Sprite 中心光晕和 Bloom；下缘轻阅读区取代覆盖浮窗，长文在自然页面流展开，点选/关闭不滚动整页；四类按钮筛选星点和目录，编辑沿用原记忆库。
-- 验证：相关 Vitest 两文件合计 10 项通过；唯一一次类型检查 exit 2，仍是未修改 AppShellView / DesktopAppSidebar 的 8 处诊断，本轮图谱文件未新增诊断；720px iframe 中短文/长文/分类/编辑回写通过，320px iframe 无页面横向溢出；离开图谱后 DOM 卸载。
-- 实际截图：`docs/evidence/galaxy-rework/` 包含平板短文、长文和 320px 默认布局，以及原教程未能渲染的截图。**均不能作为 GPU 视觉合格证据**；当前云浏览器 WebGL 被禁用。
-- 未验收：作者视频 vs 当前教程 vs 集成版的 GPU 同视角对照、着色器实机效果、Android 平板触摸/FPS/显存/底部导航覆盖；教程未附独立 OSS 许可证，通用公开再分发授权尚未明确。
-- 预览：复用用户当前 **4173 Vite** 与原地址，不再安排 5175。更新步骤见 `docs/work-orders/WORK_GALAXY_IMPLEMENTATION_RESULT.md`。
-- 共享分支进度继续经 [文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 同步，未合并前仍待同步；未运行全量、冒烟、门禁、哈希或收费 API。
-
+- 状态：**PR 待验收（沉浸式页面已实施，本轮 Android 真机未验收）**；更新日期：2026-10-30。
+- 功能分支：`feat/heartstring-memory-galaxy`；PR：https://github.com/yorixiro/conflux/pull/8 。继续原分支，未合并。
+- 本轮运行代码 Commit：`02da4f704f4261a39fb414f4578640bdd0c15352`；进度文档提交另计。
+- 依据：[沉浸式专门工单](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/work-orders/WORK_GALAXY_IMMERSIVE_MEMORY_VIEW.md) 与[最新 PR 评论](https://github.com/yorixiro/conflux/pull/8#issuecomment-6515221734)。用户已在 Android 平板认可上一轮银河效果，本轮严格保留。
+- 已完成：心弦简洁入口 → 应用内全屏星河；覆盖并隔离顶部栏/心弦分类/六导航；返回恢复原心弦与焦点；下缘轻阅读、可收起的底部目录、四分类/搜索/分页；编辑按需进入原 MemorySettingsTab，保留增改删、懒加载和索引管理。全屏页由 AppShell 外层稳定挂载，跨桌面/移动布局切换仍保留记忆选中和阅读状态。
+- 视觉保护：`galaxyTemplateVisual.ts`、`memoryGalaxyScene.ts`、数据模型与依赖均未修改；粒子、Shader、Bloom、颜色、相机和动画参数保留。画布尺寸由既有 ResizeObserver 适配全屏，管理视图暂停背景场景，退出沿用原释放机制。
+- 验证：最终两份定向 Vitest **5 项通过**；本轮唯一一次 `npm run typecheck` exit 2，仍是原有 AppShellView / DesktopAppSidebar 的 8 处错误，本轮改动无新增诊断。实际应用浏览器检查了进入/返回/ESC/浏览器 Back、筛选、搜索、长短阅读、条目新增/编辑回写、角色切换、跨布局 resize、背景隔离和退出 DOM 卸载。
+- 响应式实测：720×860、320×740、1080×660；前两者页面 clientWidth/scrollWidth 分别均为 720/320，窄屏分类 288px 可用宽度、372px 内容独立横滚。浏览器视口测试不等于 Android 真机。
+- 截图：`docs/evidence/galaxy-immersive/` 三张为真实浏览器布局/降级证据。**当前云端 WebGL 不可用，黑色区域不代表用户认可的银河被删除，也不作为 GPU 画面通过证据。**
+- 待验收：本轮全屏页面在 Android 平板上的旋转/双指缩放/系统返回键、键盘与安全区、GPU 画幅和 FPS/显存；本轮未完成 GPU 真机截图。无全量、冒烟、门禁、哈希、收费 API 或构建。
+- 预览：保留原 **4173** 及同一 origin，更新原 PR 分支后进入「心弦 → 记忆图谱 → 进入记忆星河」。步骤见结果记录。
+- 共享开发分支进度通过原[文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 更新；未合并前仍待同步。
 
 ## 开发与验收
 
