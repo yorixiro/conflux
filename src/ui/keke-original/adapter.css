@@ -66,3 +66,7 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .msg-row.assistant:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:6px var(--R,18px) var(--R,18px) 6px}
 #chat .msg-row.user .bubble{border-radius:var(--R,18px) var(--R,18px) 6px var(--R,18px)}
 #chat .msg-row.user:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:var(--R,18px) 6px 6px var(--R,18px)}
+
+/* Bottom navigation only: same single-color solid icon set as the other Conflux pages. */
+#chat nav.tabs .keke-nav-solid{display:block;width:16px;height:16px;flex:none;fill:currentColor;stroke:none}
+:root[data-cf=sticker] #chat nav.tabs .on::after{content:none}
