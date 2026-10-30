@@ -64,3 +64,9 @@
 - 本轮 Chromium 与 Headless Shell 下载均返回无效压缩包，未完成浏览器目视/交互验收；没有调用真实模型 API，没有 Android 真机验收。手机需拉取更新并重启开发服务后生效。
 
 此前角色设置整合已使用隔离浏览器的虚构角色与虚构接口检查入口、表单、角色作用域、生成参数、配置读回和历史保留；连接测试、模型生成、摘要、向量和媒体接口均不调用。生产构建及相关角色路由/角色动作/翻译检查与真机验收分开记录。用户安装版 PWA、Android 原生头像选择及真实模型回复尚未在本轮验收。
+
+## 2026-10-30 IB 式角色 API 页改造（开发中）
+
+新实现入口：`src/ui/shell/persona/settings/PersonaApiConnectionPanel.tsx`。角色 API 收藏列表只存 `savedProviderIds` 引用；密钥与地址仍在 runtime ProviderProfile。旧角色 providerId 保留读取，已被其他角色或全局选中的线路只读，复制到当前角色时不更改全局 activeProviderId。原角色设置中的三按钮与大块 ApiProviderConnectionSection 已移除，原组件保留用于全局 API 页，避免删掉仍有引用的代码。ACP 与普通 API 分流；普通 API 模型发现与手填在角色页内使用。
+
+最新源码 Commit：`1abe30f4f8e557f16f6690166fb8ec0773828cd7`。实际类型检查、Vitest、浏览器与 Android/Termux UI 验收尚未进行，不标已验收。需检查异常数据、编辑/保存/恢复及跨角色隔离，并专门审查非聊天模块引用 Provider 的情况后才允许删除未使用 API 配置。
