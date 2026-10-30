@@ -100,7 +100,8 @@ export function PersonaApiConnectionPanel({
   }
 
   async function testConnection() {
-    if (!current || testing) return;
+    const personaForTest = activePersona;
+    if (!current || testing || !personaForTest) return;
     setTesting(true);
     setTestStatus('正在检测…');
     try {
@@ -124,9 +125,9 @@ export function PersonaApiConnectionPanel({
         const result = await testApiConnection({
           api: {
             ...current,
-            model: activePersona.advanced.modelOverride?.trim() || current.model
+            model: personaForTest.advanced.modelOverride?.trim() || current.model
           },
-          advanced: activePersona.advanced
+          advanced: personaForTest.advanced
         });
         setTestStatus(result.ok ? (result.message || '连接成功') : result.error);
       }
