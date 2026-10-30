@@ -122,6 +122,12 @@ try {
         continue; // Never overwrite a file with conflicting user edits.
       }
     }
+    if (acpTokenFiles.has(path) &&
+        (!candidate.toString('utf8').includes('acpContextUsage') ||
+         !candidate.toString('utf8').includes('acpTokenReport'))) {
+      conflicts.push(path);
+      continue;
+    }
     if (!local.equals(candidate)) planned.push({ path, before: local, after: candidate });
   }
   const written = [];
@@ -140,7 +146,10 @@ try {
     const item = planned.find((p) => p.path === path);
     const local = item ? item.after : readFileSync(resolve(repo, path));
     const target = git('show', 'FETCH_HEAD:' + path);
-    say((local.equals(target) ? '已完整同步' : '保留本地定制并合并') + '：' + path);
+    const status = conflicts.includes(path) ? '未同步（保留本地文件）'
+      : local.equals(target) ? '已完整同步'
+        : '目标功能已合并，保留本地差异';
+    say(status + '：' + path);
   }
   if (conflicts.length) {
     say('以下文件保留本地修改，未覆盖：');
