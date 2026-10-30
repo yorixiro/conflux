@@ -24,7 +24,7 @@ const paths = [
   'tools/conflux-local-server.ts',
   'src/engines/request/devinAcpReply.ts',
   'src/engines/request/requestPipeline.ts',
-  'src/ui/shell/persona/settings/PersonaApiConnectionPanel.tsx',
+  // Keep the user's locally customized persona API layout untouched.
   'src/ui/shell/DevinAcpConnectionPanel.tsx',
   'src/ui/shell/ApiProviderConfigForm.tsx',
   'src/ui/shell/ApiProviderAddView.tsx',
@@ -36,6 +36,35 @@ const paths = [
   'src/engines/chatMessageNormalization.ts',
   'vite.config.ts',
 ];
+// Prefer the source revision actually present on the device for earlier ACP
+// merges. HEAD predates the first ACP sync and is not a valid common ancestor
+// for these two files after several previous guarded syncs.
+const acpTokenFiles = new Set([
+  'src/engines/request/devinAcpReply.ts',
+  'src/ui/worlds/chat/message/MessageTokenUsage.tsx'
+]);
+const acpHistory = [
+  '5abe9fd8a43dfdae7b025212bbc315dbf3dec87a',
+  '42ac0cabd15bbcf2a2bd4c3341f16ffb62286a7a',
+  '1ff40f9c14a4d3ab45c34b4331434d61f8f64835',
+  'b40e59656a352e062f3fc04bf2ea980eea1f69cf',
+  '92e07bce174be3ea65b07ec0aa18591b10ef5f31',
+  'd1058043ae1f97b3c4f42d12c8d24577059386c9'
+];
+function editDistance(a, b) {
+  const x = a.toString('utf8').split('\n');
+  const y = b.toString('utf8').split('\n');
+  let prev = Array.from({ length: y.length + 1 }, (_, i) => i);
+  for (let i = 0; i < x.length; i++) {
+    const row = [i + 1];
+    for (let j = 0; j < y.length; j++) {
+      row[j + 1] = x[i] === y[j] ? prev[j] :
+        1 + Math.min(prev[j], row[j], prev[j + 1]);
+    }
+    prev = row;
+  }
+  return prev[y.length];
+}
 const repo = process.cwd();
 function git(...args) {
   return execFileSync('git', args, {
@@ -65,11 +94,25 @@ try {
       catch { return false; }
     });
     if (!local.equals(head) && !previouslySynced) {
+      let mergeBase = head;
+      if (acpTokenFiles.has(path)) {
+        let bestDistance = editDistance(local, head);
+        for (const revision of acpHistory) {
+          try {
+            const candidateBase = git('show', revision + ':' + path);
+            const distance = editDistance(local, candidateBase);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              mergeBase = candidateBase;
+            }
+          } catch { /* Missing historical revisions are not a reason to overwrite. */ }
+        }
+      }
       const a = join(dir, n + '-local');
       const b = join(dir, n + '-base');
       const c = join(dir, n + '-remote');
       writeFileSync(a, local);
-      writeFileSync(b, head);
+      writeFileSync(b, mergeBase);
       writeFileSync(c, target);
       try {
         // -p only prints the merge; never changes the three input files.
@@ -93,6 +136,12 @@ try {
   }
   say('ACP 与会话显示修复同步完成：' + remote.slice(0, 9));
   say('更新文件：' + planned.length + '；不修改主题、导航、数据、Git 提交或索引。');
+  for (const path of paths.filter((p) => acpTokenFiles.has(p))) {
+    const item = planned.find((p) => p.path === path);
+    const local = item ? item.after : readFileSync(resolve(repo, path));
+    const target = git('show', 'FETCH_HEAD:' + path);
+    say((local.equals(target) ? '已完整同步' : '保留本地定制并合并') + '：' + path);
+  }
   if (conflicts.length) {
     say('以下文件保留本地修改，未覆盖：');
     for (const path of conflicts) say('  - ' + path);
