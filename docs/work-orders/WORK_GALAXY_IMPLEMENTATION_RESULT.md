@@ -1,3 +1,65 @@
+# PR #8 沉浸式记忆星河 · 本轮交付记录
+
+状态：**PR 待验收；用户认可的银河保持原样，本轮沉浸页面待 Android 真机验收**。更新日期：2026-10-30。
+
+- PR：https://github.com/yorixiro/conflux/pull/8（Draft / 未合并）。
+- 分支：`feat/heartstring-memory-galaxy`；本轮起点 `1793c98eace808db6f07e0659bc82878b956adf8`。
+- 本轮运行代码 Commit：`02da4f704f4261a39fb414f4578640bdd0c15352`；后续进度文档提交另计。
+- 已读 `WORK_GALAXY_IMMERSIVE_MEMORY_VIEW.md` 与最新 PR 评论 6515221734；未发现额外的 inline review threads。
+
+## 这次实际修改
+
+- `HeartstringHub.tsx`：保留五个空间；记忆图谱标签只显示「进入记忆星河」，进入前不挂载场景，返回后仍停留入口，不自动重开。
+- `MemoryGalaxyFullscreen.tsx`：由 `AppShell.tsx` 的一处 Provider 接线稳定持有全屏页；Portal 放在 document.body，native modal top layer 脱离主题 transform、裁剪和层叠上下文。全屏隔离背景点击/焦点、锁后台滚动，覆盖顶部栏、心弦分类和六导航；关闭恢复滚动及入口焦点。AppShellView、MobileAppShellFrame、CollectionWorld 只做定向阅读，无改动。
+- `memoryViewNavigation.ts`：显式进入时添加同 URL 的一层 history，目录/管理只占一个子层。浏览器 Back、ESC、原生 Android backButton 接到同一返回动作：先收起子层，再回心弦；左上「返回心弦」可直接退出两层。卸载移除 history/native/store 监听，避免重复触发。原条目编辑失焦保存也适用于浏览器 Back；资料/摘要仍使用原有明确保存和删除确认。
+- `HeartstringMemoryAtlas.tsx` / `heartstring.css`：画布铺满视口，原 Memory 标题、左上返回、右上角色选择；下缘轻阅读与四类计数；底部目录可收起，选择后收起目录并点亮真实星点；搜索、分页和失效选中清理保留。长文在下缘阅读流内展开，下缘阅读区域可滚动，画布不随正文滚走。
+- 原 MemorySettingsTab 只在点击「编辑」/「记忆库」时挂载为带「返回星河」的管理视图，不再把白色设置永久堆在星河下面。管理时背景 inert 且暂停场景，退出恢复原暂停状态；全部原记忆库功能继续由同一个组件/Store 处理。
+- 安全区与键盘复用现有 viewport-height / viewport-offset-top / keyboard-bridge-offset，未修改全局键盘或导航实现。
+
+**严格未修改** `galaxyTemplateVisual.ts`、`memoryGalaxyScene.ts`、`heartstringMemoryModel.ts`、粒子/Shader/Glow/Bloom、配色、相机/动画参数及依赖。全屏导致画幅宽高比变化，由原有 resize 路径处理；没有通过更换镜头或降低画质来适配。
+
+## 实际验证
+
+本轮只执行必要定向测试与一次类型检查，没有 build、全量测试、verify、PWA 冒烟、门禁、哈希检查或收费调用。
+
+- 最终 `npx vitest run src/ui/collection/heartstring/memoryViewNavigation.test.ts src/ui/collection/heartstring/memoryGalaxyScene.test.ts`：**2 文件、5 项通过**。覆盖返回栈、重复进入/退出、异步返回防重入、条目失焦回调，以及原场景 resize/隐藏/离屏/context lost/资源只释放一次。
+- **唯一一次** `npm run typecheck`：exit 2，共 8 处既存诊断：AppShellView.tsx:256 的 onOpenHome（TS2339），DesktopAppSidebar.tsx:189/192/221/223/333/409/490 的 hub/sidebar 比较（TS2367）。这些文件未修改，本轮改动无新增诊断；没有为此重跑类型检查或扩展到无关壳层修复。
+- 实际预览使用完整 AppShell/真实 HeartstringHub，不是重画原型。1363×936 桌面页面的 modal 边界为 (0,0,1363,936)；720×860 平板视口为 (0,0,720,860)，只有星河控件进入可访问树，原导航被原生 modal 隔离。
+- 实际从原 MemorySettingsTab 新增两条隔离验收文字（一短一长），并从阅读卡定位编辑；保存后目录即时更新。另测输入新内容后不按回车直接浏览器 Back，原条目的失焦保存生效。未调用任何模型/API。
+- 四类目录结果依次为 2 / 2 / 0 / 0；搜索「长文验收」为 1 条；点目录后自动收起；字符串条目没有伪造日期；切换到 0 记忆角色后旧详情清理。本轮未用非空资料/摘要重新跑一遍完整管理流程，其原组件和懒加载接线保持。
+- 505 字长文可完整展开：720 视口阅读容器约 310px、正文/卡片总高约 527px；320 视口阅读容器约 266px、内容约 1116px；正文 overflow:visible，只有下缘阅读区滚动，页面 scrollY 为 0。
+- 720 与 320 页面 clientWidth/scrollWidth 分别为 720/720、320/320；320 分类条 288px 容器/372px 内容可独立横滚。
+- 修复了响应式壳层重新挂载带走子页的问题：720×860 → 1080×660 → 720×860 → 320×740 后，同一选中记忆及展开状态保持，modal 持续存在；未因换布局回心弦。正常退出后，心弦记忆图谱入口、顶部栏和六导航恢复，modal/场景 DOM 为 0，body overflow 恢复，焦点回入口。
+- 场景资源清理仍由原 createMemoryGalaxyScene 的卸载路径负责；定向测试使用真实几何/材质/纹理和替身 renderer。没有把 DOM 卸载或替身测试说成显存实测。
+
+## 实际截图与未验收事项
+
+以下 PNG 来自浏览器实际运行的 Conflux 页面；平板/手机尺寸使用临时 QA 视口容器，截图裁切到实际应用视口。**QA 容器及上传端点已移除，交付的应用没有 iframe。** 内容是云端隔离验收条目，不是用户的私人记忆。
+
+- [720×860 全屏下缘阅读](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-immersive/immersive-tablet-reader.png)
+- [720×860 可收起的底部目录](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-immersive/immersive-tablet-directory.png)
+- [320×740 长文阅读与横滚分类](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/evidence/galaxy-immersive/immersive-mobile-long.png)
+
+**云端 WebGL 仍不可用，上述黑色区域仅是降级/布局证据，不代表删除了用户已经认可的银河。** 上一轮银河外观已由用户在 Android 平板确认好看且可旋转；本轮全屏下的实际 GPU 画幅、触摸手感、系统返回键、软键盘/状态栏/手势安全区、FPS/显存及安装 PWA 尚未真机验收。不能把浏览器响应式测试当作 Android 已通过。
+
+## 继续使用原来的 4173
+
+保留正在运行 Vite 的 Termux 窗口。在另一个命令窗口更新；Git 若提示未提交内容会被覆盖，保留修改并停止，不强制切换：
+
+```bash
+cd ~/my_st_termux/conflux &&
+git fetch origin feat/heartstring-memory-galaxy &&
+git switch --detach FETCH_HEAD
+```
+
+刷新原 **4173 的同一地址/主机名** → 心弦 → 记忆图谱 → **进入记忆星河**。不换 origin、不重装依赖、不清数据。检查左上返回、点星/目录选择、下缘阅读、四类筛选和编辑后返回；平板横竖屏及系统返回键仍需真机确认。此操作只预览原 PR，不合并。
+
+工单与路线图已回写；共享开发分支进度通过原[文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 更新，未合并前仍待同步。
+
+---
+
+## 上一轮视觉返工记录（历史，以下验收状态属于上一轮）
+
 # PR #8 银河视觉返工记录
 
 状态：**PR 待验收；GPU 视觉尚未验收**。更新日期：2026-10-30。

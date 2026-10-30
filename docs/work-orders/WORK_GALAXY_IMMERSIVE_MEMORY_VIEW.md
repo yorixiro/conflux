@@ -1,6 +1,6 @@
 # Work 返工工单｜「心弦 → 记忆图谱」改为真正的沉浸式星河空间
 
-日期：2026-10-30 · 任务状态：**待开发 / PR #8 待验收**  
+日期：2026-10-30 · 任务状态：**PR 待验收（本轮沉浸式页面已实施，Android 真机未验收）**  
 仓库：`yorixiro/conflux` · PR：https://github.com/yorixiro/conflux/pull/8  
 继续分支：`feat/heartstring-memory-galaxy`；工单撰写时现有 PR 代码 HEAD：`32be495f16fadfa033bf8ca455c24e21d5848b27`。开始工作时先核对实际 HEAD 和已有修改，**继续原 PR，不要另建一个银河项目，不合并**。
 
@@ -42,3 +42,19 @@
 - 交付实际的星河全屏截图和轻量阅读/目录截图；**现有的漂亮银河画面不允许被破坏或重新设计**。
 
 > 核心验收一句话：**在心弦点「记忆图谱」，像走进一片星河；点亮星星就能阅读记忆；返回就回到心弦，而不是在米色页面里滚动一块黑色网页。**
+
+
+## 本轮实施进度
+
+- 状态：**PR 待验收（沉浸式页面已实施，本轮 Android 真机未验收）**；更新日期：2026-10-30。
+- 功能分支：`feat/heartstring-memory-galaxy`；PR：https://github.com/yorixiro/conflux/pull/8 。继续原分支，未合并。
+- 本轮运行代码 Commit：`02da4f704f4261a39fb414f4578640bdd0c15352`；进度文档提交另计。
+- 依据：[沉浸式专门工单](https://github.com/yorixiro/conflux/blob/feat/heartstring-memory-galaxy/docs/work-orders/WORK_GALAXY_IMMERSIVE_MEMORY_VIEW.md) 与[最新 PR 评论](https://github.com/yorixiro/conflux/pull/8#issuecomment-6515221734)。用户已在 Android 平板认可上一轮银河效果，本轮严格保留。
+- 已完成：心弦简洁入口 → 应用内全屏星河；覆盖并隔离顶部栏/心弦分类/六导航；返回恢复原心弦与焦点；下缘轻阅读、可收起的底部目录、四分类/搜索/分页；编辑按需进入原 MemorySettingsTab，保留增改删、懒加载和索引管理。全屏页由 AppShell 外层稳定挂载，跨桌面/移动布局切换仍保留记忆选中和阅读状态。
+- 视觉保护：`galaxyTemplateVisual.ts`、`memoryGalaxyScene.ts`、数据模型与依赖均未修改；粒子、Shader、Bloom、颜色、相机和动画参数保留。画布尺寸由既有 ResizeObserver 适配全屏，管理视图暂停背景场景，退出沿用原释放机制。
+- 验证：最终两份定向 Vitest **5 项通过**；本轮唯一一次 `npm run typecheck` exit 2，仍是原有 AppShellView / DesktopAppSidebar 的 8 处错误，本轮改动无新增诊断。实际应用浏览器检查了进入/返回/ESC/浏览器 Back、筛选、搜索、长短阅读、条目新增/编辑回写、角色切换、跨布局 resize、背景隔离和退出 DOM 卸载。
+- 响应式实测：720×860、320×740、1080×660；前两者页面 clientWidth/scrollWidth 分别均为 720/320，窄屏分类 288px 可用宽度、372px 内容独立横滚。浏览器视口测试不等于 Android 真机。
+- 截图：`docs/evidence/galaxy-immersive/` 三张为真实浏览器布局/降级证据。**当前云端 WebGL 不可用，黑色区域不代表用户认可的银河被删除，也不作为 GPU 画面通过证据。**
+- 待验收：本轮全屏页面在 Android 平板上的旋转/双指缩放/系统返回键、键盘与安全区、GPU 画幅和 FPS/显存；本轮未完成 GPU 真机截图。无全量、冒烟、门禁、哈希、收费 API 或构建。
+- 预览：保留原 **4173** 及同一 origin，更新原 PR 分支后进入「心弦 → 记忆图谱 → 进入记忆星河」。步骤见结果记录。
+- 共享开发分支进度通过原[文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 更新；未合并前仍待同步。
