@@ -115,7 +115,11 @@ export async function requestDevinAcpReply(params: {
             body: JSON.stringify({ callId: call.id, ...receipt }),
             signal: params.signal
           });
-          if (!posted.ok) throw new Error('ACP tool receipt was rejected');
+          // An expired/cancelled call is a failed MCP result, not a reason to
+          // fabricate a successful tool outcome or discard the agent's reply.
+          if (!posted.ok && posted.status !== 409) {
+            throw new Error('ACP tool receipt was rejected');
+          }
           continue;
         }
         if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
