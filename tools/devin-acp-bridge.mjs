@@ -13,6 +13,7 @@
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
 const host = '127.0.0.1';
 const port = Number(process.env.DEVIN_ACP_BRIDGE_PORT ?? 47831);
@@ -38,11 +39,83 @@ const chatSessions = new Map();
 const sessionOptions = new Map();
 const legacySessionModels = new Map();
 const pending = new Map();
+const toolCalls = new Map();
+let toolRevision = 0;
+let toolCatalog = new Map();
+const mcpServers = [{
+  name: 'conflux',
+  command: process.execPath,
+  args: [fileURLToPath(new URL('./conflux-acp-mcp.mjs', import.meta.url))],
+  env: []
+}];
+
+function stopToolCalls(reason) {
+  for (const [, entry] of toolCalls) {
+    clearTimeout(entry.timer);
+    entry.resolve({ isError: true, text: reason });
+  }
+  toolCalls.clear();
+}
+function setToolCatalog(tools) {
+  if (!Array.isArray(tools) || tools.length > 150) throw new Error('Invalid ACP tool catalog');
+  const next = new Map();
+  for (const tool of tools) {
+    const fn = tool?.type === 'function' ? tool.function : null;
+    if (!fn || typeof fn.name !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_-]{0,100}$/.test(fn.name)
+      || typeof fn.description !== 'string'
+      || !fn.parameters || typeof fn.parameters !== 'object' || Array.isArray(fn.parameters)
+      || next.has(fn.name)) throw new Error('Invalid ACP tool schema');
+    next.set(fn.name, {
+      name: fn.name, description: fn.description, inputSchema: fn.parameters
+    });
+  }
+  toolCatalog = next;
+  toolRevision++;
+}
+async function readBody(req, limit = 256 * 1024) {
+  let raw = '';
+  for await (const chunk of req) {
+    raw += chunk;
+    if (Buffer.byteLength(raw) > limit) throw new Error('Request body too large');
+  }
+  return JSON.parse(raw || '{}');
+}
+async function serveToolRequest(req, res) {
+  try {
+    const body = await readBody(req, 64 * 1024);
+    if (!active || !promptReserved || !active.sessionId || res.writableEnded) {
+      return writeJson(res, 409, { error: 'No active ACP browser session' });
+    }
+    if (typeof body.name !== 'string' || !toolCatalog.has(body.name)
+      || !body.arguments || typeof body.arguments !== 'object' || Array.isArray(body.arguments)) {
+      return writeJson(res, 403, { error: 'Tool is not available in this conversation' });
+    }
+    if (toolCalls.size >= 4) return writeJson(res, 429, { error: 'Too many pending tools' });
+    const callId = randomUUID();
+    const current = active;
+    const result = await new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        toolCalls.delete(callId);
+        resolve({ isError: true, text: 'Browser tool confirmation timed out' });
+      }, 45000);
+      toolCalls.set(callId, { resolve, timer, session: current });
+      current.write({
+        type: 'tool_request', callId, name: body.name, arguments: body.arguments
+      });
+    });
+    return writeJson(res, 200, result);
+  } catch (error) {
+    return writeJson(res, 400, { error: error.message || 'Tool request failed' });
+  }
+}
+
 
 let promptReserved = false;
+let activePromptAbortController = null;
 let agentFailure = null;
 
 function failAll(reason) {
+  stopToolCalls(reason);
   for (const [, entry] of pending) entry.reject(new Error(reason));
   pending.clear();
   if (active) active.write({ type: 'error', error: reason });
@@ -52,19 +125,35 @@ function send(message) {
   if (!agent.stdin.writable) throw new Error('Devin ACP process is unavailable');
   agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', ...message }) + '\n');
 }
-function request(method, params, timeoutMs = 20000) {
+function request(method, params, timeoutMs = 20000, signal) {
   const id = ++sequence;
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
+    if (signal?.aborted) {
+      reject(new Error(`ACP ${method} cancelled`));
+      return;
+    }
+    let timer;
+    const clear = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
+    };
+    const onAbort = () => {
       pending.delete(id);
+      clear();
+      reject(new Error(`ACP ${method} cancelled`));
+    };
+    timer = setTimeout(() => {
+      pending.delete(id);
+      clear();
       reject(new Error(`ACP ${method} timed out`));
     }, timeoutMs);
     pending.set(id, {
-      resolve: (value) => { clearTimeout(timer); resolve(value); },
-      reject: (error) => { clearTimeout(timer); reject(error); }
+      resolve: (value) => { clear(); resolve(value); },
+      reject: (error) => { clear(); reject(error); }
     });
+    signal?.addEventListener('abort', onAbort, { once: true });
     try { send({ id, method, params }); }
-    catch (error) { pending.delete(id); clearTimeout(timer); reject(error); }
+    catch (error) { pending.delete(id); clear(); reject(error); }
   });
 }
 function onMessage(message) {
@@ -131,7 +220,7 @@ async function initialize() {
       clientInfo: { name: 'conflux-devin-acp', version: '0.1.0' },
       clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false }
     });
-    const result = await request('session/new', { cwd, mcpServers: [] });
+    const result = await request('session/new', { cwd, mcpServers });
     if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
     sessionId = result.sessionId;
     sessionOptions.set(sessionId, Array.isArray(result.configOptions) ? result.configOptions : []);
@@ -146,7 +235,7 @@ async function acquireChatSession(conversationId) {
   if (!conversationId) return { id: sessionId, isNew: false };
   const existing = chatSessions.get(conversationId);
   if (existing) return { id: existing, isNew: false };
-  const result = await request('session/new', { cwd, mcpServers: [] });
+  const result = await request('session/new', { cwd, mcpServers });
   if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
   // Bound the local routing index. An evicted chat starts a fresh ACP session
   // with its full transcript on the next request rather than reusing another chat.
@@ -235,6 +324,34 @@ const server = createServer(async (req, res) => {
       ...(agentFailure ? { error: agentFailure } : {})
     });
   }
+  if (req.method === 'GET' && req.url === '/tools') {
+    return writeJson(res, 200, {
+      revision: toolRevision,
+      tools: promptReserved ? [...toolCatalog.values()] : []
+    });
+  }
+  if (req.method === 'POST' && req.url === '/tool/request') {
+    return serveToolRequest(req, res);
+  }
+  if (req.method === 'POST' && req.url === '/tool/result') {
+    try {
+      const body = await readBody(req, 128 * 1024);
+      const entry = toolCalls.get(body.callId);
+      if (!entry || entry.session !== active) {
+        return writeJson(res, 409, { error: 'Tool call expired or belongs to another turn' });
+      }
+      if (typeof body.text !== 'string' || body.text.length > 100000
+        || typeof body.isError !== 'boolean') {
+        return writeJson(res, 400, { error: 'Invalid tool result' });
+      }
+      toolCalls.delete(body.callId);
+      clearTimeout(entry.timer);
+      entry.resolve({ isError: body.isError, text: body.text });
+      return writeJson(res, 200, { accepted: true });
+    } catch (error) {
+      return writeJson(res, 400, { error: error.message || 'Invalid tool result' });
+    }
+  }
   if (req.method === 'GET' && req.url === '/models') {
     try {
       await initialize();
@@ -245,7 +362,10 @@ const server = createServer(async (req, res) => {
   }
   if (req.method === 'POST' && req.url === '/cancel') {
     if (promptReserved && active?.sessionId) {
-      send({ method: 'session/cancel', params: { sessionId: active.sessionId } });
+      stopToolCalls('ACP prompt cancelled');
+      try { send({ method: 'session/cancel', params: { sessionId: active.sessionId } }); }
+      catch { /* The agent may have already exited. */ }
+      activePromptAbortController?.abort();
       return writeJson(res, 200, { cancelled: true });
     }
     return writeJson(res, 409, { error: 'No active prompt' });
@@ -260,7 +380,7 @@ const server = createServer(async (req, res) => {
   try {
     for await (const chunk of req) {
       raw += chunk;
-      if (raw.length > 256 * 1024) throw new Error('Prompt is too large');
+      if (Buffer.byteLength(raw) > 256 * 1024) throw new Error('Prompt is too large');
     }
     const body = JSON.parse(raw);
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) throw new Error('Missing prompt');
@@ -270,6 +390,9 @@ const server = createServer(async (req, res) => {
     if (body.initialContext != null && (
       typeof body.initialContext !== 'string' || body.initialContext.length > 160000
     )) throw new Error('Invalid conversation context');
+    if (body.tools != null) setToolCatalog(body.tools);
+    else setToolCatalog([]);
+    if (toolCatalog.size && !token) throw new Error('ACP native tools require DEVIN_ACP_BRIDGE_TOKEN');
     if (body.modelId != null && (
       typeof body.modelId !== 'string' || body.modelId.length > 160
     )) throw new Error('Invalid ACP model ID');
@@ -291,15 +414,19 @@ const server = createServer(async (req, res) => {
     };
     active = { write, sessionId: chat.id };
     const currentPrompt = active;
+    const promptAbortController = new AbortController();
+    activePromptAbortController = promptAbortController;
     res.on('close', () => {
       if (active !== currentPrompt || !chat.id || res.writableEnded) return;
+      stopToolCalls('Browser disconnected');
+      promptAbortController.abort();
       try { send({ method: 'session/cancel', params: { sessionId: chat.id } }); } catch { /* agent already exited */ }
     });
     const promptId = randomUUID();
     write({ type: 'started', promptId });
     const result = await request('session/prompt', {
       sessionId: chat.id, prompt: [{ type: 'text', text: promptText }]
-    }, 10 * 60 * 1000);
+    }, 10 * 60 * 1000, promptAbortController.signal);
     write({ type: 'done', result });
   } catch (error) {
     // After a failed/aborted turn, rebuild the ACP session with the full
@@ -308,6 +435,8 @@ const server = createServer(async (req, res) => {
     if (res.headersSent) active?.write({ type: 'error', error: error.message });
     else writeJson(res, 400, { error: error.message });
   } finally {
+    stopToolCalls('ACP prompt completed');
+    activePromptAbortController = null;
     active = null;
     promptReserved = false;
     if (!res.writableEnded) res.end();
