@@ -2,6 +2,8 @@
 
 Status (2026-10-30): **Bridge running and model discovery confirmed on Android device; full chat acceptance pending.** The user's screenshot showed “Devin 桥接在线” and a real model dropdown. This does not prove a two-turn conversation completed successfully.
 
+> **P1 原生工具桥是独立的后续工单。** 原有本文记录 text-chat 阶段的现场结果，不代表 tools 已通过验证。工具桥实现、权限、隔离预览和未执行的模拟测试状态见 [WORK_DEVIN_ACP_NATIVE_TOOLS_P1.md](work-orders/WORK_DEVIN_ACP_NATIVE_TOOLS_P1.md)。原生工具版不再支持下文旧的 stdin 启动方式，必须把两个 mjs 作为真实文件放在 PRoot 同目录。
+
 ## Supported scope and frozen UI
 
 - Conflux same-origin 4173 → local bridge on `127.0.0.1:47831` → `devin acp` in Ubuntu PRoot.
