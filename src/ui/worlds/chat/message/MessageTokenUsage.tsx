@@ -10,6 +10,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const usage = message.tokenUsage;
+  const isDevinAcp = message.model === 'Devin ACP' || message.providerName === 'Devin ACP';
   const tokenLabel = formatTokenCount(message.tokenCount, usage, {
     formatNumber,
     totalLabel: count => t('chat.messageMeta.tokenCount', { count })
@@ -88,7 +89,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
         aria-label={t('chat.messageMeta.openTokenUsage')}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-      >{tokenLabel || (message.providerName === 'Devin ACP' ? 'Token 未提供' : 'Token')}</button>
+      >{tokenLabel || (isDevinAcp ? 'Token 未提供' : 'Token')}</button>
       {open ? (
         <dialog
           ref={dialogRef}
