@@ -3,7 +3,7 @@
 # Starts the only local frontend (4173) and bridge (47831) with one shared token.
 set -Eeuo pipefail
 
-repo="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo"
 
 for command_name in node npm proot-distro; do
@@ -45,7 +45,7 @@ if [[ ! -s "$token_file" ]]; then
 fi
 chmod 600 "$token_file"
 token="$(cat "$token_file")"
-if [[ "\${#token}" -lt 24 ]]; then
+if [[ "${#token}" -lt 24 ]]; then
   printf '本地 ACP 密钥无效；未启动服务。\n' >&2
   exit 1
 fi
