@@ -66,7 +66,6 @@ export function DevinAcpConnectionPanel({ selectedModel = '', onSelectModel }: P
   return (
     <section className="api-provider-section api-provider-section-config" aria-label="Devin ACP 连接">
       <div className="api-provider-section-head">
-        <h3>Devin ACP</h3>
         <p>本机代理连接，无需填写普通 API 地址、密钥或 Token。</p>
       </div>
       <div className="provider-stack">
