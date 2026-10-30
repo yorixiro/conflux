@@ -36,6 +36,7 @@ let sessionId = null;
 let active = null;
 const chatSessions = new Map();
 const sessionOptions = new Map();
+const legacySessionModels = new Map();
 const pending = new Map();
 
 let promptReserved = false;
@@ -125,6 +126,7 @@ async function initialize() {
     if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
     sessionId = result.sessionId;
     sessionOptions.set(sessionId, Array.isArray(result.configOptions) ? result.configOptions : []);
+    if (result.models) legacySessionModels.set(sessionId, result.models);
     return sessionId;
   })();
   try { return await ready; }
@@ -142,6 +144,7 @@ async function acquireChatSession(conversationId) {
   if (chatSessions.size >= 32) chatSessions.delete(chatSessions.keys().next().value);
   chatSessions.set(conversationId, result.sessionId);
   sessionOptions.set(result.sessionId, Array.isArray(result.configOptions) ? result.configOptions : []);
+  if (result.models) legacySessionModels.set(result.sessionId, result.models);
   return { id: result.sessionId, isNew: true };
 }
 
@@ -158,26 +161,44 @@ function modelValues(config) {
     .filter((item) => typeof item?.value === 'string')
     .map((item) => ({ id: item.value, label: typeof item.name === 'string' ? item.name : item.value }));
 }
+function legacyModelValues(session) {
+  const legacy = legacySessionModels.get(session);
+  return Array.isArray(legacy?.availableModels)
+    ? legacy.availableModels.filter((item) => typeof item?.modelId === 'string')
+      .map((item) => ({ id: item.modelId, label: typeof item.name === 'string' ? item.name : item.modelId }))
+    : [];
+}
 function modelSnapshot(session) {
   const config = modelSelector(session);
+  const values = modelValues(config);
+  const legacy = legacySessionModels.get(session);
   return {
-    models: modelValues(config),
-    selectedModel: typeof config?.currentValue === 'string' ? config.currentValue : '',
-    available: Boolean(config)
+    models: config ? values : legacyModelValues(session),
+    selectedModel: config
+      ? (typeof config.currentValue === 'string' ? config.currentValue : '')
+      : (typeof legacy?.currentModelId === 'string' ? legacy.currentModelId : ''),
+    available: Boolean(config || legacy)
   };
 }
 async function selectModel(session, modelId) {
   if (!modelId) return;
   const config = modelSelector(session);
-  if (!config) throw new Error('Devin ACP 未提供可切换的模型列表');
-  if (!modelValues(config).some((model) => model.id === modelId)) {
+  const supportedModels = config ? modelValues(config) : legacyModelValues(session);
+  if (!supportedModels.some((model) => model.id === modelId)) {
     throw new Error('所选模型不在当前 Devin ACP 可用列表中，请重新拉取');
   }
-  if (config.currentValue === modelId) return;
-  const result = await request('session/set_config_option', {
-    sessionId: session, configId: config.id, value: modelId
-  });
-  if (Array.isArray(result?.configOptions)) sessionOptions.set(session, result.configOptions);
+  if (config) {
+    if (config.currentValue === modelId) return;
+    const result = await request('session/set_config_option', {
+      sessionId: session, configId: config.id ?? config.configId, value: modelId
+    });
+    if (Array.isArray(result?.configOptions)) sessionOptions.set(session, result.configOptions);
+  } else {
+    const legacy = legacySessionModels.get(session);
+    if (legacy?.currentModelId === modelId) return;
+    await request('session/set_model', { sessionId: session, modelId });
+    legacySessionModels.set(session, { ...legacy, currentModelId: modelId });
+  }
 }
 
 function writeJson(response, status, value) {
