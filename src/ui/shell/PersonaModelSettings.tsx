@@ -8,7 +8,9 @@ import type { Persona } from '../../types/domain';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import './PersonaModelSettings.css';
 
-export function PersonaModelSettings({ persona, settings = false }: { persona: Persona; settings?: boolean }) {
+export function PersonaModelSettings({
+  persona, settings = false, allowProviderCapabilityEdit = true
+}: { persona: Persona; settings?: boolean; allowProviderCapabilityEdit?: boolean }) {
   const id = useId();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -94,7 +96,7 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
             {!depths.some((depth) => depth.value === budget) ? <option value={budget}>自定义</option> : null}
           </select>
         </div>
-        {supportsDepth ? <label className="ps-field-label">
+        {supportsDepth && allowProviderCapabilityEdit ? <label className="ps-field-label">
           <input type="checkbox" disabled={!editable} checked={binding.api.capabilities.thinking}
             onChange={(event) => updateProvider(binding.api.id, {
               capabilities: { ...binding.api.capabilities, thinking: event.target.checked }

@@ -200,7 +200,8 @@ export function PersonaApiConnectionPanel({
           {current.agentTransport === 'devin-acp' ? <DevinAcpConnectionPanel /> : (
             <>
               <p className="ps-footnote">{getProviderModelDisplayLabel(current)} · 模型仅对当前角色保存。</p>
-              {editable ? <PersonaModelSettings key={activePersona.id} persona={activePersona} settings /> : null}
+              <PersonaModelSettings key={activePersona.id} persona={activePersona}
+                settings allowProviderCapabilityEdit={editable} />
               {editable ? (
                 <details className="conflux-role-optional">
                   <summary>高级设置 · 协议与请求路径</summary>
@@ -227,7 +228,11 @@ export function PersonaApiConnectionPanel({
           <p className="ps-footnote">移除只会取消该角色的保存与绑定，不删除 API 库里的密钥或其他角色的设置。</p>
         </>
       ) : inheriting && effective ? (
-        <button className="btn-secondary compact" type="button" onClick={() => copyFrom(effective)}>复制原有连接并独立编辑</button>
+        <>
+          <PersonaModelSettings key={activePersona.id} persona={activePersona}
+            settings allowProviderCapabilityEdit={false} />
+          <button className="btn-secondary compact" type="button" onClick={() => copyFrom(effective)}>复制原有连接并独立编辑</button>
+        </>
       ) : null}
     </div>
   );
