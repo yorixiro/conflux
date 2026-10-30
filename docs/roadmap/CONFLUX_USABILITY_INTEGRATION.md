@@ -99,3 +99,11 @@ Commit SHA：...
 - 移除只解绑角色，不自动删除中央 API 配置，避免破坏其他模块的引用；真实使用率清理留给后续全局引用审计。
 - 状态：开发中。仅完成远端源码与差异核对，类型检查、定向 Vitest、320/720px 交互、Termux/Android 设备验收均未执行；不能宣称可用或已发布。保留原代码 Git 历史以便回退。
 - 不碰用户正在运行的 4173，本地独有提交与远端分叉仍需安全同步；不得直接要求用户强制拉取或重置。
+
+## 2026-10-31 Devin ACP 原生工具桥接 P1（PR 待验收）
+
+- [PR #11](https://github.com/yorixiro/conflux/pull/11) 是 ACP 原生工具桥候选：复用原生工具 Schema 和前端执行器，MCP 请求转发/回执、取消和会话隔离，当前功能提交 `60ad946f0dd1a412adb4e0d5264582b80b2c7447`（后续文档提交不改变执行代码）。
+- [PR #12](https://github.com/yorixiro/conflux/pull/12) 单独修复 ACP 基线已有的四个 TypeScript 错误，HEAD `b4a69b8b799f90597e6e2bc8e9e0c3f9efb68c18`；尚未合并。
+- 2026-10-31 Termux 隔离工作树：旧版 MCP 模拟 `1/1 PASS`、浏览器事件 Vitest `9/9 PASS`；叠加 PR #12 后 `npm run typecheck` 退出码 0，均由用户设备截图提供。之后新增取消超时修复/对应测试，**尚无新版本运行日志**。
+- Android/Fable MCP 工具发现、实际 LocalData 的 `searchMemory` 调用、结果回传及模型继续回答尚未验证。详见 `docs/work-orders/WORK_DEVIN_ACP_NATIVE_TOOLS_P1.md` 的 4174/47832 双端口隔离预览。不合并，不运行付费模型回归。
+- 本次进度先保留在 PR #11 工作分支；共享 ACP 基线 `feat/keke-devin-acp-preview-20261030` 尚未获得此文档更新或运行代码，后续合并须明确授权。

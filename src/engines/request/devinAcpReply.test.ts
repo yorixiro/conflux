@@ -93,4 +93,76 @@ describe('ACP chat reply over the existing request pipeline', () => {
     expect(answer.tokenUsage).toBeUndefined();
   });
 
+
+  it('executes an actual ACP tool event in the browser and returns its receipt before answering', async () => {
+    const onToolCall = vi.fn(async (call: {
+      id: string; name: string; argumentsObject: Record<string, unknown>
+    }) => {
+      expect(call).toEqual({
+        id: 'call-1', name: 'searchMemory', argumentsObject: { query: '星河' }
+      });
+      return { isError: false, text: '找到了以前的记忆' };
+    });
+    const fetchMock = vi.fn<typeof fetch>(async (input, init) => {
+      if (input === '/devin-acp/tool/result') {
+        expect(JSON.parse(String(init?.body))).toEqual({
+          callId: 'call-1', isError: false, text: '找到了以前的记忆'
+        });
+        return new Response(JSON.stringify({ accepted: true }), { status: 200 });
+      }
+      expect(input).toBe('/devin-acp/prompt');
+      expect(JSON.parse(String(init?.body)).tools?.[0]?.function?.name).toBe('searchMemory');
+      return new Response([
+        'data: {"type":"tool_request","callId":"call-1","name":"searchMemory","arguments":{"query":"星河"}}',
+        '',
+        'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"查到了！"}}}',
+        '',
+        'data: {"type":"done","result":{"stopReason":"end_turn"}}',
+        ''
+      ].join('\n') + '\n', { status: 200 });
+    });
+    globalThis.fetch = fetchMock;
+    const result = await requestDevinAcpReply({
+      prompt: '搜索记忆',
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'searchMemory', description: '检索记忆',
+          parameters: { type: 'object', properties: { query: { type: 'string' } } }
+        }
+      }],
+      onToolCall
+    });
+    expect(result.content).toBe('查到了！');
+    expect(onToolCall).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+      '/devin-acp/prompt', '/devin-acp/tool/result'
+    ]);
+  });
+
+  it('returns a failed tool receipt rather than accepting a fabricated tool result', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async (input, init) => {
+      if (input === '/devin-acp/tool/result') {
+        expect(JSON.parse(String(init?.body))).toMatchObject({
+          callId: 'blocked-1', isError: true, text: 'Not allowed'
+        });
+        return new Response('{}', { status: 200 });
+      }
+      return new Response([
+        'data: {"type":"tool_request","callId":"blocked-1","name":"writeMemory","arguments":{"memory":["x"]}}',
+        '',
+        'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"操作已被拒绝。"}}}',
+        '',
+        'data: {"type":"done","result":{}}',
+        ''
+      ].join('\n') + '\n', { status: 200 });
+    });
+    globalThis.fetch = fetchMock;
+    const answer = await requestDevinAcpReply({
+      prompt: '写入记忆',
+      onToolCall: async () => ({ isError: true, text: 'Not allowed' })
+    });
+    expect(answer.content).toBe('操作已被拒绝。');
+  });
+
 });
