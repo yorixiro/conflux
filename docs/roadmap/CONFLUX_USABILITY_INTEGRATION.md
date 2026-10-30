@@ -65,3 +65,28 @@ Commit SHA：...
 ## 落地顺序
 
 先完成 P0、P1，让最常用的聊天与模型设置稳定；再接 P2 和 P3；最后整理 P4、P5。若出现角色数据串房或错误保存，优先阻断该问题，不为继续美化扩大改动范围。
+
+
+## 2026-10-30 仓库维护记录
+
+范围：整理历史 PR、核对性能优化的实际落点、清理已完整保留的旧分支。不新增功能、不合并未验收代码。
+
+本次直接读取远端 Git refs，核对共享开发分支 `feat/keke-devin-acp-preview-20261030` 的运行代码基线为 `88294ac018a8ef6066788ad68facd07b40d7adb1`。PR 返回的 base SHA 可能是旧状态，不能替代直接读取远端分支。本记录之后的文档提交不改变运行代码。
+
+| 项目 | 核对结果与处理 |
+| --- | --- |
+| [PR #2](https://github.com/yorixiro/conflux/pull/2) 旧首页导航 | HEAD `5698dd794e2ee607c46749a5c7b4b83f52876ce4` 已完整进入上述开发线；已关闭重复待办，保留历史说明。其分支仍是 PR #3 的基线，不连带删除。 |
+| [PR #6](https://github.com/yorixiro/conflux/pull/6) 场景复用/生命周期优化 | HEAD `6d99f6aea6d1c6dd0e387c14a75b4f6ba7df9547` 已完整包含在开发线历史中。 |
+| [PR #7](https://github.com/yorixiro/conflux/pull/7) GPU 绘制/离屏暂停优化 | 尚未进入该开发线；四个目标文件均与 PR 修改前完全一致。已更新 PR 状态，仍待验收，不能宣称性能收益已生效。 |
+| [PR #10](https://github.com/yorixiro/conflux/pull/10) 图标预览 | `003e116f` 曾应用，后被 `88294ac0` 撤回；已纠正“当前共享分支与预览相同”的过期说明。PR 保持关闭，未重新应用图标。 |
+| 可清理旧分支 | 下列三条分支均通过 Git 祖先关系确认，提交已完整保留在上述开发线，无开放 PR 使用它们作 head/base。删除尚未完成：命令行缺少 GitHub 写入凭据，现有连接没有删分支接口，浏览器需要登录。 |
+
+待删除的精确引用：
+
+- `feat/album-stamp-gallery` → `3c55466b90fe10df8f8db8a3669d2068f42c7400`
+- `feat/claude-sticker-pois-themes` → `4fd2c49a228cd783b4a10de21ddd6a324686b3d8`
+- `perf/album-render-lifecycle` → `6d99f6aea6d1c6dd0e387c14a75b4f6ba7df9547`
+
+删除时如引用已移动，重新判断，不依据旧快照删除。其它分支尚有独立提交、等价补丁或 PR 依赖，不能仅凭名称或日期批量删除。银河与 Scarlett 成果未被并入本轮维护。
+
+验证：实际远端读取、Git 祖先/独有提交检查、PR #7 四个文件逐文件比对。没有运行全量测试、构建、收费 API 或 Android 真机验收；没有改变运行代码和用户数据。维护状态：部分完成，旧分支删除受登录阻塞。
