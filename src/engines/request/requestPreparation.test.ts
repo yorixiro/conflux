@@ -764,6 +764,7 @@ describe('resolvePreparedAdvancedSettings', () => {
     const keke = createPersonaTemplate({
       id: 'keke',
       name: '柯老',
+      description: '',
       memory: {
         inheritGlobal: true,
         personalMemories: ['柯老自己的长期记忆。']
@@ -772,6 +773,7 @@ describe('resolvePreparedAdvancedSettings', () => {
     const deepseek = createPersonaTemplate({
       id: 'deepseek',
       name: 'DeepSeek',
+      description: '',
       memory: {
         inheritGlobal: true,
         personalMemories: ['DeepSeek 专属秘密记忆，不应提供给柯老。']
