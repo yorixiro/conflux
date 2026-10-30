@@ -143,7 +143,9 @@ export async function requestCollaboratorReply(params: {
       const reply = await requestDevinAcpReply({
         prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
         initialContext: prompt,
-        conversationId: activeConversationId ?? undefined,
+        conversationId: activeConversationId
+          ? `${activeConversationId}::${persona?.id ?? 'default'}`
+          : undefined,
         signal,
         onProgress: onProgress
           ? (partial) => onProgress(normalizeAssistantOutput(partial, persona))
