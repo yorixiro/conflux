@@ -138,19 +138,53 @@
 .memory-galaxy__persona { max-width:45%; }
 .memory-galaxy__persona select { width:100%; min-height:48px; padding:8px; border:0; background:#05020999; color:#dcc8f0; font:inherit; font-size:12px; text-overflow:ellipsis; }
 .memory-galaxy__persona option { background:#100b17; }
-.memory-galaxy__dock { position:absolute; bottom:0; left:0; right:0; display:flex; flex-direction:column; max-height:calc(100% - 64px - env(safe-area-inset-top)); padding:0 max(0px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(0px,env(safe-area-inset-left)); background:linear-gradient(transparent,#050209c4 42px,#050209f5); }
+.memory-galaxy__dock {
+  --galaxy-ink:#f6effb; --galaxy-muted:#eee6f4; --galaxy-line:#f3d7ff29;
+  position:absolute; bottom:calc(12px + env(safe-area-inset-bottom));
+  left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right));
+  display:flex; flex-direction:column; max-width:960px; margin-inline:auto;
+  max-height:calc(100% - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  box-sizing:border-box; overflow:hidden; border:1px solid #f2dfff38; border-radius:18px;
+  background:#130e1ed6; color:var(--galaxy-ink);
+  box-shadow:0 12px 36px #00000038,inset 0 1px 0 #ffffff0d;
+}
+/* One bounded blur surface; descendants stay transparent so the live galaxy
+   remains the backdrop. No full-screen filter or animated blur on Android. */
+@supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))) {
+  .memory-galaxy__dock {
+    background:linear-gradient(135deg,#251b32ad,#0b0913a3);
+    -webkit-backdrop-filter:blur(12px) saturate(115%);
+    backdrop-filter:blur(12px) saturate(115%);
+  }
+}
 .memory-galaxy__reader { max-height:36dvh; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
-.memory-galaxy-fullscreen .memory-galaxy__reading { max-width:860px; margin:0 auto; padding-top:16px; background:none; }
-.memory-galaxy-fullscreen .memory-galaxy__reading::before { margin-bottom:8px; }
+.memory-galaxy-fullscreen .memory-galaxy__reading { max-width:none; margin:0; padding:16px clamp(16px,3vw,24px) 12px; background:none; }
+.memory-galaxy-fullscreen .memory-galaxy__reading::before { display:none; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-heading { padding-bottom:8px; border-bottom:1px solid var(--galaxy-line); }
 .memory-galaxy-fullscreen .memory-galaxy__reading-meta { margin:8px 0 10px; }
-.memory-galaxy-fullscreen .memory-galaxy__reading-heading h4 { font-size:clamp(18px,2.6vw,24px); }
-.memory-galaxy-fullscreen .memory-galaxy__body { font-size:14px; line-height:1.9; }
-.memory-galaxy-fullscreen .memory-galaxy__navigation { flex:none; width:100%; max-width:920px; margin:0 auto; box-sizing:border-box; }
-.memory-galaxy-fullscreen .memory-galaxy__legend { justify-content:safe center; }
-.memory-galaxy-fullscreen .memory-galaxy__tools { flex:none; flex-wrap:wrap; gap:0 12px; padding:0 12px; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-heading h4 { color:#fff4ff; font-size:clamp(18px,2.6vw,24px); text-shadow:0 1px 5px #05020966; }
+.memory-galaxy-fullscreen .memory-galaxy__body { color:var(--galaxy-ink); font-size:14px; font-weight:400; line-height:1.9; text-shadow:0 1px 4px #05020966; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-meta > span:first-child { background:#6d3f7829; border-color:#efd2ee38; color:#fbe7f8; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-actions button { color:#f0d4ed; }
+.memory-galaxy-fullscreen .memory-galaxy__navigation { flex:none; width:100%; margin:0 auto; padding:6px 12px; box-sizing:border-box; }
+.memory-galaxy-fullscreen .memory-galaxy__legend { justify-content:safe center; gap:6px; border:0; }
+.memory-galaxy-fullscreen .memory-galaxy__legend button { padding:8px 10px; border:1px solid transparent; border-radius:10px; gap:6px; }
+.memory-galaxy-fullscreen .memory-galaxy__legend button[aria-pressed=true] { background:#6d3f7859; border-color:#ecc9ef42; box-shadow:inset 0 1px 0 #ffffff0a; color:#fff2fc; }
+.memory-galaxy-fullscreen .memory-galaxy__legend span { color:inherit; opacity:.9; }
+.memory-galaxy-fullscreen .memory-galaxy__tools { flex:none; flex-wrap:wrap; gap:0 10px; padding:4px 8px; border-top:1px solid var(--galaxy-line); }
+.memory-galaxy-fullscreen .memory-galaxy__dock button:hover { background:#6d3f7840; }
+.memory-galaxy-fullscreen .memory-galaxy__dock button:focus-visible,
+.memory-galaxy-fullscreen .memory-galaxy__dock input:focus-visible { outline-color:#f2d0ef; outline-offset:-3px; }
 .memory-galaxy__hint { margin:0; padding:20px 16px 4px; text-align:center; color:#dcc8f080; font-size:11px; }
-.memory-galaxy-fullscreen .memory-galaxy__directory { max-height:34dvh; overflow:auto; overscroll-behavior:contain; padding-top:12px; background:linear-gradient(#050209b8,#050209); }
+.memory-galaxy__dock .memory-galaxy__hint { color:var(--galaxy-muted); }
+.memory-galaxy-fullscreen .memory-galaxy__directory { max-height:34dvh; overflow:auto; overscroll-behavior:contain; padding:12px clamp(16px,3vw,24px) 8px; background:none; border-bottom:1px solid var(--galaxy-line); }
+.memory-galaxy-fullscreen .memory-galaxy__directory .memory-galaxy__panel-heading { padding-bottom:8px; }
+.memory-galaxy-fullscreen .memory-galaxy__directory h3 { color:#fff4ff; font-weight:500; letter-spacing:.04em; }
+.memory-galaxy-fullscreen .memory-galaxy__directory input { border:1px solid var(--galaxy-line); border-radius:10px; background:#09061133; color:var(--galaxy-ink); padding:8px 12px; }
+.memory-galaxy-fullscreen .memory-galaxy__directory input::placeholder { color:#d5c6de; opacity:1; }
 .memory-galaxy-fullscreen .memory-galaxy__list { max-height:none; overflow:visible; }
+.memory-galaxy-fullscreen .memory-galaxy__list button { color:var(--galaxy-ink); padding-inline:6px; }
+.memory-galaxy-fullscreen .memory-galaxy__list button[aria-pressed=true] { background:#6d3f7840; }
 .memory-galaxy__panel-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .memory-galaxy__panel-heading h3 { font:inherit; font-size:15px; margin:0; }
 .memory-galaxy__panel-heading > button { flex:none; min-width:48px; }
