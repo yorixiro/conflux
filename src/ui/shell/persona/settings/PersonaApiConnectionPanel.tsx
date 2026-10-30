@@ -6,6 +6,7 @@ import type { PersonaTabProps } from '../personaUiShared';
 
 type Props = Pick<PersonaTabProps, 'activePersona' | 'providers' | 'onUpdatePersona'> & {
   onOpenProviderSettings?: () => void;
+  onUpdateProvider?: (providerId: string, patch: Partial<ProviderProfile>) => void;
 };
 
 /**
@@ -13,7 +14,7 @@ type Props = Pick<PersonaTabProps, 'activePersona' | 'providers' | 'onUpdatePers
  * the existing API manager, so there is a single source of truth for the form.
  */
 export function PersonaApiConnectionPanel({
-  activePersona, providers = [], onUpdatePersona, onOpenProviderSettings
+  activePersona, providers = [], onUpdatePersona, onOpenProviderSettings, onUpdateProvider
 }: Props) {
   const fieldId = useId();
 
@@ -23,6 +24,8 @@ export function PersonaApiConnectionPanel({
   const current = providers.find((provider) => provider.id === activeId) ?? null;
   const missing = Boolean(activeId && !current);
   const isAcp = current?.agentTransport === 'devin-acp';
+  const legacyAcp = Boolean(current && !isAcp && current.name.trim() === 'Devin ACP'
+    && !current.baseUrl.trim() && !current.apiKey.trim());
   const savedIds = listSavedPersonaApiIds(activePersona.advanced);
 
   function selectProvider(id: string) {
@@ -59,7 +62,13 @@ export function PersonaApiConnectionPanel({
       ) : null}
       {missing ? <p className="ps-footnote">原绑定不会被自动替换。</p> : null}
 
-      {current && !isAcp ? (
+      {legacyAcp && current && onUpdateProvider ? (
+        <button type="button" className="btn-secondary compact"
+          onClick={() => onUpdateProvider(current.id, { agentTransport: 'devin-acp' })}>
+          将旧 Devin ACP 连接标记为代理类型
+        </button>
+      ) : null}
+      {current && !isAcp && !legacyAcp ? (
         <PersonaModelSettings key={activePersona.id + ':' + current.id}
           persona={activePersona} settings />
       ) : null}
