@@ -38,6 +38,7 @@ import { buildStoredToolCallRecords } from './chatToolCallRecords';
 import { recordModelFlowTrace } from './modelFlowTraceRecorder';
 import { resolveAvailablePolarisToolNames } from '../../engines/tool-protocol/toolRegistry';
 import { extractAssistantNativeToolActions } from '../../engines/assistantToolProtocol';
+import { summarizeAcpMemoryReceipts } from './chatAcpMemoryReceipt';
 import {
   applyConversationTaskModelUpdate,
   settleConversationTaskAfterStoppedAssistantTurn
@@ -451,7 +452,14 @@ async function requestReplyRound({
         if (outcome.path === 'workspace') {
           return { isError: true, text: '工作区改动等待用户确认，尚未执行。' };
         }
-        return { isError: false, text: '操作由 Conflux 记忆执行器处理，结果已写入当前对话。' };
+        if (outcome.path === 'memory') {
+          const memoryReceipts = chat.getConversationMessages(conversationId)
+            .flatMap((message) => message.toolInvocation?.toolCallId === call.id
+              ? [message.toolInvocation]
+              : []);
+          return summarizeAcpMemoryReceipts(memoryReceipts);
+        }
+        return { isError: true, text: '工具执行器未返回受支持的执行结果。' };
       },
       onAudit: (audit) => {
         requestAudit = audit;
