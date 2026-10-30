@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 /**
- * One-shot local ACP delivery from a fetched GitHub branch.
- * No process killing, no tests, no data migration, no git index changes.
- * Run using: git show FETCH_HEAD:tools/sync-devin-acp-local.mjs | node --input-type=module -
+ * Safely sync only the ACP integration from FETCH_HEAD into the local Termux
+ * working tree. Preserve custom uncommitted changes by a conflict-free
+ * three-way merge against the user's own HEAD version. This script does not
+ * touch git history/index, run tests, restart services, or access chat data.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 
-const allowedVersions = [
+const knownRemoteVersions = [
   '586a5e845e5218e777499a82ac9059bea1fca1d2',
   'd1058043ae1f97b3c4f42d12c8d24577059386c9',
   'f7de2f4272ec016e9b8d2c8af4de3e73e1d1b4c6',
   '5de93c0017080f3c7b066d661d0a14f00a8531a4',
   '92e07bce174be3ea65b07ec0aa18591b10ef5f31',
+  '96f9d0e0a306f7184fbf3903257d404999efbe03',
+  'bf5972949f849eebe9d29cbff3757587bb1a47a0',
 ];
-const files = [
+const paths = [
   'tools/devin-acp-bridge.mjs',
   'tools/conflux-local-server.ts',
   'src/engines/request/devinAcpReply.ts',
@@ -25,55 +29,83 @@ const files = [
 ];
 const repo = process.cwd();
 function git(...args) {
-  return execFileSync('git', args, { cwd: repo, encoding: 'buffer', stdio: ['ignore', 'pipe', 'pipe'] });
+  return execFileSync('git', args, {
+    cwd: repo, encoding: 'buffer', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 16 * 1024 * 1024
+  });
 }
-function message(text) { process.stdout.write(text + '\n'); }
+const say = (line) => console.log(line);
+let dir;
 try {
   if (git('branch', '--show-current').toString().trim() !== 'keke-acp-preview') {
-    throw new Error('当前不是 keke-acp-preview，本次没有修改任何文件');
+    throw new Error('不是 keke-acp-preview 分支，未修改任何文件');
   }
-  const head = git('rev-parse', 'FETCH_HEAD').toString().trim();
-  const originals = new Map();
-  const changes = [];
-  for (const file of files) {
-    const local = readFileSync(resolve(repo, file));
-    const target = git('show', 'FETCH_HEAD:' + file);
-    const allowed = allowedVersions.some((version) => {
-      try { return local.equals(git('show', version + ':' + file)); }
+  const remote = git('rev-parse', 'FETCH_HEAD').toString().trim();
+  // Prepare ALL changes before writing any working-tree file.
+  dir = mkdtempSync(join(tmpdir(), 'conflux-acp-sync-'));
+  const planned = [];
+  const conflicts = [];
+  for (let n = 0; n < paths.length; n++) {
+    const path = paths[n];
+    const local = readFileSync(resolve(repo, path));
+    const target = git('show', 'FETCH_HEAD:' + path);
+    if (local.equals(target)) continue;
+    const head = git('show', 'HEAD:' + path);
+    let candidate = target;
+    const previouslySynced = knownRemoteVersions.some((sha) => {
+      try { return local.equals(git('show', sha + ':' + path)); }
       catch { return false; }
     });
-    if (!local.equals(target) && !allowed) {
-      throw new Error('已保护本地自定义修改，未同步：' + file);
+    if (!local.equals(head) && !previouslySynced) {
+      const a = join(dir, n + '-local');
+      const b = join(dir, n + '-base');
+      const c = join(dir, n + '-remote');
+      writeFileSync(a, local);
+      writeFileSync(b, head);
+      writeFileSync(c, target);
+      try {
+        // -p only prints the merge; never changes the three input files.
+        candidate = git('merge-file', '-p', a, b, c);
+      } catch {
+        conflicts.push(path);
+        continue; // Never overwrite a file with conflicting user edits.
+      }
     }
-    originals.set(file, local);
-    if (!local.equals(target)) changes.push(file);
+    if (!local.equals(candidate)) planned.push({ path, before: local, after: candidate });
   }
-  if (changes.length) {
-    try {
-      git('restore', '--source=FETCH_HEAD', '--worktree', '--', ...changes);
-    } catch (error) {
-      for (const [file, old] of originals) writeFileSync(resolve(repo, file), old);
-      throw error;
-    }
-  }
-  message('ACP 本地代码已同步到 ' + head.slice(0, 9));
-  message('修改文件数：' + changes.length + '；未碰 Git 历史、聊天数据、主题或导航。');
-  message('运行中的 4173 / Devin 桥接进程不会热加载后端源文件，需重新加载原来的两个服务。');
-  // A single read-only local health probe helps identify the remaining runtime step.
+  const written = [];
   try {
-    const health = await fetch('http://127.0.0.1:4173/devin-acp/health', {
-      signal: AbortSignal.timeout(3500)
+    for (const item of planned) {
+      writeFileSync(resolve(repo, item.path), item.after);
+      written.push(item);
+    }
+  } catch (error) {
+    for (const item of written.reverse()) writeFileSync(resolve(repo, item.path), item.before);
+    throw error;
+  }
+  say('ACP 代码同步完成：' + remote.slice(0, 9));
+  say('更新文件：' + planned.length + '；不修改主题、导航、数据、Git 提交或索引。');
+  if (conflicts.length) {
+    say('以下文件保留本地修改，未覆盖：');
+    for (const path of conflicts) say('  - ' + path);
+    say('注意：这些文件的远端功能尚未同步，不能宣称全部交付。');
+  } else {
+    say('六个目标文件均已安全同步或无须更新。');
+  }
+  say('下一步：在 Termux 窗口用新桥接代码启动 Ubuntu 中的 Devin，之后重新加载原来的 4173 服务。');
+  try {
+    const response = await fetch('http://127.0.0.1:4173/devin-acp/health', {
+      signal: AbortSignal.timeout(2500)
     });
-    const data = await health.json().catch(() => null);
-    message('当前 4173 → Devin 桥接：HTTP ' + health.status);
-    if (data?.error) message('具体问题：' + data.error);
-    if (health.ok) message(data?.running ? '桥接在线；刷新 Conflux 后可进入正式聊天。' : '桥接进程未运行。');
-    else if (health.status === 503) message('4173 仍是旧服务或配置无效，需要在原窗口重新启动。');
-    else if (health.status === 502) message('桥接进程没有在 127.0.0.1:47831 提供服务。');
+    const data = await response.json().catch(() => null);
+    say('当前 4173 的 ACP 状态：HTTP ' + response.status);
+    if (typeof data?.error === 'string') say('原因：' + data.error);
+    if (response.ok) say(data?.running ? '桥接进程在线。' : '桥接进程没有运行。');
   } catch {
-    message('当前无法访问 4173，请检查原来的 Conflux 服务窗口。');
+    say('4173 当前不可达；没有更改或重启该服务。');
   }
 } catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
+  console.error('安全同步停止：' + (error instanceof Error ? error.message : String(error)));
   process.exitCode = 1;
+} finally {
+  if (dir) rmSync(dir, { recursive: true, force: true });
 }
