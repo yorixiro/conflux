@@ -1,42 +1,47 @@
-# Devin ACP — isolated local preview
+# Devin ACP — Termux / Ubuntu PRoot delivery notes
 
-Status: **implementation in progress**, not yet accepted on Android. The ACP connection can be selected as a provider in the normal chat flow. Do not label it production-ready without a real Devin and tablet check.
+Status (2026-10-30): **Bridge running and model discovery confirmed on Android device; full chat acceptance pending.** The user's screenshot showed “Devin 桥接在线” and a real model dropdown. This does not prove a two-turn conversation completed successfully.
 
-## Architecture
+## Supported scope and frozen UI
 
-`devin acp` (Ubuntu PRoot, stdio JSON-RPC) → `tools/devin-acp-bridge.mjs` (loopback-only HTTP/SSE, optional loopback authentication) → Conflux same-origin `/devin-acp` route → Add Connection → ACP Agent or normal chat. The Termux local server serves the route on port 4173 in both HMR and built PWA modes; standalone Vite also has a development proxy.
+- Conflux same-origin 4173 → local bridge on `127.0.0.1:47831` → `devin acp` in Ubuntu PRoot.
+- Normal API settings remain untouched. The ACP provider page supports connection status, real agent model discovery and model selection. No arbitrary OpenAI Base URL, fabricated API Key, or user-entered bridge Token is required for local loopback use.
+- Text-only conversation is the delivery target. Permission-requiring agent tools, file attachments, separately hosted PWA and native APK transports are **not** part of this acceptance. Those are separate scopes.
+- Preserve local persona settings, old chat data, current theme and the existing 4173 service configuration. Do not force-push, reset, or merge PRs for this closure.
 
-The bridge owns the Devin process and ACP session. Both the bridge and Conflux's local server bind to device loopback. The bridge token is optional for device-local use and, if configured, must match in both processes; no token is sent to the browser. Devin credentials and stdio never enter the web bundle. It is not an OpenAI-compatible endpoint; do **not** enter it as a Base URL in an API provider.
+## Proven path and minimal normal operation
 
-## Start in the Ubuntu PRoot with Devin installed
+The Devin CLI was already installed and authenticated in Ubuntu PRoot at `/root/.local/bin/devin`. A bridge started using plain `spawn('devin')` failed because the noninteractive Ubuntu subprocess did not include that directory in PATH. Using an explicit executable path resolved the observed startup failure. Do not reinstall or log in again solely because the bridge reported a missing command.
 
-From the Conflux checkout containing this integration:
+To restart the **bridge only**, in a regular Termux window with `~/my_st_termux/conflux` containing the current bridge source:
 
 ```sh
-
-export DEVIN_ACP_WORKSPACE="$HOME"
-node tools/devin-acp-bridge.mjs
+cd ~/my_st_termux/conflux
+proot-distro login ubuntu -- env -u DEVIN_ACP_BRIDGE_TOKEN \
+  DEVIN_ACP_COMMAND=/root/.local/bin/devin \
+  node --input-type=module - < tools/devin-acp-bridge.mjs
 ```
 
-No token environment variable is needed for loopback-only use. If you choose to protect loopback with DEVIN_ACP_BRIDGE_TOKEN, supply the same value to both backend processes, never the frontend. Do not commit or screenshot credentials.
+This streams source from Termux into Ubuntu; it does not assume the repository exists at `/root/my_st_termux/conflux`. Keep the bridge process running. The old `git show FETCH_HEAD:tools/devin-acp-bridge.mjs | proot-distro ...` variant also works but depends on FETCH_HEAD not changing.
 
-In the **Conflux process environment**, set `DEVIN_ACP_BRIDGE_TOKEN` to the exact same value, then run `npm run termux:dev` for live development or `npm run termux:pwa` for a built PWA. Both use the existing `http://127.0.0.1:4173/` address. The bridge defaults to `127.0.0.1:47831`. The role's “拉取模型列表” reads ACP `configOptions` from `session/new` and passes selected model IDs to `session/set_config_option` before each chat prompt; if Devin does not advertise a model selector, the default remains usable. If Ubuntu PRoot and Termux cannot share loopback on the device, verify network reachability before changing any bind address. Do not expose the bridge on `0.0.0.0` or forward it publicly.
+The current Conflux live-preview server runs via `npm run termux:dev` at `http://127.0.0.1:4173`; once running, **do not restart it for ordinary chat**. A `200` from `/devin-acp/health` only means the HTTP endpoint responded; check the returned `running` status before declaring Devin available.
 
-Open Conflux → API connections → Add connection → **ACP Agent** → **Detect ACP connection** → send a test message. To use the main chat, add the Devin ACP provider on that screen and select it in the composer.
+## Acceptance checklist (stop after completion)
 
-## Focused verification
+- [x] Android UI shows “Devin 桥接在线”
+- [x] Android UI loads genuine Devin model choices
+- [ ] From a Conflux persona bound to Devin ACP, send a message in the **normal chat window** and receive a text response
+- [ ] Send a second message in the same conversation; confirm it receives an appropriate follow-up
+- [ ] Keep selected model/connection after reopening the settings, without disrupting ordinary API routes
 
-1. `node --check tools/devin-acp-bridge.mjs` and `node --check tools/devin-acp-smoke.mjs`.
-2. `node tools/devin-acp-smoke.mjs` inside authenticated Ubuntu; confirm ACP initialize responds.
-3. `npm run typecheck` in the isolated checkout, once dependencies are installed.
-4. In the UI on port 4173 in both development and built PWA modes, test health, one prompt with streaming text, stop/cancel, disconnect, wrong token and second simultaneous prompt. Test the normal chat provider route too.
-5. Confirm no key is stored in frontend bundle, app data or logs. Check both Android browser/PWA and native APK separately.
+**After these user-observed checks pass, mark the text-chat scope accepted and freeze the UI.** No extra test suite, design changes, refactor, data cleanup or branch merge is authorized by this checklist. If an item fails, fix only the observed failure.
 
-Do not run the full regression suite for this isolated integration pass. Do not merge until the ACP session, message lifecycle and Android device checks are demonstrated.
+## Operational troubleshooting, only if an actual failure occurs
 
-## Known limitations
+- `Devin ACP process is unavailable`: check whether the Ubuntu `devin` subprocess is running; bridge listening alone is insufficient.
+- `ENOENT`/can't find `devin`: set `DEVIN_ACP_COMMAND=/root/.local/bin/devin` as above; it is **not** evidence the user is logged out.
+- 502 from 4173: local bridge is unreachable; confirm only the bridge process and loopback address, not the unrelated Vite/UI code.
+- A missing model list with `running: true`: the agent may not advertise models for that session; use its default model rather than inventing IDs.
+- Current persona settings source can differ from the shared branch because guarded sync preserved local changes. Do not overwrite this file merely to make branches identical.
 
-- The ACP provider uses the canonical chat request and history flow for text. Files and permission-requiring agent operations are not supported by this bridge.
-- Agent permission requests are rejected rather than auto-approved. Tool execution requiring permissions is therefore not ready.
-- The local Termux PWA has a same-origin route. A separately hosted PWA or native APK still needs a trusted transport in its own deployment/runtime.
-- No actual tablet/Ubuntu/Devin runtime test has been performed by this change.
+Source ownership: `tools/devin-acp-bridge.mjs`, `tools/conflux-local-server.ts`, `src/engines/request/devinAcpReply.ts`, and `src/engines/request/requestPipeline.ts`. No live Android request, test result, or private chat content is recorded in this document.
