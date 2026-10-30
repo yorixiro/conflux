@@ -61,7 +61,8 @@ function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) 
     : path === '/devin-acp/models' && req.method === 'GET' ? '/models'
     : path === '/devin-acp/prompt' && req.method === 'POST' ? '/prompt'
     : path === '/devin-acp/cancel' && req.method === 'POST' ? '/cancel'
-    : path === '/devin-acp/tool/result' && req.method === 'POST' ? '/tool/result' : null;
+    : path === '/devin-acp/tool/result' && req.method === 'POST' ? '/tool/result'
+    : path === '/devin-acp/permission/result' && req.method === 'POST' ? '/permission/result' : null;
   if (!endpoint) { json(res, 404, { error: 'Unknown ACP endpoint.' }); return; }
   if (endpoint === '/prompt' && (!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '')
     || Number(req.headers['content-length'] || 0) > 256 * 1024)) {

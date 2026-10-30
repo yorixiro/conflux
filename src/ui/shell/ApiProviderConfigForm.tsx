@@ -94,6 +94,15 @@ export function ApiProviderConfigForm({
           selectedModel={api.model === 'Devin ACP' ? '' : api.model}
           onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
         />
+        <details className="api-provider-more-settings">
+          <summary>图片理解（独立看图 API）</summary>
+          <ApiProviderImageUnderstandingSection
+            api={api}
+            providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
+            onSetApiConfig={onSetApiConfig}
+            requireExplicitProvider
+          />
+        </details>
       </div>
     );
   }

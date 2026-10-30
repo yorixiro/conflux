@@ -88,7 +88,32 @@ export async function requestDevinAcpReply(params: {
           callId?: string;
           name?: string;
           arguments?: Record<string, unknown>;
+          permissionId?: string;
+          title?: string;
+          description?: string;
+          options?: Array<{ optionId: string; name: string; kind: string }>;
         };
+        if (event.type === 'permission_request') {
+          if (!event.permissionId || !Array.isArray(event.options)) throw new Error('Invalid ACP permission request');
+          const allowOnce = event.options.find((option) => option.kind === 'allow_once');
+          const rejectOnce = event.options.find((option) => option.kind === 'reject_once');
+          const permissionDetails = [
+            event.title || 'Devin 请求操作权限',
+            event.description || '没有提供具体操作内容'
+          ].join('\n');
+          const approved = Boolean(allowOnce && typeof window !== 'undefined'
+            && window.confirm(permissionDetails + '\n\n只允许本次操作？'));
+          const response = await fetch('/devin-acp/permission/result', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              permissionId: event.permissionId,
+              optionId: approved ? allowOnce?.optionId : rejectOnce?.optionId ?? null
+            }),
+            signal: params.signal
+          });
+          if (!response.ok && response.status !== 409) throw new Error('ACP permission reply failed');
+          continue;
+        }
         if (event.type === 'tool_request') {
           if (!event.callId || !event.name || !event.arguments
             || typeof event.arguments !== 'object' || Array.isArray(event.arguments)) {

@@ -40,6 +40,16 @@ const sessionOptions = new Map();
 const legacySessionModels = new Map();
 const pending = new Map();
 const toolCalls = new Map();
+const permissionCalls = new Map();
+
+function cancelPermissionCalls() {
+  for (const [, entry] of permissionCalls) {
+    clearTimeout(entry.timer);
+    try { send({ id: entry.rpcId, result: { outcome: { outcome: 'cancelled' } } }); }
+    catch { /* Devin may have exited. */ }
+  }
+  permissionCalls.clear();
+}
 let toolRevision = 0;
 let toolCatalog = new Map();
 const mcpServers = [{
@@ -116,6 +126,7 @@ let agentFailure = null;
 
 function failAll(reason) {
   stopToolCalls(reason);
+  cancelPermissionCalls();
   for (const [, entry] of pending) entry.reject(new Error(reason));
   pending.clear();
   if (active) active.write({ type: 'error', error: reason });
@@ -165,8 +176,38 @@ function onMessage(message) {
     else entry.resolve(message.result);
     return;
   }
-  // Never silently approve shell/file operations. The UI needs an explicit
-  // permission surface before this bridge can support those requests.
+  if (typeof message.id !== 'undefined' && message.method === 'session/request_permission') {
+    const permission = message.params;
+    const options = Array.isArray(permission?.options) ? permission.options.filter((option) =>
+      option && typeof option.optionId === 'string' && option.optionId.length <= 128
+      && typeof option.name === 'string'
+      && ['allow_once', 'allow_always', 'reject_once', 'reject_always'].includes(option.kind)
+    ) : [];
+    if (!active || !promptReserved || permission?.sessionId !== active.sessionId
+      || !options.length || options.length > 16 || permissionCalls.size >= 4) {
+      send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
+      return;
+    }
+    const permissionId = randomUUID();
+    const current = active;
+    const timer = setTimeout(() => {
+      permissionCalls.delete(permissionId);
+      try { send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } }); }
+      catch { /* Agent may have exited. */ }
+    }, 45000);
+    permissionCalls.set(permissionId, { rpcId: message.id, session: current, options, timer });
+    current.write({
+      type: 'permission_request',
+      permissionId,
+      title: String(permission?.toolCall?.title || permission?.title || 'Devin 请求操作权限').slice(0, 250),
+      description: JSON.stringify(permission?.toolCall?.rawInput || permission?.subject || {}).slice(0, 1200),
+      options: options.map(({ optionId, name, kind }) => ({
+        optionId, name: name.slice(0, 140), kind
+      }))
+    });
+    return;
+  }
+  // Never implicitly grant any other agent-side file, shell or client RPC.
   if (typeof message.id !== 'undefined' && message.method) {
     send({ id: message.id, error: { code: -32601, message: 'Permission or client method unsupported by this bridge' } });
     return;
@@ -333,6 +374,28 @@ const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/tool/request') {
     return serveToolRequest(req, res);
   }
+  if (req.method === 'POST' && req.url === '/permission/result') {
+    try {
+      const body = await readBody(req, 4096);
+      const entry = permissionCalls.get(body.permissionId);
+      if (!entry || entry.session !== active) {
+        return writeJson(res, 409, { error: 'Permission request expired' });
+      }
+      const option = entry.options.find((item) => item.optionId === body.optionId);
+      // Only one-time approval is exposed by the browser. No blanket exec grants.
+      if (option && option.kind !== 'allow_once' && option.kind !== 'reject_once') {
+        return writeJson(res, 400, { error: 'Persistent permission selection unavailable' });
+      }
+      permissionCalls.delete(body.permissionId);
+      clearTimeout(entry.timer);
+      send({ id: entry.rpcId, result: {
+        outcome: option ? { outcome: 'selected', optionId: option.optionId } : { outcome: 'cancelled' }
+      } });
+      return writeJson(res, 200, { accepted: true });
+    } catch (error) {
+      return writeJson(res, 400, { error: error.message || 'Invalid permission reply' });
+    }
+  }
   if (req.method === 'POST' && req.url === '/tool/result') {
     try {
       const body = await readBody(req, 128 * 1024);
@@ -363,6 +426,7 @@ const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/cancel') {
     if (promptReserved && active?.sessionId) {
       stopToolCalls('ACP prompt cancelled');
+      cancelPermissionCalls();
       try { send({ method: 'session/cancel', params: { sessionId: active.sessionId } }); }
       catch { /* The agent may have already exited. */ }
       activePromptAbortController?.abort();
@@ -419,6 +483,7 @@ const server = createServer(async (req, res) => {
     res.on('close', () => {
       if (active !== currentPrompt || !chat.id || res.writableEnded) return;
       stopToolCalls('Browser disconnected');
+      cancelPermissionCalls();
       promptAbortController.abort();
       try { send({ method: 'session/cancel', params: { sessionId: chat.id } }); } catch { /* agent already exited */ }
     });
@@ -436,6 +501,7 @@ const server = createServer(async (req, res) => {
     else writeJson(res, 400, { error: error.message });
   } finally {
     stopToolCalls('ACP prompt completed');
+    cancelPermissionCalls();
     activePromptAbortController = null;
     active = null;
     promptReserved = false;

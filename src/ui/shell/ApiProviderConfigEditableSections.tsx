@@ -172,12 +172,14 @@ type ApiProviderImageUnderstandingSectionProps = {
   api: ProviderProfile;
   providers: ProviderProfile[];
   onSetApiConfig: (patch: Partial<ProviderProfile>) => void;
+  requireExplicitProvider?: boolean;
 };
 
 export function ApiProviderImageUnderstandingSection({
   api,
   providers,
-  onSetApiConfig
+  onSetApiConfig,
+  requireExplicitProvider = false
 }: ApiProviderImageUnderstandingSectionProps) {
   const { t } = useI18n();
   const imageUnderstanding = api.imageUnderstanding ?? DEFAULT_PROVIDER_IMAGE_UNDERSTANDING;
@@ -219,12 +221,17 @@ export function ApiProviderImageUnderstandingSection({
           {imageUnderstanding.enabled ? (
             <div className="toolbox-inline-config">
               <div className="settings-form">
+                {requireExplicitProvider ? (
+                  <p className="api-provider-inline-note">发送图片时，先由选定的看图 API 理解图片，再把描述交给 Fable。普通聊天不需要任何额外确认。</p>
+                ) : null}
                 <label>{t('apiProvider.imageUnderstanding.providerLabel')}</label>
                 <select
                   value={imageUnderstanding.providerId ?? ''}
                   onChange={(event) => patchImageUnderstanding({ providerId: event.target.value || undefined })}
                 >
-                  <option value="">{t('apiProvider.imageUnderstanding.currentProvider')}</option>
+                  <option value="">{requireExplicitProvider
+                    ? '请选择支持图片输入的 API'
+                    : t('apiProvider.imageUnderstanding.currentProvider')}</option>
                   {providers.map((provider) => (
                     <option key={provider.id} value={provider.id}>
                       {provider.name} · {provider.model}

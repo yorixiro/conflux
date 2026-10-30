@@ -605,7 +605,10 @@ export async function prepareCollaboratorReplyRequest(params: {
   });
   const providerCapability = resolveProviderCapability(api, preparedAdvanced);
   const modelId = providerCapability.provider.model;
-  const supportsImageInput = providerCapability.input.images !== 'none';
+  // The ACP transport only carries text. Its photos must use the separately
+  // configured image-understanding route, even if a stale capability says images.
+  const supportsImageInput = api.agentTransport !== 'devin-acp'
+    && providerCapability.input.images !== 'none';
   const imageUnderstanding = !supportsImageInput
     ? await understandConversationImages({
         messages,

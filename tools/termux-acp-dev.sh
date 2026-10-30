@@ -56,6 +56,13 @@ for file in tools/devin-acp-bridge.mjs tools/conflux-acp-mcp.mjs .devin/mcp_conf
   cat "$file" | proot-distro login ubuntu -- sh -c "cat > /root/.conflux-acp/$file"
 done
 
+# Allow only known read-only Conflux MCP tools. Never blanket-approve exec,
+# writeMemory, or an entire MCP server. Keep this local to the ACP workspace.
+if ! proot-distro login ubuntu -- test -e /root/.conflux-acp/.devin/config.local.json; then
+  printf '%s\n' '{"permissions":{"allow":["mcp__conflux__searchMemory","mcp__conflux__openMemorySource","mcp__conflux__readMemoryDoc","mcp__conflux__listEnvironmentNodes","mcp__conflux__searchReadableContext"]}}' |
+    proot-distro login ubuntu -- sh -c 'cat > /root/.conflux-acp/.devin/config.local.json'
+fi
+
 bridge_pid=''
 front_pid=''
 cleanup() {

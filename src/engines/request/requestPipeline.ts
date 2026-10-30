@@ -125,8 +125,15 @@ export async function requestCollaboratorReply(params: {
     onImageUnderstandingResults?.(prepared.imageUnderstandingResults);
   }
   if (api.agentTransport === 'devin-acp') {
-    if (prepared.context.attachmentSlots.pending.length) {
-      throw new Error('Devin ACP bridge currently supports text only; attachments were not sent.');
+    // Text extracted by a configured vision provider may accompany the turn;
+    // never forward an unreadable image or file to this text-only ACP transport.
+    const unreadableAttachment = prepared.conversation.some((message) =>
+      message.attachments?.some((attachment) =>
+        !attachment.clearedAt && !attachment.textContent?.trim()
+      )
+    );
+    if (unreadableAttachment) {
+      throw new Error('Devin ACP 只能接收文字。请在本连接的图片理解设置中选择支持看图的 API。');
     }
     const prompt = prepared.context.segments.flatMap((segment) =>
       segment.messages.map((message) => {
