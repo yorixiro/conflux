@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from 'react';
 import { resolvePersonaProviderBinding } from '../../../../engines/personaProviderBinding';
 import { useRuntimeStore } from '../../../../stores/runtimeStore';
 import { ApiProviderConnectionSection } from '../../ApiProviderConnectionSection';
+import { DevinAcpConnectionPanel } from '../../DevinAcpConnectionPanel';
 import { ApiProviderCapabilitiesSection, ApiProviderImageUnderstandingSection } from '../../ApiProviderConfigEditableSections';
 import { resolveApiProviderFormViewModel, shouldOpenAdvancedSettings } from '../../ApiProviderConfigShared';
 import {
@@ -54,8 +55,29 @@ function RoleConnectionFields({ provider, providers, onUpdateProvider }: {
   if (isBuiltInProviderDisplay(provider)) return <p className="ps-footnote">内置线路的接口信息由程序管理。选择自定义线路后可以填写地址和密钥。</p>;
   return (
     <div className="conflux-role-connection">
-      <p className="ps-footnote">下面修改的是「{provider.name}」这条线路。共用它的其他角色也会使用更新后的接口信息；角色专属模型由上方单独设置。</p>
-      <ApiProviderConnectionSection
+      <div className="ps-field">
+        <label className="ps-field-label" htmlFor="role-connection-transport">连接方式</label>
+        <select
+          id="role-connection-transport"
+          className="ps-input"
+          value={provider.agentTransport === 'devin-acp' ? 'devin-acp' : 'api'}
+          onChange={(event) => update({
+            agentTransport: event.target.value === 'devin-acp' ? 'devin-acp' : undefined
+          })}
+        >
+          <option value="api">普通 API</option>
+          <option value="devin-acp">Devin ACP（本地代理）</option>
+        </select>
+      </div>
+      {provider.agentTransport === 'devin-acp' ? (
+        <>
+          <p className="ps-footnote">此线路使用本地 Devin ACP 桥接，不需要填写普通 API 地址或密钥。连接尚未通过实际测试。</p>
+          <DevinAcpConnectionPanel />
+        </>
+      ) : (
+        <>
+          <p className="ps-footnote">下面修改的是「{provider.name}」这条线路。共用它的其他角色也会使用更新后的接口信息；角色专属模型由上方单独设置。</p>
+          <ApiProviderConnectionSection
         api={provider}
         matchedPresetName={matchedPreset?.name ?? ''}
         selectedPresetId={presetId}
@@ -65,11 +87,13 @@ function RoleConnectionFields({ provider, providers, onUpdateProvider }: {
         onSetAdvancedOpen={setAdvancedOpen}
         onSetApiConfig={update}
       />
-      <details className="conflux-role-optional">
-        <summary>思考、图片、流式与备用看图能力</summary>
-        <ApiProviderCapabilitiesSection api={provider} onSetApiConfig={update} />
-        <ApiProviderImageUnderstandingSection api={provider} providers={providers} onSetApiConfig={update} />
-      </details>
+          <details className="conflux-role-optional">
+            <summary>思考、图片、流式与备用看图能力</summary>
+            <ApiProviderCapabilitiesSection api={provider} onSetApiConfig={update} />
+            <ApiProviderImageUnderstandingSection api={provider} providers={providers} onSetApiConfig={update} />
+          </details>
+        </>
+      )}
     </div>
   );
 }
@@ -168,7 +192,12 @@ function ProviderBindingSettings({
         </div>
       </div>
 
-      {activePersona ? <PersonaModelSettings key={activePersona.id} persona={activePersona} settings /> : null}
+      {activePersona && binding?.api.agentTransport !== 'devin-acp'
+        ? <PersonaModelSettings key={activePersona.id} persona={activePersona} settings />
+        : null}
+      {binding?.api.agentTransport === 'devin-acp'
+        ? <p className="ps-footnote">Devin ACP 代理管理模型；普通模型列表、模型 ID 和思考强度不适用于此连接。</p>
+        : null}
       {(fixedProvider || binding?.status === 'ready') && connectionProvider
         ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} />
         : null}

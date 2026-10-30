@@ -51,6 +51,12 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
     if (!pickerOpen && canPull && !discovery.models.length && discovery.status !== 'loading') void discovery.refresh();
   }
 
+  if (binding.api.agentTransport === 'devin-acp') {
+    return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="Devin ACP 代理连接">
+      <div className="model-effort-row"><span className="ps-footnote">Devin ACP · 模型由代理管理</span></div>
+    </div>;
+  }
+
   return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="当前 AI 模型与思考强度">
     <div className="model-effort-row">
       <div className="model-quick-picker" ref={pickerRef} onKeyDown={(event) => {
