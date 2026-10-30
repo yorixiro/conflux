@@ -136,7 +136,7 @@ export type RuntimeState = {
   setActiveProvider: (providerId: string) => void;
   createProvider: (namePrefix?: string, options?: { activate?: boolean }) => string;
   importProvider: (provider: Partial<ProviderProfile>) => string;
-  duplicateProvider: (providerId: string, duplicateName?: string) => string | null;
+  duplicateProvider: (providerId: string, duplicateName?: string, options?: { activate?: boolean }) => string | null;
   updateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
   deleteProvider: (providerId: string) => void;
   hydrateFromDb: () => Promise<boolean>;
@@ -478,7 +478,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
     });
     return providerId;
   },
-  duplicateProvider: (providerId, duplicateName) => {
+  duplicateProvider: (providerId, duplicateName, options) => {
     const source = get().providers.find((provider) => provider.id === providerId);
     if (!source) return null;
     if (isPolarisBuiltInProvider(source)) return null;
@@ -497,7 +497,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
       const { builtInProviders, customProviders } = splitBuiltInProviders(state.providers);
       return {
         providers: [...builtInProviders, nextProvider, ...customProviders],
-        activeProviderId: nextId
+        activeProviderId: options?.activate === false ? state.activeProviderId : nextId
       };
     });
 

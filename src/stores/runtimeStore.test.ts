@@ -20,6 +20,25 @@ describe('runtimeStore role-only route creation', () => {
   });
 });
 
+describe('role-owned API duplication', () => {
+  it('copies the provider and credentials without changing the global selection or source', () => {
+    useRuntimeStore.setState(useRuntimeStore.getInitialState(), true);
+    const sourceId = useRuntimeStore.getState().createProvider('Shared API', { activate: false });
+    useRuntimeStore.getState().updateProvider(sourceId, {
+      baseUrl: 'https://example.invalid/v1', apiKey: 'test-secret', model: 'model-a'
+    });
+    const before = useRuntimeStore.getState();
+    const source = before.providers.find((provider) => provider.id === sourceId);
+    const copyId = before.duplicateProvider(sourceId, 'Private Copy', { activate: false });
+    const after = useRuntimeStore.getState();
+    expect(after.activeProviderId).toBe(before.activeProviderId);
+    expect(source).toEqual(after.providers.find((provider) => provider.id === sourceId));
+    expect(after.providers.find((provider) => provider.id === copyId)).toMatchObject({
+      name: 'Private Copy', baseUrl: 'https://example.invalid/v1', apiKey: 'test-secret', model: 'model-a'
+    });
+  });
+});
+
 describe('runtimeStore companion connections', () => {
   beforeEach(() => {
     useRuntimeStore.setState(useRuntimeStore.getInitialState(), true);
