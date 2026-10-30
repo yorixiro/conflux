@@ -1,15 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
-import { resolvePersonaProviderBinding } from '../../../../engines/personaProviderBinding';
-import { useRuntimeStore } from '../../../../stores/runtimeStore';
-import { ApiProviderConnectionSection } from '../../ApiProviderConnectionSection';
-import { DevinAcpConnectionPanel } from '../../DevinAcpConnectionPanel';
-import { ApiProviderCapabilitiesSection, ApiProviderImageUnderstandingSection } from '../../ApiProviderConfigEditableSections';
-import { resolveApiProviderFormViewModel, shouldOpenAdvancedSettings } from '../../ApiProviderConfigShared';
-import {
-  getProviderModelBindingValue,
-  getProviderModelDisplayLabel,
-  isBuiltInProviderDisplay
-} from '../../apiProviderDisplay';
+import { useState, type ReactNode } from 'react';
 import type { I18nKey } from '../../../../i18n/messages';
 import { useI18n } from '../../../../i18n/useI18n';
 import type { McpServerConfig, ProviderProfile } from '../../../../types/domain';
@@ -17,7 +6,7 @@ import { Icon, type IconName } from '../../../Icon';
 import { type PersonaTabProps } from '../personaUiShared';
 import { CustomRequestSettingsTab } from './CustomRequestSettingsTab';
 import { EngineSettingsTab } from './EngineSettingsTab';
-import { PersonaModelSettings } from '../../PersonaModelSettings';
+import { PersonaApiConnectionPanel } from './PersonaApiConnectionPanel';
 import { PersonaMcpSettingsPage } from './PersonaMcpSettingsPage';
 
 type RequestSettingsTabProps = PersonaTabProps & {
@@ -41,169 +30,6 @@ const REQUEST_PAGE_META: Array<{
   { id: 'custom', labelKey: 'request.settings.customSection', icon: 'code' },
   { id: 'mcp', labelKey: 'request.settings.mcpSection', icon: 'mcpServer' }
 ];
-
-function RoleConnectionFields({ provider, providers, onUpdateProvider }: {
-  provider: ProviderProfile;
-  providers: ProviderProfile[];
-  onUpdateProvider: RequestSettingsTabProps['onUpdateProvider'];
-}) {
-  const { matchedPreset, interfacePath } = resolveApiProviderFormViewModel(provider);
-  const [presetId, setPresetId] = useState(matchedPreset?.id ?? '');
-  const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(provider, matchedPreset?.id));
-  useEffect(() => { setPresetId(matchedPreset?.id ?? ''); }, [matchedPreset?.id]);
-  const update = (patch: Partial<ProviderProfile>) => onUpdateProvider(provider.id, patch);
-  if (isBuiltInProviderDisplay(provider)) return <p className="ps-footnote">内置线路的接口信息由程序管理。选择自定义线路后可以填写地址和密钥。</p>;
-  return (
-    <div className="conflux-role-connection">
-      <div className="ps-field">
-        <label className="ps-field-label" htmlFor="role-connection-transport">连接方式</label>
-        <select
-          id="role-connection-transport"
-          className="ps-input"
-          value={provider.agentTransport === 'devin-acp' ? 'devin-acp' : 'api'}
-          onChange={(event) => update({
-            agentTransport: event.target.value === 'devin-acp' ? 'devin-acp' : undefined
-          })}
-        >
-          <option value="api">普通 API</option>
-          <option value="devin-acp">Devin ACP（本地代理）</option>
-        </select>
-      </div>
-      {provider.agentTransport === 'devin-acp' ? (
-        <>
-          <p className="ps-footnote">此线路使用本地 Devin ACP 桥接，不需要填写普通 API 地址或密钥。连接尚未通过实际测试。</p>
-          <DevinAcpConnectionPanel />
-        </>
-      ) : (
-        <>
-          <p className="ps-footnote">下面修改的是「{provider.name}」这条线路。共用它的其他角色也会使用更新后的接口信息；角色专属模型由上方单独设置。</p>
-          <ApiProviderConnectionSection
-        api={provider}
-        matchedPresetName={matchedPreset?.name ?? ''}
-        selectedPresetId={presetId}
-        advancedOpen={advancedOpen}
-        interfacePath={interfacePath}
-        onSetSelectedPresetId={setPresetId}
-        onSetAdvancedOpen={setAdvancedOpen}
-        onSetApiConfig={update}
-      />
-          <details className="conflux-role-optional">
-            <summary>思考、图片、流式与备用看图能力</summary>
-            <ApiProviderCapabilitiesSection api={provider} onSetApiConfig={update} />
-            <ApiProviderImageUnderstandingSection api={provider} providers={providers} onSetApiConfig={update} />
-          </details>
-        </>
-      )}
-    </div>
-  );
-}
-
-function ProviderBindingSettings({
-  activePersona,
-  providers = [],
-  activeProviderId,
-  onUpdatePersona,
-  onOpenProviderSettings,
-  onUpdateProvider
-}: RequestSettingsTabProps) {
-  const { t } = useI18n();
-  const fieldId = useId();
-  const fixedProviderId = activePersona?.advanced.providerId?.trim() || '';
-  const fixedProvider = providers.find((provider) => provider.id === fixedProviderId) ?? null;
-  const routeMode = activePersona?.advanced.providerRouteMode;
-  const selectValue = fixedProviderId || (routeMode === 'inherit' ? '' : '__unconfigured__');
-  const hasProviderBinding = Boolean(fixedProviderId || activePersona?.advanced.modelOverride.trim() || routeMode === 'inherit');
-  const globalProvider = providers.find(provider => provider.id === activeProviderId) ?? providers[0];
-  const binding = globalProvider ? resolvePersonaProviderBinding({ globalApi: globalProvider, providers, persona: activePersona }) : null;
-  const connectionProvider = binding?.fixedProvider ?? globalProvider;
-
-  const updateProviderBinding = (providerId: string) => {
-    if (providerId === '__unconfigured__') {
-      onUpdatePersona({ advanced: { providerId: '', providerRouteMode: 'unconfigured', modelOverride: '' } });
-      return;
-    }
-    if (!providerId) {
-      onUpdatePersona({ advanced: { providerId: '', providerRouteMode: 'inherit', modelOverride: '' } });
-      return;
-    }
-    const provider = providers.find((entry) => entry.id === providerId);
-    if (!provider) return;
-    onUpdatePersona({ advanced: { providerId: provider.id, providerRouteMode: 'fixed', modelOverride: getProviderModelBindingValue(provider) } });
-  };
-
-  return (
-    <>
-      {binding?.status === 'unconfigured'
-        ? <p className="conflux-role-notice">本角色还没有绑定模型线路，选择线路后才能发送消息。</p>
-        : binding?.status === 'missing-provider'
-          ? <p className="conflux-role-notice">原绑定的模型线路已不存在。请重新选择，系统不会自动改用其他模型。</p>
-          : binding
-            ? <p className="conflux-role-notice">本角色实际使用：{binding.api.name} · {getProviderModelDisplayLabel(binding.api)}{!fixedProviderId ? '（跟随全局线路）' : ''}</p>
-            : null}
-      <div className="ps-field">
-        <div className="ps-field-head">
-          <label className="ps-field-label" htmlFor={`${fieldId}-provider`}>{t('request.settings.providerLabel')}</label>
-          <span className="ps-field-hint">{t('request.settings.providerHint')}</span>
-        </div>
-        <select
-          className="ps-input"
-          id={`${fieldId}-provider`}
-          value={selectValue}
-          onChange={(event) => updateProviderBinding(event.target.value)}
-        >
-          <option value="__unconfigured__">未配置（暂不能聊天）</option>
-          <option value="">{t('request.settings.followGlobalProvider')}</option>
-          {fixedProviderId && !fixedProvider ? <option value={fixedProviderId} disabled>已失效的线路 · {fixedProviderId}</option> : null}
-          {providers.map((provider) => (
-            <option key={provider.id} value={provider.id}>
-              {provider.name} · {getProviderModelDisplayLabel(provider)}
-            </option>
-          ))}
-        </select>
-        <div className="provider-inline-actions">
-          <button
-            type="button"
-            className="btn-secondary compact"
-            disabled={!activePersona}
-            onClick={() => {
-              const nextId = useRuntimeStore.getState().createProvider('AI 专属线路', { activate: false });
-              onUpdatePersona({ advanced: { providerId: nextId, providerRouteMode: 'fixed', modelOverride: '' } });
-            }}
-          >
-            为当前 AI 新建空白线路
-          </button>
-          <button
-            type="button"
-            className="btn-secondary compact"
-            onClick={() => updateProviderBinding('')}
-            disabled={!hasProviderBinding}
-          >
-            {t('request.settings.followGlobal')}
-          </button>
-          {onOpenProviderSettings ? (
-            <button
-              type="button"
-              className="btn-secondary compact"
-              onClick={onOpenProviderSettings}
-            >
-              {t('request.settings.openProviderSettings')}
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      {activePersona && binding?.api.agentTransport !== 'devin-acp'
-        ? <PersonaModelSettings key={activePersona.id} persona={activePersona} settings />
-        : null}
-      {binding?.api.agentTransport === 'devin-acp'
-        ? <p className="ps-footnote">Devin ACP 代理管理模型；普通模型列表、模型 ID 和思考强度不适用于此连接。</p>
-        : null}
-      {(fixedProvider || binding?.status === 'ready') && connectionProvider
-        ? <RoleConnectionFields key={connectionProvider.id} provider={connectionProvider} providers={providers} onUpdateProvider={onUpdateProvider} />
-        : null}
-    </>
-  );
-}
 
 function RequestSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -236,7 +62,7 @@ export function RequestSettingsTab(props: RequestSettingsTabProps) {
 
       {activePage === 'route' ? (
         <RequestSection title={t('request.settings.providerSection')}>
-          <ProviderBindingSettings {...props} />
+          <PersonaApiConnectionPanel {...props} />
         </RequestSection>
       ) : null}
       {activePage === 'engine' ? (
