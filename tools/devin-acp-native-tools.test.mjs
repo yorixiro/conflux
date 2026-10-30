@@ -208,9 +208,28 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
       e.type === 'update' && e.update?.content?.text?.includes('环境节点')));
     assert.ok(events.some((e) => e.type === 'done'));
     assert.ok(!events.some((e) => e.type === 'error'));
+    const idleCatalog = await fetch(base + '/tools', {
+      headers: { 'x-acp-bridge-token': token }
+    });
+    assert.deepEqual((await idleCatalog.json()).tools, []);
+    const late = await fetch(base + '/tool/result', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        callId: events.find((e) => e.type === 'tool_request').callId,
+        isError: false, text: 'late result'
+      })
+    });
+    assert.equal(late.status, 409);
+    const idleInvocation = await fetch(base + '/tool/request', {
+      method: 'POST', headers,
+      body: JSON.stringify({ name: 'searchMemory', arguments: { query: 'outside session' } })
+    });
+    assert.equal(idleInvocation.status, 409);
   } finally {
     bridge.kill('SIGTERM');
-    await new Promise((resolve) => bridge.once('exit', resolve));
+    if (bridge.exitCode === null && bridge.signalCode === null) {
+      await new Promise((resolve) => bridge.once('exit', resolve));
+    }
     await rm(dir, { recursive: true, force: true });
   }
   assert.equal(logs, '');
