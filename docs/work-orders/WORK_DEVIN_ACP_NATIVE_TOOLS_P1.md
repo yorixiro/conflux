@@ -1,6 +1,6 @@
 # Devin ACP 原生工具桥接 P1：验收与回滚
 
-状态：**代码已提交；模拟测试用例已编写，但未在真实运行环境执行；Fable/Android 实机尚未验收。**
+状态：**2026-10-31 用户在 Termux 隔离目录已验证原模拟 1/1、Vitest 9/9 通过，叠加 PR #12 后 tsc --noEmit 退出码 0。后续取消修复的新增模拟用例尚待重跑，真实 Devin/Fable 和 Android 仍未验收。**
 仓库 yorixiro/conflux，基线 feat/keke-devin-acp-preview-20261030，基线 SHA 135b8901930bd931b3111fce550ed21480ee278b。
 实现分支 feat/devin-acp-native-tools-p1-20261030。独立 Draft PR，禁止合并。
 
@@ -63,3 +63,39 @@
 **注意**：只传入桥的两个 mjs 不会自动升级 4173 浏览器源代码；还需要隔离预览带有本 PR 的 TypeScript 变更的页面。旧 UI 即使显示桥接在线，也不意味着原生工具通路有效。切换预览时不要覆盖 Termux 主工作树或用户数据。
 
 平板最终验收：Fable 调用 searchMemory 返回真实记忆候选，并在需要时使用 openMemorySource；再用 listEnvironmentNodes 返回真实目录。检查对应工具记录和回执，确认继续回答。验证普通聊天第二轮、模型选项、token/cache 统计，以及取消/断连/权限拒绝。完成前保持 Draft PR，不合并。
+
+
+## 2026-10-31 收尾测试：旧 4173 保持运行
+
+新增修复：浏览器中断或用户取消后立即终止仍在等待的 session/prompt，让下一条消息不必等待原本最长 10 分钟超时。模拟 Devin 无视取消的测试用例已补充，但没有新的运行通过日志。
+
+在先前已有的 ~/my_st_termux/conflux-acp-p1 独立工作树中（已叠加 PR #12），先确认 git status --short 为空、两个提交尚未包含，才运行：
+
+    cd ~/my_st_termux/conflux-acp-p1
+    git fetch origin feat/devin-acp-native-tools-p1-20261030
+    git cherry-pick 21ee6388d40448d95b6d495b7b4e8259b91210e2 60ad946f0dd1a412adb4e0d5264582b80b2c7447
+    node --test tools/devin-acp-native-tools.test.mjs
+    npm run typecheck
+
+不重新运行全量测试，不重复前次 9 项 Vitest，不进行付费模型探测。
+
+真实验证采用独立端口：保留正在美化的 4173 和旧 47831；测试 Vite/Conflux 使用 4174，测试 PRoot Bridge 使用 47832。4174 是独立 browser origin，不共享 4173 的 LocalData，因此只在 4174 创建专用测试协作者和测试记忆，**不读取生产个人记忆**。
+
+将隔离工作树下 tools/devin-acp-bridge.mjs、tools/conflux-acp-mcp.mjs 和 .devin/mcp_config.json 复制到 Ubuntu /root/conflux-acp-p1 相同相对目录（不得覆盖旧 PRoot Bridge）：
+
+    proot-distro login ubuntu -- mkdir -p /root/conflux-acp-p1/tools /root/conflux-acp-p1/.devin
+    cat tools/devin-acp-bridge.mjs | proot-distro login ubuntu -- sh -c "cat > /root/conflux-acp-p1/tools/devin-acp-bridge.mjs"
+    cat tools/conflux-acp-mcp.mjs | proot-distro login ubuntu -- sh -c "cat > /root/conflux-acp-p1/tools/conflux-acp-mcp.mjs"
+    cat .devin/mcp_config.json | proot-distro login ubuntu -- sh -c "cat > /root/conflux-acp-p1/.devin/mcp_config.json"
+
+在独立 Termux 窗口中启动 4174。先在本机私下设置仅测试用的强随机 DEVIN_ACP_BRIDGE_TOKEN（至少 24 字符），不要存进 Git、截图或公开日志；命令必须从隔离工作树运行，且该变量已被其 shell 继承：
+
+    DEVIN_ACP_BRIDGE_PORT=47832 node --import tsx --input-type=module -e "import {startLocalServer} from './tools/conflux-local-server.ts'; await startLocalServer({dev:true, port:4174}); console.log('Conflux isolated: http://127.0.0.1:4174')"
+
+另一 Termux 窗口使用相同测试 Token，启动独立 Ubuntu PRoot Bridge：
+
+    proot-distro login ubuntu -- env DEVIN_ACP_COMMAND=/root/.local/bin/devin DEVIN_ACP_WORKSPACE=/root/conflux-acp-p1 DEVIN_ACP_BRIDGE_PORT=47832 DEVIN_ACP_BRIDGE_TOKEN="$DEVIN_ACP_BRIDGE_TOKEN" node /root/conflux-acp-p1/tools/devin-acp-bridge.mjs
+
+打开 4174 的 Android 浏览器，只创建虚拟测试数据，启用记忆读取/环境工具，用一次真实 Devin ACP Fable 测试 searchMemory；必须能看到工具调用及结果内容，Fable 才能依据结果继续回复。追加验证正常聊天、取消后恢复、模型选项和 Token 显示。否则停在 Draft / PR 待验收，不合并。
+
+停止 4174 和 47832 即可退出独立预览，不触碰 4173 / 47831 或用户存储。
