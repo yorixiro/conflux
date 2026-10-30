@@ -45,9 +45,9 @@ describe('model and effort controls', () => {
     expect(html).not.toContain('模型 ID（也可手动填写）');
     expect(html).not.toContain('启用线路思考能力');
   });
-  it('allows role-specific model selection on a shared API without editing shared capabilities', () => {
+  it('allows role-specific model selection without exposing shared capabilities', () => {
     const html = renderToStaticMarkup(
-      <PersonaModelSettings persona={setup()} settings allowProviderCapabilityEdit={false} />
+      <PersonaModelSettings persona={setup()} settings />
     );
     expect(html).toContain('>模型</label>');
     expect(html).toContain('deepseek-v4-flash');

@@ -22,6 +22,7 @@ export function PersonaApiConnectionPanel({
 
   if (!activePersona) return <p className="ps-footnote">请先选择一个 AI 角色。</p>;
 
+  const personaId = activePersona.id;
   const savedIds = listSavedPersonaApiIds(activePersona.advanced);
   const activeId = activePersona.advanced.providerId?.trim() || '';
   const current = providers.find((provider) => provider.id === activeId)
@@ -32,12 +33,14 @@ export function PersonaApiConnectionPanel({
   const shared = Boolean(current && (
     current.id === activeProviderId
     || !activePersona.advanced.savedProviderIds?.includes(current.id)
-    || personas.some((persona) => persona.id !== activePersona.id
+    || personas.some((persona) => persona.id !== personaId
       && (persona.advanced.providerId === current.id
         || persona.advanced.savedProviderIds?.includes(current.id)))
   ));
   const builtIn = current ? isBuiltInProviderDisplay(current) : false;
   const isAcp = current?.agentTransport === 'devin-acp';
+  const legacyAcp = Boolean(current && !isAcp && current.name.trim() === 'Devin ACP'
+    && !current.baseUrl.trim() && !current.apiKey.trim());
 
   function bind(provider: ProviderProfile) {
     onUpdatePersona({ advanced: {
@@ -115,7 +118,14 @@ export function PersonaApiConnectionPanel({
       {hasMissingRoute ? <p className="conflux-role-notice">原配置已不存在，请选择已有 API。</p> : null}
       {!current && !hasMissingRoute ? <p className="ps-footnote">选择已有 API，或新建一条连接。</p> : null}
 
-      {current && isAcp ? (
+      {current && legacyAcp ? (
+        <div className="ps-field" style={{ display: 'grid', gap: 10 }}>
+          <strong>Devin ACP</strong>
+          <span className="ps-footnote">这是旧的 ACP 配置，但连接类型尚未标记。修正后不会再显示普通 API 表单。</span>
+          <button type="button" className="btn-secondary compact" style={{ justifySelf: 'start' }}
+            onClick={() => edit({ agentTransport: 'devin-acp', model: '' })}>修正为 Devin ACP</button>
+        </div>
+      ) : current && isAcp ? (
         <div className="ps-field" style={{ display: 'grid', gap: 10 }}>
           <strong>Devin ACP</strong>
           <span className="ps-footnote">本地代理连接，无需 API 地址、密钥或模型 ID。</span>
@@ -139,7 +149,7 @@ export function PersonaApiConnectionPanel({
               onChange={(event) => edit({ apiKey: event.target.value })}/>
           </div>
           <PersonaModelSettings key={activePersona.id + ':' + current.id}
-            persona={activePersona} settings allowProviderCapabilityEdit={!shared}/>
+            persona={activePersona} settings/>
         </>
       ) : current ? (
         <p className="ps-footnote">这是应用内置连接。选择自定义 API 后可填写地址、密钥和模型。</p>

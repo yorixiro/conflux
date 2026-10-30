@@ -9,8 +9,8 @@ import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import './PersonaModelSettings.css';
 
 export function PersonaModelSettings({
-  persona, settings = false, allowProviderCapabilityEdit = true
-}: { persona: Persona; settings?: boolean; allowProviderCapabilityEdit?: boolean }) {
+  persona, settings = false
+}: { persona: Persona; settings?: boolean }) {
   const id = useId();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -22,8 +22,6 @@ export function PersonaModelSettings({
   const updateCollaborator = usePersonaStore((state) => state.updateCollaborator);
   const binding = resolvePersonaProviderBinding({ persona, providers, globalApi });
   const capability = resolveProviderCapability(binding.api);
-  const supportsDepth = resolveProviderCapability({ ...binding.api, capabilities: { ...binding.api.capabilities, thinking: true } }).thinking.sendBudget;
-  const updateProvider = useRuntimeStore((state) => state.updateProvider);
   const discovery = useProviderModelDiscovery(binding.api);
   const hasRoute = Boolean(binding.fixedProvider || (!binding.fixedProviderId && persona.advanced.providerRouteMode === 'inherit'));
   const editable = editablePersona && hasRoute && !capability.route.isBuiltInTrial;
