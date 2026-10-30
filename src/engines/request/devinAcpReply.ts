@@ -1,4 +1,5 @@
 import type { AssistantReply, AssistantReplyProgress } from '../chatApi';
+import type { AssistantRequestTool } from './requestContext';
 
 export const DEVIN_ACP_PROVIDER_ID = 'conflux-devin-acp';
 
@@ -9,6 +10,8 @@ export async function requestDevinAcpReply(params: {
   modelId?: string;
   signal?: AbortSignal;
   onProgress?: (reply: AssistantReplyProgress) => void;
+  tools?: AssistantRequestTool[];
+  onToolCall?: (call: { id: string; name: string; argumentsObject: Record<string, unknown> }) => Promise<{ isError: boolean; text: string }>;
 }): Promise<AssistantReply> {
   const response = await fetch('/devin-acp/prompt', {
     method: 'POST',
@@ -16,7 +19,8 @@ export async function requestDevinAcpReply(params: {
     body: JSON.stringify({
       prompt: params.prompt, initialContext: params.initialContext,
       conversationId: params.conversationId,
-      modelId: params.modelId
+      modelId: params.modelId,
+      tools: params.tools ?? []
     }),
     signal: params.signal
   });
@@ -81,7 +85,39 @@ export async function requestDevinAcpReply(params: {
           update?: { sessionUpdate?: string; content?: { type?: string; text?: string }; used?: number; size?: number };
           result?: { usage?: unknown };
           error?: string;
+          callId?: string;
+          name?: string;
+          arguments?: Record<string, unknown>;
         };
+        if (event.type === 'tool_request') {
+          if (!event.callId || !event.name || !event.arguments
+            || typeof event.arguments !== 'object' || Array.isArray(event.arguments)) {
+            throw new Error('Invalid ACP tool request');
+          }
+          const call = {
+            id: event.callId, name: event.name, argumentsObject: event.arguments
+          };
+          let receipt: { isError: boolean; text: string };
+          try {
+            receipt = params.onToolCall
+              ? await params.onToolCall(call)
+              : { isError: true, text: 'Browser tool executor unavailable' };
+          } catch (error) {
+            if (params.signal?.aborted) throw error;
+            receipt = {
+              isError: true,
+              text: error instanceof Error ? error.message : 'Browser tool execution failed'
+            };
+          }
+          const posted = await fetch('/devin-acp/tool/result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ callId: call.id, ...receipt }),
+            signal: params.signal
+          });
+          if (!posted.ok) throw new Error('ACP tool receipt was rejected');
+          continue;
+        }
         if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
         if (event.type === 'done') {
           finished = true;
