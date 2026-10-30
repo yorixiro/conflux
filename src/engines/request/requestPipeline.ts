@@ -133,11 +133,11 @@ export async function requestCollaboratorReply(params: {
         return '[' + message.role + ']\n' + message.content;
       })
     ).join('\n\n');
-    const latestUser = prepared.context.segments
+    const conversationUserMessages = prepared.context.segments
       .filter((segment) => segment.kind === 'conversation')
       .flatMap((segment) => segment.messages)
-      .filter((message) => message.role === 'user')
-      .at(-1)?.content;
+      .filter((message) => message.role === 'user');
+    const latestUser = conversationUserMessages[conversationUserMessages.length - 1]?.content;
     recordRequestDebug(prepared.audit, { phase: 'prepared' });
     try {
       const reply = await requestDevinAcpReply({
