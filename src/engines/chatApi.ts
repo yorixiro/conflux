@@ -1,4 +1,5 @@
 import { buildApiRequest } from './chat-api/chatApiRequestBuilder';
+import { requestDevinAcpReply } from './chat-api/devinAcpChat';
 import { recordStreamDebug } from './chat-api/chatApiStreamDebug';
 import type { RequestAssistantReplyParams } from './chat-api/chatApiTypes';
 import type { AssistantRequestContext } from './request/requestContext';
@@ -65,6 +66,7 @@ export async function requestAssistantReply(params: RequestAssistantReplyParams)
     onProgress,
     onBuiltRequest
   } = params;
+  if (api.agentTransport === 'devin-acp') return requestDevinAcpReply(params);
   if (!api.apiKey.trim() && !isPolarisBuiltInProvider(api)) throw new Error('请先在设置里填写 API Key');
 
   const providerCapability = resolveProviderCapability(api, advanced);

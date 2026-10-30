@@ -65,7 +65,7 @@ export function PersonaApiConnectionPanel({
       ) : null}
       {isAcp ? (
         <p className="ps-footnote" role="status">
-          Devin ACP 使用独立代理协议。正式聊天适配尚未接通，不能作为普通 API 使用。
+          Devin ACP 通过本地桥接发送聊天消息，无需 API Key 或模型 ID。桥接必须先在线。
         </p>
       ) : null}
 

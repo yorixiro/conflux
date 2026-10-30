@@ -34,6 +34,7 @@ let sequence = 0;
 let buffer = '';
 let sessionId = null;
 let active = null;
+const chatSessions = new Map();
 const pending = new Map();
 
 let promptReserved = false;
@@ -79,7 +80,7 @@ function onMessage(message) {
     return;
   }
   if (message.method === 'session/update' && active &&
-      message.params?.sessionId === sessionId) {
+      message.params?.sessionId === active.sessionId) {
     active.write({ type: 'update', update: message.params.update });
   }
 }
@@ -123,6 +124,19 @@ async function initialize() {
   catch (error) { ready = null; throw error; }
 }
 
+async function acquireChatSession(conversationId) {
+  if (!conversationId) return { id: sessionId, isNew: false };
+  const existing = chatSessions.get(conversationId);
+  if (existing) return { id: existing, isNew: false };
+  const result = await request('session/new', { cwd, mcpServers: [] });
+  if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
+  // Bound the local routing index. An evicted chat starts a fresh ACP session
+  // with its full transcript on the next request rather than reusing another chat.
+  if (chatSessions.size >= 32) chatSessions.delete(chatSessions.keys().next().value);
+  chatSessions.set(conversationId, result.sessionId);
+  return { id: result.sessionId, isNew: true };
+}
+
 function writeJson(response, status, value) {
   response.writeHead(status, {
     'content-type': 'application/json; charset=utf-8',
@@ -142,8 +156,8 @@ const server = createServer(async (req, res) => {
     return writeJson(res, 200, { running: !agent.killed && agent.exitCode === null, sessionReady: !!sessionId });
   }
   if (req.method === 'POST' && req.url === '/cancel') {
-    if (promptReserved && sessionId) {
-      send({ method: 'session/cancel', params: { sessionId } });
+    if (promptReserved && active?.sessionId) {
+      send({ method: 'session/cancel', params: { sessionId: active.sessionId } });
       return writeJson(res, 200, { cancelled: true });
     }
     return writeJson(res, 409, { error: 'No active prompt' });
@@ -161,7 +175,17 @@ const server = createServer(async (req, res) => {
     }
     const body = JSON.parse(raw);
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) throw new Error('Missing prompt');
+    if (body.conversationId != null && (
+      typeof body.conversationId !== 'string' || body.conversationId.length > 200
+    )) throw new Error('Invalid conversation ID');
+    if (body.initialContext != null && (
+      typeof body.initialContext !== 'string' || body.initialContext.length > 160000
+    )) throw new Error('Invalid conversation context');
     await initialize();
+    const chat = await acquireChatSession(body.conversationId || null);
+    const promptText = chat.isNew && body.initialContext?.trim()
+      ? body.initialContext
+      : body.prompt;
     res.writeHead(200, {
       'content-type': 'text/event-stream; charset=utf-8',
       'cache-control': 'no-store',
@@ -171,16 +195,16 @@ const server = createServer(async (req, res) => {
     const write = (event) => {
       if (!res.writableEnded) res.write(`data: ${JSON.stringify(event)}\n\n`);
     };
-    active = { write };
+    active = { write, sessionId: chat.id };
     const currentPrompt = active;
     res.on('close', () => {
-      if (active !== currentPrompt || !sessionId || res.writableEnded) return;
-      try { send({ method: 'session/cancel', params: { sessionId } }); } catch { /* agent already exited */ }
+      if (active !== currentPrompt || !chat.id || res.writableEnded) return;
+      try { send({ method: 'session/cancel', params: { sessionId: chat.id } }); } catch { /* agent already exited */ }
     });
     const promptId = randomUUID();
     write({ type: 'started', promptId });
     const result = await request('session/prompt', {
-      sessionId, prompt: [{ type: 'text', text: body.prompt }]
+      sessionId: chat.id, prompt: [{ type: 'text', text: promptText }]
     }, 10 * 60 * 1000);
     write({ type: 'done', result });
   } catch (error) {

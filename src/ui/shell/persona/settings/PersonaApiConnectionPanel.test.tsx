@@ -35,7 +35,7 @@ describe('role API settings surface', () => {
     const acpPersona = { ...persona, advanced: { ...persona.advanced, providerId: acp.id } };
     const html = renderToStaticMarkup(<PersonaApiConnectionPanel
       activePersona={acpPersona} providers={[acp]} onUpdatePersona={vi.fn()} />);
-    expect(html).toContain('正式聊天适配尚未接通');
+    expect(html).toContain('通过本地桥接发送聊天消息');
     expect(html).not.toContain('角色模型');
   });
 });
