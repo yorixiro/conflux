@@ -16,12 +16,12 @@ import { randomUUID } from 'node:crypto';
 
 const host = '127.0.0.1';
 const port = Number(process.env.DEVIN_ACP_BRIDGE_PORT ?? 47831);
-const token = process.env.DEVIN_ACP_BRIDGE_TOKEN;
+const token = process.env.DEVIN_ACP_BRIDGE_TOKEN?.trim() || null;
 const command = process.env.DEVIN_ACP_COMMAND ?? 'devin';
 const cwd = process.env.DEVIN_ACP_WORKSPACE ?? process.cwd();
 
-if (!token || token.length < 24) {
-  console.error('Set DEVIN_ACP_BRIDGE_TOKEN (at least 24 characters) before starting.');
+if (token && token.length < 24) {
+  console.error('If set, DEVIN_ACP_BRIDGE_TOKEN must contain at least 24 characters.');
   process.exit(1);
 }
 if (!Number.isInteger(port) || port < 1024 || port > 65535) {
@@ -35,6 +35,7 @@ let buffer = '';
 let sessionId = null;
 let active = null;
 const chatSessions = new Map();
+const sessionOptions = new Map();
 const pending = new Map();
 
 let promptReserved = false;
@@ -79,6 +80,11 @@ function onMessage(message) {
     send({ id: message.id, error: { code: -32601, message: 'Permission or client method unsupported by this bridge' } });
     return;
   }
+  if (message.method === 'session/update' &&
+      message.params?.update?.sessionUpdate === 'config_option_update' &&
+      Array.isArray(message.params.update.configOptions)) {
+    sessionOptions.set(message.params.sessionId, message.params.update.configOptions);
+  }
   if (message.method === 'session/update' && active &&
       message.params?.sessionId === active.sessionId) {
     active.write({ type: 'update', update: message.params.update });
@@ -118,6 +124,7 @@ async function initialize() {
     const result = await request('session/new', { cwd, mcpServers: [] });
     if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
     sessionId = result.sessionId;
+    sessionOptions.set(sessionId, Array.isArray(result.configOptions) ? result.configOptions : []);
     return sessionId;
   })();
   try { return await ready; }
@@ -134,7 +141,43 @@ async function acquireChatSession(conversationId) {
   // with its full transcript on the next request rather than reusing another chat.
   if (chatSessions.size >= 32) chatSessions.delete(chatSessions.keys().next().value);
   chatSessions.set(conversationId, result.sessionId);
+  sessionOptions.set(result.sessionId, Array.isArray(result.configOptions) ? result.configOptions : []);
   return { id: result.sessionId, isNew: true };
+}
+
+
+function modelSelector(session) {
+  return (sessionOptions.get(session) || []).find((option) =>
+    option?.type === 'select' &&
+    (option.category === 'model' || (option.id === 'model' && !option.category))
+  );
+}
+function modelValues(config) {
+  if (!config || !Array.isArray(config.options)) return [];
+  return config.options.flatMap((item) => Array.isArray(item?.options) ? item.options : [item])
+    .filter((item) => typeof item?.value === 'string')
+    .map((item) => ({ id: item.value, label: typeof item.name === 'string' ? item.name : item.value }));
+}
+function modelSnapshot(session) {
+  const config = modelSelector(session);
+  return {
+    models: modelValues(config),
+    selectedModel: typeof config?.currentValue === 'string' ? config.currentValue : '',
+    available: Boolean(config)
+  };
+}
+async function selectModel(session, modelId) {
+  if (!modelId) return;
+  const config = modelSelector(session);
+  if (!config) throw new Error('Devin ACP 未提供可切换的模型列表');
+  if (!modelValues(config).some((model) => model.id === modelId)) {
+    throw new Error('所选模型不在当前 Devin ACP 可用列表中，请重新拉取');
+  }
+  if (config.currentValue === modelId) return;
+  const result = await request('session/set_config_option', {
+    sessionId: session, configId: config.id, value: modelId
+  });
+  if (Array.isArray(result?.configOptions)) sessionOptions.set(session, result.configOptions);
 }
 
 function writeJson(response, status, value) {
@@ -148,12 +191,23 @@ function writeJson(response, status, value) {
 const server = createServer(async (req, res) => {
   // No CORS wildcard: a browser page must not silently access local ACP.
   const origin = req.headers.origin;
-  if (origin) return writeJson(res, 403, { error: 'Use a trusted same-origin backend adapter' });
-  if (req.headers['x-acp-bridge-token'] !== token) {
+  if (origin || req.headers['sec-fetch-site'] === 'cross-site'
+    || ![`127.0.0.1:${port}`, `localhost:${port}`].includes(req.headers.host)) {
+    return writeJson(res, 403, { error: 'Local trusted clients only' });
+  }
+  if (token && req.headers['x-acp-bridge-token'] !== token) {
     return writeJson(res, 401, { error: 'Unauthorized' });
   }
   if (req.method === 'GET' && req.url === '/health') {
     return writeJson(res, 200, { running: !agent.killed && agent.exitCode === null, sessionReady: !!sessionId });
+  }
+  if (req.method === 'GET' && req.url === '/models') {
+    try {
+      await initialize();
+      return writeJson(res, 200, modelSnapshot(sessionId));
+    } catch (error) {
+      return writeJson(res, 502, { error: error instanceof Error ? error.message : 'ACP 模型列表拉取失败' });
+    }
   }
   if (req.method === 'POST' && req.url === '/cancel') {
     if (promptReserved && active?.sessionId) {
@@ -182,9 +236,13 @@ const server = createServer(async (req, res) => {
     if (body.initialContext != null && (
       typeof body.initialContext !== 'string' || body.initialContext.length > 160000
     )) throw new Error('Invalid conversation context');
+    if (body.modelId != null && (
+      typeof body.modelId !== 'string' || body.modelId.length > 160
+    )) throw new Error('Invalid ACP model ID');
     await initialize();
     activeConversationKey = body.conversationId || null;
     const chat = await acquireChatSession(activeConversationKey);
+    if (body.modelId) await selectModel(chat.id, body.modelId);
     const promptText = chat.isNew && body.initialContext?.trim()
       ? body.initialContext
       : body.prompt;
