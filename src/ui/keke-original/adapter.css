@@ -70,3 +70,8 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 /* Bottom navigation only: same single-color solid icon set as the other Conflux pages. */
 #chat nav.tabs .keke-nav-solid{display:block;width:16px;height:16px;flex:none;fill:currentColor;stroke:none}
 :root[data-cf=sticker] #chat nav.tabs .on::after{content:none}
+
+/* Message extras from the prototype: day separator and time/read-receipt line (inserted into .msg-row by mountKekeBubbles), typing dots. */
+#chat .msg-row > .kk-day{align-self:stretch;margin:6px 0 14px}
+#chat .msg-row > .kk-mt.r{margin-left:4px}
+#chat .assistant-streaming-hint{display:none}

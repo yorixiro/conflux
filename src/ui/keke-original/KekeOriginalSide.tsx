@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { Persona } from '../../types/domain';
 import { useSpaceStore } from '../../stores/spaceStore';
+import { useChatStore } from '../../stores/chatStore';
+import { readConversationMessages } from '../../stores/chat';
 import { mountKekeSide } from './kekeRuntime';
+
+const dayKey = (time: number) => { const d = new Date(time); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+const countByDay = (messages: { role: string; timestamp: number }[]) => {
+  const counts: Record<string, number> = {};
+  for (const message of messages) if (message.role !== 'system') counts[dayKey(message.timestamp)] = (counts[dayKey(message.timestamp)] ?? 0) + 1;
+  return counts;
+};
 
 const PXG = {
   big: ['....#....', '....#....', '...###...', '..#####..', '#########', '..#####..', '...###...', '....#....', '....#....'],
@@ -42,6 +51,31 @@ export function KekeOriginalSide({ persona, conversationCount, onEdit }: {
   const today = new Date();
   const sideRef = useRef<HTMLElement>(null);
   useEffect(() => { mountKekeSide(sideRef.current); }, []);
+  const conversations = useChatStore((state) => state.conversations);
+  const loadedIds = useChatStore((state) => state.loadedMessageConversationIds);
+  const dayCache = useRef(new Map<string, { updatedAt: number; counts: Record<string, number> }>());
+  useEffect(() => {
+    let cancelled = false;
+    const loaded = new Set(loadedIds);
+    (async () => {
+      const total: Record<string, number> = {};
+      for (const conversation of conversations) {
+        if (persona && conversation.collaboratorId !== persona.id) continue;
+        let entry = dayCache.current.get(conversation.id);
+        if (!entry || entry.updatedAt !== conversation.updatedAt || loaded.has(conversation.id)) {
+          try {
+            const messages = loaded.has(conversation.id) ? conversation.messages : await readConversationMessages(conversation.id);
+            entry = { updatedAt: conversation.updatedAt, counts: countByDay(messages) };
+            dayCache.current.set(conversation.id, entry);
+          } catch { continue; }
+        }
+        if (cancelled) return;
+        for (const [key, n] of Object.entries(entry.counts)) total[key] = (total[key] ?? 0) + n;
+      }
+      if (!cancelled) (sideRef.current as unknown as { kkSetCounts?: (c: Record<string, number>) => void } | null)?.kkSetCounts?.(total);
+    })();
+    return () => { cancelled = true; };
+  }, [conversations, loadedIds, persona]);
   return <aside ref={sideRef} className="fam side o keke-original-side" aria-label={`${name}的资料`}>
     <i className="dd tape t1" /><i className="pp ptape p1" />
     <div className="sav">{name.slice(0, 1)}<Px k="big" /><Px k="dia" /></div>

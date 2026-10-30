@@ -3,6 +3,7 @@
 /* Verbatim port of the prototype runtime (克克 ˚.ₒ (6).html, last script): side drawer decorations,
    calendar with chat heat map, falling-particle pile, sway/jelly motion and the todo note. */
 import { KEKE_IMG as I } from './assets';
+import { useChatStore } from '../../stores/chatStore';
 
 const IC={heart:[1,'<path d="M10 17C3 12 2 7.5 5 5.5c2-1.3 4 0 5 2 1-2 3-3.3 5-2 3 2 2 6.5-5 11.5z"/>'],
 cloud:[3,'<path d="M5 15c-3 0-3.5-4 0-4.5C5 7 9 6 11 8.5c1.5-1.5 5-.5 4.5 3 3 .3 3 3.5.5 3.5z"/>'],
@@ -33,9 +34,8 @@ export function mountKekeSide(sd) {
  sd.append(el('div','kk2 kk-holes','<i></i><i></i><i></i><i></i>'),el('div','kk2 kk-stamp','✧ profile no.01'));
  const sinfo=sd.querySelector('.sinfo'),smn=sd.querySelector('.smn');if(rain&&sinfo)sinfo.appendChild(rain);
  const T=new Date(),MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];let y=T.getFullYear(),m=T.getMonth(),sel='';
- const CK='kk-chatcnt',tk=(d=T)=>`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;let CN={};try{CN=JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){}
- if(!Object.keys(CN).length){for(let i=1;i<75;i++){const d=new Date(T.getFullYear(),T.getMonth(),T.getDate()-i),v=(d.getDate()*7+d.getMonth()*5+i*3)%17;CN[tk(d)]=v<4?0:v<8?v-2:v*1.2|0}CN[tk()]=11}
- const lv=n=>n<1?0:n<4?1:n<9?2:n<16?3:4;
+ let CN={};
+const lv=n=>n<1?0:n<4?1:n<9?2:n<16?3:4;
  const cal=el('div','kk2 kk-cal','<div class="cb"></div>');const body=cal.firstChild;
  if(I&&I.cat){const c=el('img','kk2 kk-catst');c.src=I.cat;c.alt='';cal.append(c)}
  const draw=()=>{const f=(new Date(y,m,1).getDay()+6)%7,dm=new Date(y,m+1,0).getDate(),pd=new Date(y,m,0).getDate(),cur=y==T.getFullYear()&&m==T.getMonth();
@@ -78,7 +78,7 @@ export function mountKekeSide(sd) {
   addEventListener('devicemotion',mh=e=>{if(!sd.isConnected){removeEventListener('devicemotion',mh);return}const a=e.accelerationIncludingGravity;if(!a)return;const mg=Math.hypot(a.x||0,a.y||0,a.z||0),nw=performance.now();if(Math.abs(mg-lm)>10&&nw-ls>400){ls=nw;shake(1.3)}lm=mg});
   let wasO=false,lastT='';const onOpen=()=>{av+=3.2;swing();const t=document.documentElement.dataset.ct;if(!SPR.length||t!=lastT){lastT=t;buildSpr();for(const q of P){q.sp=pickSprite();q.r=q.sp?q.sp.r*(.8+Math.random()*.5):3+Math.random()*2.6}}if(!W)size();for(const q of P){q.x=8+Math.random()*Math.max(W-16,40);q.y=-12-Math.random()*30;q.vx=q.vy=0;q.z=0;q.q=0;q.w=Math.random()*100|0}};
   new MutationObserver(()=>{const o=sd.classList.contains('o');if(o&&!wasO)onOpen();wasO=o;run()}).observe(sd,{attributes:true,attributeFilter:['class']});new ResizeObserver(size).observe(cal);
-  onOpen();wasO=true;window.kkCnt=()=>{const k=tk();CN[k]=(CN[k]||0)+1;try{localStorage.setItem(CK,JSON.stringify(CN))}catch(e){}if(P.length<64)spawn(1);if(y==T.getFullYear()&&m==T.getMonth())draw();run()};
+  onOpen();wasO=true;sd.kkSetCounts=(c)=>{CN=c||{};draw();run()};
  }
  const K='kk-todo';let st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){}
  const n=el('div','kk2 kk-note','<b>今日小事 ♡</b>'+['好好吃饭','画一点点','早点睡 ☾'].map((t,i)=>`<p data-i="${i}" class="${st[i]?'on':''}"><u></u>${t}</p>`).join(''));
@@ -189,6 +189,7 @@ export function mountKekeSendFx() {
 
 /* Bubble grouping from the prototype's render(): per-position corner radii, group spacing and the group-end sketch / sticker. */
 const SK = ['<svg class=sk width=21 height=21 viewBox="0 0 22 22"><path d="M11 1.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L11 15.9 5.1 19.5l1.7-6.7L1.5 8.4l6.9-.5z"/></svg>', '<svg class=sk width=28 height=19 viewBox="0 0 28 18"><path d="M14 9C9 2 2 3 3 8c.6 4 8 3 11 1zM14 9c5-7 12-6 11-1-.6 4-8 3-11 1zM14 9l-3 7M14 9l3 7"/></svg>', '<svg class=sk width=17 height=21 viewBox="0 0 20 24"><path style="fill:#ead0d8" d="M8 2h4v6h6v4h-6v10H8V12H2V8h6z"/></svg>'];
+const WDN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'], TY = { doodle: 'かきかき', pois: 'にゃにゃ' }, z2 = (n) => String(n).padStart(2, '0');
 const STK = ['s1', 's2', 's3', 's4', 's5', 's6'], ROT = [-14, 10, -6, 16, -10, 8];
 export function mountKekeBubbles() {
   const root = document.documentElement;
@@ -197,12 +198,32 @@ export function mountKekeBubbles() {
   const pass = () => {
     raf = 0;
     const rows = [...document.querySelectorAll('#chat .chat-flow .msg-row')];
+    const cs = useChatStore.getState(), all = cs.conversations.find((c) => c.id === cs.activeConversationId)?.messages || [], at = new Map(all.map((m, j) => [m.id, j]));
+    const dk = (m) => { const d = new Date(m.timestamp); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); };
+    document.querySelectorAll('#chat .kk-ty').forEach((n) => { if (!n.previousElementSibling?.classList.contains('assistant-streaming-hint')) n.remove(); });
+    document.querySelectorAll('#chat .assistant-streaming-hint').forEach((h) => {
+      if (h.nextElementSibling?.classList.contains('kk-ty') || !TY[root.dataset.ct]) return;
+      const t = document.createElement('span'); t.className = 'ty kk-ty'; t.setAttribute('aria-hidden', 'true'); t.innerHTML = TY[root.dataset.ct] + '<i></i><i></i><i></i>'; h.after(t);
+    });
+    const typing = !!document.querySelector('#chat .kk-ty');
     rows.forEach((row, i) => {
-      const w = role(row); if (!w) return;
+      const w = role(row);
+      const msg = all[at.get(row.dataset.messageId)], pm = msg && all[at.get(row.dataset.messageId) - 1];
+      const dcur = row.querySelector(':scope > .kk-day');
+      if (msg && (!pm || dk(pm) !== dk(msg))) {
+        const d = new Date(msg.timestamp), txt = `₊˚⊹ ${d.getMonth() + 1}.${d.getDate()} ${WDN[d.getDay()]} ⊹˚₊`;
+        if (!dcur) { const e = document.createElement('div'); e.className = 'day kk-day'; e.innerHTML = '<span></span>'; e.firstChild.textContent = txt; row.prepend(e); } else if (dcur.textContent !== txt) dcur.firstChild.textContent = txt;
+      } else if (dcur) dcur.remove();
+      if (!w) return;
       const f = !rows[i - 1] || role(rows[i - 1]) != w, l = !rows[i + 1] || role(rows[i + 1]) != w;
       const p = f && l ? 's' : f ? 'f' : l ? 'l' : 'm';
       if (row.dataset.kkP !== p) row.dataset.kkP = p;
       if (f) { if (row.dataset.kkG !== '1') row.dataset.kkG = '1'; } else delete row.dataset.kkG;
+      const mcur = row.querySelector(':scope > .kk-mt');
+      if (l && msg) {
+        const d = new Date(msg.timestamp), txt = `${z2(d.getHours())}:${z2(d.getMinutes())}${w == 's' && (i < rows.length - 1 || typing) ? ' · 既読' : ''}`;
+        if (!mcur) { const e = document.createElement('div'); e.className = `mt ${w} kk-mt`; e.textContent = txt; row.append(e); } else { if (mcur.textContent !== txt) mcur.textContent = txt; if (mcur.className !== `mt ${w} kk-mt`) mcur.className = `mt ${w} kk-mt`; }
+      } else if (mcur) mcur.remove();
       const b = row.querySelector('.bubble'); if (!b) return;
       const cur = b.querySelector(':scope > .kk-deco');
       if (!l) { if (cur) cur.remove(); return; }
@@ -226,5 +247,5 @@ export function mountKekeBubbles() {
   top.observe(document.body, { childList: true, subtree: true });
   const tm = new MutationObserver(sched); tm.observe(root, { attributes: true, attributeFilter: ['data-ct'] });
   attach();
-  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco').forEach((n) => n.remove()); };
+  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco, #chat .kk-day, #chat .kk-mt, #chat .kk-ty').forEach((n) => n.remove()); };
 }
