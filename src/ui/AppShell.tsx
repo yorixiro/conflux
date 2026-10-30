@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from 'react';
+import { MemoryGalaxyProvider } from './collection/heartstring/MemoryGalaxyFullscreen';
 import { AppShellView } from './app-shell/AppShellView';
 import { useAppRuntime } from './app-shell/useAppRuntime';
 import { useAppShellController } from './app-shell/useAppShellController';
@@ -35,7 +36,7 @@ export function AppShell() {
   });
 
   return (
-    <>
+    <MemoryGalaxyProvider>
       <AppShellView {...appShellView} onHomeOpenChange={setHomeOpen} />
       {!homeOpen && shouldShowWorldSwitchVeil(controller.activeWorld) ? (
         <WorldSwitchVeil
@@ -67,6 +68,6 @@ export function AppShell() {
           <AssetGovernanceDebugLayer onClose={closeDebugSurfaces} />
         </Suspense>
       ) : null}
-    </>
+    </MemoryGalaxyProvider>
   );
 }

@@ -122,3 +122,49 @@
   .memory-galaxy__body { font-size:14px; }
   .heartstring-memory__persona { width:100%; }
 }
+
+/* Immersive page: body portal/native modal top layer, outside transformed shells.
+   The approved GPU layer and camera are unchanged; only its viewport fills the page. */
+.heartstring-memory-entry > button { min-height:48px; padding:10px 22px; border:1px solid var(--border); border-radius:8px; background:var(--surface-solid); color:var(--text); font:inherit; cursor:pointer; }
+.memory-galaxy-fullscreen { position:fixed; inset:var(--viewport-offset-top,0px) 0 auto; width:100%; height:100dvh; height:calc(var(--viewport-height,100dvh) - max(0px,var(--keyboard-bridge-offset,0px))); max-width:none; max-height:none; margin:0; padding:0; border:0; background:#050209; color:#f3eaf5; overflow:hidden; box-sizing:border-box; overscroll-behavior:none; }
+.memory-galaxy-fullscreen::backdrop { background:#050209; }
+.memory-galaxy-fullscreen .heartstring-memory { position:relative; display:block; width:100%; height:100%; max-width:none; margin:0; padding:0; overflow:hidden; }
+.memory-galaxy-fullscreen .memory-galaxy__stage { position:absolute; inset:0; height:auto; }
+.memory-galaxy-fullscreen .memory-galaxy__masthead { top:calc(78px + env(safe-area-inset-top)); }
+.memory-galaxy__topbar { position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:calc(8px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); pointer-events:none; }
+.memory-galaxy__topbar > * { pointer-events:auto; }
+.memory-galaxy__back { display:flex; align-items:center; gap:8px; flex:none; }
+.memory-galaxy__back > span { font-size:12px; }
+.memory-galaxy__persona { max-width:45%; }
+.memory-galaxy__persona select { width:100%; min-height:48px; padding:8px; border:0; background:#05020999; color:#dcc8f0; font:inherit; font-size:12px; text-overflow:ellipsis; }
+.memory-galaxy__persona option { background:#100b17; }
+.memory-galaxy__dock { position:absolute; bottom:0; left:0; right:0; display:flex; flex-direction:column; max-height:calc(100% - 64px - env(safe-area-inset-top)); padding:0 max(0px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(0px,env(safe-area-inset-left)); background:linear-gradient(transparent,#050209c4 42px,#050209f5); }
+.memory-galaxy__reader { max-height:36dvh; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.memory-galaxy-fullscreen .memory-galaxy__reading { max-width:860px; margin:0 auto; padding-top:16px; background:none; }
+.memory-galaxy-fullscreen .memory-galaxy__reading::before { margin-bottom:8px; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-meta { margin:8px 0 10px; }
+.memory-galaxy-fullscreen .memory-galaxy__reading-heading h4 { font-size:clamp(18px,2.6vw,24px); }
+.memory-galaxy-fullscreen .memory-galaxy__body { font-size:14px; line-height:1.9; }
+.memory-galaxy-fullscreen .memory-galaxy__navigation { flex:none; width:100%; max-width:920px; margin:0 auto; box-sizing:border-box; }
+.memory-galaxy-fullscreen .memory-galaxy__legend { justify-content:safe center; }
+.memory-galaxy-fullscreen .memory-galaxy__tools { flex:none; flex-wrap:wrap; gap:0 12px; padding:0 12px; }
+.memory-galaxy__hint { margin:0; padding:20px 16px 4px; text-align:center; color:#dcc8f080; font-size:11px; }
+.memory-galaxy-fullscreen .memory-galaxy__directory { max-height:34dvh; overflow:auto; overscroll-behavior:contain; padding-top:12px; background:linear-gradient(#050209b8,#050209); }
+.memory-galaxy-fullscreen .memory-galaxy__list { max-height:none; overflow:visible; }
+.memory-galaxy__panel-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.memory-galaxy__panel-heading h3 { font:inherit; font-size:15px; margin:0; }
+.memory-galaxy__panel-heading > button { flex:none; min-width:48px; }
+.memory-galaxy__management { position:absolute; inset:0; display:flex; flex-direction:column; padding:0!important; border:0; background:#100b17; color:#f3eaf5; color-scheme:dark;
+  --bg:#100b17; --surface:#1a1223; --surface-solid:#1a1223; --surface-deep:#21172b; --text:#f3eaf5; --text-soft:#c3b3d0; --text-muted:#b4a1c2; --border:#e6b4eb30; --accent:#e5b3d6; --accent-soft:#3a2540;
+}
+.memory-galaxy__management > header { padding:calc(8px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left)); border-bottom:1px solid var(--border); }
+.memory-galaxy__management > header h3 { overflow-wrap:anywhere; }
+.memory-galaxy__management-content { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:20px max(16px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); }
+.memory-galaxy__management-content > * { max-width:960px; margin-inline:auto; }
+.memory-galaxy__loading,.memory-galaxy__empty { min-height:100%; padding:calc(16px + env(safe-area-inset-top)) 16px; box-sizing:border-box; background:#050209; color:#f3eaf5; }
+.memory-galaxy__loading button { min-height:48px; background:transparent; color:inherit; border:0; font:inherit; }
+@media (max-height:500px) {
+  .memory-galaxy-fullscreen .memory-galaxy__masthead { top:calc(55px + env(safe-area-inset-top)); }
+  .memory-galaxy__masthead p { margin-top:6px; }
+  .memory-galaxy__reader,.memory-galaxy-fullscreen .memory-galaxy__directory { max-height:30dvh; }
+}
