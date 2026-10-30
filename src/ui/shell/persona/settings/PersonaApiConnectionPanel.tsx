@@ -36,6 +36,7 @@ export function PersonaApiConnectionPanel({
   const duplicateProvider = useRuntimeStore((state) => state.duplicateProvider);
   if (!activePersona) return <p className="ps-footnote">请先选择一个 AI 角色。</p>;
 
+  const personaName = activePersona.name;
   const advanced = activePersona.advanced;
   const savedIds = listSavedPersonaApiIds(advanced);
   const savedProviders = savedIds.map((id) => providers.find((p) => p.id === id)).filter((p): p is ProviderProfile => Boolean(p));
@@ -73,7 +74,7 @@ export function PersonaApiConnectionPanel({
   }
 
   function copyFrom(source: ProviderProfile) {
-    const id = duplicateProvider(source.id, source.name + ' · ' + activePersona.name, { activate: false });
+    const id = duplicateProvider(source.id, source.name + ' · ' + personaName, { activate: false });
     if (!id) return;
     const next = useRuntimeStore.getState().providers.find((p) => p.id === id);
     if (next) bindProvider(next, addSavedPersonaApiId(savedIds, id));
