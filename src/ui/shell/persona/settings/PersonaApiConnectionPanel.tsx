@@ -4,8 +4,8 @@ import { listSavedPersonaApiIds, addSavedPersonaApiId, removeSavedPersonaApiId }
 import { resolvePersonaProviderBinding } from '../../../../engines/personaProviderBinding';
 import { getDefaultProviderPath } from '../../../../engines/providerProtocol';
 import { usePersonaStore } from '../../../../stores/personaStore';
-import { selectRuntimeApi, useRuntimeStore } from '../../../../stores/runtimeStore';
-import type { Persona, ProviderProfile } from '../../../../types/domain';
+import { useRuntimeStore } from '../../../../stores/runtimeStore';
+import type { ProviderProfile } from '../../../../types/domain';
 import { getProviderModelBindingValue, getProviderModelDisplayLabel, isBuiltInProviderDisplay } from '../../apiProviderDisplay';
 import { DevinAcpConnectionPanel } from '../../DevinAcpConnectionPanel';
 import { PersonaModelSettings } from '../../PersonaModelSettings';
