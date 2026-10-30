@@ -39,14 +39,14 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         ...(apiOrigin ? { '/api': { target: apiOrigin, changeOrigin: true } } : {}),
-        ...(acpToken && acpToken.length >= 24 && Number.isInteger(acpPort) && acpPort >= 1024 && acpPort <= 65535 ? {
+        ...((!acpToken || acpToken.length >= 24) && Number.isInteger(acpPort) && acpPort >= 1024 && acpPort <= 65535 ? {
           '/devin-acp': {
             target: `http://127.0.0.1:${acpPort}`,
             changeOrigin: true,
             rewrite: (path: string) => path.replace(/^\/devin-acp/, ''),
             configure: (proxy) => {
               proxy.on('proxyReq', (request) => {
-                request.setHeader('x-acp-bridge-token', acpToken);
+                if (acpToken) request.setHeader('x-acp-bridge-token', acpToken);
                 request.removeHeader('origin');
               });
             }
