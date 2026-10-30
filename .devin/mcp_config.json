@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "conflux": {
+      "command": "node",
+      "args": [
+        "tools/conflux-acp-mcp.mjs"
+      ]
+    }
+  }
+}
