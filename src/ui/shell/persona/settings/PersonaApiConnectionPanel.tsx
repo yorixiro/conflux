@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import { buildProviderPresetPatch, PROVIDER_PRESETS } from '../../../../config/catalog/providerCatalog';
 import { listSavedPersonaApiIds, addSavedPersonaApiId, removeSavedPersonaApiId } from '../../../../engines/personaApiConnections';
 import { resolvePersonaProviderBinding } from '../../../../engines/personaProviderBinding';
@@ -31,7 +31,6 @@ export function PersonaApiConnectionPanel({
   onUpdateProvider
 }: Props) {
   const fieldId = useId();
-  const [sourceId, setSourceId] = useState('');
   const personas = usePersonaStore((state) => state.personas);
   const createProvider = useRuntimeStore((state) => state.createProvider);
   const duplicateProvider = useRuntimeStore((state) => state.duplicateProvider);
@@ -78,7 +77,6 @@ export function PersonaApiConnectionPanel({
     if (!id) return;
     const next = useRuntimeStore.getState().providers.find((p) => p.id === id);
     if (next) bindProvider(next, addSavedPersonaApiId(savedIds, id));
-    setSourceId('');
   }
 
   function selectCurrent(value: string) {
@@ -125,13 +123,11 @@ export function PersonaApiConnectionPanel({
       </div>
       <div className="provider-inline-actions">
         <button className="btn-secondary compact" type="button" onClick={createNew}>+ 新建 API</button>
-        <label className="ps-field-label" htmlFor={fieldId + '-copy'}>复制已有 API 到这个角色</label>
-        <select className="ps-input" id={fieldId + '-copy'} value={sourceId}
+        <label className="ps-field-label" htmlFor={fieldId + '-copy'}>添加已有 API（直接引用，不复制）</label>
+        <select className="ps-input" id={fieldId + '-copy'} value=""
           onChange={(event) => {
-            const id = event.target.value;
-            setSourceId(id);
-            const found = providers.find((p) => p.id === id);
-            if (found) copyFrom(found);
+            const found = providers.find((p) => p.id === event.target.value);
+            if (found) bindProvider(found, addSavedPersonaApiId(savedIds, found.id));
           }}>
           <option value="">选择已有配置…</option>
           {availableSources.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
