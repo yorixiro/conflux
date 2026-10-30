@@ -65,7 +65,7 @@ describe('ACP chat reply over the existing request pipeline', () => {
       'data: {"type":"update","update":{"sessionUpdate":"agent_thought_chunk","content":{"type":"text","text":"先检查"}}}', '',
       'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"你好"}}}', '',
       'data: {"type":"done","result":{}}', ''
-    ].join('\\n') + '\\n', { status: 200 }));
+    ].join('\n') + '\n', { status: 200 }));
     const answer = await requestDevinAcpReply({ prompt: '测试' });
     expect(answer.content).toBe('你好');
     expect(answer.thinkingText).toBe('先检查');
