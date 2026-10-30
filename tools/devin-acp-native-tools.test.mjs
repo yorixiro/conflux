@@ -79,6 +79,17 @@ createInterface({ input: process.stdin }).on('line', (line) => {
       return;
     }
     if (message.method === 'session/prompt') {
+      const promptText = message.params?.prompt?.map((part) => part.text || '').join('') || '';
+      if (promptText.includes('NEVER_RETURN')) return; // Simulate Devin ignoring session/cancel.
+      if (promptText.includes('AFTER_CANCEL')) {
+        send({ method: 'session/update', params: {
+          sessionId: message.params.sessionId,
+          update: { sessionUpdate: 'agent_message_chunk',
+            content: { type: 'text', text: 'Session recovered' } }
+        } });
+        send({ id: message.id, result: { stopReason: 'end_turn' } });
+        return;
+      }
       try {
         const servers = sessions.get(message.params.sessionId) || [];
         if (!servers.length) throw new Error('ACP session/new omitted mcpServers');
@@ -225,6 +236,27 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
       body: JSON.stringify({ name: 'searchMemory', arguments: { query: 'outside session' } })
     });
     assert.equal(idleInvocation.status, 409);
+
+    // Devin may ignore session/cancel. A cancelled browser request must still
+    // free the local prompt slot and allow another conversation to proceed.
+    const hanging = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({ conversationId: 'mock-stuck', prompt: 'NEVER_RETURN', tools: [] })
+    });
+    assert.equal(hanging.status, 200);
+    const cancellation = await fetch(base + '/cancel', {
+      method: 'POST', headers, body: '{}'
+    });
+    assert.equal(cancellation.status, 200);
+    await hanging.text();
+    const afterCancel = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({ conversationId: 'mock-new-session', prompt: 'AFTER_CANCEL', tools: [] })
+    });
+    assert.equal(afterCancel.status, 200, 'cancel must not leave the next ACP turn stuck behind HTTP 409');
+    const recovered = await afterCancel.text();
+    assert.match(recovered, /Session recovered/);
+    assert.match(recovered, /"type":"done"/);
   } finally {
     bridge.kill('SIGTERM');
     if (bridge.exitCode === null && bridge.signalCode === null) {
