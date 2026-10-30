@@ -37,6 +37,7 @@ import { createStreamingSession } from './chatStreamingSession';
 import { buildStoredToolCallRecords } from './chatToolCallRecords';
 import { recordModelFlowTrace } from './modelFlowTraceRecorder';
 import { resolveAvailablePolarisToolNames } from '../../engines/tool-protocol/toolRegistry';
+import { extractAssistantNativeToolActions } from '../../engines/assistantToolProtocol';
 import {
   applyConversationTaskModelUpdate,
   settleConversationTaskAfterStoppedAssistantTurn
@@ -381,6 +382,73 @@ async function requestReplyRound({
       preferredOpenAiToolHistoryMode,
       signal: streaming.controller.signal,
       onProgress: streaming.queueProgress,
+      onAcpToolCall: async (call) => {
+        // ACP tool execution must remain in the browser, inside the same
+        // collaborator/conversation scope as ordinary native tool actions.
+        throwIfAborted(streaming.controller.signal);
+        if (!availableToolNames.has(call.name)) {
+          return { isError: true, text: 'Tool is not enabled for this collaborator' };
+        }
+        const parsed = extractAssistantNativeToolActions(
+          [{ id: call.id, name: call.name, argumentsText: JSON.stringify(call.argumentsObject) }],
+          '',
+          toolContextWithMcp.themeToolMode ?? 'stable',
+          [],
+          {
+            activeProjectId: activeRequestSnapshot.activeProjectId,
+            mcpTools: toolContextWithMcp.mcpTools
+          }
+        );
+        if (parsed.issues.length || parsed.actions.length !== 1) {
+          return { isError: true, text: parsed.issues.join('; ') || 'Invalid native tool arguments' };
+        }
+        const resolved = resolveAssistantToolActions({
+          actions: parsed.actions,
+          cards: toolContextWithMcp.visibleCards,
+          projectFiles: toolContextWithMcp.visibleProjectFiles,
+          projectScopes: toolContextWithMcp.visibleProjects,
+          activeCardId: effectiveActiveCardId,
+          activeProjectId: activeRequestSnapshot.activeProjectId,
+          enabledToolGroups: toolContextWithMcp.enabledToolGroups,
+          toolEnforcementScope: toolContextWithMcp.toolEnforcementScope,
+          themeToolMode: toolContextWithMcp.themeToolMode,
+          availableToolNames,
+          desktopLocalHost: toolContextWithMcp.desktopLocalHost,
+          imageGenerationAvailable: toolContextWithMcp.imageGenerationAvailable,
+          memorySearchAvailable: toolContextWithMcp.memorySearchAvailable,
+          attachmentSnapshot: toolContextWithMcp.attachmentSnapshot,
+          imageAssetSnapshot: toolContextWithMcp.imageAssetSnapshot,
+          personalData: toolContextWithMcp.personalData
+        });
+        if (resolved.errors.length || resolved.resolved.length !== 1) {
+          return { isError: true, text: resolved.errors.join('; ') || 'Tool action rejected' };
+        }
+        const outcomes = await executeToolActions(conversationId, resolved.resolved, {
+          beforeMessageId: placeholderId,
+          toolCallIds: [call.id],
+          signal: streaming.controller.signal
+        });
+        throwIfAborted(streaming.controller.signal);
+        const outcome = outcomes[0];
+        if (!outcome) return { isError: true, text: 'Tool did not return an execution receipt' };
+        if (outcome.path === 'direct') {
+          return {
+            isError: outcome.status !== 'executed',
+            text: outcome.toolInvocation.detailText
+              || outcome.toolInvocation.summary || outcome.error || 'Tool completed'
+          };
+        }
+        if (outcome.path === 'preview') {
+          return {
+            isError: true,
+            text: outcome.error || '工具预览已创建，需要用户在 Conflux 中确认后才算执行。'
+          };
+        }
+        if (outcome.path === 'workspace') {
+          return { isError: true, text: '工作区改动等待用户确认，尚未执行。' };
+        }
+        return { isError: false, text: '操作由 Conflux 记忆执行器处理，结果已写入当前对话。' };
+      },
       onAudit: (audit) => {
         requestAudit = audit;
       },
