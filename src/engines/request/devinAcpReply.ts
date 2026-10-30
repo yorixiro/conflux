@@ -4,13 +4,18 @@ export const DEVIN_ACP_PROVIDER_ID = 'conflux-devin-acp';
 
 export async function requestDevinAcpReply(params: {
   prompt: string;
+  initialContext?: string;
+  conversationId?: string;
   signal?: AbortSignal;
   onProgress?: (reply: AssistantReplyProgress) => void;
 }): Promise<AssistantReply> {
   const response = await fetch('/devin-acp/prompt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: params.prompt }),
+    body: JSON.stringify({
+      prompt: params.prompt, initialContext: params.initialContext,
+      conversationId: params.conversationId
+    }),
     signal: params.signal
   });
   if (!response.ok || !response.body) {
@@ -49,6 +54,7 @@ export async function requestDevinAcpReply(params: {
       }
     }
     if (!finished) throw new Error('Devin ACP stream ended without completion');
+    if (!content.trim()) throw new Error('Devin ACP returned no text');
     return { content, model: 'Devin ACP' };
   } finally {
     reader.releaseLock();
