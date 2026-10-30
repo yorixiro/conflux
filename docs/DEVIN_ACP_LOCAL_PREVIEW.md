@@ -4,23 +4,23 @@ Status: **implementation in progress**, not yet accepted on Android. The ACP con
 
 ## Architecture
 
-`devin acp` (Ubuntu PRoot, stdio JSON-RPC) → `tools/devin-acp-bridge.mjs` (loopback-only HTTP/SSE, token required) → Conflux same-origin `/devin-acp` route → Add Connection → ACP Agent or normal chat. The Termux local server serves the route on port 4173 in both HMR and built PWA modes; standalone Vite also has a development proxy.
+`devin acp` (Ubuntu PRoot, stdio JSON-RPC) → `tools/devin-acp-bridge.mjs` (loopback-only HTTP/SSE, optional loopback authentication) → Conflux same-origin `/devin-acp` route → Add Connection → ACP Agent or normal chat. The Termux local server serves the route on port 4173 in both HMR and built PWA modes; standalone Vite also has a development proxy.
 
-The bridge owns the Devin process and ACP session. The browser never sees the bridge token, Devin credentials or the stdio channel. It is not an OpenAI-compatible endpoint; do **not** enter it as a Base URL in an API provider.
+The bridge owns the Devin process and ACP session. Both the bridge and Conflux's local server bind to device loopback. The bridge token is optional for device-local use and, if configured, must match in both processes; no token is sent to the browser. Devin credentials and stdio never enter the web bundle. It is not an OpenAI-compatible endpoint; do **not** enter it as a Base URL in an API provider.
 
 ## Start in the Ubuntu PRoot with Devin installed
 
 From the Conflux checkout containing this integration:
 
 ```sh
-export DEVIN_ACP_BRIDGE_TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('hex'))")"
+
 export DEVIN_ACP_WORKSPACE="$HOME"
 node tools/devin-acp-bridge.mjs
 ```
 
-The same token must be present in the Conflux server process (not in `VITE_*` or source files). If it runs in a different Termux session, pass the token through a private environment file outside the repository. Never commit or screenshot it.
+No token environment variable is needed for loopback-only use. If you choose to protect loopback with DEVIN_ACP_BRIDGE_TOKEN, supply the same value to both backend processes, never the frontend. Do not commit or screenshot credentials.
 
-In the **Conflux process environment**, set `DEVIN_ACP_BRIDGE_TOKEN` to the exact same value, then run `npm run termux:dev` for live development or `npm run termux:pwa` for a built PWA. Both use the existing `http://127.0.0.1:4173/` address. The bridge defaults to `127.0.0.1:47831`. If Ubuntu PRoot and Termux cannot share loopback on the device, verify network reachability before changing any bind address. Do not expose the bridge on `0.0.0.0` or forward it publicly.
+In the **Conflux process environment**, set `DEVIN_ACP_BRIDGE_TOKEN` to the exact same value, then run `npm run termux:dev` for live development or `npm run termux:pwa` for a built PWA. Both use the existing `http://127.0.0.1:4173/` address. The bridge defaults to `127.0.0.1:47831`. The role's “拉取模型列表” reads ACP `configOptions` from `session/new` and passes selected model IDs to `session/set_config_option` before each chat prompt; if Devin does not advertise a model selector, the default remains usable. If Ubuntu PRoot and Termux cannot share loopback on the device, verify network reachability before changing any bind address. Do not expose the bridge on `0.0.0.0` or forward it publicly.
 
 Open Conflux → API connections → Add connection → **ACP Agent** → **Detect ACP connection** → send a test message. To use the main chat, add the Devin ACP provider on that screen and select it in the composer.
 

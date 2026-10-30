@@ -16,14 +16,14 @@ describe('ACP chat reply over the existing request pipeline', () => {
     const onProgress = vi.fn();
     const answer = await requestDevinAcpReply({
       prompt: '你好', initialContext: '[system]\n你是助手\n\n[user]\n你好',
-      conversationId: 'chat-test-123', onProgress
+      conversationId: 'chat-test-123', modelId: 'claude-model', onProgress
     });
     expect(answer.content).toBe('你好');
     expect(onProgress).toHaveBeenCalledTimes(1);
     const [url, options] = vi.mocked(globalThis.fetch).mock.calls[0]!;
     expect(url).toBe('/devin-acp/prompt');
     expect(JSON.parse(String(options?.body))).toMatchObject({
-      prompt: '你好', conversationId: 'chat-test-123'
+      prompt: '你好', conversationId: 'chat-test-123', modelId: 'claude-model'
     });
   });
 
@@ -58,6 +58,6 @@ describe('ACP chat reply over the existing request pipeline', () => {
       { status: 503, headers: { 'content-type': 'application/json' } }
     ));
     await expect(requestDevinAcpReply({ prompt: '你好' }))
-      .rejects.toThrow('4173 本地服务未配置 ACP 桥接密钥');
+      .rejects.toThrow('4173 的本地 ACP 代理配置无效');
   });
 });

@@ -20,6 +20,9 @@ export function PersonaApiConnectionPanel({
   const createProvider = useRuntimeStore((state) => state.createProvider);
   const [testStatus, setTestStatus] = useState('');
   const [testing, setTesting] = useState(false);
+  const [models, setModels] = useState<Array<{ id: string; label: string }>>([]);
+  const [modelStatus, setModelStatus] = useState('');
+  const [loadingModels, setLoadingModels] = useState(false);
 
   if (!activePersona) return <p className="ps-footnote">请先选择一个 AI 角色。</p>;
 
@@ -42,6 +45,8 @@ export function PersonaApiConnectionPanel({
       }
     });
     setTestStatus('');
+    setModels([]);
+    setModelStatus('');
   }
 
   function selectProvider(value: string) {
@@ -68,6 +73,32 @@ export function PersonaApiConnectionPanel({
     setTestStatus('');
   }
 
+  async function loadAcpModels() {
+    if (loadingModels) return;
+    setLoadingModels(true);
+    setModelStatus('正在读取 Devin 模型列表…');
+    try {
+      const response = await fetch('/devin-acp/models', { cache: 'no-store' });
+      const data = await response.json() as {
+        models?: Array<{ id?: string; label?: string }>;
+        available?: boolean;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(data.error || 'HTTP ' + response.status);
+      const options = (data.models || []).filter((model): model is { id: string; label: string } =>
+        typeof model.id === 'string' && typeof model.label === 'string');
+      setModels(options);
+      setModelStatus(options.length
+        ? `从 Devin ACP 读取到 ${options.length} 个模型`
+        : '当前 Devin 代理没有提供模型列表，仍可使用默认模型聊天');
+    } catch (error) {
+      setModels([]);
+      setModelStatus(error instanceof Error ? error.message : '无法拉取 ACP 模型列表');
+    } finally {
+      setLoadingModels(false);
+    }
+  }
+
   async function testConnection() {
     if (!current || testing) return;
     setTesting(true);
@@ -78,7 +109,7 @@ export function PersonaApiConnectionPanel({
         if (!result.ok) {
           const payload = await result.json().catch(() => null) as { error?: string } | null;
           const hint = result.status === 503
-            ? '4173 服务未配置 ACP 桥接密钥'
+            ? '4173 本地 ACP 代理配置错误'
             : result.status === 502
               ? 'Devin ACP 桥接进程不可达'
               : result.status === 401 ? 'ACP 桥接密钥不一致' : 'ACP 连接失败';
@@ -132,7 +163,31 @@ export function PersonaApiConnectionPanel({
         </button>
       ) : null}
       {current && isAcp ? (
-        <p className="ps-footnote">Devin ACP 由本地代理管理，无需输入 API 地址、密钥或模型。</p>
+        <>
+          <p className="ps-footnote">本机 Devin ACP 无需手填 Token。模型由代理提供，未选择时使用代理默认模型。</p>
+          <div className="ps-field">
+            <label className="ps-field-label" htmlFor={fieldId + '-acp-model'}>模型</label>
+            <select id={fieldId + '-acp-model'} className="ps-input"
+              value={activePersona.advanced.modelOverride?.trim() || ''}
+              onChange={(event) => {
+                onUpdatePersona({ advanced: { modelOverride: event.target.value } });
+                setTestStatus('');
+              }}>
+              <option value="">使用 Devin 默认模型</option>
+              {models.map((model) => <option key={model.id} value={model.id}>{model.label}</option>)}
+              {activePersona.advanced.modelOverride?.trim()
+                && !models.some((model) => model.id === activePersona.advanced.modelOverride?.trim())
+                ? <option value={activePersona.advanced.modelOverride.trim()}>
+                    {activePersona.advanced.modelOverride.trim()}（上次选择）
+                  </option> : null}
+            </select>
+          </div>
+          <button type="button" className="btn-secondary compact"
+            disabled={loadingModels} onClick={() => void loadAcpModels()}>
+            {loadingModels ? '拉取中…' : '拉取模型列表'}
+          </button>
+          {modelStatus ? <p role="status" className="ps-footnote">{modelStatus}</p> : null}
+        </>
       ) : current && !builtIn && !legacyAcp ? (
         <>
           <div className="settings-form conflux-role-credentials">

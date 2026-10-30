@@ -6,6 +6,7 @@ export async function requestDevinAcpReply(params: {
   prompt: string;
   initialContext?: string;
   conversationId?: string;
+  modelId?: string;
   signal?: AbortSignal;
   onProgress?: (reply: AssistantReplyProgress) => void;
 }): Promise<AssistantReply> {
@@ -14,7 +15,8 @@ export async function requestDevinAcpReply(params: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       prompt: params.prompt, initialContext: params.initialContext,
-      conversationId: params.conversationId
+      conversationId: params.conversationId,
+      modelId: params.modelId
     }),
     signal: params.signal
   });
@@ -28,7 +30,7 @@ export async function requestDevinAcpReply(params: {
       }
     } catch { /* Keep the response text for non-JSON failures. */ }
     const hint = response.status === 503
-      ? '4173 本地服务未配置 ACP 桥接密钥'
+      ? '4173 的本地 ACP 代理配置无效'
       : response.status === 502
         ? '4173 无法访问 Devin ACP 桥接进程'
         : response.status === 401 ? 'ACP 桥接鉴权失败，密钥不一致' : 'ACP 请求失败';
