@@ -32,3 +32,31 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
 .model-quick-status:not(:empty) { padding:8px 2px 2px; }
 
 .persona-model-settings .model-quick-menu { top:calc(100% + 8px); bottom:auto; }
+
+/* Role connections deliberately reuse the existing Persona Studio controls. */
+.conflux-role-connection {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  max-width: 620px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.conflux-role-connection .ps-field { margin: 0; min-width: 0; }
+.conflux-role-connection .persona-model-settings { margin: 0; gap: 10px; }
+.conflux-role-connection .ps-footnote {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--type-small);
+  letter-spacing: normal;
+  line-height: 1.6;
+}
+.conflux-role-connection > .btn-secondary {
+  align-self: flex-start;
+  max-width: 100%;
+  font-size: var(--type-label);
+}
