@@ -111,6 +111,7 @@ async function serveToolRequest(req, res) {
 
 
 let promptReserved = false;
+let activePromptAbortController = null;
 let agentFailure = null;
 
 function failAll(reason) {
@@ -124,19 +125,35 @@ function send(message) {
   if (!agent.stdin.writable) throw new Error('Devin ACP process is unavailable');
   agent.stdin.write(JSON.stringify({ jsonrpc: '2.0', ...message }) + '\n');
 }
-function request(method, params, timeoutMs = 20000) {
+function request(method, params, timeoutMs = 20000, signal) {
   const id = ++sequence;
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
+    if (signal?.aborted) {
+      reject(new Error(`ACP ${method} cancelled`));
+      return;
+    }
+    let timer;
+    const clear = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
+    };
+    const onAbort = () => {
       pending.delete(id);
+      clear();
+      reject(new Error(`ACP ${method} cancelled`));
+    };
+    timer = setTimeout(() => {
+      pending.delete(id);
+      clear();
       reject(new Error(`ACP ${method} timed out`));
     }, timeoutMs);
     pending.set(id, {
-      resolve: (value) => { clearTimeout(timer); resolve(value); },
-      reject: (error) => { clearTimeout(timer); reject(error); }
+      resolve: (value) => { clear(); resolve(value); },
+      reject: (error) => { clear(); reject(error); }
     });
+    signal?.addEventListener('abort', onAbort, { once: true });
     try { send({ id, method, params }); }
-    catch (error) { pending.delete(id); clearTimeout(timer); reject(error); }
+    catch (error) { pending.delete(id); clear(); reject(error); }
   });
 }
 function onMessage(message) {
@@ -346,7 +363,9 @@ const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/cancel') {
     if (promptReserved && active?.sessionId) {
       stopToolCalls('ACP prompt cancelled');
-      send({ method: 'session/cancel', params: { sessionId: active.sessionId } });
+      try { send({ method: 'session/cancel', params: { sessionId: active.sessionId } }); }
+      catch { /* The agent may have already exited. */ }
+      activePromptAbortController?.abort();
       return writeJson(res, 200, { cancelled: true });
     }
     return writeJson(res, 409, { error: 'No active prompt' });
@@ -395,16 +414,19 @@ const server = createServer(async (req, res) => {
     };
     active = { write, sessionId: chat.id };
     const currentPrompt = active;
+    const promptAbortController = new AbortController();
+    activePromptAbortController = promptAbortController;
     res.on('close', () => {
       if (active !== currentPrompt || !chat.id || res.writableEnded) return;
       stopToolCalls('Browser disconnected');
+      promptAbortController.abort();
       try { send({ method: 'session/cancel', params: { sessionId: chat.id } }); } catch { /* agent already exited */ }
     });
     const promptId = randomUUID();
     write({ type: 'started', promptId });
     const result = await request('session/prompt', {
       sessionId: chat.id, prompt: [{ type: 'text', text: promptText }]
-    }, 10 * 60 * 1000);
+    }, 10 * 60 * 1000, promptAbortController.signal);
     write({ type: 'done', result });
   } catch (error) {
     // After a failed/aborted turn, rebuild the ACP session with the full
@@ -414,6 +436,7 @@ const server = createServer(async (req, res) => {
     else writeJson(res, 400, { error: error.message });
   } finally {
     stopToolCalls('ACP prompt completed');
+    activePromptAbortController = null;
     active = null;
     promptReserved = false;
     if (!res.writableEnded) res.end();
