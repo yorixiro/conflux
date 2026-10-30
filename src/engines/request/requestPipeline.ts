@@ -1,5 +1,6 @@
 import type { AssistantToolContext } from '../assistantToolProtocol';
 import { requestDevinAcpReply } from './devinAcpReply';
+import { resolveAssistantToolRequestTools } from '../tool-protocol/assistantToolProtocolRequestTools';
 import type { OpenAiToolHistoryMode } from '../provider-runtime/providerRuntimeOpenAiToolHistory';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
@@ -72,6 +73,7 @@ export async function requestCollaboratorReply(params: {
   nickname?: string;
   signal?: AbortSignal;
   onProgress?: (reply: AssistantReplyProgress) => void;
+  onAcpToolCall?: (call: { id: string; name: string; argumentsObject: Record<string, unknown> }) => Promise<{ isError: boolean; text: string }>;
   onAudit?: (audit: AssistantRequestAudit) => void;
   onImageUnderstandingResults?: (results: RequestImageUnderstandingResult[]) => void;
 }): Promise<AssistantReply> {
@@ -95,6 +97,7 @@ export async function requestCollaboratorReply(params: {
     nickname,
     signal,
     onProgress,
+    onAcpToolCall,
     onAudit,
     onImageUnderstandingResults
   } = params;
@@ -150,6 +153,8 @@ export async function requestCollaboratorReply(params: {
           ? `${activeConversationId}::${persona?.id ?? 'default'}`
           : undefined,
         signal,
+        tools: resolveAssistantToolRequestTools(toolContext).tools,
+        onToolCall: onAcpToolCall,
         onProgress: onProgress
           ? (partial) => onProgress(normalizeAssistantOutput(partial, persona))
           : undefined
