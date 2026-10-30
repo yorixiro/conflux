@@ -10,7 +10,7 @@ import {
   normalizeProviderErrorMessage
 } from '../../engines/providerErrorHandling';
 import { requestCollaboratorReply } from '../../engines/request/requestPipeline';
-import type { AssistantReply } from '../../engines/chatApi';
+import type { AssistantReply, AssistantNativeToolCall } from '../../engines/chatApi';
 import type { AssistantRequestAudit } from '../../engines/request/requestAudit';
 import { resolveMcpToolCatalog } from '../../engines/mcpRuntime';
 import type { ToolAction } from '../../engines/toolExecutor';
@@ -358,6 +358,7 @@ async function requestReplyRound({
   let latestTaskState = activeRequestSnapshot.currentTask ?? null;
   let nextTaskActivationEnforcement: TaskActivationEnforcement | null = null;
   let requestAudit: AssistantRequestAudit | null = null;
+  const acpHandledToolCalls: AssistantNativeToolCall[] = [];
 
   streaming.start();
   recordChatSendPerformanceMark(conversationId, '聊天发送 · 占位消息已显示');
@@ -431,11 +432,14 @@ async function requestReplyRound({
         throwIfAborted(streaming.controller.signal);
         const outcome = outcomes[0];
         if (!outcome) return { isError: true, text: 'Tool did not return an execution receipt' };
+        acpHandledToolCalls.push({
+          id: call.id, name: call.name, argumentsText: JSON.stringify(call.argumentsObject)
+        });
         if (outcome.path === 'direct') {
           return {
             isError: outcome.status !== 'executed',
-            text: outcome.toolInvocation.detailText
-              || outcome.toolInvocation.summary || outcome.error || 'Tool completed'
+            text: (outcome.toolInvocation.detailText
+              || outcome.toolInvocation.summary || outcome.error || 'Tool completed').slice(0, 90000)
           };
         }
         if (outcome.path === 'preview') {
@@ -560,7 +564,7 @@ async function requestReplyRound({
       assistantMessageId: placeholderId,
       content: finalContent,
       actions: parsed.actions,
-      nativeToolCalls: reply.nativeToolCalls ?? []
+      nativeToolCalls: [...(reply.nativeToolCalls ?? []), ...acpHandledToolCalls]
     });
 
     chat.updateMessage(writableConversation, placeholderId, buildAssistantMessagePatch({
