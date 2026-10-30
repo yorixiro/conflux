@@ -43,7 +43,7 @@ export function PersonaApiConnectionPanel({
   const selectedId = advanced.providerId?.trim() || '';
   const current = providers.find((p) => p.id === selectedId) ?? null;
   const inheriting = !selectedId && advanced.providerRouteMode === 'inherit';
-  const globalProvider = providers.find((p) => p.id === activeProviderId) ?? useRuntimeStore.getState().providers[0] ?? null;
+  const globalProvider = providers.find((p) => p.id === activeProviderId) ?? providers[0] ?? null;
   const effective = current ?? (inheriting ? globalProvider : null);
   const binding = effective && globalProvider ? resolvePersonaProviderBinding({ persona: activePersona, providers, globalApi: globalProvider }) : null;
 
@@ -137,7 +137,8 @@ export function PersonaApiConnectionPanel({
           {availableSources.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
-      {!effective ? <p className="conflux-role-notice">还没有配置 API。新建一个，或者复制已经保存的配置即可。</p> : null}
+      {!effective && !selectedId ? <p className="conflux-role-notice">还没有配置 API。新建一个，或者复制已经保存的配置即可。</p> : null}
+      {selectedId && !current ? <p className="conflux-role-notice">原绑定的 API 不存在，请重新选择；旧角色资料不会被自动替换。</p> : null}
       {binding?.status === 'missing-provider' ? <p className="conflux-role-notice">原 API 已不存在，请重新选择。</p> : null}
       {current ? (
         <>
