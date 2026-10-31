@@ -30,7 +30,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .conflux-sidebar-dialog[open]::backdrop{animation:kkFadeIn .5s ease both}
 @keyframes kkDrawerIn{from{transform:translateX(-112%)}to{transform:none}}
 @keyframes kkFadeIn{from{opacity:0}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .conflux-sidebar-dialog[open],:root[data-cf=sticker] #chat .conflux-sidebar-dialog[open]::backdrop{animation:none}}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .conflux-sidebar-dialog[open],:root[data-cf=sticker] #chat .conflux-sidebar-dialog[open]::backdrop{animation:none}}
 :root[data-cf=sticker] #chat .conflux-sidebar-dialog::backdrop{background:rgba(60,50,54,.22)}
 :root[data-cf=sticker] #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub),:root[data-cf=sticker] #chat .desktop-app-sidebar.keke-themed:not(.collapsed){position:relative;box-sizing:border-box;height:100%;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) 18px max(14px,env(safe-area-inset-bottom,0px)) 38px;border:0;box-shadow:none;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper)}
 :root[data-cf=sticker] #chat .conflux-sidebar-dialog .desktop-app-sidebar:not(.conflux-conversation-hub)::after,:root[data-cf=sticker] #chat .desktop-app-sidebar.keke-themed:not(.collapsed)::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
@@ -63,9 +63,9 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* Bubble grouping from the prototype (data-kk-p is set by mountKekeBubbles): s single, f first, m middle, l last. */
 :root[data-cf=sticker] #chat .msg-row .bubble{position:relative}
 :root[data-cf=sticker] #chat .msg-row.assistant .bubble{border-radius:var(--R,18px) var(--R,18px) var(--R,18px) 6px}
-:root[data-cf=sticker] #chat .msg-row.assistant:is([data-kk-p=m],:root[data-cf=sticker] [data-kk-p=l]) .bubble{border-radius:6px var(--R,18px) var(--R,18px) 6px}
+:root[data-cf=sticker] #chat .msg-row.assistant:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:6px var(--R,18px) var(--R,18px) 6px}
 :root[data-cf=sticker] #chat .msg-row.user .bubble{border-radius:var(--R,18px) var(--R,18px) 6px var(--R,18px)}
-:root[data-cf=sticker] #chat .msg-row.user:is([data-kk-p=m],:root[data-cf=sticker] [data-kk-p=l]) .bubble{border-radius:var(--R,18px) 6px 6px var(--R,18px)}
+:root[data-cf=sticker] #chat .msg-row.user:is([data-kk-p=m],[data-kk-p=l]) .bubble{border-radius:var(--R,18px) 6px 6px var(--R,18px)}
 
 /* Bottom navigation only: same single-color solid icon set as the other Conflux pages. */
 :root[data-cf=sticker] #chat nav.tabs .keke-nav-solid{display:block;width:16px;height:16px;flex:none;fill:currentColor;stroke:none}
@@ -87,7 +87,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .msg-row.s .b{background:var(--bub-s,var(--chat-bubble-user-fill));box-shadow:var(--bub-s-sh,var(--chat-bubble-user-shadow));border:1px solid var(--ailine,transparent);color:var(--st,var(--rt));font:700 14px/1.7 var(--cn);text-shadow:none;transform-origin:100% 100%;rotate:var(--rot,0deg)}
 :root[data-ct=doodle] #chat .msg-row.r .b{transform-origin:0 100%}
 :root[data-ct=doodle] #chat .msg-row.s .b{transform-origin:100% 100%}
-:root[data-ct=pois] #chat :is(.msg-row.r .b,:root[data-cf=sticker] .msg-row.s .b){border:1.5px dashed rgba(255,255,255,.95)}
+:root[data-ct=pois] #chat :is(.msg-row.r .b,.msg-row.s .b){border:1.5px dashed rgba(255,255,255,.95)}
 :root[data-ct=pois] #chat .msg-row.s .b{background:rgba(236,215,219,.7);box-shadow:0 2px 10px rgba(150,105,115,.07)}
 :root[data-ct=pois] #chat .msg-row.r .b{background:rgba(242,242,242,.58);box-shadow:0 2px 10px rgba(70,64,66,.05)}
 /* Group-position corner radii, same four-corner logic as the prototype's RAD table. */
@@ -113,13 +113,13 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .message-inline-actions .micro-action-btn,:root[data-cf=sticker] #chat .message-edit-panel .btn-secondary{width:auto;height:auto;min-width:0;min-height:0;padding:7px 11px;border:0;border-radius:14px;background:var(--kp,#fbf8f7);box-shadow:0 0 0 2px var(--kp,#fbf8f7),1.5px 2px 0 2px rgba(176,131,140,.22);color:var(--ki,#6a6266);font:800 12px/1 var(--kf,var(--cn));letter-spacing:.08em}
 :root[data-cf=sticker] #chat .message-inline-actions .micro-action-btn svg{width:12px;height:12px}
 :root[data-cf=sticker] #chat .message-inline-actions .micro-action-btn:hover,:root[data-cf=sticker] #chat .message-inline-actions .micro-action-btn.active{border:0;background:var(--kh,#c99aa8);color:#fff}
-:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,:root[data-cf=sticker] .message-edit-panel .btn-secondary){box-shadow:none;position:relative}
-:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,:root[data-cf=sticker] .message-edit-panel .btn-secondary)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary){box-shadow:none;position:relative}
+:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
 :root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n+1){background:var(--pk);rotate:-1.5deg}
 :root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n+2){background:var(--bl);rotate:1.2deg}
 :root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n){background:var(--yl);rotate:-.8deg}
 :root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:hover,:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn.active{background:var(--kh);color:#fff}
-:root[data-ct=pois] #chat :is(.message-inline-actions .micro-action-btn,:root[data-cf=sticker] .message-edit-panel .btn-secondary){border:1.5px dashed #fff;background:#f1eeee;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
+:root[data-ct=pois] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary){border:1.5px dashed #fff;background:#f1eeee;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
 /* Inline edit adopts the prototype .ket outline + .ek action strip; cancel/save/resend all stay. */
 :root[data-cf=sticker] #chat .bubble.editing{outline:1.5px dashed var(--kh,#c99aa8);outline-offset:4px}
 :root[data-cf=sticker] #chat .message-edit-panel{position:relative}
@@ -129,7 +129,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .msg-row:has(.bubble.editing){margin-bottom:40px}
 :root[data-cf=sticker] #chat .message-edit-panel .btn-secondary.active{background:var(--kh,#c99aa8);color:#fff}
 /* Real selectable text inside bubbles (prototype disables it; real app keeps it). */
-:root[data-cf=sticker] #chat .bubble :is(.message-rich-text,:root[data-cf=sticker] .message-markdown,:root[data-cf=sticker] .message-edit-input,:root[data-cf=sticker] textarea){-webkit-user-select:text;user-select:text}
+:root[data-cf=sticker] #chat .bubble :is(.message-rich-text,.message-markdown,.message-edit-input,textarea){-webkit-user-select:text;user-select:text}
 /* Day separator inside the row. */
 :root[data-cf=sticker] #chat .msg-row > .kk-day{order:-1}
 /* Prototype has no name/model line above assistant bubbles; keep the thinking trigger row minimal. */
@@ -174,18 +174,3 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-ct=doodle] #chat .message-action-menu .message-action-btn.destructive{background:var(--kh);color:#fff}
 :root[data-ct=pois] #chat .message-action-dialog{border:1.5px dashed #fff;background:#f1eeee radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px}
 :root[data-ct=pois] #chat .message-action-menu .message-action-btn{border:1.5px dashed #fff;background:rgba(255,255,255,.65);box-shadow:0 0 0 1px rgba(134,103,98,.22)}
-
-/* Reaction glyph row inside the real action sheet + the prototype's .kx corner badge. */
-:root[data-cf=sticker] #chat .message-action-dialog .kk-krx{margin:0 0 8px;align-self:flex-start}
-:root[data-cf=sticker] #chat .krx button{width:34px;height:34px}
-/* Tap feedback from the prototype's .b.on (attached on pointerup). */
-:root[data-cf=sticker] #chat .b.on{transform:translateY(-2px)}
-/* Bigger, sticker-styled avatar in the gutter; gutter widens to match. */
-:root[data-cf=sticker] #chat .msg-row.m.r{padding-left:36px}
-:root[data-cf=sticker] #chat .msg-row.r .message-avatar-slot.assistant{left:-36px;top:4px;width:clamp(26px,4vw,32px)!important;min-width:clamp(26px,4vw,32px)!important}
-:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar{width:clamp(26px,4vw,32px)!important;height:clamp(26px,4vw,32px)!important}
-:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar svg{width:14px;height:14px}
-:root[data-cf=sticker] #chat .msg-row.s .message-avatar-slot.user{width:clamp(26px,4vw,32px);min-width:clamp(26px,4vw,32px)}
-/* User bubble wraps at content width, never mid-word for short text. */
-:root[data-cf=sticker] #chat .msg-row.s .b{width:max-content;max-width:min(80%,460px);overflow-wrap:normal;word-break:normal}
-:root[data-cf=sticker] #chat .msg-row.s .b .message-rich-text{overflow-wrap:break-word}

@@ -27,10 +27,10 @@
 :root[data-cf=sticker] #chat .kk-trk.on,:root[data-cf=sticker] #chat .kk-thm.on{opacity:.97}
 @keyframes kksway{0%,100%{rotate:calc(var(--am,3deg)*-1)}50%{rotate:var(--am,3deg)}}
 @keyframes kkbig{0%{rotate:0deg}15%{rotate:16deg}35%{rotate:-11deg}55%{rotate:7deg}75%{rotate:-4deg}100%{rotate:0deg}}
-@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-gl>i{animation:none}}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-gl>i{animation:none}}
 :root[data-ct=doodle] #chat .bgi{inset:-6%;animation:none}
 :root[data-cf=sticker] #chat .kk2{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk2{display:block}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk2{display:block}
 :root[data-cf=sticker] #chat .kk-wall{position:absolute;inset:0;z-index:1;opacity:.34;--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7)}
 :root[data-cf=sticker] #chat .kk-wall svg{position:absolute;stroke:var(--hot,#b0838c);stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
 :root[data-cf=sticker] #chat .kk-holes{position:absolute;left:10px;top:44px;bottom:44px;z-index:1;display:flex;flex-direction:column;justify-content:space-around}
@@ -53,8 +53,8 @@
 :root[data-cf=sticker] #chat .sinfo{position:relative}
 :root[data-cf=sticker] #chat .sinfo>.rain{position:absolute;right:6px;top:-6px;width:128px;height:110px;margin:0;scale:.62;transform-origin:100% 0}
 :root[data-cf=sticker] #chat .sinfo>.rain .rtx{display:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .side .spaw{margin-top:12px}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .side .spaw{margin-top:12px}
 :root[data-cf=sticker] #chat .kk-low .kk-note{margin:0;width:128px}
 :root[data-cf=sticker] #chat .kk-low .kk-print{position:relative;right:auto;bottom:auto;flex:none;width:126px;height:136px;margin-right:-6px}
 :root[data-cf=sticker] #chat .kk-cal{position:relative;pointer-events:auto;margin:22px 0 18px;padding:10px 10px 44px;background:rgba(255,255,255,.58);border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);color:var(--rt,#6a6266)}
@@ -94,7 +94,7 @@
 :root[data-cf=sticker] #chat .kk-cal .cg i.t:not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:5px -17px;font-size:10px;line-height:1;color:var(--hot);animation:kkTw 2.6s ease-in-out infinite}
 :root[data-cf=sticker] #chat .kk-cal .cg i[data-h="4"]:not(.t):not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:6px -15px;font-size:8px;line-height:1;color:var(--hot);opacity:.9}
 @keyframes kkTw{0%,100%{opacity:.4;scale:.8}50%{opacity:1;scale:1.2}}
-@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal .cg i.t::after{animation:none}}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal .cg i.t::after{animation:none}}
 :root[data-cf=sticker] #chat .kk-cal .cf{right:10px;bottom:9px;padding:4px 9px;border:1.3px dashed rgba(176,131,140,.55);border-radius:999px;background:rgba(255,255,255,.7)}
 /* 摇摇乐：日历像贴在胶带上的纸一样悬挂晃动 */
 :root[data-cf=sticker] #chat .kk-cal{transform-origin:50% 0}
@@ -104,7 +104,7 @@
 @keyframes kkSwayFast{0%,100%{rotate:0deg}25%{rotate:-5deg}75%{rotate:5deg}}
 :root[data-cf=sticker] #chat .kk-cal .cg i.t::before{animation:kkPulse 3.2s ease-in-out infinite}
 @keyframes kkPulse{0%,100%{scale:1}50%{scale:1.1}}
-@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal::after,:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{animation:none}}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal::after,:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{animation:none}}
 /* 贴纸主题：复古淡黄手写英文信纸 + 点阵小句 */
 :root[data-cf=sticker] #chat .kk-paper{display:none}
 :root[data-ct=doodle] #chat:not(.knopaper) .kk-paper{display:block;background:radial-gradient(circle,rgba(150,118,124,.22) .9px,transparent 1.3px) 9px 9px/18px 18px,var(--pp) 0 0/360px 198px repeat,url(/theme-assets/keke-original/81d079f243.svg),radial-gradient(130% 95% at 50% 45%,#fdf8f6 55%,#f4eae8 100%)}
@@ -168,32 +168,32 @@
 :root[data-ct=pois] #chat .side .smn button:nth-child(-n+2)::after{background:repeating-linear-gradient(45deg,#e3d9dc 0 4px,#f6f3f3 4px 8px)}
 /* ===== 平板响应式：竖屏拉宽，横屏左右分栏 ===== */
 @media (min-width:600px) and (min-height:700px){
-:root[data-cf=sticker] #stage,:root[data-cf=sticker] #chat .app{max-width:min(100%,740px)}
-:root[data-cf=sticker] #chat .side{width:min(50%,380px);max-width:380px;padding:40px 26px 16px 46px}
-:root[data-cf=sticker] #chat .sav{width:68px;height:68px;font-size:26px}
-:root[data-cf=sticker] #chat .side .snm b{font-size:21px}
-:root[data-cf=sticker] #chat .side .smn{gap:14px 12px}
-:root[data-cf=sticker] #chat .side .smn button{min-height:58px;padding:11px 12px 9px;font-size:13.5px}
-:root[data-cf=sticker] #chat .side .smn #sth{height:42px}
+  :root[data-cf=sticker] #stage,:root[data-cf=sticker] #chat .app{max-width:min(100%,740px)}
+  :root[data-cf=sticker] #chat .side{width:min(50%,380px);max-width:380px;padding:40px 26px 16px 46px}
+  :root[data-cf=sticker] #chat .sav{width:68px;height:68px;font-size:26px}
+  :root[data-cf=sticker] #chat .side .snm b{font-size:21px}
+  :root[data-cf=sticker] #chat .side .smn{gap:14px 12px}
+  :root[data-cf=sticker] #chat .side .smn button{min-height:58px;padding:11px 12px 9px;font-size:13.5px}
+  :root[data-cf=sticker] #chat .side .smn #sth{height:42px}
 }
 @media (min-width:960px) and (min-height:600px) and (min-aspect-ratio:1/1){
-:root[data-cf=sticker] #stage{max-width:1180px}
-:root[data-cf=sticker] #home{right:auto;width:min(42%,470px)}
-:root[data-cf=sticker] #chat{left:min(42%,470px);transform:none;pointer-events:auto;transition:none}
-:root[data-cf=sticker] #stage.chat #home{transform:none;filter:none}
-:root[data-cf=sticker] #chat .app{max-width:none}
-:root[data-cf=sticker] #chat .bk{display:none}
+  :root[data-cf=sticker] #stage{max-width:1180px}
+  :root[data-cf=sticker] #home{right:auto;width:min(42%,470px)}
+  :root[data-cf=sticker] #chat{left:min(42%,470px);transform:none;pointer-events:auto;transition:none}
+  :root[data-cf=sticker] #stage.chat #home{transform:none;filter:none}
+  :root[data-cf=sticker] #chat .app{max-width:none}
+  :root[data-cf=sticker] #chat .bk{display:none}
 }
 /* 平板竖屏：头部、消息区、底栏、资料抽屉整体放大 1.3 倍 */
 :root[data-cf=sticker]{--tz:1}
 @media (min-width:600px) and (min-height:700px) and (orientation:portrait){
-:root[data-cf=sticker]{--tz:1.15}
-:root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.15}
-:root[data-cf=sticker] #chat .side{width:min(72%,340px);max-width:340px}
+  :root[data-cf=sticker]{--tz:1.15}
+  :root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.15}
+  :root[data-cf=sticker] #chat .side{width:min(72%,340px);max-width:340px}
 }
 @media (min-width:760px) and (min-height:700px) and (orientation:portrait){
-:root[data-cf=sticker]{--tz:1.25}
-:root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.25}
+  :root[data-cf=sticker]{--tz:1.25}
+  :root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.25}
 }
 
 :root[data-ct=pois] #chat .kk-mm,:root[data-ct=pois] #chat .kk-sb{border:1.5px dashed #fff;box-shadow:0 0 0 1px rgba(134,103,98,.22),0 8px 14px -8px rgba(60,50,52,.45)}
@@ -237,14 +237,14 @@
 :root[data-cf=sticker] #chat .kk-tabs svg{width:18px;height:18px;fill:none;stroke:var(--hot);stroke-width:1.5;stroke-linecap:round}
 :root[data-cf=sticker] #chat .side.klib .kk-scr>*:not(.kk-lib){display:none!important}
 :root[data-cf=sticker] #chat .side:not(.klib) .kk-lib{display:none!important}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
 :root[data-cf=sticker] #chat .kk-set{position:absolute;left:38px;right:20px;top:74px;z-index:6;display:flex;flex-direction:column;padding:6px;border:1.5px dashed var(--hot);border-radius:12px;background:#fffdf9;box-shadow:2px 3px 0 rgba(90,70,76,.14)}
 :root[data-cf=sticker] #chat .kk-set[hidden]{display:none}
 :root[data-cf=sticker] #chat .kk-set button{display:flex;align-items:center;justify-content:space-between;padding:9px 8px;border:0;background:none;color:var(--rt);font:800 12.5px/1 var(--cn);letter-spacing:.08em}
 :root[data-cf=sticker] #chat .kk-set em{font-style:normal;color:var(--hot)}
 :root[data-cf=sticker] #chat .kk-set .sw{position:relative;width:30px;height:16px;border-radius:9px;background:rgba(150,142,146,.35)}
 :root[data-cf=sticker] #chat .kk-set .sw::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s}
-:root[data-cf=sticker] #chat .kk-set .sw.on{background:var(--hot)}#chat .kk-set .sw.on::after{left:16px}
+:root[data-cf=sticker] #chat .kk-set .sw.on{background:var(--hot)}:root[data-cf=sticker] #chat .kk-set .sw.on::after{left:16px}
 :root[data-cf=sticker] #chat .kk-lib{flex-direction:column;min-height:0;flex:1;font-family:var(--cn);color:var(--rt)}
 :root[data-cf=sticker] #chat .kk-lib button{font-family:inherit;color:inherit}
 :root[data-cf=sticker] #chat .lacc,:root[data-cf=sticker] #chat .lcl button{display:flex;align-items:center;gap:10px;text-align:left}
@@ -253,11 +253,11 @@
 :root[data-cf=sticker] #chat .lnm b{display:block;font-size:16px;letter-spacing:.06em}
 :root[data-cf=sticker] #chat .lnm small,:root[data-cf=sticker] #chat .lt small{display:block;margin-top:3px;font-size:11px;letter-spacing:.1em;color:var(--hot)}
 :root[data-cf=sticker] #chat .lct{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 2px;border:0;border-bottom:1.5px dashed rgba(176,131,140,.45);background:none;font:800 13px/1 var(--cn);letter-spacing:.12em}
-:root[data-cf=sticker] #chat .lct i{font-style:normal;color:var(--hot);transition:rotate .2s}#chat .lct.open i{rotate:180deg}
-:root[data-cf=sticker] #chat .lcl{display:none;flex-direction:column;gap:6px;padding:8px 0}#chat .lcl.open{display:flex}
+:root[data-cf=sticker] #chat .lct i{font-style:normal;color:var(--hot);transition:rotate .2s}:root[data-cf=sticker] #chat .lct.open i{rotate:180deg}
+:root[data-cf=sticker] #chat .lcl{display:none;flex-direction:column;gap:6px;padding:8px 0}:root[data-cf=sticker] #chat .lcl.open{display:flex}
 :root[data-cf=sticker] #chat .lcl button{padding:6px 8px;border:0;border-radius:12px;background:rgba(255,255,255,.55)}
 :root[data-cf=sticker] #chat .lcl button.on{background:rgba(232,186,198,.4)}
-:root[data-cf=sticker] #chat .lcl .lav{width:30px;height:30px;font-size:13px}#chat .lcl .lnm b{font-size:14px}
+:root[data-cf=sticker] #chat .lcl .lav{width:30px;height:30px;font-size:13px}:root[data-cf=sticker] #chat .lcl .lnm b{font-size:14px}
 :root[data-cf=sticker] #chat .lnew{margin:12px 0 10px;padding:11px;border:1.5px dashed var(--hot);border-radius:10px;background:rgba(255,255,255,.62);color:var(--hot)!important;font:800 13px/1 var(--cn);letter-spacing:.14em}
 :root[data-cf=sticker] #chat .lq{font:700 11px/1 var(--cn);letter-spacing:.14em;color:var(--hot)}
 :root[data-cf=sticker] #chat .lin,:root[data-cf=sticker] #chat .lrn{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;outline:0;background:rgba(255,255,255,.7);font:700 13px/1.2 var(--cn);color:var(--rt)}
@@ -268,14 +268,14 @@
 :root[data-cf=sticker] #chat .li.on{background:rgba(232,186,198,.38);box-shadow:inset 3px 0 0 var(--hot)}
 :root[data-cf=sticker] #chat .lt b{font-size:15px;letter-spacing:.05em}
 :root[data-cf=sticker] #chat .lm{padding:6px 8px;border:0;background:none;color:var(--hot)!important;font:800 16px/1 var(--cn);letter-spacing:.1em}
-:root[data-cf=sticker] #chat .lx{display:flex;gap:6px;padding:0 12px 8px}#chat .lx[hidden]{display:none}
+:root[data-cf=sticker] #chat .lx{display:flex;gap:6px;padding:0 12px 8px}:root[data-cf=sticker] #chat .lx[hidden]{display:none}
 :root[data-cf=sticker] #chat .lx button{padding:6px 10px;border:0;border-radius:10px;background:rgba(214,186,191,.35);font:800 11.5px/1 var(--cn);letter-spacing:.08em}
 :root[data-cf=sticker] #chat .le{padding:18px 0;text-align:center;font-size:12px;color:var(--hot)}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-holes{display:flex}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-holes{display:flex}
 :root[data-cf=sticker] #chat .kk-holes i{display:block}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-set{display:flex}
-:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-set[hidden]{display:none}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set{display:flex}
+:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set[hidden]{display:none}
 :root[data-cf=sticker] #chat .kk-scr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;margin:0 -8px 0 -14px;padding:8px 8px 8px 14px}
 :root[data-cf=sticker] #chat .kk-scr::-webkit-scrollbar{display:none}
 :root[data-cf=sticker] #chat .kk-scr>*{flex-shrink:0}

@@ -63,8 +63,8 @@
   var(--tint)}
 :root[data-cf=sticker] #chat .veil::before{content:"";position:absolute;inset:0;background:var(--milk,transparent)}
 :root[data-cf=sticker] #chat .veil::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:var(--twA,0);background:repeating-linear-gradient(135deg,#fff 0 .8px,transparent .8px 2px,#000 2px 2.8px,transparent 2.8px 4px)}
-:root[data-cf=sticker] #chat :is(.fog,:root[data-cf=sticker] .grain){display:none}
-:root[data-ct=doodle] #chat :is(.fog,:root[data-cf=sticker] .grain){display:block}
+:root[data-cf=sticker] #chat :is(.fog,.grain){display:none}
+:root[data-ct=doodle] #chat :is(.fog,.grain){display:block}
 :root[data-ct=doodle] #chat .bgi{inset:-6%;animation:breathe 36s var(--ease) infinite alternate}
 @keyframes breathe{from{transform:scale(1)}to{transform:scale(1.08) translate3d(-1.2%,-.8%,0)}}
 :root[data-cf=sticker] #chat .fog{overflow:hidden}
@@ -76,10 +76,10 @@
 @keyframes drift{to{transform:translateX(-50%)}}
 :root[data-cf=sticker] #chat .petals i{position:absolute;top:-4%;left:var(--x);opacity:0;animation:fall var(--d) linear var(--dl) infinite}
 @keyframes fall{
-:root[data-cf=sticker] 0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
-:root[data-cf=sticker] 8%,:root[data-cf=sticker] 90%{opacity:var(--o)}
-:root[data-cf=sticker] 50%{transform:translate3d(var(--sw),55vh,0) rotate(190deg)}
-:root[data-cf=sticker] 100%{transform:translate3d(calc(var(--sw)*-.5),110vh,0) rotate(380deg);opacity:0}}
+  0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
+  8%,90%{opacity:var(--o)}
+  50%{transform:translate3d(var(--sw),55vh,0) rotate(190deg)}
+  100%{transform:translate3d(calc(var(--sw)*-.5),110vh,0) rotate(380deg);opacity:0}}
 :root[data-cf=sticker] #chat .poem p{position:absolute;margin:0;white-space:nowrap;rotate:var(--r);opacity:0;animation:poem 21s var(--ease) var(--dl) infinite}
 @keyframes poem{0%,100%{opacity:0;transform:translateY(8px);filter:blur(3px)}22%,62%{opacity:var(--pa,.26);transform:none;filter:blur(0)}}
 :root[data-cf=sticker] #chat .grain{z-index:3;inset:-30%;opacity:var(--grain);mix-blend-mode:overlay;animation:grain 1.4s steps(5) infinite;
@@ -189,7 +189,7 @@
 @keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1) rotate(50deg)}}
 
 /* ----- 贴纸家族（贴纸 doodle / 波点 pois 共用）：data-cf=sticker；.fam 家族显示 / .nd 家族隐藏 / .dd 仅贴纸 / .pp 仅波点 / .np 波点隐藏 ----- */
-:root[data-cf=sticker] #chat :is(.fam,:root[data-cf=sticker] .pp){display:none}
+:root[data-cf=sticker] #chat :is(.fam,.pp){display:none}
 :root[data-cf=sticker] #chat .fam,:root[data-ct=pois] #chat .pp{display:revert}
 :root[data-ct=pois] #chat .np{display:none}
 :root[data-cf=sticker] #chat .dd{display:none}
@@ -201,8 +201,8 @@
 @keyframes boing{30%{transform:scale(.88)}60%{transform:scale(1.08) rotate(4deg)}}
 @keyframes twk2{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2) rotate(25deg)}}
 @keyframes marq{to{transform:translateX(-100%)}}
-:root[data-ct=doodle] #chat :is(.b,:root[data-cf=sticker] .tg,:root[data-cf=sticker] .fd,:root[data-cf=sticker] .tray,:root[data-cf=sticker] .fb,:root[data-cf=sticker] .sd)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;background:none;box-shadow:none;filter:url(#wob);pointer-events:none}
-:root[data-ct=doodle] #chat :is(.fb,:root[data-cf=sticker] .sd)::before{border-radius:50%}
+:root[data-ct=doodle] #chat :is(.b,.tg,.fd,.tray,.fb,.sd)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;background:none;box-shadow:none;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat :is(.fb,.sd)::before{border-radius:50%}
 /* 氛围：淡波点 + 灰粉暗角，粒子换成灰调彩色符号 */
 :root[data-ct=doodle] #chat .veil{background:radial-gradient(rgba(176,131,140,.24) 1.1px,transparent 1.6px) 0 0/22px 22px,radial-gradient(130% 75% at 50% 46%,transparent 50%,var(--vig) 100%),linear-gradient(180deg,var(--edge),transparent 15%,transparent 76%,rgba(248,244,244,.4)),var(--tint)}
 :root[data-ct=doodle] #chat .petals i{width:auto;height:auto;background:none;border-radius:0;filter:none;font:700 var(--s)/1 system-ui,sans-serif}
@@ -258,7 +258,7 @@
 :root[data-cf=sticker] #chat .mode.hit{animation:boing .6s var(--ease)}
 :root[data-cf=sticker] #chat .ico{width:13px;height:13px;fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;filter:url(#wob)}
 :root[data-cf=sticker] #chat .row{gap:9px;padding:0 0 2px}
-:root[data-cf=sticker] #chat :is(.fb,:root[data-cf=sticker] .sd){position:relative;width:32px;height:32px;margin:0;display:grid;place-items:center;border-radius:50%;color:var(--ink);box-shadow:0 0 0 2px var(--paper),1.5px 2px 0 2px rgba(122,109,113,.12)}
+:root[data-cf=sticker] #chat :is(.fb,.sd){position:relative;width:32px;height:32px;margin:0;display:grid;place-items:center;border-radius:50%;color:var(--ink);box-shadow:0 0 0 2px var(--paper),1.5px 2px 0 2px rgba(122,109,113,.12)}
 :root[data-cf=sticker] #chat .fb{background:var(--fbc)}
 :root[data-cf=sticker] #chat .fb svg{width:18px;height:16px}
 :root[data-cf=sticker] #chat .fb.on{transform:rotate(-12deg) scale(1.08)}
@@ -292,7 +292,7 @@
 :root[data-cf=sticker] #chat .side{position:absolute;top:0;bottom:0;left:0;z-index:8;box-sizing:border-box;width:78%;max-width:310px;flex-direction:column;padding:34px 20px 14px 38px;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper);transform:translateX(-112%);transition:transform .65s var(--ease)}
 :root[data-cf=sticker] #chat .side.o{transform:none}
 :root[data-cf=sticker] #chat .side::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
-:root[data-cf=sticker] #chat .side>:is(.tape.t1,:root[data-cf=sticker] .ptape.p1){top:12px;left:auto;right:16px}
+:root[data-cf=sticker] #chat .side>:is(.tape.t1,.ptape.p1){top:12px;left:auto;right:16px}
 :root[data-cf=sticker] #chat .sav{position:relative;width:60px;height:60px;display:grid;place-items:center;border-radius:50%;background:var(--pk);font:800 23px/1 var(--cn);box-shadow:0 0 0 3px #fff,2px 3px 0 3px rgba(122,109,113,.14)}
 :root[data-cf=sticker] #chat .sav .pxs{position:absolute;color:var(--pxc);animation:pxtw 2.6s steps(3) infinite}
 :root[data-cf=sticker] #chat .sav .pxs:first-child{right:-14px;top:-6px}
@@ -367,7 +367,7 @@
 :root[data-ct=pois] #chat .mode{--c:#eeebeb;--r:0deg;box-shadow:0 0 0 1.5px #e3dcdd,0 2px 0 1.5px rgba(0,0,0,.06)}
 :root[data-ct=pois] #chat .mode[data-k=l]{--r:0deg}
 :root[data-ct=pois] #chat .mode.hit{background:var(--pk)}
-:root[data-ct=pois] #chat :is(.fb,:root[data-cf=sticker] .sd){width:36px;height:36px;box-shadow:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.14))}
+:root[data-ct=pois] #chat :is(.fb,.sd){width:36px;height:36px;box-shadow:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.14))}
 :root[data-ct=pois] #chat .fish{position:relative;display:grid;place-items:center}
 :root[data-ct=pois] #chat .sd::before{display:none}
 :root[data-cf=sticker] #chat .fish>*{grid-area:1/1}
@@ -381,4 +381,4 @@
 :root[data-ct=pois] #chat .tray::before{display:none}
 :root[data-ct=pois] #chat .tray{box-shadow:0 0 0 1.5px #e3dcdd,0 6px 18px rgba(0,0,0,.12)}
 
-@media(prefers-reduced-motion:reduce){:root[data-cf=sticker] *{animation:none!important;transition:none!important}#chat .scr{clip-path:none}#chat .petals,#chat .poem{display:none}}}
+@media(prefers-reduced-motion:reduce){:root[data-cf=sticker] *{animation:none!important;transition:none!important}:root[data-cf=sticker] #chat .scr{clip-path:none}:root[data-cf=sticker] #chat .petals,:root[data-cf=sticker] #chat .poem{display:none}}

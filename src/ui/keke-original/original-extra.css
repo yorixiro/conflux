@@ -32,8 +32,8 @@
 @keyframes kpop{from{opacity:0;transform:scale(.82) translateY(8px)}}
 @keyframes kfade{from{opacity:0}}
 /* 贴纸：铅笔描边 + 胶带 + 彩色小便签按钮 */
-:root[data-ct=doodle] #chat :is(.krx,:root[data-cf=sticker] .kac,:root[data-cf=sticker] .ek button){position:relative;box-shadow:none}
-:root[data-ct=doodle] #chat :is(.krx,:root[data-cf=sticker] .kac,:root[data-cf=sticker] .ek button)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat :is(.krx,.kac,.ek button){position:relative;box-shadow:none}
+:root[data-ct=doodle] #chat :is(.krx,.kac,.ek button)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
 :root[data-ct=doodle] #chat .kac::after{content:"";position:absolute;top:-8px;right:18px;width:36px;height:14px;background:rgba(222,190,198,.75);rotate:5deg}
 :root[data-ct=doodle] #chat .kac button:nth-child(3n+1){background:var(--pk);rotate:-1.5deg}
 :root[data-ct=doodle] #chat .kac button:nth-child(3n+2){background:var(--bl);rotate:1.2deg}
@@ -41,7 +41,7 @@
 :root[data-ct=doodle] #chat .kq{border-left-style:dashed}
 :root[data-ct=doodle] #chat .b.ket{outline-color:var(--ink);outline-width:1.2px}
 /* 波点：灰白虚线框 + 波点底 + 像素十字 */
-:root[data-ct=pois] #chat :is(.krx,:root[data-cf=sticker] .kac){border:1.5px dashed #fff;background:#f1eeee radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px;box-shadow:0 0 0 1px rgba(134,103,98,.22),0 8px 14px -8px rgba(60,50,52,.45)}
+:root[data-ct=pois] #chat :is(.krx,.kac){border:1.5px dashed #fff;background:#f1eeee radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px;box-shadow:0 0 0 1px rgba(134,103,98,.22),0 8px 14px -8px rgba(60,50,52,.45)}
 :root[data-ct=pois] #chat .kac::after{content:"";position:absolute;top:-9px;right:14px;width:3px;height:3px;color:#c99aa8;background:currentColor;box-shadow:3px 0,-3px 0,0 3px,0 -3px}
 :root[data-ct=pois] #chat .kac button:active,:root[data-ct=pois] #chat .krx button:active{background:#e3d9dc}
 :root[data-ct=pois] #chat .ek button{border:1.5px dashed #fff;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
