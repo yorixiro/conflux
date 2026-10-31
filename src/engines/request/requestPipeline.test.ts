@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { requestCollaboratorReply } from './requestPipeline';
+import { createPersonaTemplate } from '../../config/persona/personaBuilder';
 import { getAssetBlob } from '../../infrastructure/assetStore';
 import type { ChatMessage, ProviderProfile } from '../../types/domain';
 
@@ -91,6 +92,27 @@ describe('requestPipeline', () => {
     expect(progress).toHaveBeenCalledWith(expect.objectContaining({ content: 'hi' }));
     expect(fetchMock).toHaveBeenCalledWith('/devin-acp/prompt', expect.objectContaining({ method: 'POST' }));
     expect(requestAssistantReplyMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the configured ACP provider model, not an obsolete persona HTTP override', async () => {
+    const persona = createPersonaTemplate({ id: 'legacy-acp-persona', name: 'Agent', description: '' });
+    persona.advanced = { ...persona.advanced, modelOverride: 'old-http-model' };
+    const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
+      expect(url).toBe('/devin-acp/prompt');
+      const body = JSON.parse(init.body as string) as { modelId?: string };
+      expect(body.modelId).toBe('swe-2-high');
+      return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"ok"}}}\n\ndata: {"type":"done"}\n\n', {
+        headers: { 'Content-Type': 'text/event-stream' }
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const reply = await requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp', model: 'swe-2-high' },
+      persona,
+      messages: [{ id: 'u1', role: 'user', content: 'hi', timestamp: 1 }]
+    });
+    expect(reply.content).toBe('ok');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('preserves readable documents and raw ZIP attachment metadata on Devin ACP without rejecting the turn', async () => {

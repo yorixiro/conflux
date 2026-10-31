@@ -20,7 +20,16 @@ function mergeStreamingUsage(
   // A streaming provider can send input/cache usage in message_start and only
   // updated output usage in message_delta. Missing fields are not zeroes.
   const merged = { ...previous, ...incoming };
+  if (typeof incoming.totalTokens === 'number'
+    && (typeof incoming.inputTokens === 'number' && typeof incoming.outputTokens === 'number'
+      || incoming.inputTokens === undefined && incoming.outputTokens === undefined)) {
+    // Prefer a provider's explicit full total over an inferred sum. Some
+    // providers include extra accounting not represented by input + output.
+    return merged;
+  }
   if (typeof merged.inputTokens === 'number' && typeof merged.outputTokens === 'number') {
+    // Output-only Anthropic deltas report a partial total: recompute using
+    // retained input/cache fields from message_start.
     merged.totalTokens = merged.inputTokens + merged.outputTokens;
   }
   return merged;

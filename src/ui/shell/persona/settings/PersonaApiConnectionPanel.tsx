@@ -84,7 +84,7 @@ export function PersonaApiConnectionPanel({
           {activePersona.advanced.modelOverride?.trim() ? (
             <div className="ps-field">
               <p className="ps-footnote" role="status">
-                当前角色仍有旧模型覆盖：{activePersona.advanced.modelOverride}。若 Devin 不提供该模型，发送会失败。
+                当前角色留有旧模型覆盖：{activePersona.advanced.modelOverride}。ACP 已忽略这个旧值，聊天使用代理连接中的模型。
               </p>
               <button type="button" className="btn-secondary compact"
                 onClick={() => onUpdatePersona({ advanced: { modelOverride: '' } })}>

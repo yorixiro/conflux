@@ -258,7 +258,8 @@ export function createChatActionHandlers({
     try {
       await store.chat.persistToDb?.();
       ui.setCommandStatus(statusText);
-      return true;
+      // Never erase a legacy marker if storage persistence was unavailable.
+      return typeof store.chat.persistToDb === 'function';
     } catch (error) {
       reportPersistenceError({
         label: '[chat:message-decoration]',

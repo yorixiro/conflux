@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ChatMessage } from '../../types/domain';
 import { normalizeChatMessage } from '../../engines/chatMessageNormalization';
 import { serializeMessagePayload } from '../../engines/localData/chatSqliteSerialization';
-import { parseLegacyKekeReaction, resolveMessageReactions, toggleReactionEmoji } from './messageDecorations';
+import { clearLegacyKekeReaction, parseLegacyKekeReaction, resolveMessageReactions, toggleReactionEmoji } from './messageDecorations';
 
 describe('real message decorations', () => {
   it('adds and removes independent reactions without mutating the original', () => {
@@ -20,6 +20,24 @@ describe('real message decorations', () => {
     expect(parseLegacyKekeReaction([], 'm1')).toBeNull();
     expect(resolveMessageReactions({ id: 'm1', reactions: [] })).toEqual([]);
     expect(toggleReactionEmoji(['哼'], '哼')).toEqual([]);
+  });
+
+  it('combines existing canonical reactions with legacy sticker marks and keeps other old entries', () => {
+    let raw = JSON.stringify({ m1: '哼', m2: '☆' });
+    vi.stubGlobal('window', { localStorage: {
+      getItem: () => raw,
+      setItem: (_key: string, value: string) => { raw = value; }
+    } });
+    try {
+      expect(resolveMessageReactions({ id: 'm1', reactions: ['❤️'] })).toEqual(['❤️', '哼']);
+      expect(resolveMessageReactions({ id: 'm1', reactions: undefined })).toEqual(['哼']);
+      expect(resolveMessageReactions({ id: 'm1', reactions: [] })).toEqual([]);
+      clearLegacyKekeReaction('m1');
+      expect(JSON.parse(raw)).toEqual({ m2: '☆' });
+      expect(resolveMessageReactions({ id: 'm1', reactions: ['❤️', '哼'] })).toEqual(['❤️', '哼']);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('round-trips bookmark and reactions using the real LocalData serializer', () => {

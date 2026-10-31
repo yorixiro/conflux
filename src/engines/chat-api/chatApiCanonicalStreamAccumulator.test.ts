@@ -38,6 +38,30 @@ describe('applyProviderRuntimeStreamEvents', () => {
     expect(target.tokenCount).toBe(5070);
   });
 
+  it('preserves an explicit provider total when complete input and output counts are supplied', () => {
+    const target = createAccumulator();
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 630 }
+    }]);
+    expect(target.tokenUsage?.totalTokens).toBe(630);
+    expect(target.tokenCount).toBe(630);
+  });
+
+  it('honors an explicit total-only usage event', () => {
+    const target = createAccumulator();
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 600 }
+    }]);
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { totalTokens: 670 }
+    }]);
+    expect(target.tokenUsage?.totalTokens).toBe(670);
+    expect(target.tokenCount).toBe(670);
+  });
+
   it('keeps the internal tool-call array dense when the first provider index is nonzero', () => {
     const target = createAccumulator();
 

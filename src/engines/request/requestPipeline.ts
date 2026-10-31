@@ -187,9 +187,9 @@ export async function requestCollaboratorReply(params: {
         prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
         initialContext: prompt,
         images,
-        modelId: persona?.advanced.modelOverride?.trim()
-          || (api.model !== 'Devin ACP' ? api.model.trim() : '')
-          || undefined,
+        // ACP model selection belongs to the provider. Old persona HTTP model
+        // overrides remain stored but must never reach Devin's selectModel.
+        modelId: (api.model !== 'Devin ACP' ? api.model.trim() : '') || undefined,
         conversationId: activeConversationId
           ? `${activeConversationId}::${persona?.id ?? 'default'}`
           : undefined,

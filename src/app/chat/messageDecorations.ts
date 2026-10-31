@@ -21,10 +21,12 @@ export function readLegacyKekeReaction(messageId: string): ChatReactionEmoji | n
 }
 
 export function resolveMessageReactions(message: Pick<ChatMessage, 'id' | 'reactions'>): readonly string[] {
-  // An explicit [] means the canonical field was already written.
-  if (Array.isArray(message.reactions)) return message.reactions;
+  const canonical = message.reactions ?? [];
+  // An explicit [] records a canonical choice (including removal). Do not
+  // resurrect historical localStorage markers after the user removed them.
+  if (Array.isArray(message.reactions) && canonical.length === 0) return canonical;
   const legacy = readLegacyKekeReaction(message.id);
-  return legacy ? [legacy] : [];
+  return legacy && !canonical.includes(legacy) ? [...canonical, legacy] : canonical;
 }
 
 /** Called only after a canonical ChatMessage write persists successfully. */
