@@ -54,6 +54,7 @@ function flushStreamingPayload(params: {
     model?: string;
     tokenCount?: number;
     tokenUsage?: ChatTokenUsage;
+    hasReportedTotalTokens?: boolean;
     toolCalls?: OpenAiToolCallAccumulator[];
   };
   fallbackModel: string;
@@ -101,6 +102,7 @@ export function createStreamingReplyCollector(
     model: fallbackModel as string | undefined,
     tokenCount: undefined as number | undefined,
     tokenUsage: undefined as ChatTokenUsage | undefined,
+    hasReportedTotalTokens: false,
     toolCalls: [] as OpenAiToolCallAccumulator[],
     finishReason: undefined as string | undefined,
     transportIncomplete: undefined as boolean | undefined

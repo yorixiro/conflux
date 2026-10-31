@@ -15,22 +15,25 @@ function totalFromUsage(usage: UsageStreamEvent['usage']) {
 
 function mergeStreamingUsage(
   previous: UsageStreamEvent['usage'] | undefined,
-  incoming: UsageStreamEvent['usage']
+  incoming: UsageStreamEvent['usage'],
+  previousHadReportedTotal: boolean,
+  incomingHasReportedTotal: boolean
 ): UsageStreamEvent['usage'] {
-  // A streaming provider can send input/cache usage in message_start and only
-  // updated output usage in message_delta. Missing fields are not zeroes.
+  // Merge partial input/output/cache details without losing earlier fields.
   const merged = { ...previous, ...incoming };
-  if (typeof incoming.totalTokens === 'number'
-    && (typeof incoming.inputTokens === 'number' && typeof incoming.outputTokens === 'number'
-      || incoming.inputTokens === undefined && incoming.outputTokens === undefined)) {
-    // Prefer a provider's explicit full total over an inferred sum. Some
-    // providers include extra accounting not represented by input + output.
+  if (incomingHasReportedTotal && typeof incoming.totalTokens === 'number') {
+    // A provider's explicit total may include accounting beyond input + output.
     return merged;
   }
-  if (typeof merged.inputTokens === 'number' && typeof merged.outputTokens === 'number') {
-    // Output-only Anthropic deltas report a partial total: recompute using
-    // retained input/cache fields from message_start.
-    merged.totalTokens = merged.inputTokens + merged.outputTokens;
+  if (previousHadReportedTotal && typeof previous?.totalTokens === 'number') {
+    // A later fragment with no reported total cannot overwrite a known one.
+    merged.totalTokens = previous.totalTokens;
+    return merged;
+  }
+  // Anthropic's normalized total for a message_delta can cover output only.
+  // Recompute inferred totals after merging the prior input and new output.
+  if (typeof merged.inputTokens === 'number' || typeof merged.outputTokens === 'number') {
+    merged.totalTokens = (merged.inputTokens ?? 0) + (merged.outputTokens ?? 0);
   }
   return merged;
 }
@@ -102,7 +105,15 @@ export function applyProviderRuntimeStreamEvents(
       return;
     }
     if (event.type === 'usage') {
-      target.tokenUsage = mergeStreamingUsage(target.tokenUsage, event.usage);
+      const providerReported = event.reportedTotalTokens === true
+        && typeof event.usage.totalTokens === 'number';
+      target.tokenUsage = mergeStreamingUsage(
+        target.tokenUsage,
+        event.usage,
+        target.hasReportedTotalTokens === true,
+        providerReported
+      );
+      target.hasReportedTotalTokens = target.hasReportedTotalTokens === true || providerReported;
       const tokenCount = totalFromUsage(target.tokenUsage);
       if (typeof tokenCount === 'number') {
         target.tokenCount = tokenCount;

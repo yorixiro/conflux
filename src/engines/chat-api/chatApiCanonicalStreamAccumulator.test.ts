@@ -42,7 +42,8 @@ describe('applyProviderRuntimeStreamEvents', () => {
     const target = createAccumulator();
     applyProviderRuntimeStreamEvents(target, [{
       type: 'usage',
-      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 630 }
+      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 630 },
+      reportedTotalTokens: true
     }]);
     expect(target.tokenUsage?.totalTokens).toBe(630);
     expect(target.tokenCount).toBe(630);
@@ -52,14 +53,40 @@ describe('applyProviderRuntimeStreamEvents', () => {
     const target = createAccumulator();
     applyProviderRuntimeStreamEvents(target, [{
       type: 'usage',
-      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 600 }
+      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 600 },
+      reportedTotalTokens: true
     }]);
     applyProviderRuntimeStreamEvents(target, [{
       type: 'usage',
-      usage: { totalTokens: 670 }
+      usage: { totalTokens: 670 },
+      reportedTotalTokens: true
     }]);
     expect(target.tokenUsage?.totalTokens).toBe(670);
     expect(target.tokenCount).toBe(670);
+  });
+
+  it('keeps a newer reported total after an output-only event and later missing totals', () => {
+    const target = createAccumulator();
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { inputTokens: 500, outputTokens: 100, totalTokens: 630 },
+      reportedTotalTokens: true
+    }]);
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { outputTokens: 120, totalTokens: 650 },
+      reportedTotalTokens: true
+    }]);
+    expect(target.tokenUsage).toEqual({
+      inputTokens: 500, outputTokens: 120, totalTokens: 650
+    });
+    expect(target.tokenCount).toBe(650);
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { outputTokens: 125 }
+    }]);
+    expect(target.tokenUsage?.outputTokens).toBe(125);
+    expect(target.tokenUsage?.totalTokens).toBe(650);
   });
 
   it('keeps the internal tool-call array dense when the first provider index is nonzero', () => {
