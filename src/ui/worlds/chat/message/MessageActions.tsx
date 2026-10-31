@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CodeCardActionMode } from '../../../../app/chat/chatDerivedState';
 import { CHAT_REACTION_CHOICES, type ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { readMessageSpeechCacheBlob, saveMessageSpeechCache } from '../../../../app/chat/messageSpeechCache';
@@ -537,6 +538,8 @@ export function MessageActions({
         )}
     </dialog>
   ) : null;
+  // Render the dialog outside footer elements hidden by sticker skins.
+  const dialogHost = typeof document !== 'undefined' ? document.getElementById('chat') : null;
 
   return (
     <div className={`message-inline-actions ${role}`}>
@@ -617,7 +620,7 @@ export function MessageActions({
           >
             <Icon name="more" size={15} />
           </button>
-          {actionDialog}
+          {actionDialog && dialogHost ? createPortal(actionDialog, dialogHost) : actionDialog}
         </>
       ) : null}
     </div>
