@@ -12,8 +12,23 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 
 const sessions = new Map();
+const permissionWaiters = new Map();
+let permissionSequence = 10000;
 let counter = 0;
 const send = (value) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ...value }) + '\n');
+const requestPermission = (sessionId, name) => new Promise((resolve, reject) => {
+  const id = ++permissionSequence;
+  permissionWaiters.set(id, { resolve, reject });
+  send({ id, method: 'session/request_permission', params: {
+    sessionId,
+    toolCall: { toolCallId: 'permission-' + id, title: 'Use ' + name,
+      name, kind: 'edit', status: 'pending' },
+    options: [
+      { optionId: 'allow-once', name: 'Allow once', kind: 'allow_once' },
+      { optionId: 'reject-once', name: 'Reject once', kind: 'reject_once' }
+    ]
+  } });
+});
 
 async function callTools(server) {
   const child = spawn(server.command, server.args, {
@@ -43,7 +58,7 @@ async function callTools(server) {
     });
     const catalog = await request('tools/list', {});
     const names = catalog.tools.map((tool) => tool.name);
-    if (!names.includes('searchMemory') || !names.includes('listEnvironmentNodes')) {
+    if (!['searchMemory', 'listEnvironmentNodes', 'inspectAttachments', 'writeMemory'].every((name) => names.includes(name))) {
       throw new Error('Native MCP tool schemas were not registered');
     }
     const first = await request('tools/call', {
@@ -52,10 +67,16 @@ async function callTools(server) {
     const second = await request('tools/call', {
       name: 'listEnvironmentNodes', arguments: {}
     });
-    if (first.isError || second.isError) {
+    const third = await request('tools/call', {
+      name: 'inspectAttachments', arguments: { scope: 'latest' }
+    });
+    const fourth = await request('tools/call', {
+      name: 'writeMemory', arguments: { memory: ['mock-only'] }
+    });
+    if ([first, second, third, fourth].some((result) => result.isError)) {
       throw new Error('MCP tool returned execution error');
     }
-    return first.content[0].text + ' / ' + second.content[0].text;
+    return [first, second, third, fourth].map((result) => result.content[0].text).join(' / ');
   } finally {
     child.kill();
     lines.close();
@@ -64,6 +85,13 @@ async function callTools(server) {
 createInterface({ input: process.stdin }).on('line', (line) => {
   let message;
   try { message = JSON.parse(line); } catch { return; }
+  const waiter = permissionWaiters.get(message.id);
+  if (waiter && (message.result !== undefined || message.error !== undefined)) {
+    permissionWaiters.delete(message.id);
+    if (message.error) waiter.reject(new Error(message.error.message));
+    else waiter.resolve(message.result);
+    return;
+  }
   void (async () => {
     if (message.method === 'initialize') {
       send({ id: message.id, result: {
@@ -93,6 +121,11 @@ createInterface({ input: process.stdin }).on('line', (line) => {
       try {
         const servers = sessions.get(message.params.sessionId) || [];
         if (!servers.length) throw new Error('ACP session/new omitted mcpServers');
+        const permission = await requestPermission(message.params.sessionId, 'mcp__conflux__writeMemory');
+        if (permission.outcome?.outcome !== 'selected'
+          || permission.outcome.optionId !== 'allow-once') {
+          throw new Error('The enabled Conflux write tool was not authorized');
+        }
         const evidence = await callTools(servers[0]);
         send({ method: 'session/update', params: {
           sessionId: message.params.sessionId,
@@ -171,7 +204,9 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
         prompt: '请调用 searchMemory 和 listEnvironmentNodes',
         tools: [
           tool('searchMemory', { query: { type: 'string' } }, ['query']),
-          tool('listEnvironmentNodes')
+          tool('listEnvironmentNodes'),
+          tool('inspectAttachments', { scope: { type: 'string' } }),
+          tool('writeMemory', { memory: { type: 'array', items: { type: 'string' } } })
         ]
       })
     });
@@ -197,12 +232,16 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
           // A disabled tool is rejected even while a valid conversation is active.
           const denied = await fetch(base + '/tool/request', {
             method: 'POST', headers,
-            body: JSON.stringify({ name: 'writeMemory', arguments: { memory: ['unapproved'] } })
+            body: JSON.stringify({ name: 'notEnabledTool', arguments: {} })
           });
           assert.equal(denied.status, 403);
           const text = event.name === 'searchMemory'
             ? '记忆候选：星河是项目中的记忆展示功能'
-            : '环境节点：记忆、收藏册';
+            : event.name === 'listEnvironmentNodes'
+              ? '环境节点：记忆、收藏册'
+              : event.name === 'inspectAttachments'
+                ? '附件列表：notes.pdf'
+                : '模拟写入工具执行回执';
           const receipt = await fetch(base + '/tool/result', {
             method: 'POST', headers,
             body: JSON.stringify({ callId: event.callId, isError: false, text })
@@ -212,7 +251,11 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
       }
       if (done) break;
     }
-    assert.deepEqual(calls, ['searchMemory', 'listEnvironmentNodes']);
+    assert.deepEqual(calls, [
+      'searchMemory', 'listEnvironmentNodes', 'inspectAttachments', 'writeMemory'
+    ]);
+    assert.ok(!events.some((event) => event.type === 'permission_request'),
+      'An enabled Conflux tool should not interrupt the user for permission');
     assert.ok(events.some((e) =>
       e.type === 'update' && e.update?.content?.text?.includes('记忆候选')));
     assert.ok(events.some((e) =>

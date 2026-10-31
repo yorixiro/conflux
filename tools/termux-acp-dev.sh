@@ -56,12 +56,37 @@ for file in tools/devin-acp-bridge.mjs tools/conflux-acp-mcp.mjs .devin/mcp_conf
   cat "$file" | proot-distro login ubuntu -- sh -c "cat > /root/.conflux-acp/$file"
 done
 
-# Allow only known read-only Conflux MCP tools. Never blanket-approve exec,
-# writeMemory, or an entire MCP server. Keep this local to the ACP workspace.
-if ! proot-distro login ubuntu -- test -e /root/.conflux-acp/.devin/config.local.json; then
-  printf '%s\n' '{"permissions":{"allow":["mcp__conflux__searchMemory","mcp__conflux__openMemorySource","mcp__conflux__readMemoryDoc","mcp__conflux__listEnvironmentNodes","mcp__conflux__searchReadableContext"]}}' |
-    proot-distro login ubuntu -- sh -c 'cat > /root/.conflux-acp/.devin/config.local.json'
-fi
+# Authorize every Conflux MCP tool in this dedicated local ACP workspace.
+# Upgrade old five-tool settings on startup, preserving unrelated user rules.
+# Only the Conflux MCP server is covered; not other MCP servers or CLI projects.
+proot-distro login ubuntu -- node - /root/.conflux-acp/.devin/config.local.json <<'JS'
+const fs = require('node:fs');
+const path = process.argv[2];
+let config = {};
+if (fs.existsSync(path)) {
+  try { config = JSON.parse(fs.readFileSync(path, 'utf8')); }
+  catch (error) {
+    console.error('ACP 专用权限配置无法读取，已保留原文件：' + error.message);
+    process.exit(1);
+  }
+}
+if (!config || typeof config !== 'object' || Array.isArray(config)) {
+  console.error('ACP 权限配置格式不正确，未覆盖原文件');
+  process.exit(1);
+}
+config.permissions ??= {};
+if (!config.permissions || typeof config.permissions !== 'object'
+  || Array.isArray(config.permissions)) process.exit(1);
+const oldAllow = config.permissions.allow ?? [];
+if (!Array.isArray(oldAllow)) process.exit(1);
+const allow = [...new Set([...oldAllow, 'mcp__conflux__*'])];
+if (JSON.stringify(allow) !== JSON.stringify(oldAllow)) {
+  config.permissions.allow = allow;
+  const temp = path + '.tmp-' + process.pid;
+  fs.writeFileSync(temp, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 });
+  fs.renameSync(temp, path);
+}
+JS
 
 bridge_pid=''
 front_pid=''

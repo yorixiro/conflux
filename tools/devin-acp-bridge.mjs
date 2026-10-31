@@ -188,6 +188,22 @@ function onMessage(message) {
       send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
       return;
     }
+    // The current chat has already exposed these Conflux tools through its
+    // persona-scoped catalog. Grant their one-time MCP permissions automatically,
+    // including writes, without approving unrelated CLI exec or other servers.
+    const currentToolName = permission?.toolCall?.name;
+    const confluxToolPrefix = 'mcp__conflux__';
+    if (typeof currentToolName === 'string' &&
+      currentToolName.startsWith(confluxToolPrefix) &&
+      toolCatalog.has(currentToolName.slice(confluxToolPrefix.length))) {
+      const allowOnce = options.find((option) => option.kind === 'allow_once');
+      if (allowOnce) {
+        send({ id: message.id, result: {
+          outcome: { outcome: 'selected', optionId: allowOnce.optionId }
+        } });
+        return;
+      }
+    }
     const permissionId = randomUUID();
     const current = active;
     const timer = setTimeout(() => {

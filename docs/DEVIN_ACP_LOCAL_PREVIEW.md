@@ -37,6 +37,7 @@ Do not run the full regression suite for this isolated integration pass. Do not 
 ## Known limitations
 
 - The ACP provider uses the canonical chat request and history flow for text. Files and permission-requiring agent operations are not supported by this bridge.
-- Agent permission requests are rejected rather than auto-approved. Tool execution requiring permissions is therefore not ready.
+- The dedicated Termux launcher upgrades the ACP-only Devin project config to `mcp__conflux__*`: **all** tools exposed by the Conflux MCP adapter (including memory writes, attachment access and enabled workspace actions), not just the previous five read tools. Existing local configuration is preserved, and no global Devin permissions or other MCP servers are modified. The browser still enforces current persona/conversation tool enablement and executes only its own exposed tool catalog. Permission grant is not the same as bypassing Conflux's data-edit previews or enabling unavailable tools.
+- Direct Devin CLI shell/file agent operations use their own ACP permission requests and are not silently approved by the MCP allow rule. This is independent of authorizing the entire Conflux tool catalog.
 - The local Termux PWA has a same-origin route. A separately hosted PWA or native APK still needs a trusted transport in its own deployment/runtime.
 - No actual tablet/Ubuntu/Devin runtime test has been performed by this change.
