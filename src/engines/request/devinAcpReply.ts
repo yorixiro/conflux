@@ -6,6 +6,7 @@ export const DEVIN_ACP_PROVIDER_ID = 'conflux-devin-acp';
 export async function requestDevinAcpReply(params: {
   prompt: string;
   initialContext?: string;
+  images?: Array<{ mimeType: string; data: string }>;
   conversationId?: string;
   modelId?: string;
   signal?: AbortSignal;
@@ -18,6 +19,7 @@ export async function requestDevinAcpReply(params: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       prompt: params.prompt, initialContext: params.initialContext,
+      ...(params.images?.length ? { images: params.images } : {}),
       conversationId: params.conversationId,
       modelId: params.modelId,
       tools: params.tools ?? []

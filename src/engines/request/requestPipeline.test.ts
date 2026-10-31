@@ -139,6 +139,52 @@ describe('requestPipeline', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('sends native ACP image content when the live agent advertises image input, without an OCR provider', async () => {
+    vi.mocked(getAssetBlob).mockResolvedValue(new Blob(['image-bytes'], { type: 'image/png' }));
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === '/devin-acp/capabilities') {
+        return new Response(JSON.stringify({ promptCapabilities: { image: true } }), {
+          headers: { 'content-type': 'application/json' }
+        });
+      }
+      expect(url).toBe('/devin-acp/prompt');
+      const body = JSON.parse(String(init?.body)) as {
+        images: Array<{ mimeType: string; data: string }>;
+        prompt: string; initialContext: string;
+      };
+      expect(body.images).toHaveLength(1);
+      expect(body.images[0]?.mimeType).toBe('image/png');
+      expect(body.images[0]?.data).toBeTruthy();
+      expect(body.initialContext).toContain('helphelp!');
+      return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"看到了图片"}}}\n\ndata: {"type":"done"}\n\n', {
+        headers: { 'content-type': 'text/event-stream' }
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const reply = await requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [imageMessage]
+    });
+    expect(reply.content).toBe('看到了图片');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(requestAssistantReplyMock).not.toHaveBeenCalled();
+  });
+
+  it('does not send native ACP images when the agent explicitly reports no image capability', async () => {
+    vi.mocked(getAssetBlob).mockResolvedValue(new Blob(['image-bytes'], { type: 'image/png' }));
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      promptCapabilities: { image: false }
+    }), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [imageMessage]
+    })).rejects.toThrow('当前 Devin ACP 未声明直接看图能力');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('does not imply ACP has seen a newly attached image before direct image transport exists', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
@@ -146,7 +192,7 @@ describe('requestPipeline', () => {
       api: { ...textProvider, agentTransport: 'devin-acp' },
       persona: null,
       messages: [imageMessage]
-    })).rejects.toThrow('当前 Devin ACP 桥接尚未接通直接看图');
+    })).rejects.toThrow('当前 Devin ACP 未声明直接看图能力');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

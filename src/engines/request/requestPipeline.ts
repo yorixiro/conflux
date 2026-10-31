@@ -45,6 +45,15 @@ function normalizeAssistantOutput<T extends AssistantReply | AssistantReplyProgr
   };
 }
 
+function toAcpText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content) || content.some((part) =>
+    !part || typeof part !== 'object' ||
+    (part.type !== 'text' && part.type !== 'image_url')
+  )) throw new Error('Unsupported ACP message content');
+  return content.filter((part) => part.type === 'text').map((part) => part.text).join('\n');
+}
+
 function messageContainsImageMissingModelPayload(message: Pick<RequestMessage, 'attachments'> | undefined): boolean {
   return Boolean(message?.attachments?.some((attachment) =>
     attachment.kind === 'image'
@@ -101,7 +110,26 @@ export async function requestCollaboratorReply(params: {
     onAudit,
     onImageUnderstandingResults
   } = params;
+  // Ask the live ACP agent rather than guessing image support from its model
+  // name. Do not require an extra OCR API when ACP accepts native images.
+  let acpNativeImageAvailable = false;
+  const latestInput = [...messages].reverse().find((message) => message.role === 'user');
+  if (api.agentTransport === 'devin-acp' && latestInput?.attachments?.some((attachment) =>
+    attachment.kind === 'image' && !attachment.clearedAt
+  )) {
+    try {
+      const response = await fetch('/devin-acp/capabilities', { signal });
+      if (response.ok) {
+        const capabilities = await response.json() as { promptCapabilities?: { image?: boolean } };
+        acpNativeImageAvailable = capabilities.promptCapabilities?.image === true;
+      }
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      // Offline/unsupported agent: retain the existing optional OCR route.
+    }
+  }
   const prepared = await prepareCollaboratorReplyRequest({
+    acpNativeImageAvailable,
     api,
     providers,
     globalApi,
@@ -125,38 +153,40 @@ export async function requestCollaboratorReply(params: {
     onImageUnderstandingResults?.(prepared.imageUnderstandingResults);
   }
   if (api.agentTransport === 'devin-acp') {
-    // Files are not all images. Already-extracted PDF/DOCX/CSV/XLSX/text
-    // content is serialized into the prompt; ZIP/raw files remain available to
-    // the existing conversation-scoped attachment tools. Never block ordinary
-    // conversation turns because an older attachment has no extracted text.
-    // The current ACP bridge has no native image payload transport yet, so
-    // reject only a new, unreadable image turn rather than pretending to see it.
+    // Readable files remain in the compiled text context; ZIP/raw files are
+    // available via the existing conversation-scoped attachment tools. Media
+    // belongs only to the latest user turn, never blindly replay old images.
     const latestUserMessage = [...prepared.conversation].reverse()
       .find((message) => message.role === 'user');
-    const latestImageCannotBeRead = latestUserMessage?.attachments?.some((attachment) =>
-      attachment.kind === 'image' && !attachment.clearedAt && !attachment.textContent?.trim()
-    );
-    if (latestImageCannotBeRead) {
-      throw new Error('当前 Devin ACP 桥接尚未接通直接看图；这张图片没有可读内容。请不要仅凭文件名猜测图片。');
+    const latestImages = (latestUserMessage?.attachments || [])
+      .filter((attachment) => attachment.kind === 'image' && !attachment.clearedAt);
+    const images = acpNativeImageAvailable
+      ? latestImages.map((attachment) => {
+          const match = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/]+=*)$/.exec(attachment.dataUrl || '');
+          if (!match) {
+            throw new Error('图片附件没有成功载入 ACP 原生请求，不能只发送文件名。');
+          }
+          return { mimeType: match[1], data: match[2] };
+        })
+      : [];
+    if (!acpNativeImageAvailable && latestImages.some((attachment) => !attachment.textContent?.trim())) {
+      throw new Error('当前 Devin ACP 未声明直接看图能力，且没有可用的图片理解结果。请检查模型能力或备用看图路线。');
     }
     const prompt = prepared.context.segments.flatMap((segment) =>
-      segment.messages.map((message) => {
-        if (typeof message.content !== 'string') {
-          throw new Error('Devin ACP bridge cannot serialize non-text request content');
-        }
-        return '[' + message.role + ']\n' + message.content;
-      })
+      segment.messages.map((message) => '[' + message.role + ']\n' + toAcpText(message.content))
     ).join('\n\n');
     const conversationUserMessages = prepared.context.segments
       .filter((segment) => segment.kind === 'conversation')
       .flatMap((segment) => segment.messages)
       .filter((message) => message.role === 'user');
-    const latestUser = conversationUserMessages[conversationUserMessages.length - 1]?.content;
+    const latestUserContent = conversationUserMessages[conversationUserMessages.length - 1]?.content;
+    const latestUser = latestUserContent == null ? '' : toAcpText(latestUserContent);
     recordRequestDebug(prepared.audit, { phase: 'prepared' });
     try {
       const reply = await requestDevinAcpReply({
         prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
         initialContext: prompt,
+        images,
         modelId: persona?.advanced.modelOverride?.trim()
           || (api.model !== 'Devin ACP' ? api.model.trim() : '')
           || undefined,

@@ -96,7 +96,7 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     if (message.method === 'initialize') {
       send({ id: message.id, result: {
         protocolVersion: 1, agentInfo: { name: 'mock-devin' },
-        agentCapabilities: {}
+        agentCapabilities: { promptCapabilities: { image: true, embeddedContext: false } }
       } });
       return;
     }
@@ -108,6 +108,20 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     }
     if (message.method === 'session/prompt') {
       const promptText = message.params?.prompt?.map((part) => part.text || '').join('') || '';
+      if (promptText.includes('CHECK_IMAGE')) {
+        const image = message.params?.prompt?.find((part) => part.type === 'image');
+        if (image?.mimeType !== 'image/png' || image?.data !== 'aGVsbG8=') {
+          send({ id: message.id, error: { code: -32602, message: 'Image part missing' } });
+          return;
+        }
+        send({ method: 'session/update', params: {
+          sessionId: message.params.sessionId,
+          update: { sessionUpdate: 'agent_message_chunk',
+            content: { type: 'text', text: 'ACP image accepted' } }
+        } });
+        send({ id: message.id, result: { stopReason: 'end_turn' } });
+        return;
+      }
       if (promptText.includes('NEVER_RETURN')) return; // Simulate Devin ignoring session/cancel.
       if (promptText.includes('AFTER_CANCEL')) {
         send({ method: 'session/update', params: {
@@ -262,6 +276,24 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
       e.type === 'update' && e.update?.content?.text?.includes('环境节点')));
     assert.ok(events.some((e) => e.type === 'done'));
     assert.ok(!events.some((e) => e.type === 'error'));
+
+    const capabilities = await fetch(base + '/capabilities', { headers });
+    assert.equal(capabilities.status, 200);
+    assert.equal((await capabilities.json()).promptCapabilities.image, true);
+    const mediaResponse = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        conversationId: 'mock-image-conversation',
+        prompt: 'CHECK_IMAGE',
+        images: [{ mimeType: 'image/png', data: 'aGVsbG8=' }],
+        tools: []
+      })
+    });
+    assert.equal(mediaResponse.status, 200);
+    const mediaStream = await mediaResponse.text();
+    assert.match(mediaStream, /ACP image accepted/);
+    assert.match(mediaStream, /"type":"done"/);
+
     const idleCatalog = await fetch(base + '/tools', {
       headers: { 'x-acp-bridge-token': token }
     });

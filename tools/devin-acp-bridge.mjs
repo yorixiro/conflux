@@ -34,6 +34,7 @@ const agent = spawn(command, ['acp'], { cwd, stdio: ['pipe', 'pipe', 'pipe'], en
 let sequence = 0;
 let buffer = '';
 let sessionId = null;
+let agentPromptCapabilities = { image: false, embeddedContext: false };
 let active = null;
 const chatSessions = new Map();
 const sessionOptions = new Map();
@@ -272,11 +273,17 @@ async function initialize() {
   if (ready) return ready;
   ready = (async () => {
     // Devin CLI's ACP v1 transport. Do not assume v2 wire compatibility.
-    await request('initialize', {
+    const initialization = await request('initialize', {
       protocolVersion: 1,
       clientInfo: { name: 'conflux-devin-acp', version: '0.1.0' },
       clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false }
     });
+    // ACP v1 advertises prompt media support under agentCapabilities.
+    // Do not infer image support from a selected model's name.
+    agentPromptCapabilities = {
+      image: initialization?.agentCapabilities?.promptCapabilities?.image === true,
+      embeddedContext: initialization?.agentCapabilities?.promptCapabilities?.embeddedContext === true
+    };
     const result = await request('session/new', { cwd, mcpServers });
     if (typeof result?.sessionId !== 'string') throw new Error('ACP did not return sessionId');
     sessionId = result.sessionId;
@@ -431,6 +438,14 @@ const server = createServer(async (req, res) => {
       return writeJson(res, 400, { error: error.message || 'Invalid tool result' });
     }
   }
+  if (req.method === 'GET' && req.url === '/capabilities') {
+    try {
+      await initialize();
+      return writeJson(res, 200, { promptCapabilities: agentPromptCapabilities });
+    } catch (error) {
+      return writeJson(res, 502, { error: error instanceof Error ? error.message : 'ACP capability lookup failed' });
+    }
+  }
   if (req.method === 'GET' && req.url === '/models') {
     try {
       await initialize();
@@ -460,10 +475,23 @@ const server = createServer(async (req, res) => {
   try {
     for await (const chunk of req) {
       raw += chunk;
-      if (Buffer.byteLength(raw) > 256 * 1024) throw new Error('Prompt is too large');
+      if (Buffer.byteLength(raw) > 12 * 1024 * 1024) throw new Error('ACP prompt exceeds 12 MiB limit');
     }
     const body = JSON.parse(raw);
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) throw new Error('Missing prompt');
+    if (body.images != null && !Array.isArray(body.images)) throw new Error('Invalid ACP image list');
+    if ((body.images?.length ?? 0) > 4) throw new Error('Too many ACP images in one prompt');
+    const images = (body.images || []).map((item) => {
+      if (!item || typeof item !== 'object'
+        || typeof item.data !== 'string'
+        || typeof item.mimeType !== 'string'
+        || !/^image\/(?:png|jpeg|webp|gif)$/.test(item.mimeType)
+        || item.data.length > 4 * 1024 * 1024
+        || !/^[a-zA-Z0-9+/]+={0,2}$/.test(item.data)) {
+        throw new Error('Invalid ACP image payload');
+      }
+      return { type: 'image', data: item.data, mimeType: item.mimeType };
+    });
     if (body.conversationId != null && (
       typeof body.conversationId !== 'string' || body.conversationId.length > 200
     )) throw new Error('Invalid conversation ID');
@@ -477,6 +505,9 @@ const server = createServer(async (req, res) => {
       typeof body.modelId !== 'string' || body.modelId.length > 160
     )) throw new Error('Invalid ACP model ID');
     await initialize();
+    if (images.length && !agentPromptCapabilities.image) {
+      throw new Error('Devin ACP agent has not advertised native image support');
+    }
     activeConversationKey = body.conversationId || null;
     const chat = await acquireChatSession(activeConversationKey);
     if (body.modelId) await selectModel(chat.id, body.modelId);
@@ -506,7 +537,7 @@ const server = createServer(async (req, res) => {
     const promptId = randomUUID();
     write({ type: 'started', promptId });
     const result = await request('session/prompt', {
-      sessionId: chat.id, prompt: [{ type: 'text', text: promptText }]
+      sessionId: chat.id, prompt: [{ type: 'text', text: promptText }, ...images]
     }, 10 * 60 * 1000, promptAbortController.signal);
     write({ type: 'done', result });
   } catch (error) {

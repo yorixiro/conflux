@@ -59,14 +59,15 @@ function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) 
   }
   const endpoint = path === '/devin-acp/health' && req.method === 'GET' ? '/health'
     : path === '/devin-acp/models' && req.method === 'GET' ? '/models'
+    : path === '/devin-acp/capabilities' && req.method === 'GET' ? '/capabilities'
     : path === '/devin-acp/prompt' && req.method === 'POST' ? '/prompt'
     : path === '/devin-acp/cancel' && req.method === 'POST' ? '/cancel'
     : path === '/devin-acp/tool/result' && req.method === 'POST' ? '/tool/result'
     : path === '/devin-acp/permission/result' && req.method === 'POST' ? '/permission/result' : null;
   if (!endpoint) { json(res, 404, { error: 'Unknown ACP endpoint.' }); return; }
   if (endpoint === '/prompt' && (!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '')
-    || Number(req.headers['content-length'] || 0) > 256 * 1024)) {
-    json(res, 413, { error: 'ACP prompt must be JSON of at most 256 KiB.' }); return;
+    || Number(req.headers['content-length'] || 0) > 12 * 1024 * 1024)) {
+    json(res, 413, { error: 'ACP prompt must be JSON of at most 12 MiB.' }); return;
   }
   const upstream = httpRequest({
     hostname: '127.0.0.1', port, path: endpoint, method: req.method,

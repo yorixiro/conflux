@@ -587,6 +587,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   signal?: AbortSignal;
   requestVectorEmbeddings?: RequestSemanticVectorEmbeddingClient;
   requestImageUnderstanding?: ImageUnderstandingRequestReply;
+  acpNativeImageAvailable?: boolean;
 }): Promise<{
   assistantName: string;
   modelId: string;
@@ -605,10 +606,13 @@ export async function prepareCollaboratorReplyRequest(params: {
   });
   const providerCapability = resolveProviderCapability(api, preparedAdvanced);
   const modelId = providerCapability.provider.model;
-  // The ACP transport only carries text. Its photos must use the separately
-  // configured image-understanding route, even if a stale capability says images.
-  const supportsImageInput = api.agentTransport !== 'devin-acp'
-    && providerCapability.input.images !== 'none';
+  // ACP transports images only when its actual agent declares the ACP v1
+  // image prompt capability. For normal API providers use the provider's
+  // existing model capability. Neither mode requires a second OCR provider
+  // when its selected model can read the image directly.
+  const supportsImageInput = api.agentTransport === 'devin-acp'
+    ? params.acpNativeImageAvailable === true
+    : providerCapability.input.images !== 'none';
   const imageUnderstanding = !supportsImageInput
     ? await understandConversationImages({
         messages,
