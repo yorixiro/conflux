@@ -54,7 +54,7 @@
   align-self: flex-start;
   display: inline-block;
   width: auto;
-  max-width: min(100%, 780px);
+  max-width: min(90%, 760px);
   padding: var(--chat-bubble-assistant-padding);
   border: var(--chat-bubble-assistant-border);
   border-radius: var(--chat-bubble-assistant-radius);

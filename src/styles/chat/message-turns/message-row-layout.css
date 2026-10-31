@@ -97,6 +97,11 @@
 .message-turn.assistant .message-turn-stack {
   align-items: flex-start;
 }
+.message-turn.assistant .message-turn-stack {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
 .message-turn.assistant.with-avatar .message-turn-stack {
   /* Flex accounts for the actual avatar size, including user-selected sizes. */
   flex: 1 1 auto;
