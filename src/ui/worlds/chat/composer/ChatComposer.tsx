@@ -302,13 +302,18 @@ export function ChatComposer() {
           query={slashCommandQuery}
           onPick={handlePickSlashCommand}
         />
-        {showKekeChrome ? <div className="modes" role="group" aria-label="快捷工具">
-          <KekeModeButton k="s" word="pièce" label="附件" hit={attachmentPickerOpen} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }} />
-          <span>✦</span>
-          <KekeModeButton k="l" word="kaomoji" label="颜文字" hit={kaomojiOpen} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }} />
-          <span>✦</span>
-          <KekeModeButton k="b" word="outils" label="工具" disabled={interactionLocked} onClick={actions.openToolbox} />
-        </div> : null}
+        {showKekeChrome || persona ? (
+          <div className="chat-composer-topline">
+            {showKekeChrome ? <div className="modes" role="group" aria-label="快捷工具">
+              <KekeModeButton k="s" word="pièce" label="附件" hit={attachmentPickerOpen} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }} />
+              <span>✦</span>
+              <KekeModeButton k="l" word="kaomoji" label="颜文字" hit={kaomojiOpen} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }} />
+              <span>✦</span>
+              <KekeModeButton k="b" word="outils" label="工具" disabled={interactionLocked} onClick={actions.openToolbox} />
+            </div> : null}
+            {persona ? <PersonaModelSettings key={persona.id} persona={persona} /> : null}
+          </div>
+        ) : null}
         <div className="chat-submit-anchor">
           <ComposerAttachments
             pickerOpen={attachmentPickerOpen}
@@ -405,7 +410,7 @@ export function ChatComposer() {
             </div>
           </div>
         </div>
-        {persona ? <PersonaModelSettings key={persona.id} persona={persona} /> : null}
+
         
       </div>
     </>
