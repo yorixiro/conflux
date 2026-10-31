@@ -6,7 +6,7 @@
 :root[data-cf=sticker] #chat .fd textarea{padding:0 12px;font:700 var(--chat-composer-text-size,16px)/var(--chat-composer-text-leading,1.42) var(--cn)}
 :root[data-cf=sticker] #chat .fd textarea::placeholder{font:700 var(--chat-composer-text-size,16px)/1.2 var(--cn);letter-spacing:.08em;color:#b8acb0}
 :root[data-cf=sticker] #chat .chat-composer .chat-box-shell,:root[data-cf=sticker] #chat .chat-composer .chat-box-shell:focus-within{padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;min-height:0}
-:root[data-cf=sticker] #chat .chat-composer{padding:0;gap:0;background:none;border:0;box-shadow:none}
+:root[data-cf=sticker] #chat .chat-composer{padding:0;gap:8px;background:none;border:0;box-shadow:none}
 :root[data-cf=sticker] #chat .fd textarea{resize:none;overflow-y:auto;max-height:var(--chat-composer-textarea-max-height,104px);height:auto;padding-top:9px;padding-bottom:9px;padding-right:40px;box-sizing:border-box}
 :root[data-cf=sticker] #chat .fd .voice-input-btn{position:absolute;right:2px;top:50%;translate:0 -50%;width:30px;height:30px;color:var(--ink)}
 :root[data-cf=sticker] #chat .sd .send-label{display:contents}
@@ -16,13 +16,97 @@
 :root[data-cf=sticker] #chat nav.tabs button{padding:0 2px;letter-spacing:.1em}
 html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .chat-dock.bar{width:100%;max-width:none;margin-inline:0}
+/* A single aligned footer layout for both sticker skins. The tape, paper,
+   icons and bubble ornaments remain skin-owned; only geometry is shared. */
+:root[data-cf=sticker] #chat .chat-composer .chat-composer-topline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,max-content);
+  align-items:center;
+  column-gap:10px;
+  row-gap:0;
+  min-height:32px;
+  padding:0 2px;
+  box-sizing:border-box;
+}
+:root[data-cf=sticker] #chat .chat-composer-topline>.modes{
+  justify-self:start;
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  margin:0;
+  padding:0;
+}
+:root[data-cf=sticker] #chat .chat-composer-topline .mode{
+  rotate:0deg;
+  flex:0 0 auto;
+}
+:root[data-cf=sticker] #chat .chat-composer-topline>.chat-model-toolbar{
+  justify-self:end;
+  align-self:center;
+  width:auto;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+}
+:root[data-cf=sticker] #chat .chat-composer-topline .model-effort-row{
+  justify-content:flex-end;
+  width:auto;
+  min-width:0;
+}
+:root[data-cf=sticker] #chat .chat-composer-topline .ps-footnote{
+  margin:0;
+  font-size:11px;
+  line-height:1.35;
+  white-space:nowrap;
+}
+:root[data-cf=sticker] #chat .chat-submit-anchor>.row.chat-composer-input-row{
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) 36px;
+  align-items:center;
+  column-gap:10px;
+  min-height:44px;
+  padding:0 2px;
+  box-sizing:border-box;
+}
+:root[data-cf=sticker] #chat .chat-composer-input-row>.composer-quick-actions{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:44px;
+  min-height:0;
+  padding:0;
+}
+:root[data-cf=sticker] #chat .chat-composer-input-row .fb,
+:root[data-cf=sticker] #chat .chat-composer-input-row .sd{
+  width:36px;
+  height:36px;
+  margin:0;
+  place-self:center;
+}
+:root[data-cf=sticker] #chat .chat-composer-input-row>.fd{
+  width:100%;
+  min-width:0;
+  max-width:none;
+  min-height:44px;
+  margin:0;
+}
+@media(max-width:440px){
+  :root[data-cf=sticker] #chat .chat-composer-topline{column-gap:5px}
+  :root[data-cf=sticker] #chat .chat-composer-topline>.modes{gap:5px}
+  :root[data-cf=sticker] #chat .chat-composer-topline .mode{padding-inline:6px;font-size:10.5px}
+  :root[data-cf=sticker] #chat .chat-composer-topline .ps-footnote{font-size:10px}
+  :root[data-cf=sticker] #chat .chat-submit-anchor>.row.chat-composer-input-row{column-gap:8px}
+}
 :root[data-cf=sticker] #chat.app-shell{width:100%;max-width:none;margin-inline:0}
 :root[data-cf=sticker] #chat .world-chat,:root[data-cf=sticker] #chat .chat-body{width:100%}
 :root[data-cf=sticker] #chat .app-stage{padding-inline:0;max-width:none}
 :root[data-cf=sticker] #chat .fd{min-height:44px;align-items:flex-end}
-:root[data-cf=sticker] #chat .fd{height:auto;min-height:40px;border-radius:16px}
+:root[data-cf=sticker] #chat .fd{height:auto;min-height:44px;border-radius:16px;align-items:center}
 :root[data-cf=sticker] #chat .fd textarea{line-height:var(--chat-composer-text-leading,1.42);min-height:28px;padding-top:7px;padding-bottom:7px}
-:root[data-cf=sticker] #chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
+:root[data-cf=sticker] #chat .fd .voice-input-btn{top:50%;bottom:auto;translate:0 -50%}
 :root[data-cf=sticker] #chat header.keke-original-topbar{position:relative}
 /* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
 :root[data-cf=sticker] #chat .conflux-sidebar-dialog{width:min(388px,calc(100vw - 18px));max-width:none;background:none;overflow:visible}
