@@ -135,3 +135,41 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 /* Prototype has no name/model line above assistant bubbles; keep the thinking trigger row minimal. */
 #chat .msg-row.r .message-identity-meta{display:none}
 #chat .msg-row.r .message-identity-row{min-height:0}
+
+/* Avatar in the prototype's left-gutter position; the SYM heart rides it as a corner badge.
+   Without an avatar the heart sits at the prototype's own spot (row left, top 7px). */
+#chat .msg-row.r .message-turn-body.assistant{position:relative}
+#chat .msg-row.r .message-avatar-slot.assistant{position:absolute;left:-26px;top:4px;width:22px!important;min-width:22px!important;overflow:visible}
+#chat .msg-row.r .message-avatar-slot.assistant.empty{display:none}
+#chat .msg-row.s .message-avatar-slot.user{width:22px;min-width:22px}
+#chat .msg-row .persona-avatar.message-avatar{width:22px!important;height:22px!important;border-radius:50%;overflow:visible;background:var(--paper);box-shadow:0 0 0 1.5px var(--paper),1px 1.5px 0 1px rgba(176,131,140,.32);display:grid;place-items:center}
+#chat .msg-row .persona-avatar.message-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+#chat .msg-row .persona-avatar.message-avatar svg{width:11px;height:11px}
+:root[data-ct=pois] #chat .msg-row .persona-avatar.message-avatar{box-shadow:0 0 0 1.5px #fff,0 1px 4px rgba(70,64,66,.25)}
+#chat .msg-row > .kk-sym .sym{position:absolute;left:0;top:7px}
+#chat .message-avatar-slot .kk-sym .sym{position:absolute;left:auto;top:auto;right:-3px;bottom:-3px;width:12px;height:12px}
+/* Bubble width: prototype ratio kept, but the real cap widens so long replies stop wrapping early. */
+:root #chat .msg-row.r .b{max-width:min(86%,560px)}
+:root #chat .msg-row.s .b{max-width:min(80%,460px)}
+/* Thinking decorations: the prototype family's sparkle/paw, not the Polaris star. */
+#chat .thinking-inline-icon svg,#chat .assistant-stage-live-icon svg{display:none}
+#chat .thinking-inline-icon::before{content:'♡';display:block;color:var(--dot,var(--hot));font:700 13px/1 var(--cn);animation:twinkle 1.4s var(--ease,cubic-bezier(.22,.61,.36,1)) infinite}
+:root[data-ct=pois] #chat .thinking-inline-icon::before{content:'';width:13px;height:13px;background:#6a6466;-webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat;animation:paw 1.6s var(--ease,cubic-bezier(.22,.61,.36,1)) infinite}
+#chat .assistant-stage-live .kk-ty{display:inline-flex;justify-content:center;width:30px}
+/* One meta line: time · 既読 · token, no wrapping. */
+#chat .message-usage-meta{flex-wrap:nowrap}
+
+/* Long-press action sheet skinned like the prototype's .kpop/.kac chip panel; all real actions stay. */
+:root #chat .message-action-dialog{border:0;border-radius:20px;background:var(--kp,#fbf8f7);box-shadow:0 0 0 2px var(--kp,#fbf8f7),2px 3px 0 2px rgba(176,131,140,.22),0 18px 40px -18px rgba(90,70,76,.4);color:var(--ki,#6a6266)}
+#chat .message-action-header{color:var(--ki)}
+#chat .message-action-menu{gap:5px}
+:root #chat .message-action-menu .message-action-btn{border:0;border-radius:14px;background:var(--kp,#fbf8f7);box-shadow:0 0 0 2px var(--kp,#fbf8f7),1.5px 2px 0 2px rgba(176,131,140,.22);color:var(--ki);font:800 12px/1 var(--kf,var(--cn));letter-spacing:.08em;padding:9px 12px}
+:root #chat .message-action-menu .message-action-btn.destructive{background:var(--kh,#c99aa8);color:#fff}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn{position:relative;box-shadow:none}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn:nth-child(3n+1){background:var(--pk)}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn:nth-child(3n+2){background:var(--bl)}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn:nth-child(3n){background:var(--yl)}
+:root[data-ct=doodle] #chat .message-action-menu .message-action-btn.destructive{background:var(--kh);color:#fff}
+:root[data-ct=pois] #chat .message-action-dialog{border:1.5px dashed #fff;background:#f1eeee radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px}
+:root[data-ct=pois] #chat .message-action-menu .message-action-btn{border:1.5px dashed #fff;background:rgba(255,255,255,.65);box-shadow:0 0 0 1px rgba(134,103,98,.22)}

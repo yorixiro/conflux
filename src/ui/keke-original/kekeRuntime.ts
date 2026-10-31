@@ -201,7 +201,11 @@ export function mountKekeBubbles() {
     const rows = [...document.querySelectorAll('#chat .chat-flow .msg-row')];
     const cs = useChatStore.getState(), all = cs.conversations.find((c) => c.id === cs.activeConversationId)?.messages || [], at = new Map(all.map((m, j) => [m.id, j]));
     const dk = (m) => { const d = new Date(m.timestamp); return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(); };
-    document.querySelectorAll('#chat .kk-ty').forEach((n) => { if (!n.previousElementSibling?.classList.contains('assistant-streaming-hint')) n.remove(); });
+    document.querySelectorAll('#chat .kk-ty').forEach((n) => { if (!n.previousElementSibling?.classList.contains('assistant-streaming-hint') && !n.parentElement?.classList.contains('assistant-stage-live')) n.remove(); });
+    document.querySelectorAll('#chat .assistant-stage-live').forEach((h) => {
+      if (h.querySelector(':scope > .kk-ty') || !TY[root.dataset.ct] || h.closest('.bubble')?.querySelector('.assistant-streaming-hint')) return;
+      const t = document.createElement('span'); t.className = 'ty kk-ty'; t.setAttribute('aria-hidden', 'true'); t.innerHTML = TY[root.dataset.ct] + '<i></i><i></i><i></i>'; h.appendChild(t);
+    });
     document.querySelectorAll('#chat .assistant-streaming-hint').forEach((h) => {
       if (h.nextElementSibling?.classList.contains('kk-ty') || !TY[root.dataset.ct]) return;
       const t = document.createElement('span'); t.className = 'ty kk-ty'; t.setAttribute('aria-hidden', 'true'); t.innerHTML = TY[root.dataset.ct] + '<i></i><i></i><i></i>'; h.after(t);
@@ -227,7 +231,7 @@ export function mountKekeBubbles() {
       const read = w == 's' && (i < rows.length - 1 || typing);
       if (um) {
         let rcur = um.querySelector(':scope > .kk-read');
-        if (l && read) { if (!rcur) { rcur = document.createElement('span'); rcur.className = 'kk-read'; rcur.textContent = '· ' + RD; um.appendChild(rcur); } }
+        if (l && read) { if (!rcur) { rcur = document.createElement('span'); rcur.className = 'kk-read'; rcur.textContent = '· ' + RD; um.insertBefore(rcur, um.children[1] || null); } }
         else if (rcur) rcur.remove();
       }
       const mcur = row.querySelector(':scope > .kk-mt');
@@ -235,9 +239,13 @@ export function mountKekeBubbles() {
         const d = new Date(msg.timestamp), txt = `${z2(d.getHours())}:${z2(d.getMinutes())}${read ? ' · ' + RD : ''}`;
         if (!mcur) { const e = document.createElement('div'); e.className = `mt ${w} kk-mt`; e.textContent = txt; row.append(e); } else { if (mcur.textContent !== txt) mcur.textContent = txt; if (mcur.className !== `mt ${w} kk-mt`) mcur.className = `mt ${w} kk-mt`; }
       } else if (mcur) mcur.remove();
-      if (f && w == 'r' && SYM[root.dataset.ct] && !row.querySelector(':scope > .kk-sym')) {
-        const sy = document.createElement('span'); sy.className = 'kk-sym'; sy.style.cssText = 'position:absolute;left:0;top:7px;display:contents'; sy.setAttribute('aria-hidden', 'true'); sy.innerHTML = SYM[root.dataset.ct]; row.prepend(sy);
-      } else if ((!f || w != 'r') && row.querySelector(':scope > .kk-sym')) row.querySelector(':scope > .kk-sym').remove();
+      const slot = row.querySelector('.message-avatar-slot.assistant:not(.empty)');
+      let sy = row.querySelector('.kk-sym');
+      if (f && w == 'r' && SYM[root.dataset.ct]) {
+        const host = slot || row;
+        if (sy && sy.parentNode !== host) { sy.remove(); sy = null; }
+        if (!sy) { sy = document.createElement('span'); sy.className = 'kk-sym'; sy.style.display = 'contents'; sy.setAttribute('aria-hidden', 'true'); sy.innerHTML = SYM[root.dataset.ct]; host.appendChild(sy); }
+      } else if (sy) sy.remove();
       const b = row.querySelector('.bubble'); if (!b) return;
       if (!b.classList.contains('b')) b.classList.add('b');
       if (b.dataset.p !== p) b.dataset.p = p;
