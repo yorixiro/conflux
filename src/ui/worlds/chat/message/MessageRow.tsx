@@ -412,6 +412,9 @@ function MessageRowComponent({
       className={`msg-row ${resolveMessageRowRoleClass(message, isToolEvent)} ${state.isFocused ? 'focused' : ''}`}
       data-message-id={message.id}
       data-row-state={state.lifecycle}
+      style={isAssistantReply && showChatAvatars
+        ? { '--message-avatar-gutter': `${assistantAvatarPx + 9}px` } as CSSProperties
+        : undefined}
       {...buildUserBubbleCycleAttrs(userBubbleIndex)}
       {...buildMessageCycleAttrs(state.messageCycleIndex)}
     >
@@ -433,12 +436,7 @@ function MessageRowComponent({
       ) : isAssistantReply ? (
         <div className={`message-turn assistant ${showChatAvatars ? 'with-avatar' : ''}`}>
           <div className="message-turn-body assistant">
-            <div
-              className="message-turn-stack assistant"
-              style={showChatAvatars
-                ? { '--message-avatar-gutter': `${assistantAvatarPx + 9}px` } as CSSProperties
-                : undefined}
-            >
+            <div className="message-turn-stack assistant">
               {showAssistantChatIdentity ? (
                 <MessageMeta
                   message={message}

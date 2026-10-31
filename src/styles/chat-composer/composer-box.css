@@ -117,7 +117,7 @@ html[data-keyboard-open='true'] .chat-box-shell { box-shadow: var(--chat-compose
   width: 30px;
 }
 .hidden-file-input { display: none; }
-.chat-box textarea { flex: 1; min-width: 0; min-height: 28px; max-height: 104px; border: 0; outline: none; background: transparent; font-size: 16px; color: var(--text); font-family: inherit; line-height: 1.42; resize: none; overflow-y: auto; padding: 5px 1px 1px; }
+.chat-box textarea { flex: 1; min-width: 0; min-height: 28px; max-height: var(--chat-composer-textarea-max-height, 104px); border: 0; outline: none; background: transparent; font-size: var(--chat-composer-text-size, 16px); color: var(--text); font-family: inherit; line-height: var(--chat-composer-text-leading, 1.42); resize: none; overflow-y: auto; padding: 5px 1px 1px; }
 .chat-box textarea::placeholder { color: var(--text-muted); }
 .send-btn { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 14px; border: none; background: color-mix(in srgb, var(--surface) 18%, transparent); color: var(--accent); cursor: default; font-size: 14px; transition: all var(--duration-normal) ease; display: flex; align-items: center; justify-content: center; transform: translateZ(0); box-shadow: none; }
 .send-btn.has-content { background: var(--chat-send-active-fill); color: var(--chat-send-active-text); cursor: pointer; }
@@ -350,6 +350,9 @@ html[data-keyboard-open='true'] .chat-box-shell { box-shadow: var(--chat-compose
 /* One flex sizing contract for system composer and the two sticker composers.
    Their backgrounds, ornaments, icons and control styles stay skin-owned. */
 #chat .chat-composer-input-row {
+  --chat-composer-text-size: 16px;
+  --chat-composer-text-leading: 1.42;
+  --chat-composer-textarea-max-height: 104px;
   width: 100%;
   min-width: 0;
 }

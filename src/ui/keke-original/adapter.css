@@ -3,15 +3,15 @@
 :root[data-cf=sticker] #chat .fd textarea{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;padding:0 4px;color:var(--rt);font:400 15px/1 var(--cn);letter-spacing:.04em}
 :root[data-cf=sticker] #chat .fd textarea::placeholder{color:var(--dim);font:400 23px/1 var(--script);letter-spacing:0;transition:opacity .5s var(--ease)}
 :root[data-cf=sticker] #chat .fd textarea:focus::placeholder{opacity:.3}
-:root[data-cf=sticker] #chat .fd textarea{padding:0 12px;font:700 13.5px/1 var(--cn)}
-:root[data-cf=sticker] #chat .fd textarea::placeholder{font:700 12.5px/1 var(--cn);letter-spacing:.08em;color:#b8acb0}
+:root[data-cf=sticker] #chat .fd textarea{padding:0 12px;font:700 var(--chat-composer-text-size,16px)/var(--chat-composer-text-leading,1.42) var(--cn)}
+:root[data-cf=sticker] #chat .fd textarea::placeholder{font:700 var(--chat-composer-text-size,16px)/1.2 var(--cn);letter-spacing:.08em;color:#b8acb0}
 :root[data-cf=sticker] #chat .chat-composer .chat-box-shell,:root[data-cf=sticker] #chat .chat-composer .chat-box-shell:focus-within{padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;min-height:0}
 :root[data-cf=sticker] #chat .chat-composer{padding:0;gap:0;background:none;border:0;box-shadow:none}
-:root[data-cf=sticker] #chat .fd textarea{resize:none;overflow-y:auto;max-height:120px;height:auto;padding-top:9px;padding-bottom:9px;padding-right:40px;box-sizing:border-box}
+:root[data-cf=sticker] #chat .fd textarea{resize:none;overflow-y:auto;max-height:var(--chat-composer-textarea-max-height,104px);height:auto;padding-top:9px;padding-bottom:9px;padding-right:40px;box-sizing:border-box}
 :root[data-cf=sticker] #chat .fd .voice-input-btn{position:absolute;right:2px;top:50%;translate:0 -50%;width:30px;height:30px;color:var(--ink)}
 :root[data-cf=sticker] #chat .sd .send-label{display:contents}
 :root[data-cf=sticker] #chat .keke-shell{display:contents}
-:root[data-cf=sticker] #chat .fd{height:auto;min-height:32px}
+:root[data-cf=sticker] #chat .fd{height:auto;min-height:40px}
 :root[data-cf=sticker] #chat nav.tabs{justify-content:space-around;gap:0;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))}
 :root[data-cf=sticker] #chat nav.tabs button{padding:0 2px;letter-spacing:.1em}
 html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
@@ -20,8 +20,8 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .world-chat,:root[data-cf=sticker] #chat .chat-body{width:100%}
 :root[data-cf=sticker] #chat .app-stage{padding-inline:0;max-width:none}
 :root[data-cf=sticker] #chat .fd{min-height:44px;align-items:flex-end}
-:root[data-cf=sticker] #chat .fd{height:auto;min-height:32px;border-radius:16px}
-:root[data-cf=sticker] #chat .fd textarea,:root[data-cf=sticker] #chat .fd textarea{line-height:1.45;min-height:32px;padding-top:7px;padding-bottom:7px}
+:root[data-cf=sticker] #chat .fd{height:auto;min-height:40px;border-radius:16px}
+:root[data-cf=sticker] #chat .fd textarea{line-height:var(--chat-composer-text-leading,1.42);min-height:28px;padding-top:7px;padding-bottom:7px}
 :root[data-cf=sticker] #chat .fd .voice-input-btn{top:auto;bottom:1px;translate:0 0}
 :root[data-cf=sticker] #chat header.keke-original-topbar{position:relative}
 /* Profile / library drawer: one paper, one size, torn right edge from the prototype `.side`. */
@@ -76,21 +76,16 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 :root[data-cf=sticker] #chat .msg-row > .kk-mt.r{margin-left:4px}
 /* A visible avatar takes its own gutter; keep the prototype time label
    aligned with the bubble rather than under the avatar. */
-:root[data-cf=sticker] #chat .msg-row.m.r:has(.message-avatar-slot.assistant) > .kk-mt.r{margin-left:31px}
+:root[data-cf=sticker] #chat .msg-row.m.r:has(.message-avatar-slot.assistant) > .kk-mt.r{margin-left:var(--message-avatar-gutter,0px)}
 :root[data-cf=sticker] #chat .assistant-streaming-hint{display:none}
 
 /* Prototype bubble look on the real DOM: .msg-row gets .m + .r/.s (+.g/.new), .bubble gets .b + data-p.
    Bubble face: assistant uses the prototype's sticker fill (paper + wobble outline), user the tinted fill. */
 :root[data-cf=sticker] #chat .msg-row .bubble{cursor:auto}
-:root[data-cf=sticker] #chat .msg-row.m{margin-top:6px}
-:root[data-cf=sticker] #chat .msg-row.m.g{margin-top:22px}
-:root[data-cf=sticker] #chat .msg-row.m.r{padding-left:26px}
-/* The real avatar occupies the left gutter in shared flex layout.
-   Do not also add a second 26px padding; keep it for avatar-free messages. */
-:root[data-cf=sticker] #chat .msg-row.m.r:has(.message-avatar-slot.assistant){padding-left:0}
+/* Message margins and content indents come from the shared React layout. */
 :root[data-cf=sticker] #chat .msg-row.m.s .message-turn-stack{align-items:flex-end}
-:root[data-cf=sticker] #chat .msg-row.r .b{background:var(--bub-r,var(--chat-bubble-assistant-fill));box-shadow:var(--bub-r-sh,var(--chat-bubble-assistant-shadow));border:1px solid var(--ailine,transparent);color:var(--rt);font:700 14px/1.7 var(--cn);text-shadow:none;transform-origin:0 100%}
-:root[data-cf=sticker] #chat .msg-row.s .b{background:var(--bub-s,var(--chat-bubble-user-fill));box-shadow:var(--bub-s-sh,var(--chat-bubble-user-shadow));border:1px solid var(--ailine,transparent);color:var(--st,var(--rt));font:700 14px/1.7 var(--cn);text-shadow:none;transform-origin:100% 100%;rotate:var(--rot,0deg)}
+:root[data-cf=sticker] #chat .msg-row.r .b{background:var(--bub-r,var(--chat-bubble-assistant-fill));box-shadow:var(--bub-r-sh,var(--chat-bubble-assistant-shadow));border:1px solid var(--ailine,transparent);color:var(--rt);font-family:var(--cn);font-weight:700;font-size:var(--chat-message-text-size,var(--type-body));line-height:var(--chat-message-assistant-leading,1.54);letter-spacing:0;text-shadow:none;transform-origin:0 100%}
+:root[data-cf=sticker] #chat .msg-row.s .b{background:var(--bub-s,var(--chat-bubble-user-fill));box-shadow:var(--bub-s-sh,var(--chat-bubble-user-shadow));border:1px solid var(--ailine,transparent);color:var(--st,var(--rt));font-family:var(--cn);font-weight:700;font-size:var(--chat-message-text-size,var(--type-body));line-height:var(--chat-message-user-leading,1.56);letter-spacing:0;text-shadow:none;transform-origin:100% 100%;rotate:var(--rot,0deg)}
 :root[data-ct=doodle] #chat .msg-row.r .b{transform-origin:0 100%}
 :root[data-ct=doodle] #chat .msg-row.s .b{transform-origin:100% 100%}
 :root[data-ct=pois] #chat :is(.msg-row.r .b,.msg-row.s .b){border:1.5px dashed rgba(255,255,255,.95)}
@@ -141,22 +136,21 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* Prototype has no name/model line above assistant bubbles; keep the thinking trigger row minimal. */
 :root[data-cf=sticker] #chat .msg-row.r .message-identity-meta{display:none}
 :root[data-cf=sticker] #chat .msg-row.r .message-identity-row{min-height:0}
-:root[data-cf=sticker] #chat .message-turn.assistant.with-avatar .message-turn-stack > .message-identity-row{margin-left:31px}
 
 /* Avatar in the prototype's left-gutter position; the SYM heart rides it as a corner badge.
    Without an avatar the heart sits at the prototype's own spot (row left, top 7px). */
 :root[data-cf=sticker] #chat .msg-row.r .message-turn-body.assistant{position:relative}
-:root[data-cf=sticker] #chat .msg-row.r .message-avatar-slot.assistant{position:relative;left:auto;top:auto;width:22px!important;min-width:22px!important;padding:0;overflow:visible}
+:root[data-cf=sticker] #chat .msg-row.r .message-avatar-slot.assistant{position:relative;left:auto;top:auto;padding:0;overflow:visible}
 :root[data-cf=sticker] #chat .msg-row.r .message-avatar-slot.assistant.empty{visibility:hidden}
-:root[data-cf=sticker] #chat .msg-row.s .message-avatar-slot.user{width:22px;min-width:22px;align-self:flex-start}
-:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar{width:22px!important;height:22px!important;border-radius:50%;overflow:visible;background:var(--paper);box-shadow:0 0 0 1.5px var(--paper),1px 1.5px 0 1px rgba(176,131,140,.32);display:grid;place-items:center}
+:root[data-cf=sticker] #chat .msg-row.s .message-avatar-slot.user{align-self:flex-start}
+:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar{border-radius:50%;overflow:visible;background:var(--paper);box-shadow:0 0 0 1.5px var(--paper),1px 1.5px 0 1px rgba(176,131,140,.32);display:grid;place-items:center}
 :root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar svg{width:11px;height:11px}
+:root[data-cf=sticker] #chat .msg-row .persona-avatar.message-avatar svg{max-width:100%;max-height:100%}
 :root[data-ct=pois] #chat .msg-row .persona-avatar.message-avatar{box-shadow:0 0 0 1.5px #fff,0 1px 4px rgba(70,64,66,.25)}
 :root[data-cf=sticker] #chat .msg-row > .kk-sym .sym{position:absolute;left:0;top:7px}
 :root[data-cf=sticker] #chat .message-avatar-slot .kk-sym .sym{position:absolute;left:auto;top:auto;right:-3px;bottom:-3px;width:12px;height:12px}
 /* Bubble width: prototype ratio kept, but the real cap widens so long replies stop wrapping early. */
-:root[data-cf=sticker] #chat .msg-row.r .b{max-width:min(86%,560px)}
+:root[data-cf=sticker] #chat .msg-row.r .b{max-width:var(--chat-message-assistant-max-width,min(90%,760px))}
 :root[data-cf=sticker] #chat .msg-row.s .b{max-width:100%}
 /* Thinking decorations: the prototype family's sparkle/paw, not the Polaris star. */
 :root[data-cf=sticker] #chat .thinking-inline-icon svg,:root[data-cf=sticker] #chat .assistant-stage-live-icon svg{display:none}

@@ -73,7 +73,8 @@ describe('shared chat avatar/bubble layout', () => {
     expect(row).toBeGreaterThan(identity);
     expect(avatar).toBeGreaterThan(row);
     expect(bubble).toBeGreaterThan(avatar);
-    expect(html).toContain('--message-avatar-gutter:43px');
+    const rowOpenTag = html.slice(html.indexOf('class="msg-row'), html.indexOf('>', html.indexOf('class="msg-row')));
+    expect(rowOpenTag).toContain('--message-avatar-gutter:43px');
   });
 
   it('keeps a continuation bubble in the same column with an empty avatar slot', () => {

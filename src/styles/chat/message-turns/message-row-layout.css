@@ -7,7 +7,11 @@
   padding-top: 10px;
   margin-top: -10px;
   overflow: visible;
-  /* One readable conversation column for default and both sticker skins. */
+  /* Shared message geometry. Sticker skins may change decoration, not content sizing. */
+  --chat-message-text-size: var(--type-body);
+  --chat-message-assistant-leading: 1.54;
+  --chat-message-user-leading: 1.56;
+  --chat-message-assistant-max-width: min(90%, 760px);
   width: 100%;
   max-width: 760px;
   margin-inline: auto;
