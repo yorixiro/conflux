@@ -75,3 +75,63 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .msg-row > .kk-day{align-self:stretch;margin:6px 0 14px}
 #chat .msg-row > .kk-mt.r{margin-left:4px}
 #chat .assistant-streaming-hint{display:none}
+
+/* Prototype bubble look on the real DOM: .msg-row gets .m + .r/.s (+.g/.new), .bubble gets .b + data-p.
+   Bubble face: assistant uses the prototype's sticker fill (paper + wobble outline), user the tinted fill. */
+#chat .msg-row .bubble{cursor:auto}
+#chat .msg-row.m{margin-top:6px}
+#chat .msg-row.m.g{margin-top:22px}
+#chat .msg-row.m.r{padding-left:26px}
+#chat .msg-row.m.s .message-turn-stack{align-items:flex-end}
+:root #chat .msg-row.r .b{background:var(--bub-r,var(--chat-bubble-assistant-fill));box-shadow:var(--bub-r-sh,var(--chat-bubble-assistant-shadow));border:1px solid var(--ailine,transparent);color:var(--rt);font:700 14px/1.7 var(--cn);text-shadow:none;transform-origin:0 100%}
+:root #chat .msg-row.s .b{background:var(--bub-s,var(--chat-bubble-user-fill));box-shadow:var(--bub-s-sh,var(--chat-bubble-user-shadow));border:1px solid var(--ailine,transparent);color:var(--st,var(--rt));font:700 14px/1.7 var(--cn);text-shadow:none;transform-origin:100% 100%;rotate:var(--rot,0deg)}
+:root[data-ct=doodle] #chat .msg-row.r .b{transform-origin:0 100%}
+:root[data-ct=doodle] #chat .msg-row.s .b{transform-origin:100% 100%}
+:root[data-ct=pois] #chat :is(.msg-row.r .b,.msg-row.s .b){border:1.5px dashed rgba(255,255,255,.95)}
+:root[data-ct=pois] #chat .msg-row.s .b{background:rgba(236,215,219,.7);box-shadow:0 2px 10px rgba(150,105,115,.07)}
+:root[data-ct=pois] #chat .msg-row.r .b{background:rgba(242,242,242,.58);box-shadow:0 2px 10px rgba(70,64,66,.05)}
+/* Group-position corner radii, same four-corner logic as the prototype's RAD table. */
+#chat .msg-row .b[data-p]{border-radius:var(--R,18px) var(--R,18px) var(--R,18px) var(--R,18px)}
+#chat .msg-row.r .b[data-p=m],#chat .msg-row.r .b[data-p=l]{border-bottom-left-radius:6px}
+#chat .msg-row.r .b[data-p=f],#chat .msg-row.r .b[data-p=m]{border-top-left-radius:6px}
+#chat .msg-row.s .b[data-p=m],#chat .msg-row.s .b[data-p=l]{border-bottom-right-radius:6px}
+#chat .msg-row.s .b[data-p=f],#chat .msg-row.s .b[data-p=m]{border-top-right-radius:6px}
+/* Assistant group-start charm from the prototype SYM table. */
+#chat .msg-row .kk-sym .sym{display:block}
+:root[data-ct=pois] #chat .msg-row .kk-sym .sym{background:var(--u) center/contain no-repeat}
+/* Time + token line adopts the prototype .mt face; 已読 is appended to it. */
+#chat .message-usage-meta{font:italic 500 12px/1 var(--serif);letter-spacing:.14em;color:var(--dim)}
+:root[data-cf=sticker] #chat .message-usage-meta{font:800 10px/1 var(--cn);letter-spacing:.12em;text-shadow:var(--tsh)}
+#chat .message-usage-meta .kk-read{white-space:nowrap}
+#chat .message-token-trigger{font:inherit;color:inherit;letter-spacing:inherit;padding:0;border:0;background:none;text-transform:none}
+#chat .message-token-trigger:hover{color:var(--hot)}
+#chat .msg-row:not([data-kk-p=s]):not([data-kk-p=l]) .message-usage-meta{display:none}
+/* Action chips adopt the prototype's .kac / .ek paper chips; real actions keep every handler. */
+#chat .user-message-footer{gap:6px 10px;align-items:center}
+#chat .msg-row:not([data-kk-p=s]):not([data-kk-p=l]) .user-message-footer{display:none}
+#chat .message-inline-actions{gap:5px;flex-wrap:wrap}
+:root #chat .message-inline-actions .micro-action-btn,#chat .message-edit-panel .btn-secondary{width:auto;height:auto;min-width:0;min-height:0;padding:7px 11px;border:0;border-radius:14px;background:var(--kp,#fbf8f7);box-shadow:0 0 0 2px var(--kp,#fbf8f7),1.5px 2px 0 2px rgba(176,131,140,.22);color:var(--ki,#6a6266);font:800 12px/1 var(--kf,var(--cn));letter-spacing:.08em}
+:root #chat .message-inline-actions .micro-action-btn svg{width:12px;height:12px}
+:root #chat .message-inline-actions .micro-action-btn:hover,:root #chat .message-inline-actions .micro-action-btn.active{border:0;background:var(--kh,#c99aa8);color:#fff}
+:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary){box-shadow:none;position:relative}
+:root[data-ct=doodle] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n+1){background:var(--pk);rotate:-1.5deg}
+:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n+2){background:var(--bl);rotate:1.2deg}
+:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:nth-child(3n){background:var(--yl);rotate:-.8deg}
+:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn:hover,:root[data-ct=doodle] #chat .message-inline-actions .micro-action-btn.active{background:var(--kh);color:#fff}
+:root[data-ct=pois] #chat :is(.message-inline-actions .micro-action-btn,.message-edit-panel .btn-secondary){border:1.5px dashed #fff;background:#f1eeee;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
+/* Inline edit adopts the prototype .ket outline + .ek action strip; cancel/save/resend all stay. */
+#chat .bubble.editing{outline:1.5px dashed var(--kh,#c99aa8);outline-offset:4px}
+#chat .message-edit-panel{position:relative}
+:root #chat .message-edit-panel .message-edit-input{border:0;border-radius:0;background:transparent;box-shadow:none;font:inherit;letter-spacing:inherit;color:inherit;resize:none}
+#chat .message-edit-panel .message-edit-hint{display:none}
+#chat .bubble.editing .message-inline-actions.user{position:absolute;top:calc(100% + 11px);right:0;display:flex;gap:7px;white-space:nowrap;z-index:3}
+#chat .msg-row:has(.bubble.editing){margin-bottom:40px}
+#chat .message-edit-panel .btn-secondary.active{background:var(--kh,#c99aa8);color:#fff}
+/* Real selectable text inside bubbles (prototype disables it; real app keeps it). */
+#chat .bubble :is(.message-rich-text,.message-markdown,.message-edit-input,textarea){-webkit-user-select:text;user-select:text}
+/* Day separator inside the row. */
+#chat .msg-row > .kk-day{order:-1}
+/* Prototype has no name/model line above assistant bubbles; keep the thinking trigger row minimal. */
+#chat .msg-row.r .message-identity-meta{display:none}
+#chat .msg-row.r .message-identity-row{min-height:0}

@@ -189,7 +189,8 @@ export function mountKekeSendFx() {
 
 /* Bubble grouping from the prototype's render(): per-position corner radii, group spacing and the group-end sketch / sticker. */
 const SK = ['<svg class=sk width=21 height=21 viewBox="0 0 22 22"><path d="M11 1.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L11 15.9 5.1 19.5l1.7-6.7L1.5 8.4l6.9-.5z"/></svg>', '<svg class=sk width=28 height=19 viewBox="0 0 28 18"><path d="M14 9C9 2 2 3 3 8c.6 4 8 3 11 1zM14 9c5-7 12-6 11-1-.6 4-8 3-11 1zM14 9l-3 7M14 9l3 7"/></svg>', '<svg class=sk width=17 height=21 viewBox="0 0 20 24"><path style="fill:#ead0d8" d="M8 2h4v6h6v4h-6v10H8V12H2V8h6z"/></svg>'];
-const WDN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'], TY = { doodle: 'かきかき', pois: 'にゃにゃ' }, z2 = (n) => String(n).padStart(2, '0');
+const WDN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'], TY = { doodle: 'かきかき', pois: 'にゃにゃ' }, RD = '既読', z2 = (n) => String(n).padStart(2, '0');
+const SYM = { doodle: '<svg class=sym viewBox="0 0 16 16" fill="#ead9dc" stroke="#6b6066" stroke-width="1.2" stroke-linejoin="round"><path d="M8 13.6C2.6 10.1 2 6.3 4 4.7s3.4-.3 4 1.1c.6-1.4 2-2.7 4-1.1s1.4 5.4-4 8.9Z"/></svg>', pois: '<i class="sym ic" style="--u:var(--pi-flower)"></i>' };
 const STK = ['s1', 's2', 's3', 's4', 's5', 's6'], ROT = [-14, 10, -6, 16, -10, 8];
 export function mountKekeBubbles() {
   const root = document.documentElement;
@@ -218,13 +219,30 @@ export function mountKekeBubbles() {
       const f = !rows[i - 1] || role(rows[i - 1]) != w, l = !rows[i + 1] || role(rows[i + 1]) != w;
       const p = f && l ? 's' : f ? 'f' : l ? 'l' : 'm';
       if (row.dataset.kkP !== p) row.dataset.kkP = p;
-      if (f) { if (row.dataset.kkG !== '1') row.dataset.kkG = '1'; } else delete row.dataset.kkG;
+      if (!row.classList.contains('m')) row.classList.add('m');
+      if (!row.classList.contains(w)) row.classList.add(w);
+      row.classList.toggle('g', f);
+      row.classList.toggle('new', row.dataset.rowState === 'entering');
+      const um = row.querySelector('.message-usage-meta');
+      const read = w == 's' && (i < rows.length - 1 || typing);
+      if (um) {
+        let rcur = um.querySelector(':scope > .kk-read');
+        if (l && read) { if (!rcur) { rcur = document.createElement('span'); rcur.className = 'kk-read'; rcur.textContent = '· ' + RD; um.appendChild(rcur); } }
+        else if (rcur) rcur.remove();
+      }
       const mcur = row.querySelector(':scope > .kk-mt');
-      if (l && msg) {
-        const d = new Date(msg.timestamp), txt = `${z2(d.getHours())}:${z2(d.getMinutes())}${w == 's' && (i < rows.length - 1 || typing) ? ' · 既読' : ''}`;
+      if (!um && l && msg) {
+        const d = new Date(msg.timestamp), txt = `${z2(d.getHours())}:${z2(d.getMinutes())}${read ? ' · ' + RD : ''}`;
         if (!mcur) { const e = document.createElement('div'); e.className = `mt ${w} kk-mt`; e.textContent = txt; row.append(e); } else { if (mcur.textContent !== txt) mcur.textContent = txt; if (mcur.className !== `mt ${w} kk-mt`) mcur.className = `mt ${w} kk-mt`; }
       } else if (mcur) mcur.remove();
+      if (f && w == 'r' && SYM[root.dataset.ct] && !row.querySelector(':scope > .kk-sym')) {
+        const sy = document.createElement('span'); sy.className = 'kk-sym'; sy.style.cssText = 'position:absolute;left:0;top:7px;display:contents'; sy.setAttribute('aria-hidden', 'true'); sy.innerHTML = SYM[root.dataset.ct]; row.prepend(sy);
+      } else if ((!f || w != 'r') && row.querySelector(':scope > .kk-sym')) row.querySelector(':scope > .kk-sym').remove();
       const b = row.querySelector('.bubble'); if (!b) return;
+      if (!b.classList.contains('b')) b.classList.add('b');
+      if (b.dataset.p !== p) b.dataset.p = p;
+      const rot = root.dataset.ct == 'doodle' ? (i % 2 ? .5 : -.4) : 0;
+      if (b.style.getPropertyValue('--rot') !== rot + 'deg') b.style.setProperty('--rot', rot + 'deg');
       const cur = b.querySelector(':scope > .kk-deco');
       if (!l) { if (cur) cur.remove(); return; }
       const key = root.dataset.ct + i;
@@ -247,5 +265,7 @@ export function mountKekeBubbles() {
   top.observe(document.body, { childList: true, subtree: true });
   const tm = new MutationObserver(sched); tm.observe(root, { attributes: true, attributeFilter: ['data-ct'] });
   attach();
-  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco, #chat .kk-day, #chat .kk-mt, #chat .kk-ty').forEach((n) => n.remove()); };
+  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco, #chat .kk-day, #chat .kk-mt, #chat .kk-ty, #chat .kk-sym, #chat .kk-read').forEach((n) => n.remove());
+    document.querySelectorAll('#chat .msg-row').forEach((r) => { r.classList.remove('m', 'r', 's', 'g', 'new'); });
+    document.querySelectorAll('#chat .bubble.b').forEach((b) => { b.classList.remove('b'); delete b.dataset.p; b.style.removeProperty('--rot'); }); };
 }
