@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import type { ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { buildCardReference } from '../../../../app/collection/codeCollectionSource';
 import { resolveAssistantStreamingChrome, type ChatMessageLifecycle } from '../../../../app/chat/chatStreamingDisplay';
@@ -303,7 +303,7 @@ function MessageRowComponent({
     event.preventDefault();
     openBubbleActionMenu();
   };
-  const handleBubbleKeyboardMenu = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleBubbleKeyboardMenu = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!canOpenBubbleMenu || event.target !== event.currentTarget) return;
     if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
       event.preventDefault();
@@ -392,7 +392,7 @@ function MessageRowComponent({
               className="message-reaction-stamp"
               aria-label={`取消 ${emoji} 回应`}
               title={`取消 ${emoji} 回应`}
-              onClick={() => { void actions.toggleMessageReaction(message, emoji as import('../../../../app/chat/messageDecorations').ChatReactionEmoji); }}
+              onClick={() => { void actions.toggleMessageReaction(message, emoji as ChatReactionEmoji); }}
             >{emoji}</button>
           ))}
         </div>
