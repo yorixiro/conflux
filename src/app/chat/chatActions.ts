@@ -277,7 +277,8 @@ export function createChatActionHandlers({
 
   const toggleMessageReaction = async (message: ChatMessage, emoji: ChatReactionEmoji) => {
     const saved = await updateMessageDecoration(message, (current) => ({
-      reactions: toggleReactionEmoji(resolveMessageReactions(current), emoji)
+      reactions: toggleReactionEmoji(resolveMessageReactions(current), emoji),
+      legacyReactionsMigrated: true
     }), '已更新表情回应。');
     if (saved) clearLegacyKekeReaction(message.id);
   };

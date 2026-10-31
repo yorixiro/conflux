@@ -34,7 +34,8 @@ describe('role API settings surface', () => {
     const acp = { ...api, agentTransport: 'devin-acp' as const };
     const html = renderToStaticMarkup(<PersonaApiConnectionPanel
       activePersona={persona} providers={[acp]} onUpdatePersona={vi.fn()} />);
-    expect(html).toContain('当前角色仍有旧模型覆盖');
+    expect(html).toContain('当前角色留有旧模型覆盖');
+    expect(html).toContain('ACP 已忽略这个旧值');
     expect(html).toContain('清除旧模型覆盖');
     expect(html).toContain('claude-test');
   });
