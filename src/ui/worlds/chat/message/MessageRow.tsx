@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
-import type { ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
+import { resolveMessageReactions, type ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { buildCardReference } from '../../../../app/collection/codeCollectionSource';
 import { resolveAssistantStreamingChrome, type ChatMessageLifecycle } from '../../../../app/chat/chatStreamingDisplay';
 import type { CodeCardActionMode, CodeCardMessageProgress } from '../../../../app/chat/chatDerivedState';
@@ -175,6 +175,7 @@ function MessageRowComponent({
     () => buildVisibleToolProductCardMessageIds(toolMessages),
     [toolMessages]
   );
+  const reactionEmojis = resolveMessageReactions(message);
   const speechContent = useMemo(
     () => (isAssistantReply ? buildAssistantSpeechText(message.content) : ''),
     [isAssistantReply, message.content]
@@ -241,7 +242,7 @@ function MessageRowComponent({
       canCopyMessage={!isStreamingLike && Boolean(message.content.trim())}
       canDecorate={!isStreamingLike}
       isFavorite={Boolean(message.isFavorite)}
-      reactionEmojis={message.reactions ?? []}
+      reactionEmojis={reactionEmojis}
       onToggleFavorite={() => { void actions.toggleFavoriteMessage(message); }}
       onToggleReaction={(emoji) => { void actions.toggleMessageReaction(message, emoji); }}
       canEditUser={state.canEdit}
@@ -388,10 +389,10 @@ function MessageRowComponent({
           </>
         )}
       </div>
-      {!state.editing && (message.isFavorite || Boolean(message.reactions?.length)) ? (
+      {!state.editing && (message.isFavorite || reactionEmojis.length > 0) ? (
         <div className="message-reaction-stamps" role="group" aria-label="消息标记与表情回应">
           {message.isFavorite ? <span className="message-favorite-stamp" aria-label="已收藏">★</span> : null}
-          {message.reactions?.map((emoji) => (
+          {reactionEmojis.map((emoji) => (
             <button
               key={emoji}
               type="button"

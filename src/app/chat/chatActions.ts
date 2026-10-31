@@ -16,7 +16,7 @@ import {
 } from './chatSendPerformanceTrace';
 import { selectChatConversations } from './liveConversationCatalog';
 import { reportPersistenceError } from '../../infrastructure/persistenceDiagnostics';
-import { toggleReactionEmoji, type ChatReactionEmoji } from './messageDecorations';
+import { clearLegacyKekeReaction, resolveMessageReactions, toggleReactionEmoji, type ChatReactionEmoji } from './messageDecorations';
 
 type CreateChatActionHandlersArgs = {
   startupReady: boolean;
@@ -246,18 +246,19 @@ export function createChatActionHandlers({
     statusText: string
   ) => {
     const activeConversation = derived.activeConversation;
-    if (!activeConversation || message.toolInvocation || (message.role !== 'user' && message.role !== 'assistant')) return;
+    if (!activeConversation || message.toolInvocation || (message.role !== 'user' && message.role !== 'assistant')) return false;
     const writable = await store.chat.ensureConversationWritable(activeConversation.id);
     if (!writable) {
       ui.setCommandStatus('聊天记录尚未加载，不能保存这次操作。', true);
-      return;
+      return false;
     }
     const current = writable.messages.find((entry) => entry.id === message.id);
-    if (!current || current.role !== message.role || current.toolInvocation) return;
+    if (!current || current.role !== message.role || current.toolInvocation) return false;
     store.chat.updateMessage(writable, message.id, getPatch(current));
     try {
       await store.chat.persistToDb?.();
       ui.setCommandStatus(statusText);
+      return true;
     } catch (error) {
       reportPersistenceError({
         label: '[chat:message-decoration]',
@@ -265,16 +266,20 @@ export function createChatActionHandlers({
         operation: 'persist-message-decoration'
       }, error);
       ui.setCommandStatus('更改已应用，但本地保存失败。', true);
+      return false;
     }
   };
 
-  const toggleFavoriteMessage = (message: ChatMessage) =>
-    updateMessageDecoration(message, (current) => ({ isFavorite: !current.isFavorite }), '已更新收藏标记。');
+  const toggleFavoriteMessage = async (message: ChatMessage) => {
+    await updateMessageDecoration(message, (current) => ({ isFavorite: !current.isFavorite }), '已更新收藏标记。');
+  };
 
-  const toggleMessageReaction = (message: ChatMessage, emoji: ChatReactionEmoji) =>
-    updateMessageDecoration(message, (current) => ({
-      reactions: toggleReactionEmoji(current.reactions, emoji)
+  const toggleMessageReaction = async (message: ChatMessage, emoji: ChatReactionEmoji) => {
+    const saved = await updateMessageDecoration(message, (current) => ({
+      reactions: toggleReactionEmoji(resolveMessageReactions(current), emoji)
     }), '已更新表情回应。');
+    if (saved) clearLegacyKekeReaction(message.id);
+  };
 
   const deleteMessage = async (message: ChatMessage) => {
     const activeConversation = derived.activeConversation;

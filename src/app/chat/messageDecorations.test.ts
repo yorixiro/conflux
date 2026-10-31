@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '../../types/domain';
 import { normalizeChatMessage } from '../../engines/chatMessageNormalization';
 import { serializeMessagePayload } from '../../engines/localData/chatSqliteSerialization';
-import { toggleReactionEmoji } from './messageDecorations';
+import { parseLegacyKekeReaction, resolveMessageReactions, toggleReactionEmoji } from './messageDecorations';
 
 describe('real message decorations', () => {
   it('adds and removes independent reactions without mutating the original', () => {
@@ -12,6 +12,14 @@ describe('real message decorations', () => {
     expect(original).toEqual(['❤️', '✨']);
     expect(toggleReactionEmoji(added, '❤️')).toEqual(['✨', '👍']);
     expect(toggleReactionEmoji(undefined, '🥺')).toEqual(['🥺']);
+  });
+
+  it('reads old Keke marks as legacy values without overriding canonical empty reactions', () => {
+    expect(parseLegacyKekeReaction({ m1: '哼' }, 'm1')).toBe('哼');
+    expect(parseLegacyKekeReaction({ m1: 'invalid' }, 'm1')).toBeNull();
+    expect(parseLegacyKekeReaction([], 'm1')).toBeNull();
+    expect(resolveMessageReactions({ id: 'm1', reactions: [] })).toEqual([]);
+    expect(toggleReactionEmoji(['哼'], '哼')).toEqual([]);
   });
 
   it('round-trips bookmark and reactions using the real LocalData serializer', () => {
