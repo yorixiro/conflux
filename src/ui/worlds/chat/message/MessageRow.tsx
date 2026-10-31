@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { resolveMessageReactions, type ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { buildCardReference } from '../../../../app/collection/codeCollectionSource';
 import { resolveAssistantStreamingChrome, type ChatMessageLifecycle } from '../../../../app/chat/chatStreamingDisplay';
@@ -433,25 +433,12 @@ function MessageRowComponent({
       ) : isAssistantReply ? (
         <div className={`message-turn assistant ${showChatAvatars ? 'with-avatar' : ''}`}>
           <div className="message-turn-body assistant">
-            {showChatAvatars ? (
-              <div
-                className={`message-avatar-slot assistant ${isAssistantContinuation ? 'empty' : ''}`}
-                style={{ width: assistantAvatarPx, minWidth: assistantAvatarPx }}
-              >
-                {!isAssistantContinuation ? (
-                  <PersonaAvatar
-                    role="assistant"
-                    seed={assistantSigilSeed}
-                    imageUrl={assistantAvatarUrl}
-                    iconId={assistantAvatarIconId}
-                    shape={assistantAvatarShape}
-                    size={assistantAvatarPx}
-                    className="message-avatar"
-                  />
-                ) : null}
-              </div>
-            ) : null}
-            <div className="message-turn-stack assistant">
+            <div
+              className="message-turn-stack assistant"
+              style={showChatAvatars
+                ? { '--message-avatar-gutter': `${assistantAvatarPx + 9}px` } as CSSProperties
+                : undefined}
+            >
               {showAssistantChatIdentity ? (
                 <MessageMeta
                   message={message}
@@ -473,7 +460,27 @@ function MessageRowComponent({
                   showThinking={showThinking}
                 />
               ) : null}
-              {messageBubble}
+              <div className="message-turn-bubble-row">
+                {showChatAvatars ? (
+                  <div
+                    className={`message-avatar-slot assistant ${isAssistantContinuation ? 'empty' : ''}`}
+                    style={{ width: assistantAvatarPx, minWidth: assistantAvatarPx }}
+                  >
+                    {!isAssistantContinuation ? (
+                      <PersonaAvatar
+                        role="assistant"
+                        seed={assistantSigilSeed}
+                        imageUrl={assistantAvatarUrl}
+                        iconId={assistantAvatarIconId}
+                        shape={assistantAvatarShape}
+                        size={assistantAvatarPx}
+                        className="message-avatar"
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+                <div className="message-turn-bubble-content">
+                  {messageBubble}
               {!isStreamingLike && !state.editing && message.memoryEvidence?.items.length ? (
                 <MessageMemoryRecallCard evidence={message.memoryEvidence} />
               ) : null}
@@ -497,6 +504,8 @@ function MessageRowComponent({
               ) : null}
               {messageActions}
               {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
+                </div>
+              </div>
             </div>
           </div>
         </div>

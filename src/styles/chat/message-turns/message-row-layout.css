@@ -108,6 +108,25 @@
 .message-turn.assistant .message-turn-head-main {
   flex: 1 1 auto;
 }
+/* The avatar and bubble share the same physical row, below optional identity/thinking. */
+.message-turn-bubble-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  gap: 9px;
+}
+.message-turn-bubble-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+.message-turn.assistant.with-avatar .message-turn-stack > .message-identity-row {
+  margin-left: var(--message-avatar-gutter, 0px);
+}
 .message-turn.assistant .message-turn-body.body-below-head {
   display: block;
 }

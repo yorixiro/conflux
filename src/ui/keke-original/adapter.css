@@ -141,6 +141,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* Prototype has no name/model line above assistant bubbles; keep the thinking trigger row minimal. */
 :root[data-cf=sticker] #chat .msg-row.r .message-identity-meta{display:none}
 :root[data-cf=sticker] #chat .msg-row.r .message-identity-row{min-height:0}
+:root[data-cf=sticker] #chat .message-turn.assistant.with-avatar .message-turn-stack > .message-identity-row{margin-left:31px}
 
 /* Avatar in the prototype's left-gutter position; the SYM heart rides it as a corner badge.
    Without an avatar the heart sits at the prototype's own spot (row left, top 7px). */
