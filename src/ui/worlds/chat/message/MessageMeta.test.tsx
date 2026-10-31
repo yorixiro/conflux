@@ -49,4 +49,20 @@ describe('MessageMeta', () => {
     expect(html).toContain('小助手');
     expect(html).not.toContain('Polaris');
   });
+  it('uses a text thinking trigger instead of the Polaris star on every theme', () => {
+    const html = renderToStaticMarkup(
+      <MessageMeta
+        message={createAssistantMessage()}
+        fallbackAssistantName="小助手"
+        isThinkingActive={false}
+        onOpenThinkingSummary={vi.fn()}
+      />
+    );
+
+    expect(html).toContain('thinking-inline-trigger');
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).toContain('>thinking</span>');
+    expect(html).not.toContain('polarisStar');
+  });
+
 });
