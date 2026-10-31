@@ -49,7 +49,7 @@
 
 ### 聊天消息「记忆浮现」卡 · 2026-10-31
 
-状态：**PR 待验收**。独立分支 `feat/chat-memory-recall-drawer-20261031`，基于 `keke-acp-preview` / `aaf7a60`；详细验收记录见 `docs/work-orders/WORK_CHAT_MEMORY_RECALL_DRAWER.md`。
+状态：**PR 待验收**。PR：https://github.com/yorixiro/conflux/pull/16 ；功能提交 `de2a959f`。独立分支 `feat/chat-memory-recall-drawer-20261031`，基于 `keke-acp-preview` / `aaf7a60`；详细验收记录见 `docs/work-orders/WORK_CHAT_MEMORY_RECALL_DRAWER.md`。
 将已有 `memoryEvidence` 真实命中摘录从消息「更多」移到正文下方可展开抽屉卡，并以可靠元数据标识「聊天记录/语义片段/上下文命中」，不猜测「关系底座/日记与信/用户画像」等未来类别。与 PR #13、#15 及本地未推送的克克美化提交隔离。代码已提交但定向测试、typecheck、Android/PWA 均未执行，不合并。
 
 ## 开发与验收
