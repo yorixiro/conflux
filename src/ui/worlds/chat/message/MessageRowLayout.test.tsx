@@ -22,7 +22,7 @@ vi.mock('./MessageTokenUsage', () => ({
 const state: MessageRowState = {
   editing: null,
   isFocused: false,
-  lifecycle: 'settled',
+  lifecycle: 'rest',
   isThinkingCollapsed: true,
   isCodeExpanded: false,
   canEdit: false,
