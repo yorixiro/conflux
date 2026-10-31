@@ -147,7 +147,9 @@ export async function startLocalServer({ dev = false, port = 4173, root = resolv
     const registration = await navigator.serviceWorker.getRegistration('/');
     if (registration) await registration.unregister();
   }
-  window.location.replace('/');
+  // The old offline worker controls plain "/" until this page is unloaded.
+  // A query-qualified navigation bypasses its exact-URL cached-shell route.
+  window.location.replace('/?conflux-dev=1');
 })().catch((error) => {
   document.body.textContent = '切换失败：' + (error.message || String(error));
 });
