@@ -82,7 +82,9 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* Prototype bubble look on the real DOM: .msg-row gets .m + .r/.s (+.g/.new), .bubble gets .b + data-p.
    Bubble face: assistant uses the prototype's sticker fill (paper + wobble outline), user the tinted fill. */
 :root[data-cf=sticker] #chat .msg-row .bubble{cursor:auto}
-/* Message margins and content indents come from the shared React layout. */
+/* The original prototype's .m/.m.g/.m.r geometry must not override
+   the shared row-spacing and avatar gutter in the real React message list. */
+:root[data-cf=sticker] #chat .msg-row.m{margin-top:var(--chat-message-row-top,-10px);padding-left:0}
 :root[data-cf=sticker] #chat .msg-row.m.s .message-turn-stack{align-items:flex-end}
 :root[data-cf=sticker] #chat .msg-row.r .b{background:var(--bub-r,var(--chat-bubble-assistant-fill));box-shadow:var(--bub-r-sh,var(--chat-bubble-assistant-shadow));border:1px solid var(--ailine,transparent);color:var(--rt);font-family:var(--cn);font-weight:700;font-size:var(--chat-message-text-size,var(--type-body));line-height:var(--chat-message-assistant-leading,1.54);letter-spacing:0;text-shadow:none;transform-origin:0 100%}
 :root[data-cf=sticker] #chat .msg-row.s .b{background:var(--bub-s,var(--chat-bubble-user-fill));box-shadow:var(--bub-s-sh,var(--chat-bubble-user-shadow));border:1px solid var(--ailine,transparent);color:var(--st,var(--rt));font-family:var(--cn);font-weight:700;font-size:var(--chat-message-text-size,var(--type-body));line-height:var(--chat-message-user-leading,1.56);letter-spacing:0;text-shadow:none;transform-origin:100% 100%;rotate:var(--rot,0deg)}

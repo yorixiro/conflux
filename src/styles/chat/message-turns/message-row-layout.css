@@ -5,13 +5,14 @@
   gap: 4px;
   scroll-margin-top: 20px;
   padding-top: 10px;
-  margin-top: -10px;
+  margin-top: var(--chat-message-row-top);
   overflow: visible;
   /* Shared message geometry. Sticker skins may change decoration, not content sizing. */
   --chat-message-text-size: var(--type-body);
   --chat-message-assistant-leading: 1.54;
   --chat-message-user-leading: 1.56;
   --chat-message-assistant-max-width: min(90%, 760px);
+  --chat-message-row-top: -10px;
   width: 100%;
   max-width: 760px;
   margin-inline: auto;
@@ -34,7 +35,8 @@
 .msg-row.system { align-items: flex-start; }
 .msg-row.user + .msg-row.assistant,
 .msg-row.assistant + .msg-row.user {
-  margin-top: 10px;
+  --chat-message-row-top: 10px;
+  margin-top: var(--chat-message-row-top);
 }
 .message-turn {
   display: flex;
