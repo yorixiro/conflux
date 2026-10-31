@@ -244,7 +244,7 @@ function MessageRowComponent({
       onMenuOpenChange={setActionMenuOpen}
       onEditUser={() => actions.editMessage(message)}
       onDelete={() => void actions.deleteMessage(message)}
-      canOpenThinkingSummary={isAssistantReply && showThinking && showChatAvatars && Boolean(message.thinkingText)}
+      canOpenThinkingSummary={false}
       canRetryAssistant={state.canRetry}
       canEditAssistant={state.canEditAssistant}
       canForkAssistant={state.canEditAssistant}
@@ -278,32 +278,46 @@ function MessageRowComponent({
     longPressTimerRef.current = null;
   };
 
-  const openUserActionMenu = () => {
-    if (!isUserMessage || state.editing) return;
+  const canOpenBubbleMenu = (isUserMessage || isAssistantReply) && !state.editing && !isStreamingLike;
+  const isInteractiveBubbleChild = (target: EventTarget | null) =>
+    target instanceof Element && Boolean(target.closest('a, button, input, textarea, select, [contenteditable="true"]'));
+
+  const openBubbleActionMenu = () => {
+    if (!canOpenBubbleMenu) return;
     void selectionHaptic();
     setActionMenuOpen(true);
   };
 
   const handleBubblePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isUserMessage || state.editing) return;
+    if (!canOpenBubbleMenu || isInteractiveBubbleChild(event.target)) return;
     if (event.pointerType === 'mouse') return;
     clearLongPressTimer();
     longPressTimerRef.current = window.setTimeout(() => {
       longPressTimerRef.current = null;
-      openUserActionMenu();
+      openBubbleActionMenu();
     }, 360);
   };
 
   const handleBubbleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
-    if (!isUserMessage || state.editing) return;
+    if (!canOpenBubbleMenu || isInteractiveBubbleChild(event.target)) return;
     event.preventDefault();
-    openUserActionMenu();
+    openBubbleActionMenu();
+  };
+  const handleBubbleKeyboardMenu = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!canOpenBubbleMenu || event.target !== event.currentTarget) return;
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      event.preventDefault();
+      openBubbleActionMenu();
+    }
   };
 
   const messageBubble = (
     <div
       className={`bubble-frame ${message.role === 'assistant' ? 'assistant' : 'user'} ${state.editing ? 'editing' : ''} ${state.lifecycle} ${showStreamingPrelude ? 'streaming-prelude' : ''} ${actionMenuOpen ? 'action-menu-open' : ''}`}
       onContextMenu={handleBubbleContextMenu}
+      onKeyDown={handleBubbleKeyboardMenu}
+      tabIndex={canOpenBubbleMenu ? 0 : undefined}
+      aria-label={canOpenBubbleMenu ? '消息，长按或打开操作菜单' : undefined}
       onPointerDown={handleBubblePointerDown}
       onPointerUp={clearLongPressTimer}
       onPointerCancel={clearLongPressTimer}
@@ -368,6 +382,21 @@ function MessageRowComponent({
           </>
         )}
       </div>
+      {!state.editing && (message.isFavorite || Boolean(message.reactions?.length)) ? (
+        <div className="message-reaction-stamps" role="group" aria-label="消息标记与表情回应">
+          {message.isFavorite ? <span className="message-favorite-stamp" aria-label="已收藏">★</span> : null}
+          {message.reactions?.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className="message-reaction-stamp"
+              aria-label={`取消 ${emoji} 回应`}
+              title={`取消 ${emoji} 回应`}
+              onClick={() => { void actions.toggleMessageReaction(message, emoji as import('../../../../app/chat/messageDecorations').ChatReactionEmoji); }}
+            >{emoji}</button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 
