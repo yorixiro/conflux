@@ -254,12 +254,16 @@ export function createChatActionHandlers({
     }
     const current = writable.messages.find((entry) => entry.id === message.id);
     if (!current || current.role !== message.role || current.toolInvocation) return false;
+    // A writable conversation without persistence must not claim a saved edit.
+    if (typeof store.chat.persistToDb !== 'function') {
+      ui.setCommandStatus('本地保存不可用，这条消息没有更新。', true);
+      return false;
+    }
     store.chat.updateMessage(writable, message.id, getPatch(current));
     try {
-      await store.chat.persistToDb?.();
+      await store.chat.persistToDb();
       ui.setCommandStatus(statusText);
-      // Never erase a legacy marker if storage persistence was unavailable.
-      return typeof store.chat.persistToDb === 'function';
+      return true;
     } catch (error) {
       reportPersistenceError({
         label: '[chat:message-decoration]',
