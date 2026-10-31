@@ -25,9 +25,21 @@ function serializeArguments(value: unknown) {
   return '';
 }
 
-function pushUsage(events: CanonicalProviderStreamEvent[], usage: ChatTokenUsage | undefined) {
+function pushUsage(
+  events: CanonicalProviderStreamEvent[],
+  usage: ChatTokenUsage | undefined,
+  totalIsProviderReported = false
+) {
   if (usage) {
-    events.push({ type: 'usage', usage });
+    // Anthropic's normalized total is inferred from partial input/output events.
+    // OpenAI-compatible total_tokens is an explicit provider field.
+    events.push({
+      type: 'usage',
+      usage,
+      ...(totalIsProviderReported && usage.totalTokens !== undefined
+        ? { reportedTotalTokens: true }
+        : {})
+    });
   }
 }
 
@@ -141,7 +153,7 @@ function parseResponsesStreamEvent(payload: Record<string, unknown>): CanonicalP
     if (Array.isArray(response?.output)) {
       response.output.forEach((item) => pushResponsesOutputItemEvents(events, item));
     }
-    pushUsage(events, parseOpenAiCompatibleUsage(response?.usage));
+    pushUsage(events, parseOpenAiCompatibleUsage(response?.usage), true);
     events.push({ type: 'done', finishReason: 'stop' });
     return events;
   }
@@ -233,7 +245,7 @@ function parseOpenAiCompatibleStreamEvent(payload: Record<string, unknown>): Can
   if (finishReason) {
     events.push({ type: 'done', finishReason });
   }
-  pushUsage(events, usage);
+  pushUsage(events, usage, true);
   return events;
 }
 

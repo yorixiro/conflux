@@ -20,6 +20,8 @@ export type ReplyAccumulator = {
   model?: string;
   tokenCount?: number;
   tokenUsage?: ChatTokenUsage;
+  /** Stream-local provenance; never serialized as user-visible token usage. */
+  hasReportedTotalTokens?: boolean;
   toolCalls?: OpenAiToolCallAccumulator[];
   finishReason?: string;
   transportIncomplete?: boolean;

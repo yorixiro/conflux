@@ -157,7 +157,7 @@ export type CanonicalProviderStreamEvent =
   | { type: 'tool_call.start'; id: string; name: string; index?: number }
   | { type: 'tool_call.delta'; id: string; argumentsDelta: string; index?: number }
   | { type: 'tool_call.done'; id: string; name: string; argumentsText: string; index?: number }
-  | { type: 'usage'; usage: ChatTokenUsage }
+  | { type: 'usage'; usage: ChatTokenUsage; reportedTotalTokens?: boolean }
   | { type: 'done'; finishReason?: string; transportIncomplete?: boolean }
   | { type: 'error'; error: CanonicalProviderError };
 
