@@ -47,6 +47,12 @@
 - 预览：保留原 **4173** 及同一 origin，更新原 PR 分支后进入「心弦 → 记忆图谱 → 进入记忆星河」。步骤见结果记录。
 - 共享开发分支进度通过原[文档 PR #9](https://github.com/yorixiro/conflux/pull/9) 更新；未合并前仍待同步。
 
+### 气泡真实数据第一步 · 2026-10-31
+
+状态：**PR 待验收**；独立分支 `feat/chat-message-decorations-realdata-20261031`，基于 `keke-acp-preview` 的 `aaf7a60`。
+仅在真实消息上增加收藏标记/表情回应，用原 LocalData JSON 保存；原 CSS、美化资产、ACP、记忆与心弦均未改。P2「收藏到心弦」、引用、编辑态完善仍未完成。
+美化 AI 本地 `dc0090d` 未推送，尚未完成分支冲突审查。定向测试已编写未运行，typecheck/build/Android/PWA 均未验收；Draft，勿合并。
+
 ## 开发与验收
 
 - 每项启动前核对最新实际开发分支、未提交改动和 PR 依赖，不以旧 `main` 为基础；先遵循 `AGENTS.md`。

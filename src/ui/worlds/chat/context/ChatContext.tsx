@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import type { CodeCardActionMode, CodeCardMessageProgress } from '../../../../app/chat/chatDerivedState';
 import type { WorkspaceBannerState } from '../../../../engines/workspaceBannerState';
 import type { ChatAttachment, ChatCardReference, ChatMessage, ChatMessageVoiceCache, CodeCard, Conversation, Persona, ThemeToolMode } from '../../../../types/domain';
@@ -70,6 +71,8 @@ export type ChatContextActionsValue = {
   retry: (message: ChatMessage) => Promise<void>;
   editMessage: (message: ChatMessage) => void;
   deleteMessage: (message: ChatMessage) => Promise<void>;
+  toggleFavoriteMessage: (message: ChatMessage) => Promise<void>;
+  toggleMessageReaction: (message: ChatMessage, emoji: ChatReactionEmoji) => Promise<void>;
   editAssistantMessage: (message: ChatMessage, content: string) => void;
   cacheAssistantSpeech: (message: ChatMessage, voiceCache: ChatMessageVoiceCache) => void;
   forkFromMessage: (message: ChatMessage) => void;

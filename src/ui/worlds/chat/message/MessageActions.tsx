@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CodeCardActionMode } from '../../../../app/chat/chatDerivedState';
+import { CHAT_REACTION_CHOICES, type ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { readMessageSpeechCacheBlob, saveMessageSpeechCache } from '../../../../app/chat/messageSpeechCache';
 import { requestGeneratedSpeech } from '../../../../engines/voiceGenerationClient';
 import { writeTextToClipboard } from '../../../../infrastructure/clipboard';
@@ -44,6 +45,11 @@ export type MessageTaskReceiptAction = {
 
 type MessageActionsProps = {
   canCopyMessage: boolean;
+  canDecorate: boolean;
+  isFavorite: boolean;
+  reactionEmojis: readonly string[];
+  onToggleFavorite: () => void;
+  onToggleReaction: (emoji: ChatReactionEmoji) => void;
   canEditUser: boolean;
   canDelete: boolean;
   menuOpen: boolean;
@@ -76,6 +82,11 @@ type MessageActionsProps = {
 
 export function MessageActions({
   canCopyMessage,
+  canDecorate,
+  isFavorite,
+  reactionEmojis,
+  onToggleFavorite,
+  onToggleReaction,
   canEditUser,
   canDelete,
   menuOpen,
@@ -112,7 +123,7 @@ export function MessageActions({
   const [speechLoading, setSpeechLoading] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const [panelMode, setPanelMode] = useState<'menu' | 'edit' | 'memory'>('menu');
+  const [panelMode, setPanelMode] = useState<'menu' | 'edit' | 'memory' | 'reactions'>('menu');
   const [assistantDraft, setAssistantDraft] = useState(messageContent);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -121,7 +132,7 @@ export function MessageActions({
   const showCodeCardAction = codeCardActionMode !== 'hidden';
   const hasMemoryEvidence = role === 'assistant' && Boolean(memoryEvidence?.items.length);
   const hasSpeechCache = role === 'assistant' && Boolean(speechCache?.assetId);
-  const hasMore = canCopyMessage || canEditUser || canEditAssistant || canDelete || canForkAssistant || canRetryAssistant || hasMemoryEvidence || hasSpeechCache;
+  const hasMore = canDecorate || canCopyMessage || canEditUser || canEditAssistant || canDelete || canForkAssistant || canRetryAssistant || hasMemoryEvidence || hasSpeechCache;
   const speakableContent = speechContent.trim();
   const canUseConfiguredSpeech = voiceGeneration.enabled && Boolean(voiceGeneration.baseUrl?.trim() && voiceGeneration.apiKey?.trim());
   const canSpeakAssistant = role === 'assistant' && Boolean(speakableContent) && (hasSpeechCache || canUseConfiguredSpeech || nativeSpeechAvailable);
@@ -365,6 +376,18 @@ export function MessageActions({
                 <Icon name="copy" size={18} /><span>{t('chat.messageActions.copy')}</span>
               </button>
             ) : null}
+            {canDecorate ? (
+              <>
+                <button type="button" className="message-action-btn" aria-pressed={isFavorite}
+                  onClick={() => { onToggleFavorite(); closeActions(); }}>
+                  <span aria-hidden="true">{isFavorite ? '★' : '☆'}</span>
+                  <span>{isFavorite ? '取消收藏' : '收藏消息'}</span>
+                </button>
+                <button type="button" className="message-action-btn" onClick={() => setPanelMode('reactions')}>
+                  <span aria-hidden="true">♡</span><span>表情回应</span>
+                </button>
+              </>
+            ) : null}
             {canEditUser ? (
               <button type="button" className="message-action-btn" onClick={() => { closeActions(); onEditUser(); }}>
                 <Icon name="edit" size={18} /><span>{t('chat.messageActions.editAndRetry')}</span>
@@ -449,6 +472,25 @@ export function MessageActions({
                 <Icon name="trash" size={18} /><span>{t('chat.messageActions.delete')}</span>
               </button>
             ) : null}
+          </div>
+        ) : panelMode === 'reactions' ? (
+          <div className="assistant-message-memory">
+            <div className="assistant-message-memory-title">
+              <button type="button" className="assistant-message-memory-back" onClick={() => setPanelMode('menu')}
+                aria-label="返回消息操作"><Icon name="chevron" size={16} /></button>
+              <span>表情回应</span>
+            </div>
+            <div className="message-action-menu" role="group" aria-label="选择表情回应">
+              {CHAT_REACTION_CHOICES.map((emoji) => (
+                <button type="button" className="message-action-btn" key={emoji}
+                  aria-pressed={reactionEmojis.includes(emoji)}
+                  aria-label={`${reactionEmojis.includes(emoji) ? '取消' : '添加'} ${emoji} 回应`}
+                  onClick={() => { onToggleReaction(emoji); closeActions(); }}>
+                  <span aria-hidden="true">{emoji}</span>
+                  <span>{reactionEmojis.includes(emoji) ? '取消回应' : '添加回应'}</span>
+                </button>
+              ))}
+            </div>
           </div>
         ) : panelMode === 'memory' && memoryEvidence ? (
           <div className="assistant-message-memory">
