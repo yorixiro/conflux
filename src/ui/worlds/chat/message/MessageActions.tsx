@@ -157,7 +157,13 @@ export function MessageActions({
       return;
     }
     const position = () => {
-      const anchor = trigger.getBoundingClientRect();
+      const triggerBounds = trigger.getBoundingClientRect();
+      // Theme skins may hide the action strip. Long-press/right-click still
+      // needs the menu anchored to the actual message bubble.
+      const bubbleBounds = trigger.closest('.msg-row')?.querySelector('.bubble')?.getBoundingClientRect();
+      const anchor = triggerBounds.width && triggerBounds.height
+        ? triggerBounds
+        : bubbleBounds ?? triggerBounds;
       const viewport = window.visualViewport;
       const flow = trigger.closest('.chat-flow')?.getBoundingClientRect();
       const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
@@ -534,11 +540,6 @@ export function MessageActions({
 
   return (
     <div className={`message-inline-actions ${role}`}>
-      {role === 'assistant' && canCopyMessage && (
-        <button type="button" className={`micro-action-btn ${copied ? 'active' : ''}`} onClick={() => { void copyMessage(); }} aria-label={copied ? t('chat.messageActions.copied') : t('chat.messageActions.copyAssistant')} title={copied ? t('chat.messageActions.copied') : t('chat.messageActions.copyAssistant')}>
-          <Icon name="copy" size={14} />
-        </button>
-      )}
       {canSpeakAssistant ? (
         <button
           type="button"
