@@ -25,6 +25,13 @@ Conflux is the user's independently directed local-first AI conversation and wor
 - Prefer one implementation for shared Android and Web/PWA features, with thin platform adapters.
 - Do not change unrelated repositories, expose secrets, or send private data to external models without explicit scope.
 
+## Feature lifecycle consistency
+- Before **adding, changing, hiding or removing** a product feature, proactively trace the complete implementation: UI entry points and interactions → actions/state → execution logic, tools/permissions and providers → AI context compilation/system prompts/tool descriptions (only if the feature is advertised or injected there) → persistence/schema/history compatibility → tests, docs and obsolete implementations.
+- Removing a UI button does **not** remove an executable capability. If a feature is retired, remove or disable every reachable invocation path, including AI tool registrations and prompt instructions where applicable; verify users cannot still trigger it by an alternate route.
+- Conversely, do **not** edit prompts/context compilation, backend code or storage just because a presentation detail changed. Change only layers actually affected, and preserve historical data unless an explicit, verified migration is approved.
+- New features must be wired to real actions and data, not placeholder controls. Changed features must keep all supported entry points, UI themes, Android/PWA behavior and stored data consistent.
+- During delivery, briefly state which layers were changed, which layers were intentionally left alone and why, what legacy paths were cleaned up, and what was actually tested. This cross-layer audit is the coding agent's responsibility, not something the user should have to repeatedly request.
+
 ## Independent repository and attribution
 - Independent GitHub ownership and visual identity do not require a GitHub fork relationship. The eventual new repository starts from a verified Conflux snapshot, **not** an obsolete default main.
 - Keep applicable original copyright, AGPL-3.0-only and third-party notices; see LICENSE and docs/PROVENANCE.md. These belong in technical/legal documentation, not in the product's branding or UI.
