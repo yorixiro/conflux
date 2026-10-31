@@ -118,3 +118,9 @@ Conflux 允许非常不同的视觉主题（克克贴纸/波点、极简、玻�
 - 共用输入行由 `ChatComposer.tsx` 的 `chat-composer-input-row` 与 `src/styles/chat-composer/composer-box.css` 管理；两套贴纸通过 `adapter.css` 仅兼容自有外观和原型结构，不另复制消息组件。
 - PR #13/#14/#15/#16 仍是独立待验收变更；本轮**没有**合并这些 PR，避免把新布局混入其他功能工单。
 - 本轮完成的是源码级收束和提交链检查，**未执行** TypeScript/Vitest、浏览器视觉矩阵或 Android 真机测试。禁止把「提交成功」「无提交分叉」写成「布局验收通过」。
+
+### 头像与气泡实际 DOM 对齐修复（2026-11-01）
+
+- `81e5f8c`：修复此前仅改顶部偏移却仍未对齐的根因。原 `MessageRow` 把头像放在包含身份标题和 Thinking 行的外层 Flex，与气泡不在同一行；现移动到 `message-turn-bubble-row`，将头像和气泡及其操作区放在同一行，标题保留在上方并按头像占位缩进。用户消息右侧头像保持原结构。两套贴纸外观样式独立覆盖，不修改数据库或缓存。
+- 本轮新增 `MessageRowLayout.test.tsx`，覆盖 AI 头像与气泡顺序、续接消息占位、关闭头像和用户头像。**测试已编写但尚未执行**；需要在具备仓库依赖的运行环境进行定向 Vitest、类型检查和 Android/PWA 实际布局验收。
+- 用户截图的「这条旧 Devin ACP 连接仍被当成普通 API」文字可在当前 `ApiProviderConfigForm.tsx` 找到，不能由此断言 PWA 没更新；该提示代表旧连接记录尚未完成显式迁移，严禁据此自动改写全部用户提供商配置。

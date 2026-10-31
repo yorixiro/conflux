@@ -481,29 +481,29 @@ function MessageRowComponent({
                 ) : null}
                 <div className="message-turn-bubble-content">
                   {messageBubble}
-              {!isStreamingLike && !state.editing && message.memoryEvidence?.items.length ? (
-                <MessageMemoryRecallCard evidence={message.memoryEvidence} />
-              ) : null}
-              {toolMessages.length > 0 ? (
-                <div className="assistant-leading-tool-list">
-                  {toolMessages.map((toolMessage) => (
-                    <div key={toolMessage.id} className="tool-product-stack">
-                      <MessageToolEvent
-                        message={toolMessage}
-                        onSaveImageAttachment={actions.saveImageAttachment}
-                        onApplyToolPreview={actions.applyToolPreview}
-                        onSaveToolPreview={actions.saveToolPreview}
-                        onRollbackToolPreview={actions.rollbackToolPreview}
-                        onOpenToolbox={actions.openToolbox}
-                        onInteractionBoundary={markToolReceiptInteraction}
-                      />
-                      {renderToolProductCard(toolMessage)}
+                  {!isStreamingLike && !state.editing && message.memoryEvidence?.items.length ? (
+                    <MessageMemoryRecallCard evidence={message.memoryEvidence} />
+                  ) : null}
+                  {toolMessages.length > 0 ? (
+                    <div className="assistant-leading-tool-list">
+                      {toolMessages.map((toolMessage) => (
+                        <div key={toolMessage.id} className="tool-product-stack">
+                          <MessageToolEvent
+                            message={toolMessage}
+                            onSaveImageAttachment={actions.saveImageAttachment}
+                            onApplyToolPreview={actions.applyToolPreview}
+                            onSaveToolPreview={actions.saveToolPreview}
+                            onRollbackToolPreview={actions.rollbackToolPreview}
+                            onOpenToolbox={actions.openToolbox}
+                            onInteractionBoundary={markToolReceiptInteraction}
+                          />
+                          {renderToolProductCard(toolMessage)}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : null}
-              {messageActions}
-              {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
+                  ) : null}
+                  {messageActions}
+                  {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
                 </div>
               </div>
             </div>
