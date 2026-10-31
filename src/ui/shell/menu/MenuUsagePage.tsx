@@ -24,16 +24,20 @@ function formatPercent(numerator: number, denominator: number) {
 export function MenuUsagePage({ summary, onBack }: MenuUsagePageProps) {
   const copy = useI18n();
   const { t, formatNumber } = copy;
-  const cacheReadRate = formatPercent(
-    summary.cachedInputTokens,
-    summary.inputTokens || summary.cacheObservedInputTokens
-  );
-  const observedCacheRate = formatPercent(summary.cachedInputTokens, summary.cacheObservedInputTokens);
-  const cacheMissLabel = summary.cacheMissInputTokens > 0
+  const hasReportedCacheRate = summary.cacheObservedInputTokens > 0 && summary.cacheReportedReplyCount > 0;
+  const hasCompleteCacheCoverage = hasReportedCacheRate && summary.cacheUnreportedReplyCount === 0;
+  const observedCacheRate = hasReportedCacheRate
+    ? formatPercent(summary.cachedInputTokens, summary.cacheObservedInputTokens)
+    : t('settings.usage.notRecorded');
+  // The global coverage cannot treat providers that omit cache usage as zero hits.
+  const cacheReadRate = hasCompleteCacheCoverage
+    ? observedCacheRate
+    : t('settings.usage.notRecorded');
+  const cacheMissLabel = summary.cacheReportedReplyCount > 0
     ? t('settings.usage.cacheMissShort', { tokens: formatSummaryNumber(summary.cacheMissInputTokens, copy) })
     : t('settings.usage.cacheMissUnreported');
-  const cacheReadBarWidth = (summary.inputTokens || summary.cacheObservedInputTokens) > 0
-    ? Math.min(100, Math.round((summary.cachedInputTokens / (summary.inputTokens || summary.cacheObservedInputTokens)) * 100))
+  const cacheReadBarWidth = hasCompleteCacheCoverage
+    ? Math.min(100, Math.round((summary.cachedInputTokens / summary.cacheObservedInputTokens) * 100))
     : 0;
 
   return (

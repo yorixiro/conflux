@@ -1,5 +1,38 @@
 import { describe, expect, it } from 'vitest';
-import { parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
+import { parseAnthropicUsage, parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
+
+describe('parseAnthropicUsage', () => {
+  it('counts cache reads and writes in total input without double counting', () => {
+    expect(parseAnthropicUsage({
+      input_tokens: 120,
+      cache_read_input_tokens: 5000,
+      cache_creation_input_tokens: 300,
+      output_tokens: 40
+    })).toEqual({
+      totalTokens: 5460,
+      inputTokens: 5420,
+      outputTokens: 40,
+      cachedInputTokens: 5000,
+      cacheMissInputTokens: 420,
+      cacheCreationInputTokens: 300
+    });
+  });
+
+  it('preserves missing input fields in output-only streaming fragments', () => {
+    expect(parseAnthropicUsage({ output_tokens: 45 })).toEqual({
+      totalTokens: 45,
+      outputTokens: 45
+    });
+  });
+
+  it('does not infer a cache miss when Anthropic omits cache accounting', () => {
+    expect(parseAnthropicUsage({ input_tokens: 2, output_tokens: 5 })).toEqual({
+      totalTokens: 7,
+      inputTokens: 2,
+      outputTokens: 5
+    });
+  });
+});
 
 describe('parseOpenAiCompatibleUsage', () => {
   it('reads OpenRouter cache writes and reported zero reads from chat-completions usage', () => {

@@ -8,24 +8,7 @@ import {
 import { appendAnthropicToolCall, appendOpenAiToolCalls } from './providerRuntimeResponseToolCalls';
 import { extractStructuredText, extractTextPayload, extractThinkingPayload } from './providerRuntimeResponseText';
 import { mergeToolCallArgumentsText } from './providerRuntimeToolArguments';
-import { parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
-
-function readNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
-function readObject(value: unknown): Record<string, unknown> | undefined {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as Record<string, unknown>
-    : undefined;
-}
-
-function compactTokenUsage(usage: ChatTokenUsage): ChatTokenUsage | undefined {
-  const compacted = Object.fromEntries(
-    Object.entries(usage).filter(([, value]) => typeof value === 'number' && Number.isFinite(value))
-  ) as ChatTokenUsage;
-  return Object.keys(compacted).length > 0 ? compacted : undefined;
-}
+import { parseAnthropicUsage, parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
 
 function totalFromUsage(usage: ChatTokenUsage) {
   return usage.totalTokens
@@ -43,30 +26,6 @@ function applyTokenUsage(target: ReplyAccumulator, usage: ChatTokenUsage | undef
   if (typeof totalTokens === 'number') {
     target.tokenCount = totalTokens;
   }
-}
-
-function parseAnthropicUsage(rawUsage: unknown): ChatTokenUsage | undefined {
-  const usage = readObject(rawUsage);
-  if (!usage) return undefined;
-  const inputTokens = readNumber(usage.input_tokens);
-  const outputTokens = readNumber(usage.output_tokens);
-  const cachedInputTokens = readNumber(usage.cache_read_input_tokens);
-  const cacheCreationInputTokens = readNumber(usage.cache_creation_input_tokens);
-  const totalTokens = [
-    inputTokens,
-    outputTokens,
-    cachedInputTokens,
-    cacheCreationInputTokens
-  ].filter((value): value is number => typeof value === 'number')
-    .reduce((total, value) => total + value, 0);
-
-  return compactTokenUsage({
-    totalTokens: totalTokens > 0 ? totalTokens : undefined,
-    inputTokens,
-    outputTokens,
-    cachedInputTokens,
-    cacheCreationInputTokens
-  });
 }
 
 function serializeResponsesFunctionArguments(argumentsValue: unknown) {

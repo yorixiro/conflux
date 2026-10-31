@@ -11,6 +11,33 @@ function createAccumulator(): ReplyAccumulator {
 }
 
 describe('applyProviderRuntimeStreamEvents', () => {
+  it('keeps earlier cache usage when a later streaming event only updates output tokens', () => {
+    const target = createAccumulator();
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: {
+        totalTokens: 5010,
+        inputTokens: 5000,
+        outputTokens: 10,
+        cachedInputTokens: 4200,
+        cacheMissInputTokens: 800
+      }
+    }]);
+    applyProviderRuntimeStreamEvents(target, [{
+      type: 'usage',
+      usage: { totalTokens: 70, outputTokens: 70 }
+    }]);
+
+    expect(target.tokenUsage).toEqual({
+      totalTokens: 5070,
+      inputTokens: 5000,
+      outputTokens: 70,
+      cachedInputTokens: 4200,
+      cacheMissInputTokens: 800
+    });
+    expect(target.tokenCount).toBe(5070);
+  });
+
   it('keeps the internal tool-call array dense when the first provider index is nonzero', () => {
     const target = createAccumulator();
 

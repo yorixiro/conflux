@@ -5,7 +5,7 @@ import type {
 } from './providerRuntimeTypes';
 import { extractStructuredText } from './providerRuntimeResponseText';
 import { mergeToolCallArgumentsText } from './providerRuntimeToolArguments';
-import { parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
+import { parseAnthropicUsage, parseOpenAiCompatibleUsage } from './providerRuntimeUsage';
 
 function readObject(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -15,36 +15,6 @@ function readObject(value: unknown): Record<string, unknown> | undefined {
 
 function readNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
-function compactUsage(usage: ChatTokenUsage): ChatTokenUsage | undefined {
-  const entries = Object.entries(usage)
-    .filter(([, value]) => typeof value === 'number' && Number.isFinite(value));
-  return entries.length ? Object.fromEntries(entries) as ChatTokenUsage : undefined;
-}
-
-function parseAnthropicUsage(rawUsage: unknown): ChatTokenUsage | undefined {
-  const usage = readObject(rawUsage);
-  if (!usage) return undefined;
-  const inputTokens = readNumber(usage.input_tokens);
-  const outputTokens = readNumber(usage.output_tokens);
-  const cachedInputTokens = readNumber(usage.cache_read_input_tokens);
-  const cacheCreationInputTokens = readNumber(usage.cache_creation_input_tokens);
-  const totalTokens = [
-    inputTokens,
-    outputTokens,
-    cachedInputTokens,
-    cacheCreationInputTokens
-  ].filter((value): value is number => typeof value === 'number')
-    .reduce((total, value) => total + value, 0);
-
-  return compactUsage({
-    totalTokens: totalTokens > 0 ? totalTokens : undefined,
-    inputTokens,
-    outputTokens,
-    cachedInputTokens,
-    cacheCreationInputTokens
-  });
 }
 
 function serializeArguments(value: unknown) {

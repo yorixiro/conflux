@@ -236,6 +236,7 @@ describe('chatApiStreamingCollector', () => {
     expect(reply.model).toBe('openai/gpt-5.4-20260305');
     expect(reply.content).toBe('补全正文。');
     expect(reply.tokenUsage).toEqual({
+      totalTokens: 11,
       inputTokens: 8,
       outputTokens: 3
     });
