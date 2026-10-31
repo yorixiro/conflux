@@ -1,0 +1,150 @@
+/* Shared message receipt, not a skin override. Inherits the active chat palette. */
+.message-memory-recall-card {
+  width: min(100%, 540px);
+  max-width: 100%;
+  min-width: 0;
+  margin: 6px 0;
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-solid) 64%, transparent);
+  color: var(--text-soft);
+  overflow: hidden;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.message-memory-recall-handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.message-memory-recall-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+
+.message-memory-recall-symbol {
+  display: inline-grid;
+  flex: 0 0 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 48%, transparent);
+  border-radius: 9px;
+}
+
+.message-memory-recall-title {
+  white-space: nowrap;
+  font-size: var(--type-caption);
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+
+.message-memory-recall-tags {
+  display: flex;
+  min-width: 0;
+  gap: 5px;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.message-memory-recall-tag {
+  max-width: 100%;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent-soft) 25%, transparent);
+  color: var(--text-muted);
+  font-size: var(--type-tiny);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message-memory-recall-count {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--type-tiny);
+  white-space: nowrap;
+}
+
+.message-memory-recall-chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  transition: transform 240ms ease;
+}
+
+.message-memory-recall-card.is-open .message-memory-recall-chevron {
+  transform: rotate(180deg);
+}
+
+.message-memory-recall-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  transition: grid-template-rows 280ms cubic-bezier(.2,.7,.2,1), opacity 210ms ease;
+}
+
+.message-memory-recall-card.is-open .message-memory-recall-drawer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.message-memory-recall-drawer-inner {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 12px;
+  visibility: hidden;
+  transition: visibility 0s linear 280ms, padding 280ms ease;
+}
+
+.message-memory-recall-card.is-open .message-memory-recall-drawer-inner {
+  padding: 2px 12px 12px;
+  visibility: visible;
+  transition: visibility 0s, padding 280ms ease;
+}
+
+.message-memory-recall-description {
+  margin: 0 0 8px;
+  font-size: var(--type-tiny);
+  color: var(--text-muted);
+}
+
+.message-memory-recall-drawer .message-memory-evidence.embedded {
+  max-height: min(46dvh, 400px);
+  overflow-y: auto;
+}
+
+.message-memory-recall-drawer .message-memory-evidence-panel {
+  border-top: 1px solid color-mix(in srgb, var(--border) 48%, transparent);
+  padding-top: 8px;
+}
+
+@media (max-width: 380px) {
+  .message-memory-recall-handle { gap: 5px; padding-inline: 8px; }
+  .message-memory-recall-handle .message-memory-recall-tag:nth-child(n + 2) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-memory-recall-drawer,
+  .message-memory-recall-drawer-inner,
+  .message-memory-recall-chevron {
+    transition: none;
+  }
+}
