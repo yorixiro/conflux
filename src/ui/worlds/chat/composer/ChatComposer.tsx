@@ -342,7 +342,7 @@ export function ChatComposer() {
             </div>
           ) : null}
           <div className={showKekeChrome ? 'keke-shell' : 'chat-box-shell chat-box'}>
-            <div className={showKekeChrome ? 'row' : 'chat-box-main'}>
+            <div className={showKekeChrome ? 'row chat-composer-input-row' : 'chat-box-main chat-composer-input-row'}>
               <ComposerQuickActions
                 paperStyle={showKekeChrome}
                 pickerOpen={attachmentPickerOpen}
