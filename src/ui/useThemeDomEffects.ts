@@ -5,6 +5,7 @@ import { buildThemeBlankBaseCss } from '../engines/themeBlankBaseCss';
 import { resolveThemeAssetUrls } from './themeAssetCss';
 import { buildThemeDomSnapshot, shouldAnimateThemeTransition, type ThemeDomSnapshot } from './themeDomSteadyState';
 import { hasCreativeBackgroundOverride } from './themeBackgroundOverride';
+import { CHAT_THEME_PALETTE_SELECTOR, reconcileChatThemeVariables } from './chatThemePalette';
 import type { ThemeState, ThemeVariables, World } from '../types/domain';
 
 const THEME_TRANSITION_ENTER_MS = 96;
@@ -188,18 +189,23 @@ function syncStyleTag(layer: string, cssText: string) {
 
 function syncThemeVariables(nextVariables: ThemeVariables, prevVariables: ThemeVariables) {
   if (typeof document === 'undefined') return;
-  const root = document.documentElement;
-  const previousKeys = new Set(Object.keys(prevVariables));
-
-  Object.entries(nextVariables).forEach(([key, value]) => {
-    previousKeys.delete(key);
-    if (prevVariables[key] === value) return;
-    root.style.setProperty(key, value);
-  });
-
-  previousKeys.forEach((key) => {
-    root.style.removeProperty(key);
-  });
+  // The chat palette must not change :root: that also colors Home and Settings.
+  // CSSOM parses CSS values safely, including user-defined gradients and URLs.
+  let paletteStyle = document.head.querySelector<HTMLStyleElement>('style[data-conflux-chat-palette]');
+  if (!paletteStyle) {
+    paletteStyle = document.createElement('style');
+    paletteStyle.setAttribute('data-conflux-chat-palette', '');
+    paletteStyle.textContent = `${CHAT_THEME_PALETTE_SELECTOR} {}`;
+    document.head.appendChild(paletteStyle);
+  }
+  const rule = paletteStyle.sheet?.cssRules.item(0);
+  if (!rule || !('style' in rule)) return;
+  reconcileChatThemeVariables(
+    nextVariables,
+    prevVariables,
+    (rule as CSSStyleRule).style,
+    document.documentElement.style
+  );
 }
 
 function countVariableChanges(nextVariables: ThemeVariables, prevVariables: ThemeVariables) {
