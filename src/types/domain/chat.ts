@@ -44,6 +44,8 @@ export interface ChatMessage {
   isFavorite?: boolean;
   /** Message-local emoji selections retained by LocalData JSON. */
   reactions?: string[];
+  /** Canonical reactions already incorporate legacy kk-rx; do not re-import stale localStorage. */
+  legacyReactionsMigrated?: boolean;
   nativeToolCalls?: ChatNativeToolCall[];
   toolInvocation?: ToolInvocation;
   cardReference?: ChatCardReference;

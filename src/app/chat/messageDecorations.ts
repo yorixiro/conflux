@@ -20,8 +20,11 @@ export function readLegacyKekeReaction(messageId: string): ChatReactionEmoji | n
   } catch { return null; }
 }
 
-export function resolveMessageReactions(message: Pick<ChatMessage, 'id' | 'reactions'>): readonly string[] {
+export function resolveMessageReactions(message: Pick<ChatMessage, 'id' | 'reactions' | 'legacyReactionsMigrated'>): readonly string[] {
   const canonical = message.reactions ?? [];
+  // A durable migration flag prevents stale legacy records from reappearing
+  // when localStorage cleanup fails after the canonical write succeeds.
+  if (message.legacyReactionsMigrated === true) return canonical;
   // An explicit [] records a canonical choice (including removal). Do not
   // resurrect historical localStorage markers after the user removed them.
   if (Array.isArray(message.reactions) && canonical.length === 0) return canonical;

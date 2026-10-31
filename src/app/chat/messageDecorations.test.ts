@@ -40,6 +40,29 @@ describe('real message decorations', () => {
     }
   });
 
+  it('does not resurrect old marks when localStorage cleanup fails after migration', () => {
+    const oldRecords = JSON.stringify({ m1: '哼', m2: '☆' });
+    vi.stubGlobal('window', { localStorage: {
+      getItem: () => oldRecords,
+      setItem: () => { throw new Error('Storage unavailable'); }
+    } });
+    try {
+      expect(resolveMessageReactions({ id: 'm1', reactions: ['❤️'] })).toEqual(['❤️', '哼']);
+      const migrated: ChatMessage = {
+        id: 'm1', role: 'assistant', content: 'saved', timestamp: 100,
+        reactions: ['❤️'], legacyReactionsMigrated: true
+      };
+      expect(() => clearLegacyKekeReaction('m1')).not.toThrow();
+      const saved = serializeMessagePayload(migrated, 'c1');
+      const reloaded = normalizeChatMessage(JSON.parse(saved) as ChatMessage);
+      expect(reloaded.legacyReactionsMigrated).toBe(true);
+      expect(resolveMessageReactions(reloaded)).toEqual(['❤️']);
+      expect(JSON.parse(oldRecords)).toEqual({ m1: '哼', m2: '☆' });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('round-trips bookmark and reactions using the real LocalData serializer', () => {
     const message: ChatMessage = { id: 'm1', role: 'assistant', content: 'saved', timestamp: 100,
       isFavorite: true, reactions: ['❤️', '✨'] };
