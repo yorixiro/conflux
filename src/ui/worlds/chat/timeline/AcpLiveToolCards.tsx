@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import {
   getAcpToolCardsSnapshot,
   resolveAcpPermission,
@@ -14,10 +14,17 @@ export function AcpLiveToolCards({ conversationId }: { conversationId: string | 
         card.conversationId.startsWith(conversationId + '::')
       ).slice(-5)
     : [];
+  const cardRef = useRef<HTMLDivElement>(null);
+  const pendingId = visible.find((card) => card.state === 'approval')?.id ?? null;
+  // A permission request must be visible even if the chat's reply-stage
+  // scroll position is above the last message. No modal or page overlay.
+  useEffect(() => {
+    if (pendingId) cardRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [pendingId]);
   if (!visible.length) return null;
 
   return (
-    <div className="acp-live-tool-cards" aria-live="polite">
+    <div ref={cardRef} className="acp-live-tool-cards" aria-live="polite">
       {visible.map((card) => {
         const pending = card.state === 'approval';
         const status = pending ? 'running' : card.state;

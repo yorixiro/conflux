@@ -19,10 +19,16 @@ const send = (value) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ..
 const requestPermission = (sessionId, name) => new Promise((resolve, reject) => {
   const id = ++permissionSequence;
   permissionWaiters.set(id, { resolve, reject });
+  // ACP agents can omit name from permission requests; the previous tool
+  // update must still authorize an enabled Conflux tool without a UI prompt.
+  send({ method: 'session/update', params: { sessionId, update: {
+    sessionUpdate: 'tool_call', toolCallId: 'permission-' + id,
+    name, title: 'Use ' + name, kind: 'edit', status: 'pending'
+  } } });
   send({ id, method: 'session/request_permission', params: {
     sessionId,
     toolCall: { toolCallId: 'permission-' + id, title: 'Use ' + name,
-      name, kind: 'edit', status: 'pending' },
+      kind: 'edit', status: 'pending' },
     options: [
       { optionId: 'allow-once', name: 'Allow once', kind: 'allow_once' },
       { optionId: 'reject-once', name: 'Reject once', kind: 'reject_once' }
