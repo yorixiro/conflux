@@ -2,7 +2,8 @@
 
 日期：2026-10-31。状态：PR 待验收（代码实施，运行测试及真机未验收）。
 基线：`keke-acp-preview` 的 `aaf7a60e6348170d027d703bd670f55c71e732f5`。
-开发分支：`feat/chat-memory-recall-drawer-20261031`，PR 地址见 PR 元数据。
+开发分支：`feat/chat-memory-recall-drawer-20261031`。PR：https://github.com/yorixiro/conflux/pull/16 。
+功能提交（文档收尾前 HEAD）：`de2a959faff2a8016135abc61b7320dbd122daa0`。
 
 ## 目标与实际数据边界
 
