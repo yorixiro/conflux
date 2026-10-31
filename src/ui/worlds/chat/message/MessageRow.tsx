@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import type { ChatReactionEmoji } from '../../../../app/chat/messageDecorations';
 import { buildCardReference } from '../../../../app/collection/codeCollectionSource';
 import { resolveAssistantStreamingChrome, type ChatMessageLifecycle } from '../../../../app/chat/chatStreamingDisplay';
 import type { CodeCardActionMode, CodeCardMessageProgress } from '../../../../app/chat/chatDerivedState';
@@ -59,6 +60,8 @@ export type MessageRowActions = {
   retry: (message: ChatMessage) => Promise<void>;
   editMessage: (message: ChatMessage) => void;
   deleteMessage: (message: ChatMessage) => Promise<void>;
+  toggleFavoriteMessage: (message: ChatMessage) => Promise<void>;
+  toggleMessageReaction: (message: ChatMessage, emoji: ChatReactionEmoji) => Promise<void>;
   editAssistantMessage: (message: ChatMessage, content: string) => void;
   cacheAssistantSpeech: (message: ChatMessage, voiceCache: ChatMessageVoiceCache) => void;
   forkFromMessage: (message: ChatMessage) => void;
@@ -229,6 +232,11 @@ function MessageRowComponent({
   const messageActions = (isAssistantReply || isUserMessage) && !state.editing ? (
     <MessageActions
       canCopyMessage={!isStreamingLike && Boolean(message.content.trim())}
+      canDecorate={!isStreamingLike}
+      isFavorite={Boolean(message.isFavorite)}
+      reactionEmojis={message.reactions ?? []}
+      onToggleFavorite={() => { void actions.toggleFavoriteMessage(message); }}
+      onToggleReaction={(emoji) => { void actions.toggleMessageReaction(message, emoji); }}
       canEditUser={state.canEdit}
       canDelete={state.canDelete}
       menuOpen={actionMenuOpen}
