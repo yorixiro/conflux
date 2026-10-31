@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ChatMessage, ToolInvocation } from '../../../../types/domain';
 import type { I18nTranslator } from '../../../../i18n';
 import { useI18n } from '../../../../i18n';
@@ -44,6 +45,7 @@ export function ThinkingSheet({
 }: ThinkingSheetProps) {
   const { t } = useI18n();
   const [rawExpanded, setRawExpanded] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const copy = useMemo(() => createThinkingSummaryCopy(t), [t]);
   const session = useMemo(
     () => (message ? buildThinkingSessionSummary(messages, message.id, copy) : null),
@@ -54,19 +56,41 @@ export function ThinkingSheet({
     setRawExpanded(false);
   }, [message?.id]);
 
-  if (!message || !session) return null;
+  const isAvailable = Boolean(message && session);
+  useEffect(() => {
+    if (!isAvailable) return undefined;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isAvailable, message?.id, onClose]);
 
-  return (
+  // Portal into the app shell rather than the timeline: the dialog must be
+  // centered on the entire screen, not clipped by scrolling message rows.
+  const portalHost = typeof document === 'undefined'
+    ? null
+    : document.querySelector<HTMLElement>('.app-shell.chat');
+  if (!message || !session || !portalHost) return null;
+
+  return createPortal(
     <div className="thinking-summary-overlay" role="dialog" aria-modal="true" aria-label={t('chat.thinking.sheetAria')}>
       <button type="button" className="thinking-summary-backdrop" aria-label={t('chat.thinking.closeAria')} onClick={onClose} />
       <div className="thinking-summary-sheet">
-        <div className="sheet-handle" />
         <div className="thinking-summary-topbar">
-          <button type="button" className="thinking-summary-close" onClick={onClose} aria-label={t('chat.thinking.closeAria')}>
+          <button type="button" className="thinking-summary-close" ref={closeRef} onClick={onClose} aria-label={t('chat.thinking.closeAria')}>
             <Icon name="x" size={18} />
           </button>
           <div className="thinking-summary-title">
-            <strong>Summary</strong>
+            <strong>thinking</strong>
             <span>{[message.assistantName || assistantName, session.statsLabel].filter(Boolean).join(' · ')}</span>
           </div>
           <div className="thinking-summary-spacer" aria-hidden="true" />
@@ -142,6 +166,7 @@ export function ThinkingSheet({
           ) : null}
         </div>
       </div>
-    </div>
+    </div>,
+    portalHost
   );
 }

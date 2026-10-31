@@ -528,14 +528,15 @@ export function MessageActions({
       {canOpenThinkingSummary && (
         <button
           type="button"
-          className={`micro-action-btn ${isThinkingActive ? 'active' : ''}`}
+          className={`micro-action-btn thinking-action-trigger ${isThinkingActive ? 'active' : ''}`}
+          aria-haspopup="dialog"
           onClick={(event) => {
             runSelectionAction(onOpenThinkingSummary, { element: event.currentTarget });
           }}
           aria-label={isThinkingActive ? t('chat.messageActions.openThinkingActive') : t('chat.messageActions.openThinking')}
           title={isThinkingActive ? t('chat.messageActions.thinkingTitleActive') : t('chat.messageActions.thinkingTitle')}
         >
-          <Icon name="polarisStar" size={14} color="polarisDeepSpace" />
+          <span className="thinking-inline-label">thinking</span>
         </button>
       )}
       {showCodeCardAction && (
