@@ -74,6 +74,9 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* Message extras from the prototype: day separator and time/read-receipt line (inserted into .msg-row by mountKekeBubbles), typing dots. */
 :root[data-cf=sticker] #chat .msg-row > .kk-day{align-self:stretch;margin:6px 0 14px}
 :root[data-cf=sticker] #chat .msg-row > .kk-mt.r{margin-left:4px}
+/* A visible avatar takes its own gutter; keep the prototype time label
+   aligned with the bubble rather than under the avatar. */
+:root[data-cf=sticker] #chat .msg-row.m.r:has(.message-avatar-slot.assistant) > .kk-mt.r{margin-left:31px}
 :root[data-cf=sticker] #chat .assistant-streaming-hint{display:none}
 
 /* Prototype bubble look on the real DOM: .msg-row gets .m + .r/.s (+.g/.new), .bubble gets .b + data-p.
