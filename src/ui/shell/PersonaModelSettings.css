@@ -32,3 +32,50 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
 .model-quick-status:not(:empty) { padding:8px 2px 2px; }
 
 .persona-model-settings .model-quick-menu { top:calc(100% + 8px); bottom:auto; }
+
+/* Message composer: model/effort live in the upper-right lane, never below send. */
+.chat-composer .chat-composer-topline {
+  order: 19;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 10px;
+  row-gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.chat-composer .chat-composer-topline > .modes {
+  flex: 0 0 auto;
+  margin-right: auto;
+  min-width: max-content;
+}
+.chat-composer .chat-composer-topline > .chat-model-toolbar {
+  order: 0;
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  margin-left: auto;
+  padding: 0;
+}
+.chat-composer-topline .model-effort-row {
+  width: auto;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.chat-composer-topline .model-quick-picker {
+  max-width: clamp(72px, 22vw, 150px);
+}
+.chat-composer-topline .model-quick-trigger,
+.chat-composer-topline .model-effort-row label {
+  min-height: 30px;
+}
+.chat-composer-topline .model-quick-menu {
+  right: 0;
+  left: auto;
+  max-width: calc(100vw - 24px);
+}
+:root[data-cf=sticker] #chat .chat-composer-topline > .modes {
+  padding: 2px 2px 0;
+}
