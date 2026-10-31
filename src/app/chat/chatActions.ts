@@ -16,6 +16,7 @@ import {
 } from './chatSendPerformanceTrace';
 import { selectChatConversations } from './liveConversationCatalog';
 import { reportPersistenceError } from '../../infrastructure/persistenceDiagnostics';
+import { toggleReactionEmoji, type ChatReactionEmoji } from './messageDecorations';
 
 type CreateChatActionHandlersArgs = {
   startupReady: boolean;
@@ -239,6 +240,42 @@ export function createChatActionHandlers({
     ui.setCommandStatus('已修改这条回答。');
   };
 
+  const updateMessageDecoration = async (
+    message: ChatMessage,
+    getPatch: (current: ChatMessage) => Partial<ChatMessage>,
+    statusText: string
+  ) => {
+    const activeConversation = derived.activeConversation;
+    if (!activeConversation || message.toolInvocation || (message.role !== 'user' && message.role !== 'assistant')) return;
+    const writable = await store.chat.ensureConversationWritable(activeConversation.id);
+    if (!writable) {
+      ui.setCommandStatus('聊天记录尚未加载，不能保存这次操作。', true);
+      return;
+    }
+    const current = writable.messages.find((entry) => entry.id === message.id);
+    if (!current || current.role !== message.role || current.toolInvocation) return;
+    store.chat.updateMessage(writable, message.id, getPatch(current));
+    try {
+      await store.chat.persistToDb?.();
+      ui.setCommandStatus(statusText);
+    } catch (error) {
+      reportPersistenceError({
+        label: '[chat:message-decoration]',
+        store: 'chat',
+        operation: 'persist-message-decoration'
+      }, error);
+      ui.setCommandStatus('更改已应用，但本地保存失败。', true);
+    }
+  };
+
+  const toggleFavoriteMessage = (message: ChatMessage) =>
+    updateMessageDecoration(message, (current) => ({ isFavorite: !current.isFavorite }), '已更新收藏标记。');
+
+  const toggleMessageReaction = (message: ChatMessage, emoji: ChatReactionEmoji) =>
+    updateMessageDecoration(message, (current) => ({
+      reactions: toggleReactionEmoji(current.reactions, emoji)
+    }), '已更新表情回应。');
+
   const deleteMessage = async (message: ChatMessage) => {
     const activeConversation = derived.activeConversation;
     if (!activeConversation || ui.sending || message.toolInvocation || message.role === 'system') return;
@@ -436,6 +473,8 @@ export function createChatActionHandlers({
     commitMessageEdit,
     retryLatestAssistant,
     updateAssistantMessage,
+    toggleFavoriteMessage,
+    toggleMessageReaction,
     deleteMessage,
     cacheAssistantSpeech,
     forkConversationFromMessage,

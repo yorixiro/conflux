@@ -162,6 +162,8 @@ function buildActionsSection(args: {
     retry: args.chatActions.retryLatestAssistant,
     editMessage: args.ui.startEditingMessage,
     deleteMessage: args.chatActions.deleteMessage,
+    toggleFavoriteMessage: args.chatActions.toggleFavoriteMessage,
+    toggleMessageReaction: args.chatActions.toggleMessageReaction,
     editAssistantMessage: args.chatActions.updateAssistantMessage,
     cacheAssistantSpeech: args.chatActions.cacheAssistantSpeech,
     forkFromMessage: args.chatActions.forkConversationFromMessage,

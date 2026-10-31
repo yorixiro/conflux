@@ -36,6 +36,10 @@ export interface ChatMessage {
   speakerCollaboratorId?: string;
   thinkingText?: string;
   voiceCache?: ChatMessageVoiceCache;
+  /** Message-local bookmark; Heartstring indexing is a separate phase. */
+  isFavorite?: boolean;
+  /** Message-local emoji selections, retained in LocalData JSON payload. */
+  reactions?: string[];
   nativeToolCalls?: ChatNativeToolCall[];
   toolInvocation?: ToolInvocation;
   cardReference?: ChatCardReference;
