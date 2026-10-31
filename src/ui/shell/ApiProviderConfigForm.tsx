@@ -4,7 +4,7 @@ import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
 import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
-import { getProviderMissingFields } from './apiProviderDisplay';
+import { getProviderMissingFields, isLegacyDevinAcpProvider } from './apiProviderDisplay';
 import {
   ApiProviderCapabilitiesSection,
   ApiProviderImageUnderstandingSection,
@@ -42,12 +42,7 @@ export function ApiProviderConfigForm({
   const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(api, matchedPreset?.id));
   const modelDiscovery = useProviderModelDiscovery(api);
   const presetModels = publicTrialProvider ? [] : (matchedPreset?.models ?? []);
-  // Legacy Devin records were stored as ordinary credential-less HTTP APIs.
-  // Offer explicit migration instead of silently rewriting user profiles.
-  const legacyAcp = api.agentTransport !== 'devin-acp'
-    && api.name.trim() === 'Devin ACP'
-    && !api.baseUrl.trim()
-    && !api.apiKey.trim();
+  const legacyAcp = isLegacyDevinAcpProvider(api);
 
   useEffect(() => {
     setSelectedPresetId(matchedPreset?.id ?? '');
@@ -91,40 +86,43 @@ export function ApiProviderConfigForm({
     void handleDiscoverModels();
   }
 
-  // ACP is a stateful agent session, not an OpenAI-compatible provider.
-  // Keep its settings separate from API credentials, model discovery and diagnostics.
-  if (api.agentTransport === 'devin-acp') {
+  // A legacy ACP record must never fall through to the ordinary Base URL / API Key form.
+  // Keep its stored data unchanged until the owner explicitly activates ACP transport.
+  if (api.agentTransport === 'devin-acp' || legacyAcp) {
     return (
       <div className="api-provider-console">
-        <DevinAcpConnectionPanel
-          selectedModel={api.model === 'Devin ACP' ? '' : api.model}
-          onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
-        />
-        <details className="api-provider-more-settings">
-          <summary>图片理解（独立看图 API）</summary>
-          <ApiProviderImageUnderstandingSection
-            api={api}
-            providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
-            onSetApiConfig={onSetApiConfig}
-            requireExplicitProvider
-          />
-        </details>
+        {legacyAcp ? (
+          <div className="api-provider-setup-note" role="status">
+            <strong>旧 Devin ACP 连接等待启用本地代理</strong>
+            <p>这条连接不需要 Base URL 或 API Key。启用后保留连接 ID 和角色绑定，并使用本地 Devin 模型配置。</p>
+            <button type="button" className="btn-secondary compact"
+              onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
+              启用 Devin ACP 本地代理
+            </button>
+          </div>
+        ) : (
+          <>
+            <DevinAcpConnectionPanel
+              selectedModel={api.model === 'Devin ACP' ? '' : api.model}
+              onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
+            />
+            <details className="api-provider-more-settings">
+              <summary>图片理解（独立看图 API）</summary>
+              <ApiProviderImageUnderstandingSection
+                api={api}
+                providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
+                onSetApiConfig={onSetApiConfig}
+                requireExplicitProvider
+              />
+            </details>
+          </>
+        )}
       </div>
     );
   }
 
   return (
     <div className="api-provider-console">
-      {legacyAcp ? (
-        <div className="api-provider-setup-note" role="status">
-          <strong>这条旧 Devin ACP 连接仍被当成普通 API</strong>
-          <p>Devin 使用本地代理，不需要普通 API 地址或密钥。转换后，请在角色 API 设置中检查旧模型覆盖。</p>
-          <button type="button" className="btn-secondary compact"
-            onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
-            转换为 Devin ACP 本地代理连接
-          </button>
-        </div>
-      ) : null}
       {!builtInProvider ? (
         <div className="api-provider-setup-note" role="status">
           <strong>{missingFields.length

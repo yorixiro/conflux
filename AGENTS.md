@@ -38,8 +38,11 @@ Conflux is the user's independently directed local-first AI conversation and wor
 - Historical function names and filenames may stay temporarily while dependencies are unwound. Do not mass-rename storage keys, packages or APIs just to change the logo.
 
 ## Process and delivery
-- Make small, reviewable changes. Keep current theme, user data, ACP and Android/PWA functionality intact.
+- **Conflux is a solo-maintained project.** The default is one active, runnable integration branch, not one branch/PR per small feature. Do not create a new branch, PR, work-order file, or paperwork without a concrete need or the owner's request.
+- Integrate related changes into the active development version and keep the runnable phone/PWA preview as the primary delivery target. A commit, PR, or passing check is not itself a delivered feature.
+- Keep changes understandable and scoped to the actual user goal, but prefer a complete vertical feature over endless micro-commits. Keep current theme, user data, ACP and Android/PWA functionality intact.
 - Check status and exact base commit before code edits. No force push/reset, branch deletion, or PR merge unless explicitly requested.
 - For UI changes run relevant typecheck/build and focused tests, then provide mobile/tablet acceptance steps. For storage or request changes, run corresponding stronger verification.
 - Never claim tests or real-device checks that did not occur. State commit SHA, changed files, and remaining blockers.
-- At the end of every Work ticket, update the ticket's progress and the relevant roadmap entry with PR URL, Commit SHA, completed/unresolved scope, test results and actual Android validation status. A submitted PR is 'PR 待验收', not '已验收'. Ensure the progress update is visible on the shared development branch (or explicitly create a doc-only PR and report pending synchronization).
+- Report what actually runs in the active integration version, the user-visible path, and any remaining blockers. Update one current integration status rather than generating additional documentation PRs. When a separate PR is explicitly needed, record its integration state and never confuse 'code exists' with 'visible in the installed PWA'.
+- Before calling an integration complete, check whether existing feature branches contain unique code that was not brought into the active application. Never bulk-merge outdated branches over newer implementations; port missing behavior while preserving current data and UI.

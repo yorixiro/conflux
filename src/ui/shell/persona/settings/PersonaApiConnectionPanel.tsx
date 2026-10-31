@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { addSavedPersonaApiId, listSavedPersonaApiIds } from '../../../../engines/personaApiConnections';
 import type { ProviderProfile } from '../../../../types/domain';
+import { isLegacyDevinAcpProvider } from '../../apiProviderDisplay';
 import { PersonaModelSettings } from '../../PersonaModelSettings';
 import type { PersonaTabProps } from '../personaUiShared';
 
@@ -24,8 +25,7 @@ export function PersonaApiConnectionPanel({
   const current = providers.find((provider) => provider.id === activeId) ?? null;
   const missing = Boolean(activeId && !current);
   const isAcp = current?.agentTransport === 'devin-acp';
-  const legacyAcp = Boolean(current && !isAcp && current.name.trim() === 'Devin ACP'
-    && !current.baseUrl.trim() && !current.apiKey.trim());
+  const legacyAcp = Boolean(current && isLegacyDevinAcpProvider(current));
   const savedIds = listSavedPersonaApiIds(activePersona.advanced);
 
   function selectProvider(id: string) {
@@ -66,7 +66,7 @@ export function PersonaApiConnectionPanel({
         <button type="button" className="btn-secondary compact"
           onClick={() => {
             // Explicit legacy conversion must also clear this persona's old HTTP model.
-            onUpdateProvider(current.id, { agentTransport: 'devin-acp' });
+            onUpdateProvider(current.id, { agentTransport: 'devin-acp', model: '' });
             onUpdatePersona({ advanced: { modelOverride: '' } });
           }}>
           将旧 Devin ACP 连接标记为代理类型
