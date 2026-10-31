@@ -192,6 +192,8 @@ export interface PersonaMemoryReferenceDoc {
 
 export interface PersonaAdvancedSettings {
   providerId?: string;
+  /** API connections saved in this role's selector; provider secrets remain in runtime. */
+  savedProviderIds?: string[];
   /** Undefined keeps the legacy follow-global behavior for existing collaborators. */
   providerRouteMode?: 'unconfigured' | 'inherit' | 'fixed';
   modelOverride: string;

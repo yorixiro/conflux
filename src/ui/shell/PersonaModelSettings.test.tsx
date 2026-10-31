@@ -40,9 +40,19 @@ describe('model and effort controls', () => {
   it('places refresh and manual model input in API settings', () => {
     const html = renderToStaticMarkup(<PersonaModelSettings persona={setup()} settings />);
     expect(html).toContain('刷新模型列表');
-    expect(html).toContain('模型 ID（也可手动填写）');
-    expect(html).toContain('思考强度');
-    expect(html).toContain('启用线路思考能力');
+    expect(html).toContain('>模型</label>');
+    expect(html).toContain('list=');
+    expect(html).not.toContain('模型 ID（也可手动填写）');
+    expect(html).not.toContain('启用线路思考能力');
+  });
+  it('allows role-specific model selection without exposing shared capabilities', () => {
+    const html = renderToStaticMarkup(
+      <PersonaModelSettings persona={setup()} settings />
+    );
+    expect(html).toContain('>模型</label>');
+    expect(html).toContain('deepseek-v4-flash');
+    expect(html).not.toContain('启用线路思考能力');
+    expect(html).not.toContain('disabled=""');
   });
   it('does not let an unconfigured persona inherit and change the global route', () => {
     const persona = setup();

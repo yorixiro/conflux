@@ -31,14 +31,18 @@ export interface ChatMessage {
   model?: string;
   tokenCount?: number;
   tokenUsage?: ChatTokenUsage;
+  /** ACP session context occupancy, NOT this message's token consumption. */
+  acpContextUsage?: { used: number; size: number };
+  /** Usage numbers explicitly reported by the ACP agent; turn-vs-session scope is agent-defined. */
+  acpTokenReport?: ChatTokenUsage;
   memoryEvidence?: ChatMemoryEvidence;
   assistantName?: string;
   speakerCollaboratorId?: string;
   thinkingText?: string;
   voiceCache?: ChatMessageVoiceCache;
-  /** Message-local bookmark; Heartstring indexing is a separate phase. */
+  /** Message-local bookmark; Heartstring indexing is separate. */
   isFavorite?: boolean;
-  /** Message-local emoji selections, retained in LocalData JSON payload. */
+  /** Message-local emoji selections retained by LocalData JSON. */
   reactions?: string[];
   nativeToolCalls?: ChatNativeToolCall[];
   toolInvocation?: ToolInvocation;

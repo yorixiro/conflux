@@ -10,10 +10,18 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const usage = message.tokenUsage;
+  const isDevinAcp = message.model === 'Devin ACP' || message.providerName === 'Devin ACP';
+  const context = message.acpContextUsage;
+  const acpReport = message.acpTokenReport;
   const tokenLabel = formatTokenCount(message.tokenCount, usage, {
     formatNumber,
     totalLabel: count => t('chat.messageMeta.tokenCount', { count })
   });
+  const acpReportedTotal = acpReport?.totalTokens;
+  const acpLabel = typeof acpReportedTotal === 'number'
+    ? `ACP 报告 ${formatNumber(acpReportedTotal)} Token`
+    : context ? `上下文 ${formatNumber(context.used)} Token`
+      : 'Token 未提供';
   const metrics = [
     ['settings.usage.totalTokens', usage?.totalTokens ?? message.tokenCount],
     ['settings.usage.input', usage?.inputTokens],
@@ -88,7 +96,7 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
         aria-label={t('chat.messageMeta.openTokenUsage')}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-      >{tokenLabel || 'Token'}</button>
+      >{tokenLabel || (isDevinAcp ? acpLabel : 'Token')}</button>
       {open ? (
         <dialog
           ref={dialogRef}
@@ -102,6 +110,28 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
             <button type="button" onClick={close} aria-label={t('chat.messageMeta.closeTokenUsage')}><Icon name="x" size={18} /></button>
           </header>
           {message.model ? <p className="message-token-model">{[message.providerName, message.model].filter(Boolean).join(' · ')}</p> : null}
+          {isDevinAcp && context ? (
+            <p className="message-token-model">
+              ACP 上下文：{formatNumber(context.used)} / {formatNumber(context.size)} Token（非本轮消耗）
+            </p>
+          ) : null}
+          {isDevinAcp && acpReport ? (
+            <div className="message-token-note">
+              <p>Devin ACP 报告用量（可能是当前会话累计，不作为单轮计费统计）</p>
+              <dl>
+                {([
+                  ['报告总量', acpReport.totalTokens],
+                  ['输入', acpReport.inputTokens],
+                  ['输出', acpReport.outputTokens],
+                  ['缓存读取', acpReport.cachedInputTokens],
+                  ['缓存写入', acpReport.cacheCreationInputTokens],
+                  ['推理', acpReport.reasoningTokens]
+                ] as const).filter(([, value]) => typeof value === 'number').map(([label, value]) => (
+                  <div key={label}><dt>{label}</dt><dd>{formatNumber(value!)}</dd></div>
+                ))}
+              </dl>
+            </div>
+          ) : null}
           {hasUsage ? <dl>
             {metrics.map(([label, value]) => (
               <div key={label}>
@@ -109,7 +139,9 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
                 <dd>{typeof value === 'number' ? formatNumber(value) : t('settings.usage.notRecorded')}</dd>
               </div>
             ))}
-          </dl> : <p className="message-token-empty">{t('chat.messageMeta.noTokenUsage')}</p>}
+          </dl> : isDevinAcp && !acpReport && !context ? (
+            <p className="message-token-empty">Devin 未上报 Token 用量。</p>
+          ) : !isDevinAcp ? <p className="message-token-empty">{t('chat.messageMeta.noTokenUsage')}</p> : null}
           {hasUsage ? <details className="message-token-note">
             <summary>{t('chat.messageMeta.tokenUsageAbout')}</summary>
             <p>{t('chat.messageMeta.tokenUsageNote')}</p>

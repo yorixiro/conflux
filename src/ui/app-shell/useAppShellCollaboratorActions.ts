@@ -272,10 +272,20 @@ export function useAppShellCollaboratorActions({
         setActiveCollaborator(nextId);
         setEditingCollaboratorId(nextId);
         setFrontstageCollaboratorId(nextId);
-        setActiveCard(introCardId);
-        spotlightCard(introCardId);
-        setCollectionShelf('code');
-        setWorld('collection');
+        if (activeWorld === 'chat') {
+          // From the conversation hub, return to messaging rather than forcing
+          // a detour to the generated intro card in the collection.
+          clearPendingAttachments();
+          clearPendingCardReference();
+          const conversationId = createConversation(nextId);
+          setActiveConversation(conversationId);
+          enterChatWorld({ setWorld });
+        } else {
+          setActiveCard(introCardId);
+          spotlightCard(introCardId);
+          setCollectionShelf('code');
+          setWorld('collection');
+        }
       }
     },
     talkToCollaborator,

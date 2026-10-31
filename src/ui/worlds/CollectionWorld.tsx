@@ -8,7 +8,7 @@ import { buildVisibleCollectionShelfNavItems } from '../collection/grid/collecti
 import { DialogueCollectionShelf } from '../collection/grid/DialogueCollectionShelf';
 import { CollaboratorInfoShelf, type CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 import { ImageCollectionShelf } from '../collection/images/ImageCollectionShelf';
-import { ArchiveAlbumShelf } from '../collection/album/ArchiveAlbumShelf';
+import { HeartstringHub } from '../collection/heartstring/HeartstringHub';
 import { CodeProjectCollectionShelfPages } from './collection/CodeProjectCollectionShelfPages';
 import { useI18n } from '../../i18n';
 
@@ -64,7 +64,7 @@ export function CollectionWorld({
     () =>
       buildVisibleCollectionShelfNavItems(
         {
-          dialogue: true,
+          dialogue: false,
           album: true,
           info: true,
           code: true,
@@ -82,10 +82,10 @@ export function CollectionWorld({
   const [floatingActionHost, setFloatingActionHost] = useState<HTMLDivElement | null>(null);
   const activeShelf = controller.collectionShelf;
   const setCollectionShelf = controller.setCollectionShelf;
-  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'dialogue' || activeShelf === 'album';
+  const archiveShelfActive = activeShelf === 'info' || activeShelf === 'album';
   const sectionNavItems = visibleShelfItems.filter((item) => (
     archiveShelfActive
-      ? item.shelf === 'info' || item.shelf === 'dialogue' || item.shelf === 'album'
+      ? item.shelf === 'album'
       : item.shelf === 'project' || item.shelf === 'code' || item.shelf === 'image'
   ));
   const selectShelf = (shelf: typeof activeShelf) => {
@@ -96,7 +96,7 @@ export function CollectionWorld({
   };
   useEffect(() => {
     if (visibleShelfSet.has(activeShelf)) return;
-    setCollectionShelf(visibleShelfItems[0]?.shelf ?? 'dialogue');
+    setCollectionShelf('album');
   }, [activeShelf, setCollectionShelf, visibleShelfItems, visibleShelfSet]);
 
   useEffect(() => {
@@ -128,8 +128,8 @@ export function CollectionWorld({
       />
 
       <div className={`surface-motion-local-stage collection-shelf-stage ${searchOpen ? 'collection-shelf-stage--controls-open' : ''}`}>
-        {sectionNavigation ? (
-          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '档案分类' : '工坊分类'}>
+        {sectionNavigation && activeShelf !== 'info' && activeShelf !== 'album' ? (
+          <nav className="conflux-collection-section-nav" aria-label={archiveShelfActive ? '心弦分类' : '工坊分类'}>
             {sectionNavItems.map((item) => (
               <button
                 key={item.shelf}
@@ -263,7 +263,7 @@ export function CollectionWorld({
             {visibleShelfSet.has('album') && activeShelf === 'album' ? (
               <div className="collection-shelf-page collection-shelf-page--album collection-shelf-page--active" data-shelf-page="album">
                 <div className="collection-shelf-page-body">
-                  <ArchiveAlbumShelf searchTerm={controller.searchTerm} />
+                  <HeartstringHub searchTerm={controller.searchTerm} />
                 </div>
               </div>
             ) : null}

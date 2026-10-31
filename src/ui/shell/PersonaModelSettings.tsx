@@ -8,7 +8,9 @@ import type { Persona } from '../../types/domain';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import './PersonaModelSettings.css';
 
-export function PersonaModelSettings({ persona, settings = false }: { persona: Persona; settings?: boolean }) {
+export function PersonaModelSettings({
+  persona, settings = false
+}: { persona: Persona; settings?: boolean }) {
   const id = useId();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -20,8 +22,6 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
   const updateCollaborator = usePersonaStore((state) => state.updateCollaborator);
   const binding = resolvePersonaProviderBinding({ persona, providers, globalApi });
   const capability = resolveProviderCapability(binding.api);
-  const supportsDepth = resolveProviderCapability({ ...binding.api, capabilities: { ...binding.api.capabilities, thinking: true } }).thinking.sendBudget;
-  const updateProvider = useRuntimeStore((state) => state.updateProvider);
   const discovery = useProviderModelDiscovery(binding.api);
   const hasRoute = Boolean(binding.fixedProvider || (!binding.fixedProviderId && persona.advanced.providerRouteMode === 'inherit'));
   const editable = editablePersona && hasRoute && !capability.route.isBuiltInTrial;
@@ -51,7 +51,36 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
     if (!pickerOpen && canPull && !discovery.models.length && discovery.status !== 'loading') void discovery.refresh();
   }
 
-  return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="当前 AI 模型与思考强度">
+  if (binding.api.agentTransport === 'devin-acp') {
+    return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="Devin ACP 代理连接">
+      <div className="model-effort-row"><span className="ps-footnote">Devin ACP · 模型由代理管理</span></div>
+    </div>;
+  }
+
+  if (settings) {
+    return <div className="persona-model-settings" aria-label="当前角色模型">
+      <div className="ps-field">
+        <label className="ps-field-label" htmlFor={id + '-model'}>模型</label>
+        <input className="ps-input ps-input--mono"
+          id={id + '-model'} list={id + '-model-options'}
+          disabled={!editable} value={binding.modelOverride}
+          placeholder={binding.api.model || '输入或选择模型 ID'}
+          autoCapitalize="none" autoCorrect="off" spellCheck={false}
+          onChange={(event) => update({ modelOverride: event.target.value })} />
+        <datalist id={id + '-model-options'}>
+          {discovery.models.map((model) => <option key={model.id} value={model.id}>{model.label || model.id}</option>)}
+        </datalist>
+      </div>
+      <button className="btn-secondary compact" type="button"
+        disabled={!canPull || discovery.status === 'loading'}
+        onClick={() => void discovery.refresh()}>
+        {discovery.status === 'loading' ? '正在获取模型…' : '刷新模型列表'}
+      </button>
+      {discovery.status === 'error' ? <p className="ps-footnote" role="status">{discovery.error}</p> : null}
+    </div>;
+  }
+
+  return <div className="chat-model-toolbar" aria-label="当前 AI 模型与思考强度">
     <div className="model-effort-row">
       <div className="model-quick-picker" ref={pickerRef} onKeyDown={(event) => {
         if (event.key === 'Escape' && pickerOpen) {
@@ -91,21 +120,5 @@ export function PersonaModelSettings({ persona, settings = false }: { persona: P
         <span className="model-quick-arrow" aria-hidden="true">▾</span>
       </label>
     </div>
-    {settings ? <>
-      <button className="btn-secondary compact" type="button" disabled={!canPull || discovery.status === 'loading'} onClick={() => void discovery.refresh()}>
-        {discovery.status === 'loading' ? '正在拉取…' : discovery.models.length ? '刷新模型列表' : '拉取模型列表'}
-      </button>
-      <div role="status" aria-live="polite">
-        {discovery.status === 'error' ? <p className="ps-footnote">{discovery.error}</p> : null}
-        {discovery.status === 'success' ? <p className="ps-footnote">已拉取 {discovery.models.length} 个模型，可在聊天输入框下方切换。</p> : null}
-      </div>
-      <label className="ps-field-label" htmlFor={`${id}-manual`}>模型 ID（也可手动填写）</label>
-      <input className="ps-input ps-input--mono" id={`${id}-manual`} disabled={!editable} value={binding.modelOverride} placeholder={binding.api.model || '输入模型 ID'} autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={(event) => update({ modelOverride: event.target.value })} />
-      {supportsDepth ? <label className="ps-field-label">
-        <input type="checkbox" disabled={!editable} checked={binding.api.capabilities.thinking} onChange={(event) => updateProvider(binding.api.id, { capabilities: { ...binding.api.capabilities, thinking: event.target.checked } })} />
-        启用线路思考能力（共用此线路的角色生效）
-      </label> : null}
-      {!canSetDepth ? <p className="ps-footnote">此线路尚未开启思考能力或当前协议不支持强度设置。</p> : null}
-    </> : null}
   </div>;
 }

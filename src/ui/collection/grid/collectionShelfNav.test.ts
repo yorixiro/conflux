@@ -36,4 +36,12 @@ describe('buildVisibleCollectionShelfNavItems', () => {
 
     expect(items.map((item) => item.shelf)).toEqual(['dialogue', 'album', 'project', 'code', 'image', 'info']);
   });
+  it('supports an archive without a dialogue-history tab', () => {
+    const items = buildVisibleCollectionShelfNavItems(
+      { dialogue: false, album: true, info: true, code: true, project: true, image: true },
+      t
+    );
+    expect(items.map((item) => item.shelf)).toEqual(['album', 'project', 'code', 'image', 'info']);
+  });
+
 });

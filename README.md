@@ -1,95 +1,59 @@
-# Polaris
+# Conflux
 
-Polaris is a local-first AI workspace for sustained work with models, collaborators, saved materials, tools, and personal project context.
+Conflux 是一个独立设计与持续开发的、本地优先的 AI 对话与个人工作空间。产品设计、交互、视觉风格和功能路线由 Conflux 自己决定，不继承旧项目的设计偏好。
 
-Most AI chat clients treat a conversation as a single message stream. Polaris treats it as a workspace: conversations survive restarts, collaborators keep identity and memory boundaries, useful outputs become cards or project materials, and model-visible tools leave evidence that the next request can use.
+技术栈：React、TypeScript、Vite。目标是一套业务核心支持 Web/PWA 与 Android，按需接入本地服务、模型供应商、工具和 MCP。
 
-The core design idea is to build an environment that matches how an AI collaborator can reason naturally: clear scene, clear identities, clear tools, clear evidence, and enough local context for the model to choose well.
+## 主要功能方向
 
-## Product Shape
+- 对话、角色身份、模型线路、聊天记录与消息操作
+- 长期资料与上下文检索、卡片、收藏和工作区
+- 独立可换肤的 UI，允许贴纸、纸张、玻璃、极简等不同布局变体
+- Android 平板与手机、Web/PWA 共享功能核心
+- 本地优先的数据管理、备份与迁移
+- 可选的本地服务和开发代理集成（例如 Devin ACP 预览）
 
-- **Chat workspace:** long-lived conversations, streaming replies, task state, tool calls, thinking summaries, attachments, and import/export flows.
-- **Collaborators and personas:** configurable collaborators with persistent identity, model settings, memory controls, room settings, and tool permissions.
-- **Collection surface:** saved conversations, code cards, images, files, room projects, and workspace materials outside the linear chat timeline.
-- **Readable AI environment:** request context, room boundaries, memories, tools, and project materials are arranged as named parts of the current scene.
-- **LocalData:** a local-first data layer for conversations, collaborators, cards, assets, project files, runtime settings, and migration/import boundaries.
-- **Tool evidence:** model tools are tracked as visible events with execution results and replayable context, not just hidden side effects.
-- **Cross-platform shell:** shared product runtime for web, iOS, Android, and desktop host surfaces, with native bridges only for real platform capabilities.
+**功能路线不等于已实现或已验收。** 依代码、测试及实际设备验收判断功能状态。
 
-## Current Status
+## 项目原则
 
-- Native iOS and Android shells use SQLite behind the LocalData backend. Web and self-host browser builds use KV/IndexedDB.
-- Data ownership is explicit: LocalData facts with a SQLite backend where connected, blob storage for large binaries, runtime/UI stores as projections, and existing local data handled through import and migration boundaries.
+1. Conflux 现有的自定义主题和交互是产品基线，不恢复旧项目的界面风格。
+2. 主题外观与业务逻辑分离；换肤不允许改变聊天归属、角色 ID、模型请求或数据保存机制。
+3. UI 尺寸和适配遵循 [Conflux 布局规范](docs/UI_LAYOUT_SPEC.md)；主题可以有自定义尺寸与组件变体。
+4. 技术债逐模块审查和替换，目标是减少不必要的旧依赖，而不是全局替换字符串造成新故障。
+5. 代码验证、构建、真机验收分开报告；改动必须可追溯。
 
-Status files:
+## 主要代码入口
 
-- [docs/README.md](/docs/README.md): documentation map.
-- [DEPLOYMENT.md](/DEPLOYMENT.md): local development, web deployment, backend origin, and native build guide.
-- [docs/open-source/README.md](/docs/open-source/README.md): documentation pack for product intent, architecture, modules, backend, and verification.
+- `src/ui/app-shell/`：应用导航、侧栏、弹层与界面布局
+- `src/ui/worlds/`：聊天、群聊与资料世界
+- `src/ui/keke-original/`、`src/config/theme/`：自定义主题与适配层
+- `src/app/chat/`、`src/app/persona/`、`src/app/collection/`：核心领域逻辑
+- `src/engines/request/`、`src/engines/tool-protocol/`：模型请求和工具事件
+- `src/stores/`、`src/engines/localData/`：状态和本地数据
+- `src/native/`、`android/`：平台适配
 
-## License
+部分旧模块、包名、资源、存储键仍留有历史名称；它们是逐步替换对象，并不构成 Conflux 的设计约束。
 
-Polaris source code is licensed under AGPL-3.0-only. See [LICENSE](/LICENSE).
-
-## Contributing
-
-Polaris welcomes issue reports, documentation improvements, focused bug fixes, tests, import/export adapters, backend/selfhost improvements, and platform bridge work. Product direction stays owner-led so the workspace remains coherent, but collaboration is welcome when a change preserves the data boundaries and user experience described in this repository.
-
-See [CONTRIBUTING.md](/CONTRIBUTING.md).
-
-## Code Map
-
-- `src/main.tsx` starts the web app and selects the active runtime surface.
-- `src/ui/AppShell.tsx` and `src/ui/app-shell/` own the top-level app shell.
-- `src/ui/worlds/ChatWorld.tsx` and `src/app/chat/` own chat orchestration.
-- `src/ui/worlds/CollectionWorld.tsx` and `src/app/collection/` own the collection/project workspace surface.
-- `src/stores/` owns persisted client state projections: `spaceStore`, `chatStore`, `collectionStore`, `personaStore`, and `runtimeStore`.
-- `src/engines/` owns reusable logic for requests, providers, tool protocol, task state, cards, themes, attachments, LocalData, and persistence helpers.
-- `ios/` and `android/` own Capacitor wrappers and native plugins.
-- `workers/polaris-api/` owns the Cloudflare Worker API package.
-
-## Local Development
-
-Install dependencies and start the Vite dev server:
+## 本地开发
 
 ```bash
-npm i
+npm ci
 npm run dev
-```
-
-`npm run dev` starts the frontend Vite server. It does not start a backend by itself. Web builds keep relative `/api` routes on the current origin, and Vite only proxies `/api` when `VITE_POLARIS_API_ORIGIN` is set. For split-origin dev proxying or native internal API routes, copy `.env.example` to `.env.local` and set `VITE_POLARIS_API_ORIGIN` to your own selfhost or relay origin.
-
-Backend/selfhost notes are in [docs/connect-your-own-backend.md](/docs/connect-your-own-backend.md).
-Deployment paths are in [DEPLOYMENT.md](/DEPLOYMENT.md).
-
-Common verification commands:
-
-```bash
 npm run typecheck
-npm run test:data-boundary
-npm test
 npm run build
 ```
 
-`npm run verify` runs the main typecheck, extra tool/API typecheck, worker typecheck, the full test suite, and a production build.
+定向修改优先做定向验证。不要为了普通 UI 改动反复执行有费用的模型请求。
 
-## Data And Verification Rules
+## 文档
 
-- Use `.env.example` as the checked-in configuration template and keep fixtures synthetic.
-- Treat old Polaris data as an external migration source: import, stage, validate, then promote it into current LocalData rows.
-- Tool changes must close the full loop: model visibility, execution, UI evidence, next-turn replay, and focused tests.
+- [开发规则](AGENTS.md)
+- [UI 尺寸与布局规范](docs/UI_LAYOUT_SPEC.md)
+- [独立化迁移清单](docs/CONFLUX_INDEPENDENCE_PLAN.md)
+- [数据与持久化说明](docs/handbook/DATA_AND_STORAGE.md)
+- [来源及许可信息](docs/PROVENANCE.md)
 
----
+## 许可
 
-## Conflux fork — Android / Web 融合工程
-
-此仓库是 Polaris 的个人融合开发 fork。目标是**同一套 React/TypeScript 业务代码**构建 Android APK 与 Web/PWA，选择性融合 InternalBeyond-Mobile 功能，并在后期增加可选的 Aru Host 接入。**当前仍是 Polaris 基线，不能把规划能力视为已完成。**
-
-开发与 Codex 交接入口：
-- [系统架构书](docs/CONFLUX_ARCHITECTURE.md)
-- [功能迁移矩阵](docs/CONFLUX_MIGRATION_MATRIX.md)
-- [Codex 开发任务书（P0–P6）](docs/CONFLUX_CODEX_HANDOFF.md)
-- [Codex 仓库规则](AGENTS.md)
-
-当前任务：**P0 源码审计和双端基线构建**。验证通过后才进入 P1（Web/PWA、Android、Grok provider）；不要一开始复制 IB 整套 HTML 或重写 Polaris 聊天核心。此 fork 的 GitHub Issues 当前关闭，因此以开发任务书为准。
-
+本仓库仍包含部分依 AGPL-3.0-only 使用的既有代码，适用条款见 [LICENSE](LICENSE)。代码来源与需要保留的声明集中记录于 [docs/PROVENANCE.md](docs/PROVENANCE.md)。这不代表 Conflux 的视觉或产品方案受旧项目约束。

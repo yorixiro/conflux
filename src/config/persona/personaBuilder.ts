@@ -197,6 +197,9 @@ export function createPersonaTemplate(
     },
     advanced: {
       providerId: overrides.advanced?.providerId ?? '',
+      savedProviderIds: Array.from(new Set((overrides.advanced?.savedProviderIds ?? [])
+        .filter((id): id is string => typeof id === 'string' && Boolean(id.trim()))
+        .map((id) => id.trim()))),
       providerRouteMode: overrides.advanced?.providerRouteMode,
       modelOverride: overrides.advanced?.modelOverride ?? '',
       temperature: overrides.advanced?.temperature ?? '0.7',

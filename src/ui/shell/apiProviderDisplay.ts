@@ -13,18 +13,20 @@ export function getProviderModelDisplayLabel(
   fallback = '还没填模型',
   builtInLabel = POLARIS_BUILT_IN_MODEL_LABEL
 ) {
+  if (provider.agentTransport === 'devin-acp') return '模型由代理管理';
   return isBuiltInProviderDisplay(provider)
     ? builtInLabel
     : (provider.model || fallback);
 }
 
 export function getProviderModelBindingValue(provider: ProviderProfile) {
+  if (provider.agentTransport === 'devin-acp') return '';
   return isBuiltInProviderDisplay(provider)
     ? POLARIS_PUBLIC_PROVIDER_MODEL
     : provider.model;
 }
 
 export function getProviderMissingFields(provider: ProviderProfile) {
-  if (isBuiltInProviderDisplay(provider)) return [];
+  if (provider.agentTransport === 'devin-acp' || isBuiltInProviderDisplay(provider)) return [];
   return (['baseUrl', 'apiKey', 'model'] as const).filter(field => !provider[field].trim());
 }

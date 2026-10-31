@@ -181,6 +181,34 @@ describe('useAppShellCollaboratorActions', () => {
     expect(setCollaboratorBuilderTargetId).toHaveBeenCalledWith(null);
   });
 
+  it('creates a conversation for a new AI when the builder was opened from chat', () => {
+    const createConversation = vi.fn(() => 'conversation-new');
+    const setActiveConversation = vi.fn();
+    const setWorld = vi.fn();
+    const setActiveCard = vi.fn();
+    const actions = useAppShellCollaboratorActions({
+      personas: [], conversations: [], companionConnections: [],
+      editingCollaboratorId: null, collaboratorBuilderTargetId: null,
+      frontstageCollaboratorId: null, activeCollaboratorId: null, activeWorld: 'chat',
+      collectionShelf: 'info', activeConversationId: null, activeConversationCollaboratorId: null,
+      createConversation, createPersona: vi.fn(() => 'persona-new'), createCard: vi.fn(() => 'card-new'),
+      deleteCollaborator: vi.fn(() => true), orphanConversation: vi.fn(), updateCollaborator: vi.fn(),
+      setActiveCollaborator: vi.fn(), setEditingCollaboratorId: vi.fn(),
+      setActiveCard, spotlightCard: vi.fn(), setActiveConversation,
+      deleteCollaboratorThemeSession: vi.fn(), setWorld, setCollectionShelf: vi.fn(),
+      setFrontstageCollaboratorId: vi.fn(), clearPendingAttachments: vi.fn(),
+      clearPendingCardReference: vi.fn(), rollbackPreviewForConversationDeletion: vi.fn(() => false),
+      closeMenu: vi.fn(), setCollaboratorBuilderOpen: vi.fn(), setCollaboratorBuilderTargetId: vi.fn()
+    });
+    actions.collaboratorBuilderBridge.createCollaboratorFromBuilder({ name: 'New AI' }, {
+      title: 'New AI', cardNote: '', language: 'markdown', code: '', cardFaceCss: '', tags: [], source: 'manual'
+    });
+    expect(createConversation).toHaveBeenCalledWith('persona-new');
+    expect(setActiveConversation).toHaveBeenCalledWith('conversation-new');
+    expect(setWorld).toHaveBeenCalledWith('chat');
+    expect(setActiveCard).not.toHaveBeenCalled();
+  });
+
   it('opens existing and newly created collaborator settings from retired group world state', () => {
     const setActiveCollaborator = vi.fn();
     const setEditingCollaboratorId = vi.fn();

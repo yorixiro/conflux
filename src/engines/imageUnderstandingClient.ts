@@ -22,9 +22,13 @@ export function resolveImageUnderstandingProvider(args: {
 }) {
   if (args.settings?.enabled !== true) return null;
   const providerId = args.settings.providerId?.trim();
+  // Never fall back to the text-only ACP model for an image understanding call.
+  // Explicitly selected but removed providers also must not silently reroute.
+  if (!providerId && args.globalApi.agentTransport === 'devin-acp') return null;
   const selected = providerId
-    ? args.providers?.find((provider) => provider.id === providerId) ?? args.globalApi
+    ? args.providers?.find((provider) => provider.id === providerId)
     : args.globalApi;
+  if (!selected || selected.agentTransport === 'devin-acp') return null;
   const modelOverride = args.settings.modelOverride?.trim();
   return modelOverride ? { ...selected, model: modelOverride } : selected;
 }

@@ -47,7 +47,7 @@ export function normalizeChatMessage(message: ChatMessage): ChatMessage {
   };
 }
 
-type AssistantReplyLike = Pick<AssistantReply | AssistantReplyProgress, 'model' | 'tokenCount' | 'tokenUsage' | 'thinkingText'>;
+type AssistantReplyLike = Pick<AssistantReply | AssistantReplyProgress, 'model' | 'tokenCount' | 'tokenUsage' | 'acpContextUsage' | 'acpTokenReport' | 'thinkingText'>;
 
 export function buildAssistantMessagePatch(args: {
   messageId: string;
@@ -73,6 +73,12 @@ export function buildAssistantMessagePatch(args: {
   };
   if (args.reply.tokenUsage) {
     patch.tokenUsage = args.reply.tokenUsage;
+  }
+  if (args.reply.acpContextUsage) {
+    patch.acpContextUsage = args.reply.acpContextUsage;
+  }
+  if (args.reply.acpTokenReport) {
+    patch.acpTokenReport = args.reply.acpTokenReport;
   }
   if (args.memoryEvidence) {
     patch.memoryEvidence = args.memoryEvidence;

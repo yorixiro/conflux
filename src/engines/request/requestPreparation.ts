@@ -587,6 +587,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   signal?: AbortSignal;
   requestVectorEmbeddings?: RequestSemanticVectorEmbeddingClient;
   requestImageUnderstanding?: ImageUnderstandingRequestReply;
+  acpNativeImageAvailable?: boolean;
 }): Promise<{
   assistantName: string;
   modelId: string;
@@ -596,7 +597,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   conversation: RequestMessage[];
   imageUnderstandingResults: RequestImageUnderstandingResult[];
 }> {
-  const { api, persona, personas, messages, toolLedger, toolContext, currentTask, nickname } = params;
+  const { api, persona, messages, toolLedger, toolContext, currentTask, nickname } = params;
   const startedAt = runtimeNow();
   const requestId = createUid('request');
   const preparedAdvanced = resolvePreparedAdvancedSettings({
@@ -605,7 +606,13 @@ export async function prepareCollaboratorReplyRequest(params: {
   });
   const providerCapability = resolveProviderCapability(api, preparedAdvanced);
   const modelId = providerCapability.provider.model;
-  const supportsImageInput = providerCapability.input.images !== 'none';
+  // ACP transports images only when its actual agent declares the ACP v1
+  // image prompt capability. For normal API providers use the provider's
+  // existing model capability. Neither mode requires a second OCR provider
+  // when its selected model can read the image directly.
+  const supportsImageInput = api.agentTransport === 'devin-acp'
+    ? params.acpNativeImageAvailable === true
+    : providerCapability.input.images !== 'none';
   const imageUnderstanding = !supportsImageInput
     ? await understandConversationImages({
         messages,
@@ -661,13 +668,10 @@ export async function prepareCollaboratorReplyRequest(params: {
   });
   const truncationMs = runtimeNow() - stepStartedAt;
   stepStartedAt = runtimeNow();
+  // Private role memory only. Sharing across personas must never happen
+  // implicitly just because their settings contain a legacy global flag.
   const memoryPlan = resolveRequestMemoryPlan({
     memory: persona?.memory,
-    inheritedMemorySources: persona
-      ? (personas ?? [])
-          .filter((candidate) => candidate.id !== persona.id)
-          .map((candidate) => ({ id: candidate.id, memory: candidate.memory }))
-      : [],
     maxTokens: budgetPlan.buckets.memory.maxTokens
   });
   const memoryPlanMs = runtimeNow() - stepStartedAt;

@@ -3,7 +3,8 @@ import {
   conversationMatchesCollaboratorScope,
   isConversationOrphaned,
   resolveConversationCollaboratorId,
-  resolveConversationCollaboratorName
+  resolveConversationCollaboratorName,
+  resolveChatSidebarScope
 } from './conversationOwnership';
 
 describe('conversationOwnership', () => {
@@ -59,5 +60,44 @@ describe('conversationOwnership', () => {
   it('keeps group conversations out of collaborator scopes and aggregate room lists', () => {
     expect(conversationMatchesCollaboratorScope({ collaboratorId: null, groupRoomId: 'group-1' }, null)).toBe(false);
     expect(conversationMatchesCollaboratorScope({ collaboratorId: 'nova', groupRoomId: 'group-1' }, 'nova')).toBe(false);
+  });
+});
+
+
+describe('resolveChatSidebarScope', () => {
+  const knownCollaboratorIds = ['old-role', 'new-role'];
+
+  it('uses the actual conversation owner when a new persona is selected but the old chat is still open', () => {
+    expect(resolveChatSidebarScope({
+      activeWorld: 'chat', activeConversationId: 'old-chat',
+      activeConversationCollaboratorId: 'old-role', frontstageCollaboratorId: 'new-role',
+      knownCollaboratorIds
+    })).toBe('old-role');
+  });
+
+  it('keeps the selected persona scope inside the collection and before opening a chat', () => {
+    expect(resolveChatSidebarScope({
+      activeWorld: 'collection', activeConversationId: 'old-chat',
+      activeConversationCollaboratorId: 'old-role', frontstageCollaboratorId: 'new-role',
+      knownCollaboratorIds
+    })).toBe('new-role');
+    expect(resolveChatSidebarScope({
+      activeWorld: 'chat', activeConversationId: null,
+      activeConversationCollaboratorId: null, frontstageCollaboratorId: 'new-role',
+      knownCollaboratorIds
+    })).toBe('new-role');
+  });
+
+  it('shows aggregate history when the visible conversation belongs to a deleted or unknown role', () => {
+    expect(resolveChatSidebarScope({
+      activeWorld: 'chat', activeConversationId: 'orphan-chat',
+      activeConversationCollaboratorId: null, frontstageCollaboratorId: 'new-role',
+      knownCollaboratorIds
+    })).toBeNull();
+    expect(resolveChatSidebarScope({
+      activeWorld: 'chat', activeConversationId: 'unknown-chat',
+      activeConversationCollaboratorId: 'missing-role', frontstageCollaboratorId: 'new-role',
+      knownCollaboratorIds
+    })).toBeNull();
   });
 });

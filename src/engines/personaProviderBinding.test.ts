@@ -14,6 +14,7 @@ function createProvider(overrides: Partial<ProviderProfile> & Pick<ProviderProfi
     id: overrides.id,
     name: overrides.name,
     protocol: overrides.protocol ?? 'openai-completions',
+    ...(overrides.agentTransport === 'devin-acp' ? { agentTransport: 'devin-acp' as const } : {}),
     baseUrl: overrides.baseUrl ?? '/api',
     path: overrides.path ?? '/chat/completions',
     apiKey: overrides.apiKey ?? 'test-key',
@@ -170,6 +171,21 @@ describe('resolvePersonaProviderBinding', () => {
       providers: [globalApi, missingKey],
       persona: createPersona({ providerId: 'empty-key', providerRouteMode: 'fixed' })
     }).status).toBe('unconfigured');
+  });
+
+  it('treats a selected ACP route as configured without API URL, key or model', () => {
+    const acp = createProvider({
+      id: 'devin', name: 'Devin ACP', model: '',
+      agentTransport: 'devin-acp', baseUrl: '', apiKey: ''
+    });
+    expect(resolvePersonaProviderBinding({
+      globalApi, providers: [globalApi, acp],
+      persona: createPersona({ providerId: 'devin', providerRouteMode: 'fixed' })
+    }).status).toBe('ready');
+    expect(resolvePersonaProviderBinding({
+      globalApi: acp, providers: [acp],
+      persona: createPersona({ providerRouteMode: 'inherit' })
+    }).status).toBe('ready');
   });
 
   it('uses the collaborator provider and model together when both are pinned', () => {

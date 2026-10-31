@@ -23,7 +23,7 @@ const baseArgs = {
 };
 
 describe('deriveAppShellState', () => {
-  it('uses the frontstage collaborator as the chat topbar root', () => {
+  it('labels the chat with the conversation owner, not a newly selected persona', () => {
     const state = deriveAppShellState({
       ...baseArgs,
       activeWorld: 'chat',
@@ -38,7 +38,7 @@ describe('deriveAppShellState', () => {
       activeConversationCollaboratorId: 'bb'
     });
 
-    expect(state.topbarTitle).toBe('用户');
+    expect(state.topbarTitle).toBe('BB');
     expect(state.topbarTitleTone).toBe('collaborator');
   });
 
@@ -71,7 +71,7 @@ describe('deriveAppShellState', () => {
       frontstageCollaboratorId: 'aa'
     });
 
-    expect(state.topbarTitle).toBe('Polaris');
+    expect(state.topbarTitle).toBe('Conflux');
     expect(state.worldLabel).toBe('群聊');
     expect(state.showTopbarShell).toBe(false);
     expect(state.showTopbarTitle).toBe(true);

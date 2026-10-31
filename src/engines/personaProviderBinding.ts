@@ -11,6 +11,9 @@ export type PersonaProviderBinding = {
 };
 
 function hasUsableProviderRoute(provider: ProviderProfile, modelOverride?: string) {
+  // ACP providers do not use the OpenAI-compatible URL/key/model fields.
+  // This is a configured-route check, not a live bridge health check.
+  if (provider.agentTransport === 'devin-acp') return true;
   if (isPolarisBuiltInProvider(provider)) return Boolean(modelOverride?.trim() || provider.model.trim());
   return Boolean((modelOverride?.trim() || provider.model.trim()) && provider.baseUrl.trim() && provider.apiKey.trim());
 }

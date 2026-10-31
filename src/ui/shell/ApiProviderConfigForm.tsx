@@ -3,6 +3,7 @@ import { resolveProviderCapability } from '../../engines/provider-runtime';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
+import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
 import { getProviderMissingFields } from './apiProviderDisplay';
 import {
   ApiProviderCapabilitiesSection,
@@ -82,6 +83,28 @@ export function ApiProviderConfigForm({
       return;
     }
     void handleDiscoverModels();
+  }
+
+  // ACP is a stateful agent session, not an OpenAI-compatible provider.
+  // Keep its settings separate from API credentials, model discovery and diagnostics.
+  if (api.agentTransport === 'devin-acp') {
+    return (
+      <div className="api-provider-console">
+        <DevinAcpConnectionPanel
+          selectedModel={api.model === 'Devin ACP' ? '' : api.model}
+          onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
+        />
+        <details className="api-provider-more-settings">
+          <summary>图片理解（独立看图 API）</summary>
+          <ApiProviderImageUnderstandingSection
+            api={api}
+            providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
+            onSetApiConfig={onSetApiConfig}
+            requireExplicitProvider
+          />
+        </details>
+      </div>
+    );
   }
 
   return (

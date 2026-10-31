@@ -1,0 +1,66 @@
+/* ACP activity is outside .msg-row; use the selected Keke skin instead of default tool glass. */
+#chat .acp-live-tool-cards {
+  display:flex;flex-direction:column;align-items:flex-start;gap:9px;
+  max-width:100%;margin:8px 0 14px;padding:0 16px 0 26px;
+  color:var(--rt);font-family:var(--cn)
+}
+#chat .acp-live-tool-cards .tool-event,
+#chat .acp-live-tool-cards .tool-event:is(.collapsed,.expanded,.running) {
+  position:relative;box-sizing:border-box;width:fit-content;max-width:100%;min-width:0;
+  padding:7px 12px;border:1px solid var(--ailine,var(--gline));border-radius:var(--R,18px);
+  background:var(--ai,var(--bub-r,var(--glass)));color:var(--rt);
+  box-shadow:0 5px 15px -9px rgba(70,56,62,.3);
+  font:600 12px/1.5 var(--cn);letter-spacing:.035em;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)
+}
+#chat .acp-live-tool-cards .tool-event.expanded {width:min(100%,380px);padding:10px 12px}
+#chat .acp-live-tool-cards .tool-event-compact {align-items:center;gap:8px}
+#chat .acp-live-tool-cards .tool-event-icon,
+#chat .acp-live-tool-cards .tool-event.collapsed .tool-event-icon {
+  flex:0 0 24px;width:24px;height:24px;border-radius:50%;animation:none;
+  background:var(--pk,rgba(255,255,255,.12));color:var(--hot,var(--rt));font-size:16px
+}
+#chat .acp-live-tool-cards .tool-event-icon.running {animation:softPulse 1.8s ease-in-out infinite}
+#chat .acp-live-tool-cards .tool-event-summary {
+  color:var(--rt);font:600 12px/1.5 var(--cn);letter-spacing:.035em
+}
+#chat .acp-live-tool-cards .tool-event-summary-inline {
+  display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;
+  white-space:normal;overflow-wrap:anywhere
+}
+#chat .acp-live-tool-cards .tool-event-status {
+  display:inline-flex;align-items:center;flex:0 0 auto;
+  padding:3px 7px;border:1px solid var(--gline);border-radius:999px;
+  background:var(--pk,rgba(255,255,255,.08));color:var(--hot,var(--dim));
+  font:600 10px/1.2 var(--cn);white-space:nowrap
+}
+#chat .acp-live-tool-cards .tool-event-expanded {display:flex;flex-direction:column;gap:9px}
+#chat .acp-live-tool-cards .tool-event-expanded > p {
+  margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--dim);font-size:11px
+}
+#chat .acp-live-tool-cards .tool-event-chip-row {display:flex;flex-wrap:wrap;gap:8px}
+#chat .acp-live-tool-cards .tool-event-chip-row button {
+  min-height:32px;padding:5px 12px;border:1px solid var(--gline);border-radius:999px;
+  background:var(--glass);color:var(--rt);font:600 11px/1.4 var(--cn);cursor:pointer
+}
+#chat .acp-live-tool-cards .tool-event-chip-row button:first-child {
+  background:var(--pk,var(--glass));border-color:var(--hot,var(--gline))
+}
+#chat .acp-live-tool-cards .tool-event-chip-row button:focus-visible {
+  outline:2px solid var(--hot,var(--accent));outline-offset:2px
+}
+:root[data-cf=sticker] #chat .acp-live-tool-cards .tool-event,
+:root[data-cf=sticker] #chat .acp-live-tool-cards .tool-event:is(.collapsed,.expanded,.running) {
+  background:var(--bub-r);border:0;box-shadow:var(--bub-r-sh);
+  -webkit-backdrop-filter:none;backdrop-filter:none
+}
+:root[data-ct=doodle] #chat .acp-live-tool-cards .tool-event::before {
+  content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);
+  border-radius:inherit;filter:url(#wob);pointer-events:none
+}
+:root[data-cf=sticker] #chat .acp-live-tool-cards .tool-event-status {
+  border-color:var(--mark);color:var(--hot)
+}
+@media (prefers-reduced-motion:reduce) {
+  #chat .acp-live-tool-cards .tool-event-icon.running {animation:none}
+}

@@ -30,6 +30,25 @@ export function ApiProviderAddView({
         </button>
       </section>
 
+      <button
+        type="button"
+        className="btn-secondary api-provider-add-primary"
+        onClick={() => {
+          onImportProvider({
+            agentTransport: 'devin-acp',
+            name: 'Devin ACP',
+            model: '',
+            protocol: 'openai-completions',
+            baseUrl: '',
+            apiKey: '',
+            path: ''
+          } as Partial<ProviderProfile>);
+          onImported();
+        }}
+      >
+        在正式聊天中使用 Devin ACP
+      </button>
+
       <ApiProviderRouteCardSection
         api={api}
         onImportProvider={onImportProvider}
