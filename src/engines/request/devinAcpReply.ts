@@ -1,5 +1,11 @@
 import type { AssistantReply, AssistantReplyProgress } from '../chatApi';
 import type { AssistantRequestTool } from './requestContext';
+import {
+  beginAcpToolStream,
+  finishAcpToolStream,
+  publishAcpToolUpdate,
+  requestAcpPermissionChoice
+} from '../../app/chat/acpLiveToolCards';
 
 export const DEVIN_ACP_PROVIDER_ID = 'conflux-devin-acp';
 
@@ -43,6 +49,8 @@ export async function requestDevinAcpReply(params: {
     throw new Error(`${hint}（HTTP ${response.status}）${reason ? '：' + reason.slice(0, 240) : ''}`);
   }
   if (!response.body) throw new Error('Devin ACP 没有返回消息流');
+  const activityConversationId = params.conversationId ?? 'acp:standalone';
+  beginAcpToolStream(activityConversationId);
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -84,7 +92,12 @@ export async function requestDevinAcpReply(params: {
         if (!data) continue;
         const event = JSON.parse(data) as {
           type: string;
-          update?: { sessionUpdate?: string; content?: { type?: string; text?: string }; used?: number; size?: number };
+          update?: {
+            sessionUpdate?: string;
+            content?: { type?: string; text?: string };
+            used?: number; size?: number;
+            toolCallId?: string; title?: string; name?: string; status?: string;
+          };
           result?: { usage?: unknown };
           error?: string;
           callId?: string;
@@ -99,17 +112,22 @@ export async function requestDevinAcpReply(params: {
           if (!event.permissionId || !Array.isArray(event.options)) throw new Error('Invalid ACP permission request');
           const allowOnce = event.options.find((option) => option.kind === 'allow_once');
           const rejectOnce = event.options.find((option) => option.kind === 'reject_once');
-          const permissionDetails = [
-            event.title || 'Devin 请求操作权限',
-            event.description || '没有提供具体操作内容'
-          ].join('\n');
-          const approved = Boolean(allowOnce && typeof window !== 'undefined'
-            && window.confirm(permissionDetails + '\n\n只允许本次操作？'));
+          // Conflux MCP tools are auto-authorized by the bridge. Other
+          // requests appear inline in the chat instead of browser dialogs.
+          const chosenOptionId = await requestAcpPermissionChoice({
+            conversationId: activityConversationId,
+            permissionId: event.permissionId,
+            title: event.title || 'Devin 请求操作权限',
+            description: event.description || '',
+            options: event.options,
+            signal: params.signal
+          });
+          const approved = chosenOptionId === allowOnce?.optionId;
           const response = await fetch('/devin-acp/permission/result', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               permissionId: event.permissionId,
-              optionId: approved ? allowOnce?.optionId : rejectOnce?.optionId ?? null
+              optionId: approved ? allowOnce?.optionId : chosenOptionId ?? rejectOnce?.optionId ?? null
             }),
             signal: params.signal
           });
@@ -153,6 +171,9 @@ export async function requestDevinAcpReply(params: {
         if (event.type === 'done') {
           finished = true;
           readAgentUsage(event.result?.usage);
+        }
+        if (event.type === 'update' && event.update) {
+          publishAcpToolUpdate(activityConversationId, event.update);
         }
         if (event.type === 'update' && event.update?.sessionUpdate === 'usage_update'
           && validTokens(event.update.used) && validTokens(event.update.size)) {
@@ -207,6 +228,7 @@ export async function requestDevinAcpReply(params: {
       ...(reportedUsage ? { acpTokenReport: reportedUsage } : {})
     };
   } finally {
+    finishAcpToolStream(activityConversationId, finished);
     reader.releaseLock();
   }
 }

@@ -42,6 +42,9 @@ const legacySessionModels = new Map();
 const pending = new Map();
 const toolCalls = new Map();
 const permissionCalls = new Map();
+// ACP v1 permission requests may only include toolCallId rather than name.
+// Associate names with IDs from the same session's tool_call notifications.
+const reportedToolNames = new Map();
 
 function cancelPermissionCalls() {
   for (const [, entry] of permissionCalls) {
@@ -61,6 +64,7 @@ const mcpServers = [{
 }];
 
 function stopToolCalls(reason) {
+  reportedToolNames.clear();
   for (const [, entry] of toolCalls) {
     clearTimeout(entry.timer);
     entry.resolve({ isError: true, text: reason });
@@ -169,6 +173,15 @@ function request(method, params, timeoutMs = 20000, signal) {
   });
 }
 function onMessage(message) {
+  if (message.method === 'session/update') {
+    const update = message.params?.update;
+    const session = message.params?.sessionId;
+    if (typeof session === 'string' && typeof update?.toolCallId === 'string'
+      && typeof update?.name === 'string' &&
+      (update.sessionUpdate === 'tool_call' || update.sessionUpdate === 'tool_call_update')) {
+      reportedToolNames.set(session + ':' + update.toolCallId, update.name);
+    }
+  }
   if (typeof message.id !== 'undefined' && (message.result !== undefined || message.error !== undefined)) {
     const entry = pending.get(message.id);
     if (!entry) return;
@@ -192,7 +205,11 @@ function onMessage(message) {
     // The current chat has already exposed these Conflux tools through its
     // persona-scoped catalog. Grant their one-time MCP permissions automatically,
     // including writes, without approving unrelated CLI exec or other servers.
-    const currentToolName = permission?.toolCall?.name;
+    const toolCall = permission?.toolCall || permission?.subject?.toolCall;
+    const currentToolName = toolCall?.name ||
+      (typeof toolCall?.toolCallId === 'string'
+        ? reportedToolNames.get(permission.sessionId + ':' + toolCall.toolCallId)
+        : null);
     const confluxToolPrefix = 'mcp__conflux__';
     if (typeof currentToolName === 'string' &&
       currentToolName.startsWith(confluxToolPrefix) &&

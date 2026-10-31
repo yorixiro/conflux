@@ -28,6 +28,7 @@ import { useTimelineScroll } from './TimelineScroll';
 import { Icon } from '../../../Icon';
 import { CodeRunFullscreen } from '../../../collection/workshop/CodeRunFullscreen';
 import { TextReadingFullscreen } from '../../../collection/workshop/TextReadingFullscreen';
+import { AcpLiveToolCards } from './AcpLiveToolCards';
 
 type MessageTimelineProps = {
   isWorldSettled: boolean;
@@ -564,6 +565,7 @@ export function MessageTimeline({ isWorldSettled }: MessageTimelineProps) {
         {timelineWindow.bottomSpacerHeight > 0 ? (
           <div className="chat-flow-spacer" aria-hidden="true" style={{ height: `${timelineWindow.bottomSpacerHeight}px` }} />
         ) : null}
+        <AcpLiveToolCards conversationId={conversationId} />
         {ui.showLiveThinking ? (
           <div className="thinking-live">{t('chat.timeline.thinkingLive')}<span>.</span><span>.</span><span>.</span></div>
         ) : null}
