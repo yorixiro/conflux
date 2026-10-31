@@ -30,6 +30,15 @@ describe('role API settings surface', () => {
     expect(html).not.toContain('API Key');
   });
 
+  it('discloses an obsolete persona model override on an ACP provider', () => {
+    const acp = { ...api, agentTransport: 'devin-acp' as const };
+    const html = renderToStaticMarkup(<PersonaApiConnectionPanel
+      activePersona={persona} providers={[acp]} onUpdatePersona={vi.fn()} />);
+    expect(html).toContain('当前角色仍有旧模型覆盖');
+    expect(html).toContain('清除旧模型覆盖');
+    expect(html).toContain('claude-test');
+  });
+
   it('keeps ACP model settings off the ordinary provider form', () => {
     const acp = { ...api, agentTransport: 'devin-acp' as const };
     const acpPersona = { ...persona, advanced: { ...persona.advanced, providerId: acp.id } };

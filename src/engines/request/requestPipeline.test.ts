@@ -71,9 +71,10 @@ describe('requestPipeline', () => {
 
   it('routes a selected Devin ACP provider through chat with real context separators and streamed output', async () => {
     const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
-      const body = JSON.parse(init.body as string) as { prompt: string };
-      expect(body.prompt).toContain('[user]\nhello');
-      expect(body.prompt).not.toContain(']\\\\n');
+      const body = JSON.parse(init.body as string) as { prompt: string; initialContext: string };
+      expect(body.prompt).toBe('hello');
+      expect(body.initialContext).toContain('[user]\\nhello');
+      expect(body.initialContext).not.toContain(']\\\\n');
       return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"hi"}}}\n\ndata: {"type":"done"}\n\n', {
         headers: { 'Content-Type': 'text/event-stream' }
       });
@@ -185,15 +186,21 @@ describe('requestPipeline', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('does not imply ACP has seen a newly attached image before direct image transport exists', async () => {
-    const fetchMock = vi.fn();
+  it('checks ACP image capability without sending unsupported image content', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      expect(url).toBe('/devin-acp/capabilities');
+      return new Response(JSON.stringify({ promptCapabilities: { image: false } }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    });
     vi.stubGlobal('fetch', fetchMock);
     await expect(requestCollaboratorReply({
       api: { ...textProvider, agentTransport: 'devin-acp' },
       persona: null,
       messages: [imageMessage]
     })).rejects.toThrow('当前 Devin ACP 未声明直接看图能力');
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalledWith('/devin-acp/prompt', expect.anything());
   });
 
   it('blocks image turns before sending when the effective model is text-only and OCR is unavailable', async () => {

@@ -44,6 +44,7 @@ describe('ACP inline tool activity', () => {
     });
     const pending = getAcpToolCardsSnapshot().find((card) => card.conversationId === conversationId);
     expect(pending?.state).toBe('approval');
+    expect(pending?.options).toHaveLength(2);
     resolveAcpPermission('permission:request-1', 'yes');
     await expect(promise).resolves.toBe('yes');
     beginAcpToolStream(conversationId);
