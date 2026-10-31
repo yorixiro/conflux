@@ -7,6 +7,11 @@
   padding-top: 10px;
   margin-top: -10px;
   overflow: visible;
+  /* One readable conversation column for default and both sticker skins. */
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 .app-shell:not(.world-switching) .msg-row[data-row-state='entering'] { animation: latestMessageFade 220ms var(--ease-out) both; }
 .app-shell:not(.world-switching) .msg-row.assistant[data-row-state='entering'] .bubble.assistant,
@@ -37,6 +42,7 @@
   gap: 10px;
   width: 100%;
   min-width: 0;
+  align-items: flex-start;
 }
 .message-turn-head {
   display: flex;
@@ -59,13 +65,11 @@
   flex: 0 0 auto;
   display: flex;
 }
-.message-avatar-slot.assistant {
-  align-items: flex-start;
-  padding-top: 18px;
-}
+.message-avatar-slot.assistant,
 .message-avatar-slot.user {
-  align-items: flex-end;
-  padding-bottom: 2px;
+  align-items: flex-start;
+  align-self: flex-start;
+  padding: 0;
 }
 .message-avatar-slot.empty {
   visibility: hidden;
@@ -75,12 +79,12 @@
   box-shadow: 0 10px 18px color-mix(in srgb, var(--accent-soft) 10%, transparent);
 }
 .message-turn.assistant {
-  width: min(100%, 780px);
+  width: min(100%, 760px);
   align-items: flex-start;
   gap: 6px;
 }
 .message-turn.assistant.with-avatar {
-  width: min(100%, 724px);
+  width: min(100%, 760px);
 }
 .message-turn.assistant.with-avatar .message-turn-body {
   gap: 9px;
@@ -94,8 +98,10 @@
   align-items: flex-start;
 }
 .message-turn.assistant.with-avatar .message-turn-stack {
+  /* Flex accounts for the actual avatar size, including user-selected sizes. */
   flex: 1 1 auto;
-  max-width: calc(100% - 44px);
+  max-width: 100%;
+  min-width: 0;
   gap: 2px;
 }
 .message-turn.assistant .message-turn-head-main {
@@ -119,7 +125,8 @@
 .message-turn.user .message-turn-stack {
   flex: 1 1 auto;
   width: 100%;
-  max-width: min(100%, 82%);
+  max-width: 80%;
+  min-width: 0;
   align-items: flex-end;
 }
 .system-inline-note { max-width: min(100%, 336px); padding: 7px 11px; border-radius: 17px; background: var(--chat-system-note-fill); border: var(--chat-system-note-border); box-shadow: var(--chat-system-note-shadow); backdrop-filter: var(--chat-system-note-backdrop); font-size: 11px; line-height: 1.45; color: color-mix(in srgb, var(--text-muted) 92%, var(--text-soft) 8%); white-space: pre-wrap; word-break: break-word; opacity: 0.88; transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease, box-shadow var(--duration-fast) ease, opacity var(--duration-fast) ease, transform 180ms ease; }
