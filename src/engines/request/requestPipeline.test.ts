@@ -73,7 +73,7 @@ describe('requestPipeline', () => {
     const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
       const body = JSON.parse(init.body as string) as { prompt: string; initialContext: string };
       expect(body.prompt).toBe('hello');
-      expect(body.initialContext).toContain('[user]\\nhello');
+      expect(body.initialContext).toContain('[user]\nhello');
       expect(body.initialContext).not.toContain(']\\\\n');
       return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"hi"}}}\n\ndata: {"type":"done"}\n\n', {
         headers: { 'Content-Type': 'text/event-stream' }
