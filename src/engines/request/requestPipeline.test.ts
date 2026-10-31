@@ -92,6 +92,64 @@ describe('requestPipeline', () => {
     expect(requestAssistantReplyMock).not.toHaveBeenCalled();
   });
 
+  it('preserves readable documents and raw ZIP attachment metadata on Devin ACP without rejecting the turn', async () => {
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string) as { initialContext: string; prompt: string };
+      expect(body.initialContext).toContain('PDF 正文：Conflux 附件测试');
+      expect(body.initialContext).toContain('archive.zip');
+      expect(body.initialContext).toContain('请阅读附件');
+      return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"文件已列出"}}}\n\ndata: {"type":"done"}\n\n', {
+        headers: { 'Content-Type': 'text/event-stream' }
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const reply = await requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [{
+        id: 'document-turn', role: 'user', content: '这是文件', timestamp: 1,
+        attachments: [
+          { id: 'pdf-1', assetId: 'asset-pdf', kind: 'file', name: 'notes.pdf',
+            mimeType: 'application/pdf', size: 1000, textContent: 'PDF 正文：Conflux 附件测试' },
+          { id: 'zip-1', assetId: 'asset-zip', kind: 'file', name: 'archive.zip',
+            mimeType: 'application/zip', size: 1000 }
+        ]
+      }, {
+        id: 'latest-turn', role: 'user', content: '请阅读附件', timestamp: 2
+      }]
+    });
+    expect(reply.content).toBe('文件已列出');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not let an old unreadable image block later text-only ACP turns', async () => {
+    const fetchMock = vi.fn(async () => new Response(
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"可以继续聊天"}}}\n\ndata: {"type":"done"}\n\n',
+      { headers: { 'Content-Type': 'text/event-stream' } }
+    ));
+    vi.stubGlobal('fetch', fetchMock);
+    const reply = await requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [imageMessage, {
+        id: 'later-text', role: 'user', content: '现在只聊天', timestamp: 2
+      }]
+    });
+    expect(reply.content).toBe('可以继续聊天');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not imply ACP has seen a newly attached image before direct image transport exists', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(requestCollaboratorReply({
+      api: { ...textProvider, agentTransport: 'devin-acp' },
+      persona: null,
+      messages: [imageMessage]
+    })).rejects.toThrow('当前 Devin ACP 桥接尚未接通直接看图');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('blocks image turns before sending when the effective model is text-only and OCR is unavailable', async () => {
     await expect(requestCollaboratorReply({
       api: textProvider,

@@ -125,15 +125,19 @@ export async function requestCollaboratorReply(params: {
     onImageUnderstandingResults?.(prepared.imageUnderstandingResults);
   }
   if (api.agentTransport === 'devin-acp') {
-    // Text extracted by a configured vision provider may accompany the turn;
-    // never forward an unreadable image or file to this text-only ACP transport.
-    const unreadableAttachment = prepared.conversation.some((message) =>
-      message.attachments?.some((attachment) =>
-        !attachment.clearedAt && !attachment.textContent?.trim()
-      )
+    // Files are not all images. Already-extracted PDF/DOCX/CSV/XLSX/text
+    // content is serialized into the prompt; ZIP/raw files remain available to
+    // the existing conversation-scoped attachment tools. Never block ordinary
+    // conversation turns because an older attachment has no extracted text.
+    // The current ACP bridge has no native image payload transport yet, so
+    // reject only a new, unreadable image turn rather than pretending to see it.
+    const latestUserMessage = [...prepared.conversation].reverse()
+      .find((message) => message.role === 'user');
+    const latestImageCannotBeRead = latestUserMessage?.attachments?.some((attachment) =>
+      attachment.kind === 'image' && !attachment.clearedAt && !attachment.textContent?.trim()
     );
-    if (unreadableAttachment) {
-      throw new Error('Devin ACP 只能接收文字。请在本连接的图片理解设置中选择支持看图的 API。');
+    if (latestImageCannotBeRead) {
+      throw new Error('当前 Devin ACP 桥接尚未接通直接看图；这张图片没有可读内容。请不要仅凭文件名猜测图片。');
     }
     const prompt = prepared.context.segments.flatMap((segment) =>
       segment.messages.map((message) => {
