@@ -188,6 +188,8 @@ export function mountKekeSendFx() {
 }
 
 /* Bubble grouping from the prototype's render(): per-position corner radii, group spacing and the group-end sketch / sticker. */
+const RXK = 'kk-rx', RXL = ['♡', '✲', '☆', '哼'];
+let RX = {}; try { RX = JSON.parse(localStorage.getItem(RXK) || '{}'); } catch (e) {}
 const SK = ['<svg class=sk width=21 height=21 viewBox="0 0 22 22"><path d="M11 1.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L11 15.9 5.1 19.5l1.7-6.7L1.5 8.4l6.9-.5z"/></svg>', '<svg class=sk width=28 height=19 viewBox="0 0 28 18"><path d="M14 9C9 2 2 3 3 8c.6 4 8 3 11 1zM14 9c5-7 12-6 11-1-.6 4-8 3-11 1zM14 9l-3 7M14 9l3 7"/></svg>', '<svg class=sk width=17 height=21 viewBox="0 0 20 24"><path style="fill:#ead0d8" d="M8 2h4v6h6v4h-6v10H8V12H2V8h6z"/></svg>'];
 const WDN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'], TY = { doodle: 'かきかき', pois: 'にゃにゃ' }, RD = '既読', z2 = (n) => String(n).padStart(2, '0');
 const SYM = { doodle: '<svg class=sym viewBox="0 0 16 16" fill="#ead9dc" stroke="#6b6066" stroke-width="1.2" stroke-linejoin="round"><path d="M8 13.6C2.6 10.1 2 6.3 4 4.7s3.4-.3 4 1.1c.6-1.4 2-2.7 4-1.1s1.4 5.4-4 8.9Z"/></svg>', pois: '<i class="sym ic" style="--u:var(--pi-flower)"></i>' };
@@ -247,6 +249,10 @@ export function mountKekeBubbles() {
         if (!sy) { sy = document.createElement('span'); sy.className = 'kk-sym'; sy.style.display = 'contents'; sy.setAttribute('aria-hidden', 'true'); sy.innerHTML = SYM[root.dataset.ct]; host.appendChild(sy); }
       } else if (sy) sy.remove();
       const b = row.querySelector('.bubble'); if (!b) return;
+      const rx = RX[row.dataset.messageId];
+      let kx = b.querySelector(':scope > .kx');
+      if (rx) { if (!kx) { kx = document.createElement('i'); kx.className = 'kx'; b.appendChild(kx); } if (kx.textContent !== rx) kx.textContent = rx; }
+      else if (kx) kx.remove();
       if (!b.classList.contains('b')) b.classList.add('b');
       if (b.dataset.p !== p) b.dataset.p = p;
       const rot = root.dataset.ct == 'doodle' ? (i % 2 ? .5 : -.4) : 0;
@@ -269,11 +275,35 @@ export function mountKekeBubbles() {
     if (el) { mo = new MutationObserver(sched); mo.observe(el, { childList: true, subtree: true }); }
     sched();
   };
-  const top = new MutationObserver(attach);
+  const watch = () => {
+    document.querySelectorAll('#chat .message-action-dialog').forEach((d) => {
+      const menu = d.querySelector('.message-action-menu');
+      if (!menu || menu.parentNode.querySelector(':scope > .kk-krx')) return;
+      const row = document.querySelector('#chat .bubble-frame.action-menu-open')?.closest('.msg-row');
+      const id = row?.dataset.messageId; if (!id) return;
+      const rx = document.createElement('div'); rx.className = 'krx kk-krx';
+      rx.innerHTML = RXL.map((x) => `<button type="button" data-x="${x}" class="${RX[id] == x ? 'on' : ''}">${x}</button>`).join('');
+      menu.parentNode.insertBefore(rx, menu);
+      rx.onclick = (e) => {
+        const bt = e.target.closest('[data-x]'); if (!bt) return;
+        if (RX[id] == bt.dataset.x) delete RX[id]; else RX[id] = bt.dataset.x;
+        try { localStorage.setItem(RXK, JSON.stringify(RX)); } catch (x) {}
+        rx.querySelectorAll('button').forEach((q) => q.classList.toggle('on', q.dataset.x == RX[id]));
+        sched();
+      };
+    });
+  };
+  const press = (e) => {
+    const b = e.target && e.target.closest && e.target.closest('#chat .b');
+    if (!b || b.querySelector('.message-edit-input')) return;
+    b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 700);
+  };
+  document.addEventListener('pointerup', press, true);
+  const top = new MutationObserver(() => { attach(); watch(); });
   top.observe(document.body, { childList: true, subtree: true });
   const tm = new MutationObserver(sched); tm.observe(root, { attributes: true, attributeFilter: ['data-ct'] });
   attach();
-  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.querySelectorAll('#chat .kk-deco, #chat .kk-day, #chat .kk-mt, #chat .kk-ty, #chat .kk-sym, #chat .kk-read').forEach((n) => n.remove());
+  return () => { top.disconnect(); tm.disconnect(); mo && mo.disconnect(); cancelAnimationFrame(raf); document.removeEventListener('pointerup', press, true); document.querySelectorAll('#chat .kk-deco, #chat .kk-day, #chat .kk-mt, #chat .kk-ty, #chat .kk-sym, #chat .kk-read, #chat .kk-krx, #chat .kx').forEach((n) => n.remove());
     document.querySelectorAll('#chat .msg-row').forEach((r) => { r.classList.remove('m', 'r', 's', 'g', 'new'); });
     document.querySelectorAll('#chat .bubble.b').forEach((b) => { b.classList.remove('b'); delete b.dataset.p; b.style.removeProperty('--rot'); }); };
 }

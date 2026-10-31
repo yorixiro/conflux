@@ -1,5 +1,5 @@
 /* ---------- chat ---------- */
-#chat{
+:root[data-cf=sticker] #chat{
   --cn:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC","Noto Serif CJK SC",serif;
   --serif:"Cormorant Garamond","Cormorant",Georgia,serif;
   --script:"Pinyon Script","Snell Roundhand","Apple Chancery",cursive;
@@ -52,157 +52,157 @@
   --R:16px;letter-spacing:.06em
 }
 
-#chat .app{position:relative;height:100%;max-width:520px;margin:auto;display:flex;flex-direction:column;overflow:hidden;background:#111}
+:root[data-cf=sticker] #chat .app{position:relative;height:100%;max-width:520px;margin:auto;display:flex;flex-direction:column;overflow:hidden;background:#111}
 
 /* ----- 氛围层（从后往前）：背景（轻柔焦 + 低对比）→ 薄雾 → 斜纹布纹 → 暗角/上下压暗 →（仅贴纸）雾 / 符号粒子 / 句子 / 颗粒 ----- */
-#chat .layer{position:absolute;inset:0;pointer-events:none}
-#chat .bgi{inset:-10px;background:var(--img) center/cover no-repeat;filter:var(--bgf)}
-#chat .veil{background:
+:root[data-cf=sticker] #chat .layer{position:absolute;inset:0;pointer-events:none}
+:root[data-cf=sticker] #chat .bgi{inset:-10px;background:var(--img) center/cover no-repeat;filter:var(--bgf)}
+:root[data-cf=sticker] #chat .veil{background:
   radial-gradient(95% 65% at 50% 46%,transparent 30%,var(--vig) 100%),
   linear-gradient(180deg,var(--edge),transparent 16%,transparent 78%,var(--edge)),
   var(--tint)}
-#chat .veil::before{content:"";position:absolute;inset:0;background:var(--milk,transparent)}
-#chat .veil::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:var(--twA,0);background:repeating-linear-gradient(135deg,#fff 0 .8px,transparent .8px 2px,#000 2px 2.8px,transparent 2.8px 4px)}
-#chat :is(.fog,.grain){display:none}
-:root[data-ct=doodle] #chat :is(.fog,.grain){display:block}
+:root[data-cf=sticker] #chat .veil::before{content:"";position:absolute;inset:0;background:var(--milk,transparent)}
+:root[data-cf=sticker] #chat .veil::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:var(--twA,0);background:repeating-linear-gradient(135deg,#fff 0 .8px,transparent .8px 2px,#000 2px 2.8px,transparent 2.8px 4px)}
+:root[data-cf=sticker] #chat :is(.fog,:root[data-cf=sticker] .grain){display:none}
+:root[data-ct=doodle] #chat :is(.fog,:root[data-cf=sticker] .grain){display:block}
 :root[data-ct=doodle] #chat .bgi{inset:-6%;animation:breathe 36s var(--ease) infinite alternate}
 @keyframes breathe{from{transform:scale(1)}to{transform:scale(1.08) translate3d(-1.2%,-.8%,0)}}
-#chat .fog{overflow:hidden}
-#chat .fog i{position:absolute;left:0;width:200%;height:52%;top:6%;background:
+:root[data-cf=sticker] #chat .fog{overflow:hidden}
+:root[data-cf=sticker] #chat .fog i{position:absolute;left:0;width:200%;height:52%;top:6%;background:
   radial-gradient(closest-side,rgb(var(--haze)/var(--fogA)),transparent) 0 0/25% 100% repeat-x,
   radial-gradient(closest-side,rgb(var(--haze)/calc(var(--fogA)*.7)),transparent) 6% 30%/12.5% 70% repeat-x;
   animation:drift 80s linear infinite}
-#chat .fog i+i{top:auto;bottom:4%;height:44%;background-position:12% 0,0 40%;animation-duration:120s;animation-direction:reverse}
+:root[data-cf=sticker] #chat .fog i+i{top:auto;bottom:4%;height:44%;background-position:12% 0,0 40%;animation-duration:120s;animation-direction:reverse}
 @keyframes drift{to{transform:translateX(-50%)}}
-#chat .petals i{position:absolute;top:-4%;left:var(--x);opacity:0;animation:fall var(--d) linear var(--dl) infinite}
+:root[data-cf=sticker] #chat .petals i{position:absolute;top:-4%;left:var(--x);opacity:0;animation:fall var(--d) linear var(--dl) infinite}
 @keyframes fall{
-  0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
-  8%,90%{opacity:var(--o)}
-  50%{transform:translate3d(var(--sw),55vh,0) rotate(190deg)}
-  100%{transform:translate3d(calc(var(--sw)*-.5),110vh,0) rotate(380deg);opacity:0}}
-#chat .poem p{position:absolute;margin:0;white-space:nowrap;rotate:var(--r);opacity:0;animation:poem 21s var(--ease) var(--dl) infinite}
+:root[data-cf=sticker] 0%{transform:translate3d(0,0,0) rotate(0);opacity:0}
+:root[data-cf=sticker] 8%,:root[data-cf=sticker] 90%{opacity:var(--o)}
+:root[data-cf=sticker] 50%{transform:translate3d(var(--sw),55vh,0) rotate(190deg)}
+:root[data-cf=sticker] 100%{transform:translate3d(calc(var(--sw)*-.5),110vh,0) rotate(380deg);opacity:0}}
+:root[data-cf=sticker] #chat .poem p{position:absolute;margin:0;white-space:nowrap;rotate:var(--r);opacity:0;animation:poem 21s var(--ease) var(--dl) infinite}
 @keyframes poem{0%,100%{opacity:0;transform:translateY(8px);filter:blur(3px)}22%,62%{opacity:var(--pa,.26);transform:none;filter:blur(0)}}
-#chat .grain{z-index:3;inset:-30%;opacity:var(--grain);mix-blend-mode:overlay;animation:grain 1.4s steps(5) infinite;
+:root[data-cf=sticker] #chat .grain{z-index:3;inset:-30%;opacity:var(--grain);mix-blend-mode:overlay;animation:grain 1.4s steps(5) infinite;
   background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 @keyframes grain{20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}}
-#chat .wipe{z-index:6;opacity:0;background:radial-gradient(120% 80% at 50% 50%,rgb(var(--haze)/.5),rgb(var(--haze)/.22));-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);transition:opacity .5s var(--ease)}
-#chat .swap .wipe{opacity:1}
-#chat.on .wipe{animation:unveil 1.8s var(--ease)}
+:root[data-cf=sticker] #chat .wipe{z-index:6;opacity:0;background:radial-gradient(120% 80% at 50% 50%,rgb(var(--haze)/.5),rgb(var(--haze)/.22));-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);transition:opacity .5s var(--ease)}
+:root[data-cf=sticker] #chat .swap .wipe{opacity:1}
+:root[data-cf=sticker] #chat.on .wipe{animation:unveil 1.8s var(--ease)}
 @keyframes unveil{0%,12%{opacity:1}100%{opacity:0}}
-#chat .hd,#chat .list,#chat .bar{position:relative;z-index:2}
+:root[data-cf=sticker] #chat .hd,:root[data-cf=sticker] #chat .list,:root[data-cf=sticker] #chat .bar{position:relative;z-index:2}
 
 /* ----- 顶栏 ----- */
-#chat .hd{flex:none;display:flex;align-items:center;gap:8px;padding:16px 18px 14px 8px}
-#chat .bk{flex:none;width:34px;height:40px;display:grid;place-items:center;border:0;padding:0;background:none;color:var(--rt);opacity:.75;cursor:pointer;transition:transform .4s var(--ease),opacity .3s}
-#chat .bk:active{transform:translateX(-3px);opacity:1}
-#chat .ttl{flex:1;min-width:0}
-#chat .nm{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
-#chat .nm b{font:600 19px/1.2 var(--cn);letter-spacing:.26em;color:var(--rt);text-shadow:var(--tsh)}
-#chat .scr{font:400 23px/1 var(--script);color:var(--dim);padding:0 8px 6px 2px;clip-path:inset(-30% 100% -30% -10%)}
-#chat.on .scr{animation:write 2.2s var(--ease) .45s forwards}
+:root[data-cf=sticker] #chat .hd{flex:none;display:flex;align-items:center;gap:8px;padding:16px 18px 14px 8px}
+:root[data-cf=sticker] #chat .bk{flex:none;width:34px;height:40px;display:grid;place-items:center;border:0;padding:0;background:none;color:var(--rt);opacity:.75;cursor:pointer;transition:transform .4s var(--ease),opacity .3s}
+:root[data-cf=sticker] #chat .bk:active{transform:translateX(-3px);opacity:1}
+:root[data-cf=sticker] #chat .ttl{flex:1;min-width:0}
+:root[data-cf=sticker] #chat .nm{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+:root[data-cf=sticker] #chat .nm b{font:600 19px/1.2 var(--cn);letter-spacing:.26em;color:var(--rt);text-shadow:var(--tsh)}
+:root[data-cf=sticker] #chat .scr{font:400 23px/1 var(--script);color:var(--dim);padding:0 8px 6px 2px;clip-path:inset(-30% 100% -30% -10%)}
+:root[data-cf=sticker] #chat.on .scr{animation:write 2.2s var(--ease) .45s forwards}
 @keyframes write{to{clip-path:inset(-30% -10% -30% -10%)}}
-#chat .st{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:11px;line-height:1;letter-spacing:.14em;color:var(--dim)}
-#chat .st i{width:5px;height:5px;border-radius:50%;background:var(--dot);animation:pulse 3.2s var(--ease) infinite}
+:root[data-cf=sticker] #chat .st{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:11px;line-height:1;letter-spacing:.14em;color:var(--dim)}
+:root[data-cf=sticker] #chat .st i{width:5px;height:5px;border-radius:50%;background:var(--dot);animation:pulse 3.2s var(--ease) infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--dot) 70%,transparent)}70%,100%{box-shadow:0 0 0 6px transparent}}
-#chat .fr{font:italic 500 13px/1 var(--serif);letter-spacing:.05em}
-#chat .tg{flex:none;height:28px;padding:0 13px;border:1px solid var(--gline);border-radius:999px;background:none;color:var(--rt);font:500 11px/1 var(--cn);letter-spacing:.14em;display:flex;align-items:center;gap:6px;cursor:pointer;transition:border-color .4s,background .4s}
-#chat .tg:active{background:rgb(var(--haze)/.08)}
-#chat .prog{position:absolute;left:18px;right:18px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--gline) 18%,var(--gline) 82%,transparent)}
-#chat .prog i{position:absolute;top:0;height:1px;width:24%;left:calc(var(--p)*76%);background:linear-gradient(90deg,transparent,var(--rt),transparent);box-shadow:0 0 6px var(--rt);opacity:.75;transition:left .25s linear}
+:root[data-cf=sticker] #chat .fr{font:italic 500 13px/1 var(--serif);letter-spacing:.05em}
+:root[data-cf=sticker] #chat .tg{flex:none;height:28px;padding:0 13px;border:1px solid var(--gline);border-radius:999px;background:none;color:var(--rt);font:500 11px/1 var(--cn);letter-spacing:.14em;display:flex;align-items:center;gap:6px;cursor:pointer;transition:border-color .4s,background .4s}
+:root[data-cf=sticker] #chat .tg:active{background:rgb(var(--haze)/.08)}
+:root[data-cf=sticker] #chat .prog{position:absolute;left:18px;right:18px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--gline) 18%,var(--gline) 82%,transparent)}
+:root[data-cf=sticker] #chat .prog i{position:absolute;top:0;height:1px;width:24%;left:calc(var(--p)*76%);background:linear-gradient(90deg,transparent,var(--rt),transparent);box-shadow:0 0 6px var(--rt);opacity:.75;transition:left .25s linear}
 
 /* ----- 消息 ----- */
-#chat .list{flex:1;overflow-y:auto;padding:20px 20px 26px;scrollbar-width:none}
-#chat .day{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 20px;color:var(--dim)}
-#chat .day::before,#chat .day::after{content:"";flex:0 1 64px;height:1px;background:linear-gradient(90deg,transparent,currentColor)}
-#chat .day::after{transform:scaleX(-1)}
-#chat .day span{font:400 21px/1.2 var(--script);color:var(--rt);opacity:.82;text-shadow:var(--tsh)}
-#chat .m{position:relative;display:flex;margin-top:6px}
-#chat .m.g{margin-top:22px}
-#chat .m.s{justify-content:flex-end}
-#chat .m.r{padding-left:26px}
-#chat .sym{position:absolute;left:0;top:7px;width:15px;height:15px;color:var(--dot);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--dot) 50%,transparent))}
-#chat .b{position:relative;overflow-wrap:anywhere;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .5s var(--ease),text-shadow .5s,border-color .5s,box-shadow .5s}
-#chat .r .b{max-width:min(84%,360px);padding:10px 15px;font-size:14.5px;line-height:1.8;color:var(--rt);background:var(--ai);border:1px solid var(--ailine);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -16px rgba(0,0,0,.7);transform-origin:0 100%}
-#chat .s .b{max-width:min(76%,330px);padding:9px 15px;font-size:14.5px;line-height:1.7;color:var(--st);background:var(--glass);border:1px solid var(--gline);-webkit-backdrop-filter:blur(14px) saturate(1.45);backdrop-filter:blur(14px) saturate(1.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -12px 22px -14px rgba(0,0,0,.25),0 14px 30px -14px rgba(0,0,0,.6);text-shadow:0 1px 2px rgba(0,0,0,.18);rotate:var(--rot,0deg);transform-origin:100% 100%}
-#chat .r .b.on{transform:translateY(-2px);border-color:color-mix(in srgb,var(--dot) 50%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 22px -4px color-mix(in srgb,var(--dot) 45%,transparent)}
-#chat .s .b.on{transform:translateY(-2px);border-color:color-mix(in srgb,var(--rt) 55%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 22px -4px color-mix(in srgb,var(--dot) 50%,transparent)}
-#chat .new .b{animation:rise .9s var(--ease) both}
-#chat .new .sym{animation:bloom 1s var(--ease) both}
-#chat .ch{animation:ink .7s var(--ease) both;animation-delay:calc(var(--i)*26ms)}
+:root[data-cf=sticker] #chat .list{flex:1;overflow-y:auto;padding:20px 20px 26px;scrollbar-width:none}
+:root[data-cf=sticker] #chat .day{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 20px;color:var(--dim)}
+:root[data-cf=sticker] #chat .day::before,:root[data-cf=sticker] #chat .day::after{content:"";flex:0 1 64px;height:1px;background:linear-gradient(90deg,transparent,currentColor)}
+:root[data-cf=sticker] #chat .day::after{transform:scaleX(-1)}
+:root[data-cf=sticker] #chat .day span{font:400 21px/1.2 var(--script);color:var(--rt);opacity:.82;text-shadow:var(--tsh)}
+:root[data-cf=sticker] #chat .m{position:relative;display:flex;margin-top:6px}
+:root[data-cf=sticker] #chat .m.g{margin-top:22px}
+:root[data-cf=sticker] #chat .m.s{justify-content:flex-end}
+:root[data-cf=sticker] #chat .m.r{padding-left:26px}
+:root[data-cf=sticker] #chat .sym{position:absolute;left:0;top:7px;width:15px;height:15px;color:var(--dot);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--dot) 50%,transparent))}
+:root[data-cf=sticker] #chat .b{position:relative;overflow-wrap:anywhere;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .5s var(--ease),text-shadow .5s,border-color .5s,box-shadow .5s}
+:root[data-cf=sticker] #chat .r .b{max-width:min(84%,360px);padding:10px 15px;font-size:14.5px;line-height:1.8;color:var(--rt);background:var(--ai);border:1px solid var(--ailine);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -16px rgba(0,0,0,.7);transform-origin:0 100%}
+:root[data-cf=sticker] #chat .s .b{max-width:min(76%,330px);padding:9px 15px;font-size:14.5px;line-height:1.7;color:var(--st);background:var(--glass);border:1px solid var(--gline);-webkit-backdrop-filter:blur(14px) saturate(1.45);backdrop-filter:blur(14px) saturate(1.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -12px 22px -14px rgba(0,0,0,.25),0 14px 30px -14px rgba(0,0,0,.6);text-shadow:0 1px 2px rgba(0,0,0,.18);rotate:var(--rot,0deg);transform-origin:100% 100%}
+:root[data-cf=sticker] #chat .r .b.on{transform:translateY(-2px);border-color:color-mix(in srgb,var(--dot) 50%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 22px -4px color-mix(in srgb,var(--dot) 45%,transparent)}
+:root[data-cf=sticker] #chat .s .b.on{transform:translateY(-2px);border-color:color-mix(in srgb,var(--rt) 55%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 22px -4px color-mix(in srgb,var(--dot) 50%,transparent)}
+:root[data-cf=sticker] #chat .new .b{animation:rise .9s var(--ease) both}
+:root[data-cf=sticker] #chat .new .sym{animation:bloom 1s var(--ease) both}
+:root[data-cf=sticker] #chat .ch{animation:ink .7s var(--ease) both;animation-delay:calc(var(--i)*26ms)}
 @keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(6px)}}
 @keyframes ink{from{opacity:0;filter:blur(4px)}}
 @keyframes bloom{from{opacity:0;transform:scale(.3) rotate(-90deg)}}
-#chat .new.s .b::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.22) 50%,transparent 62%) -150% 0/250% 100% no-repeat;animation:shine 1.5s var(--ease) .35s both}
+:root[data-cf=sticker] #chat .new.s .b::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.22) 50%,transparent 62%) -150% 0/250% 100% no-repeat;animation:shine 1.5s var(--ease) .35s both}
 @keyframes shine{to{background-position:150% 0}}
-#chat .mt{margin:9px 0 0 26px;font:italic 500 12px/1 var(--serif);letter-spacing:.14em;color:var(--dim)}
-#chat .mt.s{text-align:right;margin:9px 4px 0 0}
-#chat .ty{display:inline-flex;align-items:center;gap:6px;font:400 20px/1 var(--script);color:var(--dim)}
-#chat .ty i{width:5px;height:5px;background:currentColor;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:twinkle 1.4s var(--ease) infinite}
-#chat .ty i:first-of-type{margin-left:4px}
-#chat .ty i:nth-of-type(2){animation-delay:.2s}
-#chat .ty i:nth-of-type(3){animation-delay:.4s}
+:root[data-cf=sticker] #chat .mt{margin:9px 0 0 26px;font:italic 500 12px/1 var(--serif);letter-spacing:.14em;color:var(--dim)}
+:root[data-cf=sticker] #chat .mt.s{text-align:right;margin:9px 4px 0 0}
+:root[data-cf=sticker] #chat .ty{display:inline-flex;align-items:center;gap:6px;font:400 20px/1 var(--script);color:var(--dim)}
+:root[data-cf=sticker] #chat .ty i{width:5px;height:5px;background:currentColor;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:twinkle 1.4s var(--ease) infinite}
+:root[data-cf=sticker] #chat .ty i:first-of-type{margin-left:4px}
+:root[data-cf=sticker] #chat .ty i:nth-of-type(2){animation-delay:.2s}
+:root[data-cf=sticker] #chat .ty i:nth-of-type(3){animation-delay:.4s}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.6)}40%{opacity:1;transform:scale(1.3) rotate(45deg)}}
-#chat .sk{position:absolute;display:none;pointer-events:none;filter:url(#wob);fill:#fff;stroke:#77777d;stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;left:-8px;top:-14px}
+:root[data-cf=sticker] #chat .sk{position:absolute;display:none;pointer-events:none;filter:url(#wob);fill:#fff;stroke:#77777d;stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;left:-8px;top:-14px}
 :root[data-ct=doodle] #chat .sk{display:block}
 
 /* ----- 底栏：模式 / 输入 / 火漆 ----- */
-#chat .bar{flex:none;padding:6px 18px 4px;background:linear-gradient(transparent,var(--edge) 60%)}
-#chat .bar::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--gline) 20%,var(--gline) 80%,transparent)}
-#chat .modes{display:flex;align-items:center;gap:12px;padding:9px 2px 2px;color:var(--dim)}
-#chat .modes>span{font-size:9px;opacity:.55}
-#chat .mode{position:relative;display:inline-flex;align-items:baseline;gap:5px;padding:2px 0;border:0;background:none;color:var(--dim);font:500 11px/1.4 var(--cn);letter-spacing:.16em;cursor:pointer;transition:color .4s var(--ease)}
-#chat .mode i{font:italic 500 14.5px/1 var(--serif);letter-spacing:.03em;color:var(--rt);opacity:.82}
-#chat .mode::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
-#chat .mode:hover::after,#chat .mode.hit::after{transform:scaleX(1)}
-#chat .mode.hit{color:var(--rt)}
-#chat .row{position:relative;display:flex;align-items:center;gap:8px;padding:2px 0 4px}
-#chat .fb{flex:none;width:34px;height:34px;display:grid;place-items:center;margin-left:-6px;border:0;padding:0;background:none;color:var(--dim);cursor:pointer;transition:transform .7s var(--ease),color .3s}
-#chat .fb.on{transform:rotate(135deg);color:var(--rt)}
-#chat .fd{position:relative;flex:1;min-width:0;height:44px;display:flex;align-items:center}
-#chat .fd input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;padding:0 4px;color:var(--rt);font:400 15px/1 var(--cn);letter-spacing:.04em}
-#chat .fd input::placeholder{color:var(--dim);font:400 23px/1 var(--script);letter-spacing:0;transition:opacity .5s var(--ease)}
-#chat .fd input:focus::placeholder{opacity:.3}
-#chat .ln{position:absolute;left:0;right:0;bottom:7px;height:1px;background:color-mix(in srgb,var(--gline) 55%,transparent)}
-#chat .ln::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--rt),transparent);transform:scaleX(0);transition:transform .8s var(--ease)}
-#chat .fd:focus-within .ln::after{transform:scaleX(1)}
-#chat .sd{flex:none;position:relative;width:48px;height:48px;border:0;padding:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#chat .sd::before{content:"";position:absolute;inset:2px 3px 3px 2px;border-radius:56% 44% 52% 48%/44% 56% 46% 54%;background:var(--accent2);box-shadow:0 8px 16px -6px rgba(0,0,0,.55)}
-#chat .seal{position:absolute;inset:5px;display:grid;place-items:center;padding-top:3px;border-radius:48% 52% 50% 50%/52% 47% 53% 48%;background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--accent) 68%,#fff 32%),var(--accent) 44%,var(--accent2));box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--accent2) 50%,transparent),inset 0 0 0 4px color-mix(in srgb,var(--acc-ink) 22%,transparent),inset 0 -4px 8px rgba(0,0,0,.28);color:var(--acc-ink);font:400 25px/1 var(--script);text-shadow:0 1px 0 rgba(255,255,255,.22),0 -1px 0 rgba(0,0,0,.4)}
-#chat .sd::after{content:"";position:absolute;inset:5px;border-radius:50%;border:1px solid var(--accent);opacity:0;pointer-events:none}
-#chat .sd:active{transform:scale(.93)}
-#chat .sd.stamp{animation:stamp .75s var(--ease)}
-#chat .sd.stamp::after{animation:ring 1s var(--ease)}
+:root[data-cf=sticker] #chat .bar{flex:none;padding:6px 18px 4px;background:linear-gradient(transparent,var(--edge) 60%)}
+:root[data-cf=sticker] #chat .bar::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--gline) 20%,var(--gline) 80%,transparent)}
+:root[data-cf=sticker] #chat .modes{display:flex;align-items:center;gap:12px;padding:9px 2px 2px;color:var(--dim)}
+:root[data-cf=sticker] #chat .modes>span{font-size:9px;opacity:.55}
+:root[data-cf=sticker] #chat .mode{position:relative;display:inline-flex;align-items:baseline;gap:5px;padding:2px 0;border:0;background:none;color:var(--dim);font:500 11px/1.4 var(--cn);letter-spacing:.16em;cursor:pointer;transition:color .4s var(--ease)}
+:root[data-cf=sticker] #chat .mode i{font:italic 500 14.5px/1 var(--serif);letter-spacing:.03em;color:var(--rt);opacity:.82}
+:root[data-cf=sticker] #chat .mode::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+:root[data-cf=sticker] #chat .mode:hover::after,:root[data-cf=sticker] #chat .mode.hit::after{transform:scaleX(1)}
+:root[data-cf=sticker] #chat .mode.hit{color:var(--rt)}
+:root[data-cf=sticker] #chat .row{position:relative;display:flex;align-items:center;gap:8px;padding:2px 0 4px}
+:root[data-cf=sticker] #chat .fb{flex:none;width:34px;height:34px;display:grid;place-items:center;margin-left:-6px;border:0;padding:0;background:none;color:var(--dim);cursor:pointer;transition:transform .7s var(--ease),color .3s}
+:root[data-cf=sticker] #chat .fb.on{transform:rotate(135deg);color:var(--rt)}
+:root[data-cf=sticker] #chat .fd{position:relative;flex:1;min-width:0;height:44px;display:flex;align-items:center}
+:root[data-cf=sticker] #chat .fd input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;padding:0 4px;color:var(--rt);font:400 15px/1 var(--cn);letter-spacing:.04em}
+:root[data-cf=sticker] #chat .fd input::placeholder{color:var(--dim);font:400 23px/1 var(--script);letter-spacing:0;transition:opacity .5s var(--ease)}
+:root[data-cf=sticker] #chat .fd input:focus::placeholder{opacity:.3}
+:root[data-cf=sticker] #chat .ln{position:absolute;left:0;right:0;bottom:7px;height:1px;background:color-mix(in srgb,var(--gline) 55%,transparent)}
+:root[data-cf=sticker] #chat .ln::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--rt),transparent);transform:scaleX(0);transition:transform .8s var(--ease)}
+:root[data-cf=sticker] #chat .fd:focus-within .ln::after{transform:scaleX(1)}
+:root[data-cf=sticker] #chat .sd{flex:none;position:relative;width:48px;height:48px;border:0;padding:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:root[data-cf=sticker] #chat .sd::before{content:"";position:absolute;inset:2px 3px 3px 2px;border-radius:56% 44% 52% 48%/44% 56% 46% 54%;background:var(--accent2);box-shadow:0 8px 16px -6px rgba(0,0,0,.55)}
+:root[data-cf=sticker] #chat .seal{position:absolute;inset:5px;display:grid;place-items:center;padding-top:3px;border-radius:48% 52% 50% 50%/52% 47% 53% 48%;background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--accent) 68%,#fff 32%),var(--accent) 44%,var(--accent2));box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--accent2) 50%,transparent),inset 0 0 0 4px color-mix(in srgb,var(--acc-ink) 22%,transparent),inset 0 -4px 8px rgba(0,0,0,.28);color:var(--acc-ink);font:400 25px/1 var(--script);text-shadow:0 1px 0 rgba(255,255,255,.22),0 -1px 0 rgba(0,0,0,.4)}
+:root[data-cf=sticker] #chat .sd::after{content:"";position:absolute;inset:5px;border-radius:50%;border:1px solid var(--accent);opacity:0;pointer-events:none}
+:root[data-cf=sticker] #chat .sd:active{transform:scale(.93)}
+:root[data-cf=sticker] #chat .sd.stamp{animation:stamp .75s var(--ease)}
+:root[data-cf=sticker] #chat .sd.stamp::after{animation:ring 1s var(--ease)}
 @keyframes stamp{30%{transform:scale(.8) rotate(-10deg)}65%{transform:scale(1.05) rotate(3deg)}}
 @keyframes ring{from{opacity:.8;transform:scale(1)}to{opacity:0;transform:scale(2.4)}}
-#chat .tray{position:absolute;left:12px;bottom:calc(100% + 4px);display:flex;gap:2px;padding:6px;border:1px solid var(--gline);border-radius:16px;background:color-mix(in srgb,var(--edge) 70%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);opacity:0;transform:translateY(8px) scale(.97);transform-origin:0 100%;pointer-events:none;transition:opacity .4s var(--ease),transform .5s var(--ease)}
-#chat .tray.o{opacity:1;transform:none;pointer-events:auto}
-#chat .tray button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 13px;border:0;border-radius:10px;background:none;color:var(--rt);font:500 12px/1 var(--cn);letter-spacing:.14em;cursor:pointer}
-#chat .tray button:active{background:rgb(var(--haze)/.1)}
-#chat .tray small{font:italic 500 11px/1 var(--serif);letter-spacing:.04em;color:var(--dim)}
-#chat .tabs{display:flex;justify-content:center;gap:40px;padding:0 0 2px}
-#chat .tabs button{height:30px;border:0;background:none;color:var(--dim);font:500 11px/1 var(--cn);letter-spacing:.32em;display:flex;align-items:center;gap:6px;cursor:pointer;transition:color .4s}
-#chat .tabs .on{color:var(--rt)}
-#chat .tabs .dm{opacity:0;transform:rotate(-90deg) scale(.4);transition:opacity .5s var(--ease),transform .6s var(--ease)}
-#chat .tabs .on .dm{opacity:1;transform:none}
+:root[data-cf=sticker] #chat .tray{position:absolute;left:12px;bottom:calc(100% + 4px);display:flex;gap:2px;padding:6px;border:1px solid var(--gline);border-radius:16px;background:color-mix(in srgb,var(--edge) 70%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);opacity:0;transform:translateY(8px) scale(.97);transform-origin:0 100%;pointer-events:none;transition:opacity .4s var(--ease),transform .5s var(--ease)}
+:root[data-cf=sticker] #chat .tray.o{opacity:1;transform:none;pointer-events:auto}
+:root[data-cf=sticker] #chat .tray button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 13px;border:0;border-radius:10px;background:none;color:var(--rt);font:500 12px/1 var(--cn);letter-spacing:.14em;cursor:pointer}
+:root[data-cf=sticker] #chat .tray button:active{background:rgb(var(--haze)/.1)}
+:root[data-cf=sticker] #chat .tray small{font:italic 500 11px/1 var(--serif);letter-spacing:.04em;color:var(--dim)}
+:root[data-cf=sticker] #chat .tabs{display:flex;justify-content:center;gap:40px;padding:0 0 2px}
+:root[data-cf=sticker] #chat .tabs button{height:30px;border:0;background:none;color:var(--dim);font:500 11px/1 var(--cn);letter-spacing:.32em;display:flex;align-items:center;gap:6px;cursor:pointer;transition:color .4s}
+:root[data-cf=sticker] #chat .tabs .on{color:var(--rt)}
+:root[data-cf=sticker] #chat .tabs .dm{opacity:0;transform:rotate(-90deg) scale(.4);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+:root[data-cf=sticker] #chat .tabs .on .dm{opacity:1;transform:none}
 
-#chat .pop{position:absolute;z-index:5;pointer-events:none;font:14px/1 system-ui,sans-serif;animation:pop .95s var(--ease) forwards}
+:root[data-cf=sticker] #chat .pop{position:absolute;z-index:5;pointer-events:none;font:14px/1 system-ui,sans-serif;animation:pop .95s var(--ease) forwards}
 @keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1) rotate(50deg)}}
 
 /* ----- 贴纸家族（贴纸 doodle / 波点 pois 共用）：data-cf=sticker；.fam 家族显示 / .nd 家族隐藏 / .dd 仅贴纸 / .pp 仅波点 / .np 波点隐藏 ----- */
-#chat :is(.fam,.pp){display:none}
+:root[data-cf=sticker] #chat :is(.fam,:root[data-cf=sticker] .pp){display:none}
 :root[data-cf=sticker] #chat .fam,:root[data-ct=pois] #chat .pp{display:revert}
 :root[data-ct=pois] #chat .np{display:none}
-#chat .dd{display:none}
+:root[data-cf=sticker] #chat .dd{display:none}
 :root[data-ct=doodle] #chat .dd{display:revert}
 :root[data-cf=sticker] #chat .nd{display:none}
-#chat .mode[data-k=s]{--c:#efe3e4;--r:-2deg}
-#chat .mode[data-k=l]{--c:#e4e7ea;--r:1.5deg}
-#chat .mode[data-k=b]{--c:#ede7db;--r:-1deg}
+:root[data-cf=sticker] #chat .mode[data-k=s]{--c:#efe3e4;--r:-2deg}
+:root[data-cf=sticker] #chat .mode[data-k=l]{--c:#e4e7ea;--r:1.5deg}
+:root[data-cf=sticker] #chat .mode[data-k=b]{--c:#ede7db;--r:-1deg}
 @keyframes boing{30%{transform:scale(.88)}60%{transform:scale(1.08) rotate(4deg)}}
 @keyframes twk2{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2) rotate(25deg)}}
 @keyframes marq{to{transform:translateX(-100%)}}
-:root[data-ct=doodle] #chat :is(.b,.tg,.fd,.tray,.fb,.sd)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;background:none;box-shadow:none;filter:url(#wob);pointer-events:none}
-:root[data-ct=doodle] #chat :is(.fb,.sd)::before{border-radius:50%}
+:root[data-ct=doodle] #chat :is(.b,:root[data-cf=sticker] .tg,:root[data-cf=sticker] .fd,:root[data-cf=sticker] .tray,:root[data-cf=sticker] .fb,:root[data-cf=sticker] .sd)::before{content:"";position:absolute;inset:-1px;border:1.2px solid var(--ink);border-radius:inherit;background:none;box-shadow:none;filter:url(#wob);pointer-events:none}
+:root[data-ct=doodle] #chat :is(.fb,:root[data-cf=sticker] .sd)::before{border-radius:50%}
 /* 氛围：淡波点 + 灰粉暗角，粒子换成灰调彩色符号 */
 :root[data-ct=doodle] #chat .veil{background:radial-gradient(rgba(176,131,140,.24) 1.1px,transparent 1.6px) 0 0/22px 22px,radial-gradient(130% 75% at 50% 46%,transparent 50%,var(--vig) 100%),linear-gradient(180deg,var(--edge),transparent 15%,transparent 76%,rgba(248,244,244,.4)),var(--tint)}
 :root[data-ct=doodle] #chat .petals i{width:auto;height:auto;background:none;border-radius:0;filter:none;font:700 var(--s)/1 system-ui,sans-serif}
@@ -211,14 +211,14 @@
 :root[data-cf=sticker] #chat .hd{z-index:3;padding:12px 16px 12px 8px;background:repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 4px,var(--paper);box-shadow:0 6px 14px -10px rgba(90,70,76,.25)}
 :root[data-cf=sticker] #chat .hd::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:12px;background:var(--tear) 37px 100%/140px 12px repeat-x;transform:scaleY(-1);filter:drop-shadow(0 -1px .8px rgba(90,70,76,.22));pointer-events:none}
 :root[data-cf=sticker] #chat .hav{display:grid}
-#chat .hav{flex:none;position:relative;width:38px;height:38px;margin-right:2px;place-items:center;border:0;padding:0;border-radius:50%;background:var(--pk);color:var(--rt);font:800 15px/1 var(--cn);box-shadow:0 0 0 2px #fff,1.5px 2px 0 2px rgba(122,109,113,.14);cursor:pointer;transition:transform .5s var(--ease)}
-#chat .hav:active{transform:scale(.92) rotate(-6deg)}
-#chat .hav .pxs{position:absolute;right:-5px;top:-4px;color:var(--pxc)}
-#chat .hav::after{content:"";position:absolute;right:0;bottom:1px;width:8px;height:8px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 2px #fff}
-#chat .hpx{position:absolute;top:8px;right:118px;pointer-events:none;color:var(--pxc)}
-#chat .hpx>*{position:absolute;animation:pxtw 2.8s steps(3) infinite}
-#chat .hpx>:nth-child(2){left:14px;top:18px;animation-delay:-.9s}
-#chat .hpx>:nth-child(3){left:-16px;top:22px;animation-delay:-1.8s}
+:root[data-cf=sticker] #chat .hav{flex:none;position:relative;width:38px;height:38px;margin-right:2px;place-items:center;border:0;padding:0;border-radius:50%;background:var(--pk);color:var(--rt);font:800 15px/1 var(--cn);box-shadow:0 0 0 2px #fff,1.5px 2px 0 2px rgba(122,109,113,.14);cursor:pointer;transition:transform .5s var(--ease)}
+:root[data-cf=sticker] #chat .hav:active{transform:scale(.92) rotate(-6deg)}
+:root[data-cf=sticker] #chat .hav .pxs{position:absolute;right:-5px;top:-4px;color:var(--pxc)}
+:root[data-cf=sticker] #chat .hav::after{content:"";position:absolute;right:0;bottom:1px;width:8px;height:8px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 2px #fff}
+:root[data-cf=sticker] #chat .hpx{position:absolute;top:8px;right:118px;pointer-events:none;color:var(--pxc)}
+:root[data-cf=sticker] #chat .hpx>*{position:absolute;animation:pxtw 2.8s steps(3) infinite}
+:root[data-cf=sticker] #chat .hpx>:nth-child(2){left:14px;top:18px;animation-delay:-.9s}
+:root[data-cf=sticker] #chat .hpx>:nth-child(3){left:-16px;top:22px;animation-delay:-1.8s}
 @keyframes pxtw{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:.85;transform:none}}
 :root[data-cf=sticker] #chat .nm b{font-weight:800;letter-spacing:.18em}
 :root[data-cf=sticker] #chat .scr{display:none}
@@ -245,9 +245,9 @@
 /* 底栏：撕下来的笔记本纸（毛边 + 横格 + 页边线）+ 两条和纸胶带 */
 :root[data-cf=sticker] #chat .bar{padding:16px 16px 2px;background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 8px,var(--paper);box-shadow:0 -6px 14px -10px rgba(90,70,76,.25)}
 :root[data-cf=sticker] #chat .bar::before{left:0;right:0;top:-11px;height:12px;background:var(--tear) 0 100%/140px 12px repeat-x;filter:drop-shadow(0 -1px .8px rgba(90,70,76,.25))}
-#chat .tape{position:absolute;top:-13px;width:62px;height:17px;z-index:3;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(214,186,191,.72) 0 4px,rgba(232,215,218,.72) 4px 8px);clip-path:polygon(3% 0,97% 4%,100% 30%,96% 52%,100% 78%,97% 100%,2% 96%,0 70%,4% 48%,0 22%)}
-#chat .tape.t1{left:22px;rotate:-6deg}
-#chat .tape.t2{right:26px;width:48px;rotate:5deg;background:repeating-linear-gradient(90deg,rgba(200,208,216,.75) 0 3px,rgba(222,227,232,.75) 3px 6px)}
+:root[data-cf=sticker] #chat .tape{position:absolute;top:-13px;width:62px;height:17px;z-index:3;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(214,186,191,.72) 0 4px,rgba(232,215,218,.72) 4px 8px);clip-path:polygon(3% 0,97% 4%,100% 30%,96% 52%,100% 78%,97% 100%,2% 96%,0 70%,4% 48%,0 22%)}
+:root[data-cf=sticker] #chat .tape.t1{left:22px;rotate:-6deg}
+:root[data-cf=sticker] #chat .tape.t2{right:26px;width:48px;rotate:5deg;background:repeating-linear-gradient(90deg,rgba(200,208,216,.75) 0 3px,rgba(222,227,232,.75) 3px 6px)}
 :root[data-cf=sticker] #chat .modes{gap:8px;padding:0 2px 8px}
 :root[data-cf=sticker] #chat .modes>span{display:none}
 :root[data-cf=sticker] #chat .mode{height:24px;padding:0 9px 0 7px;align-items:center;gap:4px;border-radius:12px;background:var(--c);color:var(--rt);font:800 11px/1 var(--cn);letter-spacing:.1em;rotate:var(--r);box-shadow:0 0 0 2px var(--paper),1.5px 2px 0 2px rgba(122,109,113,.12);transition:transform .4s var(--ease)}
@@ -256,9 +256,9 @@
 :root[data-cf=sticker] #chat .mode b{font:400 11px/1 system-ui,sans-serif;color:var(--hot)}
 :root[data-cf=sticker] #chat .mode:hover{transform:translateY(-2px)}
 :root[data-cf=sticker] #chat .mode.hit{animation:boing .6s var(--ease)}
-#chat .ico{width:13px;height:13px;fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;filter:url(#wob)}
+:root[data-cf=sticker] #chat .ico{width:13px;height:13px;fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;filter:url(#wob)}
 :root[data-cf=sticker] #chat .row{gap:9px;padding:0 0 2px}
-:root[data-cf=sticker] #chat :is(.fb,.sd){position:relative;width:32px;height:32px;margin:0;display:grid;place-items:center;border-radius:50%;color:var(--ink);box-shadow:0 0 0 2px var(--paper),1.5px 2px 0 2px rgba(122,109,113,.12)}
+:root[data-cf=sticker] #chat :is(.fb,:root[data-cf=sticker] .sd){position:relative;width:32px;height:32px;margin:0;display:grid;place-items:center;border-radius:50%;color:var(--ink);box-shadow:0 0 0 2px var(--paper),1.5px 2px 0 2px rgba(122,109,113,.12)}
 :root[data-cf=sticker] #chat .fb{background:var(--fbc)}
 :root[data-cf=sticker] #chat .fb svg{width:18px;height:16px}
 :root[data-cf=sticker] #chat .fb.on{transform:rotate(-12deg) scale(1.08)}
@@ -270,75 +270,75 @@
 :root[data-cf=sticker] #chat .fd input{padding:0 12px;font:700 13.5px/1 var(--cn)}
 :root[data-cf=sticker] #chat .fd input::placeholder{font:700 12.5px/1 var(--cn);letter-spacing:.08em;color:#b8acb0}
 :root[data-cf=sticker] #chat .ln{display:none}
-#chat .spk{position:absolute;font:11px/1 system-ui,sans-serif;color:var(--hot);pointer-events:none;animation:twk2 2.6s var(--ease) infinite}
-#chat .spk.k1{left:12px;top:-11px}
-#chat .spk.k2{right:22px;top:-10px;color:#9dabb9;animation-delay:.8s}
-#chat .spk.k3{right:-6px;bottom:-8px;color:#bfae86;animation-delay:1.6s}
+:root[data-cf=sticker] #chat .spk{position:absolute;font:11px/1 system-ui,sans-serif;color:var(--hot);pointer-events:none;animation:twk2 2.6s var(--ease) infinite}
+:root[data-cf=sticker] #chat .spk.k1{left:12px;top:-11px}
+:root[data-cf=sticker] #chat .spk.k2{right:22px;top:-10px;color:#9dabb9;animation-delay:.8s}
+:root[data-cf=sticker] #chat .spk.k3{right:-6px;bottom:-8px;color:#bfae86;animation-delay:1.6s}
 :root[data-cf=sticker] #chat .deco{display:flex;overflow:hidden;white-space:nowrap;margin:2px -16px 0;font:11px/1.5 system-ui,sans-serif;letter-spacing:.18em;color:var(--deco);-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
-#chat .deco span{flex:none;animation:marq 28s linear infinite}
+:root[data-cf=sticker] #chat .deco span{flex:none;animation:marq 28s linear infinite}
 :root[data-cf=sticker] #chat .tabs{gap:30px;padding:0 0 4px}
 :root[data-cf=sticker] #chat .tabs button{position:relative;height:28px;font:800 11px/1 var(--cn);letter-spacing:.18em;gap:5px}
 :root[data-cf=sticker] #chat .tabs .dm{display:none}
-#chat .tico{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;filter:url(#wob);transition:fill .4s}
+:root[data-cf=sticker] #chat .tico{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;filter:url(#wob);transition:fill .4s}
 :root[data-ct=doodle] #chat .tabs .on .tico{fill:var(--pk);animation:boing .6s var(--ease)}
 :root[data-cf=sticker] #chat .tabs .on::after{content:"";position:absolute;left:18px;right:-5px;top:50%;height:7px;z-index:-1;border-radius:3px 9px 4px 8px;background:var(--mark);rotate:-2deg}
 :root[data-cf=sticker] #chat .tray{border:0;background:var(--paper);box-shadow:0 0 0 2.5px var(--paper),2px 3px 0 2.5px rgba(157,171,185,.3)}
 :root[data-cf=sticker] #chat .tray button{font-weight:800}
 :root[data-cf=sticker] #chat .tray small{font:700 10px/1 var(--cn);color:var(--hot)}
 /* 资料抽屉：点顶栏头像从左边滑出的同一张撕纸笔记本（毛边朝右） */
-#chat .sscrim{position:absolute;inset:0;z-index:7;background:rgba(60,50,54,.22);opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
-#chat .sscrim.o{opacity:1;pointer-events:auto}
+:root[data-cf=sticker] #chat .sscrim{position:absolute;inset:0;z-index:7;background:rgba(60,50,54,.22);opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+:root[data-cf=sticker] #chat .sscrim.o{opacity:1;pointer-events:auto}
 :root[data-cf=sticker] #chat .side{display:flex}
-#chat .side{position:absolute;top:0;bottom:0;left:0;z-index:8;box-sizing:border-box;width:78%;max-width:310px;flex-direction:column;padding:34px 20px 14px 38px;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper);transform:translateX(-112%);transition:transform .65s var(--ease)}
-#chat .side.o{transform:none}
-#chat .side::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
-#chat .side>:is(.tape.t1,.ptape.p1){top:12px;left:auto;right:16px}
-#chat .sav{position:relative;width:60px;height:60px;display:grid;place-items:center;border-radius:50%;background:var(--pk);font:800 23px/1 var(--cn);box-shadow:0 0 0 3px #fff,2px 3px 0 3px rgba(122,109,113,.14)}
-#chat .sav .pxs{position:absolute;color:var(--pxc);animation:pxtw 2.6s steps(3) infinite}
-#chat .sav .pxs:first-child{right:-14px;top:-6px}
-#chat .sav .pxs:nth-child(2){left:-12px;bottom:2px;animation-delay:-1.3s}
-#chat .snm{display:flex;align-items:baseline;gap:8px;margin-top:14px}
-#chat .snm b{font:800 19px/1.2 var(--cn);letter-spacing:.18em}
-#chat .skao{font:700 12px/1 system-ui,sans-serif;color:var(--hot)}
-#chat .sst{display:flex;align-items:center;gap:6px;margin:6px 0 0;font:700 11px/1 var(--cn);letter-spacing:.1em;color:var(--dim)}
-#chat .sst i{width:5px;height:5px;border-radius:50%;background:var(--dot);animation:pulse 3.2s var(--ease) infinite}
-#chat .sdv{display:flex;align-items:center;gap:8px;margin:16px 0 6px;color:var(--pxc)}
-#chat .sdv i{flex:1;border-top:1.5px dashed var(--margin)}
-#chat .sinfo{display:grid;grid-template-columns:auto 1fr;column-gap:14px;margin:0;font:700 12.5px/22px var(--cn)}
-#chat .sinfo dt{font-size:10.5px;letter-spacing:.14em;color:var(--hot)}
-#chat .sinfo dd{margin:0;color:var(--rt)}
-#chat .smn{display:flex;flex-direction:column;margin-top:10px}
-#chat .smn button{display:flex;align-items:center;gap:10px;height:44px;padding:0;border:0;background:none;color:var(--rt);font:800 13px/1 var(--cn);letter-spacing:.16em;text-align:left;cursor:pointer;transition:transform .4s var(--ease)}
-#chat .smn button .pxs{color:var(--pxc);transition:transform .5s var(--ease)}
-#chat .smn button:active{transform:translateX(4px)}
-#chat .smn button:active .pxs{transform:rotate(90deg) scale(1.3)}
-#chat .smn small{margin-left:auto;font:700 10px/1 var(--cn);letter-spacing:.06em;color:var(--dim)}
+:root[data-cf=sticker] #chat .side{position:absolute;top:0;bottom:0;left:0;z-index:8;box-sizing:border-box;width:78%;max-width:310px;flex-direction:column;padding:34px 20px 14px 38px;color:var(--rt);background:linear-gradient(90deg,transparent 26px,var(--margin) 26px 27px,transparent 27px),repeating-linear-gradient(transparent 0 21px,var(--rule) 21px 22px) 0 12px,var(--paper);transform:translateX(-112%);transition:transform .65s var(--ease)}
+:root[data-cf=sticker] #chat .side.o{transform:none}
+:root[data-cf=sticker] #chat .side::after{content:"";position:absolute;top:0;bottom:0;right:-11px;width:12px;background:var(--tearv) 100% 0/12px 140px repeat-y;filter:drop-shadow(1.5px 0 1px rgba(90,70,76,.2));pointer-events:none}
+:root[data-cf=sticker] #chat .side>:is(.tape.t1,:root[data-cf=sticker] .ptape.p1){top:12px;left:auto;right:16px}
+:root[data-cf=sticker] #chat .sav{position:relative;width:60px;height:60px;display:grid;place-items:center;border-radius:50%;background:var(--pk);font:800 23px/1 var(--cn);box-shadow:0 0 0 3px #fff,2px 3px 0 3px rgba(122,109,113,.14)}
+:root[data-cf=sticker] #chat .sav .pxs{position:absolute;color:var(--pxc);animation:pxtw 2.6s steps(3) infinite}
+:root[data-cf=sticker] #chat .sav .pxs:first-child{right:-14px;top:-6px}
+:root[data-cf=sticker] #chat .sav .pxs:nth-child(2){left:-12px;bottom:2px;animation-delay:-1.3s}
+:root[data-cf=sticker] #chat .snm{display:flex;align-items:baseline;gap:8px;margin-top:14px}
+:root[data-cf=sticker] #chat .snm b{font:800 19px/1.2 var(--cn);letter-spacing:.18em}
+:root[data-cf=sticker] #chat .skao{font:700 12px/1 system-ui,sans-serif;color:var(--hot)}
+:root[data-cf=sticker] #chat .sst{display:flex;align-items:center;gap:6px;margin:6px 0 0;font:700 11px/1 var(--cn);letter-spacing:.1em;color:var(--dim)}
+:root[data-cf=sticker] #chat .sst i{width:5px;height:5px;border-radius:50%;background:var(--dot);animation:pulse 3.2s var(--ease) infinite}
+:root[data-cf=sticker] #chat .sdv{display:flex;align-items:center;gap:8px;margin:16px 0 6px;color:var(--pxc)}
+:root[data-cf=sticker] #chat .sdv i{flex:1;border-top:1.5px dashed var(--margin)}
+:root[data-cf=sticker] #chat .sinfo{display:grid;grid-template-columns:auto 1fr;column-gap:14px;margin:0;font:700 12.5px/22px var(--cn)}
+:root[data-cf=sticker] #chat .sinfo dt{font-size:10.5px;letter-spacing:.14em;color:var(--hot)}
+:root[data-cf=sticker] #chat .sinfo dd{margin:0;color:var(--rt)}
+:root[data-cf=sticker] #chat .smn{display:flex;flex-direction:column;margin-top:10px}
+:root[data-cf=sticker] #chat .smn button{display:flex;align-items:center;gap:10px;height:44px;padding:0;border:0;background:none;color:var(--rt);font:800 13px/1 var(--cn);letter-spacing:.16em;text-align:left;cursor:pointer;transition:transform .4s var(--ease)}
+:root[data-cf=sticker] #chat .smn button .pxs{color:var(--pxc);transition:transform .5s var(--ease)}
+:root[data-cf=sticker] #chat .smn button:active{transform:translateX(4px)}
+:root[data-cf=sticker] #chat .smn button:active .pxs{transform:rotate(90deg) scale(1.3)}
+:root[data-cf=sticker] #chat .smn small{margin-left:auto;font:700 10px/1 var(--cn);letter-spacing:.06em;color:var(--dim)}
 /* 下雨小窗：ASCII 猫猫趴窗看雨 */
-#chat .rain{position:relative;flex:none;height:128px;margin-top:22px;color:var(--ink)}
-#chat .win{position:absolute;left:8px;top:24px;width:112px;height:72px;display:grid;grid-template-columns:1fr 1fr;border-left:3px double;border-right:3px double}
-#chat .win::before{content:"";position:absolute;left:-10px;right:-10px;top:-9px;height:9px;border:1px solid;border-bottom:0;transform:perspective(30px) rotateX(18deg);transform-origin:bottom}
-#chat .win::after{content:"";position:absolute;left:-12px;right:-12px;bottom:-5px;height:4px;border:1px solid;border-radius:1px}
-#chat .win>i{position:relative;--g:linear-gradient(-58deg,transparent 44%,currentColor 44% 54%,transparent 54%)}
-#chat .win>i+i{border-left:3px double}
-#chat .win>i::before{content:"";position:absolute;inset:0;opacity:.45;background:var(--g) 62% 12%/14px 14px no-repeat,var(--g) 30% 46%/12px 12px no-repeat,var(--g) 74% 70%/14px 14px no-repeat}
-#chat .win>i+i::before{background:var(--g) 20% 10%/14px 14px no-repeat,var(--g) 70% 34%/14px 14px no-repeat,var(--g) 36% 64%/14px 14px no-repeat,var(--g) 80% 88%/10px 10px no-repeat}
-#chat .cat{position:absolute;left:50%;bottom:3px;translate:-50% 0;white-space:pre;text-align:center;font:500 10.5px/1.2 system-ui,"Segoe UI",sans-serif;letter-spacing:0;animation:peek 5s var(--ease) infinite}
+:root[data-cf=sticker] #chat .rain{position:relative;flex:none;height:128px;margin-top:22px;color:var(--ink)}
+:root[data-cf=sticker] #chat .win{position:absolute;left:8px;top:24px;width:112px;height:72px;display:grid;grid-template-columns:1fr 1fr;border-left:3px double;border-right:3px double}
+:root[data-cf=sticker] #chat .win::before{content:"";position:absolute;left:-10px;right:-10px;top:-9px;height:9px;border:1px solid;border-bottom:0;transform:perspective(30px) rotateX(18deg);transform-origin:bottom}
+:root[data-cf=sticker] #chat .win::after{content:"";position:absolute;left:-12px;right:-12px;bottom:-5px;height:4px;border:1px solid;border-radius:1px}
+:root[data-cf=sticker] #chat .win>i{position:relative;--g:linear-gradient(-58deg,transparent 44%,currentColor 44% 54%,transparent 54%)}
+:root[data-cf=sticker] #chat .win>i+i{border-left:3px double}
+:root[data-cf=sticker] #chat .win>i::before{content:"";position:absolute;inset:0;opacity:.45;background:var(--g) 62% 12%/14px 14px no-repeat,var(--g) 30% 46%/12px 12px no-repeat,var(--g) 74% 70%/14px 14px no-repeat}
+:root[data-cf=sticker] #chat .win>i+i::before{background:var(--g) 20% 10%/14px 14px no-repeat,var(--g) 70% 34%/14px 14px no-repeat,var(--g) 36% 64%/14px 14px no-repeat,var(--g) 80% 88%/10px 10px no-repeat}
+:root[data-cf=sticker] #chat .cat{position:absolute;left:50%;bottom:3px;translate:-50% 0;white-space:pre;text-align:center;font:500 10.5px/1.2 system-ui,"Segoe UI",sans-serif;letter-spacing:0;animation:peek 5s var(--ease) infinite}
 @keyframes peek{0%,70%,100%{transform:none}78%{transform:translateY(2px)}86%{transform:translateY(-1px)}}
-#chat .rtx{position:absolute;left:136px;top:54px;margin:0;font:500 11.5px/1 system-ui,"Segoe UI",sans-serif;letter-spacing:.02em;white-space:nowrap}
-#chat .rtx b{font-weight:500;animation:dotb 1.8s steps(1) infinite}
-#chat .rtx b:nth-of-type(2){animation-delay:.3s}
-#chat .rtx b:nth-of-type(3){animation-delay:.6s}
+:root[data-cf=sticker] #chat .rtx{position:absolute;left:136px;top:54px;margin:0;font:500 11.5px/1 system-ui,"Segoe UI",sans-serif;letter-spacing:.02em;white-space:nowrap}
+:root[data-cf=sticker] #chat .rtx b{font-weight:500;animation:dotb 1.8s steps(1) infinite}
+:root[data-cf=sticker] #chat .rtx b:nth-of-type(2){animation-delay:.3s}
+:root[data-cf=sticker] #chat .rtx b:nth-of-type(3){animation-delay:.6s}
 @keyframes dotb{0%,30%{opacity:0}31%,100%{opacity:1}}
-#chat .rd{position:absolute;font:400 10px/1 ui-monospace,Consolas,monospace;opacity:0;animation:drop var(--d) linear var(--dl) infinite}
+:root[data-cf=sticker] #chat .rd{position:absolute;font:400 10px/1 ui-monospace,Consolas,monospace;opacity:0;animation:drop var(--d) linear var(--dl) infinite}
 @keyframes drop{0%{opacity:0;transform:translateY(-8px)}20%,70%{opacity:.6}100%{opacity:0;transform:translateY(14px)}}
-#chat .spaw{display:flex;align-items:center;gap:6px;margin-top:auto;font:700 10px/1 var(--cn);letter-spacing:.12em;color:var(--dim)}
-#chat .spaw i{width:11px;height:11px;background:var(--ink);opacity:.55;-webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat}
-#chat .spaw i:nth-child(odd){translate:0 -4px;rotate:-14deg}
-#chat .spaw i:nth-child(even){rotate:12deg}
-#chat .spaw span{margin-left:auto}
+:root[data-cf=sticker] #chat .spaw{display:flex;align-items:center;gap:6px;margin-top:auto;font:700 10px/1 var(--cn);letter-spacing:.12em;color:var(--dim)}
+:root[data-cf=sticker] #chat .spaw i{width:11px;height:11px;background:var(--ink);opacity:.55;-webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat}
+:root[data-cf=sticker] #chat .spaw i:nth-child(odd){translate:0 -4px;rotate:-14deg}
+:root[data-cf=sticker] #chat .spaw i:nth-child(even){rotate:12deg}
+:root[data-cf=sticker] #chat .spaw span{margin-left:auto}
 
 /* ----- 波点主题：灰色波点背景 + 扁平灰白图标素材（--pi-*，见 tools/embed_pois.py）----- */
-#chat .ic{flex:none;width:var(--w,16px);height:var(--h,var(--w,16px));background:var(--u) center/contain no-repeat}
+:root[data-cf=sticker] #chat .ic{flex:none;width:var(--w,16px);height:var(--h,var(--w,16px));background:var(--u) center/contain no-repeat}
 :root[data-ct=pois] #chat .pp.ic,:root[data-ct=pois] #chat .fish .ic{display:inline-block}
 :root[data-ct=pois] #chat .sym.ic{width:16px;height:16px;top:7px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
 :root[data-ct=pois] #chat .bk{opacity:1}
@@ -356,22 +356,22 @@
 @keyframes paw{0%,100%{opacity:.12;transform:scale(.6)}30%,60%{opacity:1;transform:none}}
 /* 像素星星：背景零散闪烁 / 发送迸星 */
 :root[data-ct=pois] #chat .petals{opacity:.7}
-#chat .petals .px{position:absolute;color:var(--pxc);opacity:.2;animation:pxtw var(--d) steps(3) var(--dl) infinite}
-#chat .pxs{display:block;shape-rendering:crispEdges}
-#chat .stk{position:absolute;top:-12px;left:-10px;width:22px;height:22px;pointer-events:none;background:var(--u) center/contain no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-#chat .r .stk{left:auto;right:-10px}
-#chat .ptape{position:absolute;top:-10px;z-index:3;pointer-events:none;background:var(--u) center/contain no-repeat}
-#chat .ptape.p1{--u:var(--pi-tape1);left:18px;width:58px;height:24px;rotate:-8deg}
-#chat .ptape.p2{--u:var(--pi-tape2);right:22px;width:52px;height:22px;rotate:7deg}
+:root[data-cf=sticker] #chat .petals .px{position:absolute;color:var(--pxc);opacity:.2;animation:pxtw var(--d) steps(3) var(--dl) infinite}
+:root[data-cf=sticker] #chat .pxs{display:block;shape-rendering:crispEdges}
+:root[data-cf=sticker] #chat .stk{position:absolute;top:-12px;left:-10px;width:22px;height:22px;pointer-events:none;background:var(--u) center/contain no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+:root[data-cf=sticker] #chat .r .stk{left:auto;right:-10px}
+:root[data-cf=sticker] #chat .ptape{position:absolute;top:-10px;z-index:3;pointer-events:none;background:var(--u) center/contain no-repeat}
+:root[data-cf=sticker] #chat .ptape.p1{--u:var(--pi-tape1);left:18px;width:58px;height:24px;rotate:-8deg}
+:root[data-cf=sticker] #chat .ptape.p2{--u:var(--pi-tape2);right:22px;width:52px;height:22px;rotate:7deg}
 :root[data-ct=pois] #chat .ptape{display:block}
 :root[data-ct=pois] #chat .mode{--c:#eeebeb;--r:0deg;box-shadow:0 0 0 1.5px #e3dcdd,0 2px 0 1.5px rgba(0,0,0,.06)}
 :root[data-ct=pois] #chat .mode[data-k=l]{--r:0deg}
 :root[data-ct=pois] #chat .mode.hit{background:var(--pk)}
-:root[data-ct=pois] #chat :is(.fb,.sd){width:36px;height:36px;box-shadow:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.14))}
+:root[data-ct=pois] #chat :is(.fb,:root[data-cf=sticker] .sd){width:36px;height:36px;box-shadow:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.14))}
 :root[data-ct=pois] #chat .fish{position:relative;display:grid;place-items:center}
 :root[data-ct=pois] #chat .sd::before{display:none}
-#chat .fish>*{grid-area:1/1}
-#chat .fish .fold{translate:4px 5px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))}
+:root[data-cf=sticker] #chat .fish>*{grid-area:1/1}
+:root[data-cf=sticker] #chat .fish .fold{translate:4px 5px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))}
 :root[data-ct=pois] #chat .fish>.ic:first-child{transition:transform .7s var(--ease)}
 :root[data-ct=pois] #chat .fb.on{transform:none}
 :root[data-ct=pois] #chat .fb.on .fish>.ic:first-child{transform:rotate(200deg)}
@@ -381,4 +381,4 @@
 :root[data-ct=pois] #chat .tray::before{display:none}
 :root[data-ct=pois] #chat .tray{box-shadow:0 0 0 1.5px #e3dcdd,0 6px 18px rgba(0,0,0,.12)}
 
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#chat .scr{clip-path:none}#chat .petals,#chat .poem{display:none}}
+@media(prefers-reduced-motion:reduce){:root[data-cf=sticker] *{animation:none!important;transition:none!important}#chat .scr{clip-path:none}#chat .petals,#chat .poem{display:none}}}

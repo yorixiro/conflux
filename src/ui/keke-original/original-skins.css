@@ -1,151 +1,151 @@
-#chat{--ksh:drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27))}
-#chat .kk{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
+:root[data-cf=sticker] #chat{--ksh:drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27))}
+:root[data-cf=sticker] #chat .kk{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
 :root[data-ct=doodle] #chat .kk:not(.pp){display:block}
 :root[data-ct=pois] #chat .kk.pp{display:block}
-#chat .kk-disc{position:absolute;right:-22px;bottom:-16px;z-index:2;width:48px;height:auto;rotate:10deg;filter:var(--ksh)}
-#chat .side>.tape{z-index:3}
-#chat .kk-bar{position:absolute;right:30px;top:16px;z-index:2;height:112px;width:auto;rotate:1.5deg;filter:var(--ksh)}
-#chat .kk-print{position:absolute;right:20px;bottom:64px;z-index:0;width:150px;height:150px}
-#chat .kk-print::before{content:"";position:absolute;right:4px;bottom:4px;width:132px;height:132px;background:radial-gradient(rgba(176,131,140,.4) 1.3px,transparent 1.8px) 0 0/9px 9px;-webkit-mask:radial-gradient(circle,#000 56%,transparent 71%);mask:radial-gradient(circle,#000 56%,transparent 71%)}
-#chat .kk-print img{position:absolute;right:18px;bottom:8px;height:116px;width:auto;mix-blend-mode:multiply;opacity:.88}
-#chat .kk-print i{position:absolute;font:700 12px/1 var(--cn);font-style:normal;color:var(--hot)}
-#chat .kk-gl{position:absolute;left:12px;right:12px;bottom:-2px;height:0;z-index:4;--st:var(--hot,#b0838c);--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7);--tg:rgba(176,131,140,.55)}
-#chat .kk-gl.pp{--st:#9a8f93;--f1:#f3f0f0;--f2:#e9e4e4;--f3:#e1e5e9;--tg:rgba(154,143,147,.5)}
-#chat .kk-gl .ln{position:absolute;left:-6px;top:0;width:calc(100% + 12px);height:10px;overflow:visible;fill:none;stroke:var(--st);stroke-width:1.5;stroke-dasharray:5 4;opacity:.75}
-#chat .kk-gl>u{position:absolute;top:-4px;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 32%,#fff 0 1.3px,transparent 1.7px),var(--st);box-shadow:1px 2px 1.5px rgba(90,70,76,.3)}
-#chat .kk-gl>i{position:absolute;display:flex;flex-direction:column;align-items:center;translate:-50% 0;font-style:normal;color:var(--st);transform-origin:50% 0;animation:kksway var(--du,6s) ease-in-out infinite;animation-delay:var(--dl,0s)}
-#chat .kk-gl>i::before{content:"";height:var(--l,12px);border-left:1.5px dashed var(--st);opacity:.7}
-#chat .kk-gl>i svg{display:block;stroke:var(--st);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
-#chat .kk-gl>i>img{display:block;width:auto;filter:var(--ksh)}
-#chat .kk-gl>i>b{font:700 12px/1 var(--cn);letter-spacing:.04em;white-space:nowrap}
-#chat .kk-gl>i>b.k{padding:4px 7px 3px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 0 0 1.2px var(--tg),1.5px 2px 0 rgba(90,70,76,.18);font-size:11px;rotate:-2deg}
-#chat .kk-gl>i:nth-child(even)>b.k{rotate:2deg}
-#chat .kk-gl>i.big{animation:kkbig 1.5s ease-out}
-#chat .kk-trk,#chat .kk-thm{position:absolute;z-index:3;opacity:0;transition:opacity .3s;filter:var(--ksh)}
-#chat .kk-trk{right:6px;top:118px;height:120px;width:auto}
-#chat .kk-thm{right:24px;top:118px;width:22px;height:auto;transition:opacity .3s,top .12s linear;rotate:var(--r,0deg)}
-#chat .kk-trk.on,#chat .kk-thm.on{opacity:.97}
+:root[data-cf=sticker] #chat .kk-disc{position:absolute;right:-22px;bottom:-16px;z-index:2;width:48px;height:auto;rotate:10deg;filter:var(--ksh)}
+:root[data-cf=sticker] #chat .side>.tape{z-index:3}
+:root[data-cf=sticker] #chat .kk-bar{position:absolute;right:30px;top:16px;z-index:2;height:112px;width:auto;rotate:1.5deg;filter:var(--ksh)}
+:root[data-cf=sticker] #chat .kk-print{position:absolute;right:20px;bottom:64px;z-index:0;width:150px;height:150px}
+:root[data-cf=sticker] #chat .kk-print::before{content:"";position:absolute;right:4px;bottom:4px;width:132px;height:132px;background:radial-gradient(rgba(176,131,140,.4) 1.3px,transparent 1.8px) 0 0/9px 9px;-webkit-mask:radial-gradient(circle,#000 56%,transparent 71%);mask:radial-gradient(circle,#000 56%,transparent 71%)}
+:root[data-cf=sticker] #chat .kk-print img{position:absolute;right:18px;bottom:8px;height:116px;width:auto;mix-blend-mode:multiply;opacity:.88}
+:root[data-cf=sticker] #chat .kk-print i{position:absolute;font:700 12px/1 var(--cn);font-style:normal;color:var(--hot)}
+:root[data-cf=sticker] #chat .kk-gl{position:absolute;left:12px;right:12px;bottom:-2px;height:0;z-index:4;--st:var(--hot,#b0838c);--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7);--tg:rgba(176,131,140,.55)}
+:root[data-cf=sticker] #chat .kk-gl.pp{--st:#9a8f93;--f1:#f3f0f0;--f2:#e9e4e4;--f3:#e1e5e9;--tg:rgba(154,143,147,.5)}
+:root[data-cf=sticker] #chat .kk-gl .ln{position:absolute;left:-6px;top:0;width:calc(100% + 12px);height:10px;overflow:visible;fill:none;stroke:var(--st);stroke-width:1.5;stroke-dasharray:5 4;opacity:.75}
+:root[data-cf=sticker] #chat .kk-gl>u{position:absolute;top:-4px;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 32%,#fff 0 1.3px,transparent 1.7px),var(--st);box-shadow:1px 2px 1.5px rgba(90,70,76,.3)}
+:root[data-cf=sticker] #chat .kk-gl>i{position:absolute;display:flex;flex-direction:column;align-items:center;translate:-50% 0;font-style:normal;color:var(--st);transform-origin:50% 0;animation:kksway var(--du,6s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+:root[data-cf=sticker] #chat .kk-gl>i::before{content:"";height:var(--l,12px);border-left:1.5px dashed var(--st);opacity:.7}
+:root[data-cf=sticker] #chat .kk-gl>i svg{display:block;stroke:var(--st);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
+:root[data-cf=sticker] #chat .kk-gl>i>img{display:block;width:auto;filter:var(--ksh)}
+:root[data-cf=sticker] #chat .kk-gl>i>b{font:700 12px/1 var(--cn);letter-spacing:.04em;white-space:nowrap}
+:root[data-cf=sticker] #chat .kk-gl>i>b.k{padding:4px 7px 3px;border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 0 0 1.2px var(--tg),1.5px 2px 0 rgba(90,70,76,.18);font-size:11px;rotate:-2deg}
+:root[data-cf=sticker] #chat .kk-gl>i:nth-child(even)>b.k{rotate:2deg}
+:root[data-cf=sticker] #chat .kk-gl>i.big{animation:kkbig 1.5s ease-out}
+:root[data-cf=sticker] #chat .kk-trk,:root[data-cf=sticker] #chat .kk-thm{position:absolute;z-index:3;opacity:0;transition:opacity .3s;filter:var(--ksh)}
+:root[data-cf=sticker] #chat .kk-trk{right:6px;top:118px;height:120px;width:auto}
+:root[data-cf=sticker] #chat .kk-thm{right:24px;top:118px;width:22px;height:auto;transition:opacity .3s,top .12s linear;rotate:var(--r,0deg)}
+:root[data-cf=sticker] #chat .kk-trk.on,:root[data-cf=sticker] #chat .kk-thm.on{opacity:.97}
 @keyframes kksway{0%,100%{rotate:calc(var(--am,3deg)*-1)}50%{rotate:var(--am,3deg)}}
 @keyframes kkbig{0%{rotate:0deg}15%{rotate:16deg}35%{rotate:-11deg}55%{rotate:7deg}75%{rotate:-4deg}100%{rotate:0deg}}
-@media (prefers-reduced-motion:reduce){#chat .kk-gl>i{animation:none}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-gl>i{animation:none}}}
 :root[data-ct=doodle] #chat .bgi{inset:-6%;animation:none}
-#chat .kk2{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk2{display:block}
-#chat .kk-wall{position:absolute;inset:0;z-index:1;opacity:.34;--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7)}
-#chat .kk-wall svg{position:absolute;stroke:var(--hot,#b0838c);stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
-#chat .kk-holes{position:absolute;left:10px;top:44px;bottom:44px;z-index:1;display:flex;flex-direction:column;justify-content:space-around}
-#chat .kk-holes i{width:12px;height:12px;border-radius:50%;background:#cdc2c5;box-shadow:inset 1.5px 2px 2px rgba(90,70,76,.4),0 0 0 4px rgba(255,255,255,.9),1px 2px 2px 4px rgba(90,70,76,.1)}
-#chat .kk-stamp{position:absolute;left:38px;top:12px;padding:4px 8px;border:1.3px dashed var(--hot);border-radius:6px;color:var(--hot);font:800 10px/1 var(--cn);letter-spacing:.22em;rotate:-2deg;opacity:.85}
-#chat .side .snm b{padding:0 4px;margin-left:-4px;border-radius:2px;background:linear-gradient(transparent 56%,rgba(232,186,198,.6) 56% 88%,transparent 88%)}
+:root[data-cf=sticker] #chat .kk2{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk2{display:block}
+:root[data-cf=sticker] #chat .kk-wall{position:absolute;inset:0;z-index:1;opacity:.34;--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7)}
+:root[data-cf=sticker] #chat .kk-wall svg{position:absolute;stroke:var(--hot,#b0838c);stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
+:root[data-cf=sticker] #chat .kk-holes{position:absolute;left:10px;top:44px;bottom:44px;z-index:1;display:flex;flex-direction:column;justify-content:space-around}
+:root[data-cf=sticker] #chat .kk-holes i{width:12px;height:12px;border-radius:50%;background:#cdc2c5;box-shadow:inset 1.5px 2px 2px rgba(90,70,76,.4),0 0 0 4px rgba(255,255,255,.9),1px 2px 2px 4px rgba(90,70,76,.1)}
+:root[data-cf=sticker] #chat .kk-stamp{position:absolute;left:38px;top:12px;padding:4px 8px;border:1.3px dashed var(--hot);border-radius:6px;color:var(--hot);font:800 10px/1 var(--cn);letter-spacing:.22em;rotate:-2deg;opacity:.85}
+:root[data-cf=sticker] #chat .side .snm b{padding:0 4px;margin-left:-4px;border-radius:2px;background:linear-gradient(transparent 56%,rgba(232,186,198,.6) 56% 88%,transparent 88%)}
 :root[data-ct=pois] #chat .side .snm b{background:linear-gradient(transparent 56%,rgba(205,196,199,.6) 56% 88%,transparent 88%)}
-#chat .side .sinfo dt{align-self:center;padding:0 6px;border-radius:5px;background:rgba(176,131,140,.14);line-height:17px;text-align:center}
-#chat .kk-note{position:relative;pointer-events:auto;align-self:flex-start;width:148px;margin:20px 0 0 4px;padding:17px 12px 11px;rotate:1.8deg;background:#f6efd9;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.16),0 5px 9px -5px rgba(90,70,76,.3);font:800 12px/1.9 var(--cn);color:var(--rt,#6a6266);cursor:pointer}
-#chat .kk-note::before{content:"";position:absolute;top:-6px;left:50%;width:42px;height:12px;margin-left:-21px;rotate:-4deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
-#chat .kk-note b{display:block;margin-bottom:3px;font-size:11px;letter-spacing:.14em;color:var(--hot)}
-#chat .kk-note p{display:flex;align-items:center;gap:7px;margin:0;letter-spacing:.08em;transition:opacity .3s}
-#chat .kk-note u{position:relative;flex:none;width:11px;height:11px;border:1.3px solid var(--hot);border-radius:3px;background:#fffdf5}
-#chat .kk-note p.on{opacity:.55;text-decoration:line-through}
-#chat .kk-note p.on u{background:var(--hot)}
-#chat .kk-note p.on u::after{content:"";position:absolute;left:2.5px;top:.5px;width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;rotate:40deg}
-#chat .side{isolation:isolate;--kk-sp:rgba(150,142,146,.2);--kk-sp-w:1.3}
-#chat .kk-spir{position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-#chat .kk-spir path{fill:none;stroke:var(--kk-sp);stroke-width:var(--kk-sp-w);stroke-linecap:round;stroke-linejoin:round}
-#chat .sinfo{position:relative}
-#chat .sinfo>.rain{position:absolute;right:6px;top:-6px;width:128px;height:110px;margin:0;scale:.62;transform-origin:100% 0}
-#chat .sinfo>.rain .rtx{display:none}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .side .spaw{margin-top:12px}
-#chat .kk-low .kk-note{margin:0;width:128px}
-#chat .kk-low .kk-print{position:relative;right:auto;bottom:auto;flex:none;width:126px;height:136px;margin-right:-6px}
-#chat .kk-cal{position:relative;pointer-events:auto;margin:22px 0 18px;padding:10px 10px 44px;background:rgba(255,255,255,.58);border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);color:var(--rt,#6a6266)}
-#chat .kk-cal::before{content:"";position:absolute;top:-7px;left:18px;width:44px;height:12px;rotate:-5deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
-#chat .kk-cal .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-#chat .kk-cal .ch button{border:0;background:none;padding:2px 9px;color:var(--hot);font:800 18px/1 var(--cn)}
-#chat .kk-cal .ct{cursor:pointer;font:800 12px/1 var(--cn);color:var(--rt,#6a6266)}
-#chat .kk-cal .ct b{font-size:22px;letter-spacing:0}
-#chat .kk-cal .ct em{margin-left:4px;font:700 9.5px/1 var(--cn);font-style:normal;letter-spacing:.18em;color:var(--hot)}
-#chat .kk-cal .cw,#chat .kk-cal .cg{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}
-#chat .kk-cal .cw{margin-bottom:3px;border-bottom:1.2px dashed rgba(176,131,140,.4);color:var(--hot);font:800 10px/18px var(--cn)}
-#chat .kk-cal .cg{row-gap:1px}
-#chat .kk-cal .cg i{position:relative;z-index:0;height:22px;cursor:pointer;font:700 11.5px/22px var(--cn);font-style:normal}
-#chat .kk-cal .cg i.o{opacity:.28}
-#chat .kk-cal .cg i.w:not(.t){color:var(--hot)}
-#chat .kk-cal .cg i.t{color:#fff}
-#chat .kk-cal .cg i.t::before{content:"";position:absolute;left:50%;top:50%;z-index:-1;width:22px;height:22px;translate:-50% -50%;rotate:-6deg;border-radius:52% 48% 55% 45%;background:var(--hot)}
+:root[data-cf=sticker] #chat .side .sinfo dt{align-self:center;padding:0 6px;border-radius:5px;background:rgba(176,131,140,.14);line-height:17px;text-align:center}
+:root[data-cf=sticker] #chat .kk-note{position:relative;pointer-events:auto;align-self:flex-start;width:148px;margin:20px 0 0 4px;padding:17px 12px 11px;rotate:1.8deg;background:#f6efd9;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.16),0 5px 9px -5px rgba(90,70,76,.3);font:800 12px/1.9 var(--cn);color:var(--rt,#6a6266);cursor:pointer}
+:root[data-cf=sticker] #chat .kk-note::before{content:"";position:absolute;top:-6px;left:50%;width:42px;height:12px;margin-left:-21px;rotate:-4deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
+:root[data-cf=sticker] #chat .kk-note b{display:block;margin-bottom:3px;font-size:11px;letter-spacing:.14em;color:var(--hot)}
+:root[data-cf=sticker] #chat .kk-note p{display:flex;align-items:center;gap:7px;margin:0;letter-spacing:.08em;transition:opacity .3s}
+:root[data-cf=sticker] #chat .kk-note u{position:relative;flex:none;width:11px;height:11px;border:1.3px solid var(--hot);border-radius:3px;background:#fffdf5}
+:root[data-cf=sticker] #chat .kk-note p.on{opacity:.55;text-decoration:line-through}
+:root[data-cf=sticker] #chat .kk-note p.on u{background:var(--hot)}
+:root[data-cf=sticker] #chat .kk-note p.on u::after{content:"";position:absolute;left:2.5px;top:.5px;width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;rotate:40deg}
+:root[data-cf=sticker] #chat .side{isolation:isolate;--kk-sp:rgba(150,142,146,.2);--kk-sp-w:1.3}
+:root[data-cf=sticker] #chat .kk-spir{position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+:root[data-cf=sticker] #chat .kk-spir path{fill:none;stroke:var(--kk-sp);stroke-width:var(--kk-sp-w);stroke-linecap:round;stroke-linejoin:round}
+:root[data-cf=sticker] #chat .sinfo{position:relative}
+:root[data-cf=sticker] #chat .sinfo>.rain{position:absolute;right:6px;top:-6px;width:128px;height:110px;margin:0;scale:.62;transform-origin:100% 0}
+:root[data-cf=sticker] #chat .sinfo>.rain .rtx{display:none}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .side .spaw{margin-top:12px}
+:root[data-cf=sticker] #chat .kk-low .kk-note{margin:0;width:128px}
+:root[data-cf=sticker] #chat .kk-low .kk-print{position:relative;right:auto;bottom:auto;flex:none;width:126px;height:136px;margin-right:-6px}
+:root[data-cf=sticker] #chat .kk-cal{position:relative;pointer-events:auto;margin:22px 0 18px;padding:10px 10px 44px;background:rgba(255,255,255,.58);border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);color:var(--rt,#6a6266)}
+:root[data-cf=sticker] #chat .kk-cal::before{content:"";position:absolute;top:-7px;left:18px;width:44px;height:12px;rotate:-5deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
+:root[data-cf=sticker] #chat .kk-cal .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+:root[data-cf=sticker] #chat .kk-cal .ch button{border:0;background:none;padding:2px 9px;color:var(--hot);font:800 18px/1 var(--cn)}
+:root[data-cf=sticker] #chat .kk-cal .ct{cursor:pointer;font:800 12px/1 var(--cn);color:var(--rt,#6a6266)}
+:root[data-cf=sticker] #chat .kk-cal .ct b{font-size:22px;letter-spacing:0}
+:root[data-cf=sticker] #chat .kk-cal .ct em{margin-left:4px;font:700 9.5px/1 var(--cn);font-style:normal;letter-spacing:.18em;color:var(--hot)}
+:root[data-cf=sticker] #chat .kk-cal .cw,:root[data-cf=sticker] #chat .kk-cal .cg{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}
+:root[data-cf=sticker] #chat .kk-cal .cw{margin-bottom:3px;border-bottom:1.2px dashed rgba(176,131,140,.4);color:var(--hot);font:800 10px/18px var(--cn)}
+:root[data-cf=sticker] #chat .kk-cal .cg{row-gap:1px}
+:root[data-cf=sticker] #chat .kk-cal .cg i{position:relative;z-index:0;height:22px;cursor:pointer;font:700 11.5px/22px var(--cn);font-style:normal}
+:root[data-cf=sticker] #chat .kk-cal .cg i.o{opacity:.28}
+:root[data-cf=sticker] #chat .kk-cal .cg i.w:not(.t){color:var(--hot)}
+:root[data-cf=sticker] #chat .kk-cal .cg i.t{color:#fff}
+:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{content:"";position:absolute;left:50%;top:50%;z-index:-1;width:22px;height:22px;translate:-50% -50%;rotate:-6deg;border-radius:52% 48% 55% 45%;background:var(--hot)}
 /* 聊天频率热力：同一色调分 4 档深浅 */
-#chat .kk-cal .cg i[data-h]:not(.t):not(.o)::before{content:"";position:absolute;left:50%;top:50%;z-index:-1;width:22px;height:22px;translate:-50% -50%;rotate:5deg;border-radius:48% 52% 45% 55%;background:color-mix(in srgb,var(--hot) var(--hp,0%),transparent)}
-#chat .kk-cal .cg i[data-h="0"]::before{display:none}
-#chat .kk-cal .cg i[data-h="1"]{--hp:15%}
-#chat .kk-cal .cg i[data-h="2"]{--hp:28%}
-#chat .kk-cal .cg i[data-h="3"]{--hp:46%}
-#chat .kk-cal .cg i[data-h="4"]{--hp:64%}
-#chat .kk-cal .cg i[data-h="3"]:not(.t){color:var(--rt,#6a6266)}
-#chat .kk-cal .cg i[data-h="4"]:not(.t){color:#fff}
-#chat .kk-cal{isolation:isolate}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h]:not(.t):not(.o)::before{content:"";position:absolute;left:50%;top:50%;z-index:-1;width:22px;height:22px;translate:-50% -50%;rotate:5deg;border-radius:48% 52% 45% 55%;background:color-mix(in srgb,var(--hot) var(--hp,0%),transparent)}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="0"]::before{display:none}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="1"]{--hp:15%}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="2"]{--hp:28%}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="3"]{--hp:46%}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="4"]{--hp:64%}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="3"]:not(.t){color:var(--rt,#6a6266)}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="4"]:not(.t){color:#fff}
+:root[data-cf=sticker] #chat .kk-cal{isolation:isolate}
 /* ===== 日历边框与重点标记：小旗串 / 荧光笔月份 / 虚线圆钮 / 闪星 ===== */
-#chat .kk-cal{--b1:#efc9d1;--b2:#d4e0ea;--b3:#f1e6c9;padding-top:16px}
+:root[data-cf=sticker] #chat .kk-cal{--b1:#efc9d1;--b2:#d4e0ea;--b3:#f1e6c9;padding-top:16px}
 :root[data-ct=pois] #chat .kk-cal{--b1:#d9d0d3;--b2:#e9e3e5;--b3:#cbc3c6}
-#chat .kk-cal::after{content:"";position:absolute;top:-1px;left:72px;right:34px;height:14px;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(176,131,140,.6) 0 4px,transparent 4px 7px) 0 0/100% 1.2px no-repeat,conic-gradient(from -30deg at 8px 100%,var(--b1) 0 60deg,transparent 0) 0 1px/48px 13px repeat-x,conic-gradient(from -30deg at 8px 100%,var(--b2) 0 60deg,transparent 0) 16px 1px/48px 13px repeat-x,conic-gradient(from -30deg at 8px 100%,var(--b3) 0 60deg,transparent 0) 32px 1px/48px 13px repeat-x}
-#chat .kk-cal .ct b{padding:0 3px;border-radius:3px;background:linear-gradient(transparent 60%,rgba(244,222,228,.95) 60%)}
+:root[data-cf=sticker] #chat .kk-cal::after{content:"";position:absolute;top:-1px;left:72px;right:34px;height:14px;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(176,131,140,.6) 0 4px,transparent 4px 7px) 0 0/100% 1.2px no-repeat,conic-gradient(from -30deg at 8px 100%,var(--b1) 0 60deg,transparent 0) 0 1px/48px 13px repeat-x,conic-gradient(from -30deg at 8px 100%,var(--b2) 0 60deg,transparent 0) 16px 1px/48px 13px repeat-x,conic-gradient(from -30deg at 8px 100%,var(--b3) 0 60deg,transparent 0) 32px 1px/48px 13px repeat-x}
+:root[data-cf=sticker] #chat .kk-cal .ct b{padding:0 3px;border-radius:3px;background:linear-gradient(transparent 60%,rgba(244,222,228,.95) 60%)}
 :root[data-ct=pois] #chat .kk-cal .ct b{background:linear-gradient(transparent 60%,rgba(227,217,220,.95) 60%)}
-#chat .kk-cal .ch button{display:grid;place-items:center;width:24px;height:24px;padding:0;border:1.3px dashed rgba(176,131,140,.55);border-radius:50%;background:rgba(255,255,255,.55);font:800 15px/1 var(--cn);transition:scale .25s}
-#chat .kk-cal .ch button:active{scale:.88}
-#chat .kk-cal .cg i.t::before{filter:drop-shadow(0 1px 3px color-mix(in srgb,var(--hot) 55%,transparent))}
-#chat .kk-cal .cg i.t:not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:5px -17px;font-size:10px;line-height:1;color:var(--hot);animation:kkTw 2.6s ease-in-out infinite}
-#chat .kk-cal .cg i[data-h="4"]:not(.t):not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:6px -15px;font-size:8px;line-height:1;color:var(--hot);opacity:.9}
+:root[data-cf=sticker] #chat .kk-cal .ch button{display:grid;place-items:center;width:24px;height:24px;padding:0;border:1.3px dashed rgba(176,131,140,.55);border-radius:50%;background:rgba(255,255,255,.55);font:800 15px/1 var(--cn);transition:scale .25s}
+:root[data-cf=sticker] #chat .kk-cal .ch button:active{scale:.88}
+:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{filter:drop-shadow(0 1px 3px color-mix(in srgb,var(--hot) 55%,transparent))}
+:root[data-cf=sticker] #chat .kk-cal .cg i.t:not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:5px -17px;font-size:10px;line-height:1;color:var(--hot);animation:kkTw 2.6s ease-in-out infinite}
+:root[data-cf=sticker] #chat .kk-cal .cg i[data-h="4"]:not(.t):not(.s)::after{content:"✦";position:absolute;left:50%;top:50%;translate:6px -15px;font-size:8px;line-height:1;color:var(--hot);opacity:.9}
 @keyframes kkTw{0%,100%{opacity:.4;scale:.8}50%{opacity:1;scale:1.2}}
-@media (prefers-reduced-motion:reduce){#chat .kk-cal .cg i.t::after{animation:none}}
-#chat .kk-cal .cf{right:10px;bottom:9px;padding:4px 9px;border:1.3px dashed rgba(176,131,140,.55);border-radius:999px;background:rgba(255,255,255,.7)}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal .cg i.t::after{animation:none}}}
+:root[data-cf=sticker] #chat .kk-cal .cf{right:10px;bottom:9px;padding:4px 9px;border:1.3px dashed rgba(176,131,140,.55);border-radius:999px;background:rgba(255,255,255,.7)}
 /* 摇摇乐：日历像贴在胶带上的纸一样悬挂晃动 */
-#chat .kk-cal{transform-origin:50% 0}
-#chat .kk-cal::after{transform-origin:50% 0;animation:kkSway 5s ease-in-out infinite}
+:root[data-cf=sticker] #chat .kk-cal{transform-origin:50% 0}
+:root[data-cf=sticker] #chat .kk-cal::after{transform-origin:50% 0;animation:kkSway 5s ease-in-out infinite}
 @keyframes kkSway{0%,100%{rotate:-.9deg}50%{rotate:.9deg}}
-#chat .kk-cal.kk-wob::after{animation:kkSwayFast .55s ease-in-out 3}
+:root[data-cf=sticker] #chat .kk-cal.kk-wob::after{animation:kkSwayFast .55s ease-in-out 3}
 @keyframes kkSwayFast{0%,100%{rotate:0deg}25%{rotate:-5deg}75%{rotate:5deg}}
-#chat .kk-cal .cg i.t::before{animation:kkPulse 3.2s ease-in-out infinite}
+:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{animation:kkPulse 3.2s ease-in-out infinite}
 @keyframes kkPulse{0%,100%{scale:1}50%{scale:1.1}}
-@media (prefers-reduced-motion:reduce){#chat .kk-cal::after,#chat .kk-cal .cg i.t::before{animation:none}}
+@media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-cal::after,:root[data-cf=sticker] #chat .kk-cal .cg i.t::before{animation:none}}}
 /* 贴纸主题：复古淡黄手写英文信纸 + 点阵小句 */
-#chat .kk-paper{display:none}
+:root[data-cf=sticker] #chat .kk-paper{display:none}
 :root[data-ct=doodle] #chat:not(.knopaper) .kk-paper{display:block;background:radial-gradient(circle,rgba(150,118,124,.22) .9px,transparent 1.3px) 9px 9px/18px 18px,var(--pp) 0 0/360px 198px repeat,url(/theme-assets/keke-original/81d079f243.svg),radial-gradient(130% 95% at 50% 45%,#fdf8f6 55%,#f4eae8 100%)}
 :root[data-ct=doodle] #chat:not(.knopaper) .veil{background:radial-gradient(130% 80% at 50% 46%,transparent 58%,rgba(176,131,140,.06) 100%),linear-gradient(180deg,rgba(176,131,140,.04),transparent 14%,transparent 84%,rgba(176,131,140,.04))}
 :root[data-ct=doodle] #chat:not(.knopaper) .veil::before{background:none}
 :root[data-ct=doodle] #chat:not(.knopaper) .bgi{inset:0;background:var(--kbun) 22% 24%/auto 30% no-repeat,var(--kcat) 78% 78%/auto 25% no-repeat;mix-blend-mode:multiply;opacity:.74;filter:none}
 :root[data-ct=doodle] #chat:not(.knopaper) .fog{opacity:.35}
 /* 顶栏：主题按钮换成设置按钮；侧栏：去掉聊天资料/收藏的话 */
-#chat .hd #th{display:none}
-#chat .hd .kk-gear{flex:none;width:38px;height:38px;margin-left:8px;border-radius:50%;border:1.5px solid rgba(90,76,82,.75);background:rgba(255,255,255,.55);color:#5a4c52;display:grid;place-items:center;padding:0;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);transition:scale .25s}
-#chat .hd .kk-gear:active{scale:.9}
-#chat .smn button:not(#sth){display:none!important}
+:root[data-cf=sticker] #chat .hd #th{display:none}
+:root[data-cf=sticker] #chat .hd .kk-gear{flex:none;width:38px;height:38px;margin-left:8px;border-radius:50%;border:1.5px solid rgba(90,76,82,.75);background:rgba(255,255,255,.55);color:#5a4c52;display:grid;place-items:center;padding:0;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);transition:scale .25s}
+:root[data-cf=sticker] #chat .hd .kk-gear:active{scale:.9}
+:root[data-cf=sticker] #chat .smn button:not(#sth){display:none!important}
 /* 快捷设置面板 */
-#chat .kk-qs{position:absolute;inset:0;z-index:40;display:none}
-#chat .kk-qs.o{display:block}
-#chat .kk-qs .scr{position:absolute;inset:0;background:rgba(70,56,62,.28);backdrop-filter:blur(2px)}
-#chat .kk-qs .pn{position:absolute;top:0;right:0;bottom:0;width:min(88%,380px);overflow:auto;padding:26px 18px 24px 22px;background:#fdf8f6;border-left:1.5px dashed rgba(176,131,140,.6);box-shadow:-6px 0 18px rgba(90,70,76,.12);animation:kkIn .32s cubic-bezier(.2,.8,.2,1)}
+:root[data-cf=sticker] #chat .kk-qs{position:absolute;inset:0;z-index:40;display:none}
+:root[data-cf=sticker] #chat .kk-qs.o{display:block}
+:root[data-cf=sticker] #chat .kk-qs .scr{position:absolute;inset:0;background:rgba(70,56,62,.28);backdrop-filter:blur(2px)}
+:root[data-cf=sticker] #chat .kk-qs .pn{position:absolute;top:0;right:0;bottom:0;width:min(88%,380px);overflow:auto;padding:26px 18px 24px 22px;background:#fdf8f6;border-left:1.5px dashed rgba(176,131,140,.6);box-shadow:-6px 0 18px rgba(90,70,76,.12);animation:kkIn .32s cubic-bezier(.2,.8,.2,1)}
 @keyframes kkIn{from{translate:30px 0;opacity:0}}
-#chat .kk-qs .tp{display:inline-block;padding:4px 10px;border:1.3px dashed rgba(176,131,140,.55);border-radius:6px;font:700 10px/1 var(--cn);letter-spacing:.22em;color:rgba(176,131,140,.9)}
-#chat .kk-qs h3{margin:14px 0 2px;font:800 22px/1.2 var(--cn);color:#5a4c52}
-#chat .kk-qs .sub{font:600 12px/1.4 var(--cn);color:#9a8a90}
-#chat .kk-qs .x{position:absolute;top:18px;right:16px;width:34px;height:34px;padding:0;border-radius:50%;border:1.5px dashed rgba(176,131,140,.6);background:rgba(255,255,255,.6);color:#5a4c52;font:600 18px/1 var(--cn)}
-#chat .kk-qs .gh{margin:20px 0 8px;font:800 11px/1 var(--cn);letter-spacing:.2em;color:#b0838c}
-#chat .kk-qs .cd{padding:12px 14px;border:1.5px dashed rgba(176,131,140,.55);border-radius:14px;background:rgba(255,255,255,.62);box-shadow:1.5px 2.5px 0 rgba(90,70,76,.08)}
-#chat .kk-qs .cd b{display:block;font:800 15px/1.2 var(--cn);color:#5a4c52}
-#chat .kk-qs .cd small{display:block;margin:2px 0 8px;font:600 11px/1.3 var(--cn);color:#9a8a90}
-#chat .kk-qs select{width:100%;padding:9px 10px;border:1.3px dashed rgba(176,131,140,.55);border-radius:10px;background:#fff;font:600 13px var(--cn);color:#5a4c52}
-#chat .kk-qs .rw{display:flex;align-items:center;gap:12px;width:100%;margin:6px 0;padding:11px 12px;text-align:left;border:1.3px dashed rgba(176,131,140,.45);border-radius:12px;background:rgba(255,255,255,.5);font:700 14px/1.2 var(--cn);color:#5a4c52;transition:scale .2s}
-#chat .kk-qs .rw:active{scale:.97}
-#chat .kk-qs .rw i{flex:none;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:rgba(244,222,228,.8);font-style:normal;font-size:13px}
-#chat .kk-qs .rw em{margin-left:auto;font-style:normal;font-size:11px;color:#b8a8ae;font-weight:600}
-#chat .kk-qs .rw::after{content:"›";margin-left:auto;color:#b0838c;font-size:18px}
-#chat .kk-qs .rw:has(em)::after{margin-left:6px}
-#chat .kk-qs .rw em+::after{margin-left:6px}
-#chat .kk-qs .ts{position:absolute;left:50%;bottom:22px;translate:-50% 0;padding:8px 14px;border-radius:999px;background:rgba(90,76,82,.88);color:#fff;font:600 12px var(--cn);opacity:0;transition:opacity .25s;pointer-events:none;z-index:2;white-space:nowrap}
-#chat .kk-qs .ts.o{opacity:1}
-#chat .kk-cal .kk-pile{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1;border-radius:10px}
-#chat .kk-cal .cg i.s::after{content:"";position:absolute;left:50%;top:50%;width:25px;height:25px;translate:-50% -50%;border:1.3px dashed var(--hot);border-radius:50%}
-#chat .kk-cal .cf{position:absolute;right:12px;bottom:10px;color:var(--hot);font:700 10px/1 var(--cn);letter-spacing:.12em}
-#chat .kk-cal .cf button{border:0;background:none;padding:0;color:inherit;font:inherit;letter-spacing:inherit}
-#chat .kk-catst{position:absolute;left:-8px;bottom:-14px;width:86px;height:auto;filter:drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27))}
+:root[data-cf=sticker] #chat .kk-qs .tp{display:inline-block;padding:4px 10px;border:1.3px dashed rgba(176,131,140,.55);border-radius:6px;font:700 10px/1 var(--cn);letter-spacing:.22em;color:rgba(176,131,140,.9)}
+:root[data-cf=sticker] #chat .kk-qs h3{margin:14px 0 2px;font:800 22px/1.2 var(--cn);color:#5a4c52}
+:root[data-cf=sticker] #chat .kk-qs .sub{font:600 12px/1.4 var(--cn);color:#9a8a90}
+:root[data-cf=sticker] #chat .kk-qs .x{position:absolute;top:18px;right:16px;width:34px;height:34px;padding:0;border-radius:50%;border:1.5px dashed rgba(176,131,140,.6);background:rgba(255,255,255,.6);color:#5a4c52;font:600 18px/1 var(--cn)}
+:root[data-cf=sticker] #chat .kk-qs .gh{margin:20px 0 8px;font:800 11px/1 var(--cn);letter-spacing:.2em;color:#b0838c}
+:root[data-cf=sticker] #chat .kk-qs .cd{padding:12px 14px;border:1.5px dashed rgba(176,131,140,.55);border-radius:14px;background:rgba(255,255,255,.62);box-shadow:1.5px 2.5px 0 rgba(90,70,76,.08)}
+:root[data-cf=sticker] #chat .kk-qs .cd b{display:block;font:800 15px/1.2 var(--cn);color:#5a4c52}
+:root[data-cf=sticker] #chat .kk-qs .cd small{display:block;margin:2px 0 8px;font:600 11px/1.3 var(--cn);color:#9a8a90}
+:root[data-cf=sticker] #chat .kk-qs select{width:100%;padding:9px 10px;border:1.3px dashed rgba(176,131,140,.55);border-radius:10px;background:#fff;font:600 13px var(--cn);color:#5a4c52}
+:root[data-cf=sticker] #chat .kk-qs .rw{display:flex;align-items:center;gap:12px;width:100%;margin:6px 0;padding:11px 12px;text-align:left;border:1.3px dashed rgba(176,131,140,.45);border-radius:12px;background:rgba(255,255,255,.5);font:700 14px/1.2 var(--cn);color:#5a4c52;transition:scale .2s}
+:root[data-cf=sticker] #chat .kk-qs .rw:active{scale:.97}
+:root[data-cf=sticker] #chat .kk-qs .rw i{flex:none;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:rgba(244,222,228,.8);font-style:normal;font-size:13px}
+:root[data-cf=sticker] #chat .kk-qs .rw em{margin-left:auto;font-style:normal;font-size:11px;color:#b8a8ae;font-weight:600}
+:root[data-cf=sticker] #chat .kk-qs .rw::after{content:"›";margin-left:auto;color:#b0838c;font-size:18px}
+:root[data-cf=sticker] #chat .kk-qs .rw:has(em)::after{margin-left:6px}
+:root[data-cf=sticker] #chat .kk-qs .rw em+::after{margin-left:6px}
+:root[data-cf=sticker] #chat .kk-qs .ts{position:absolute;left:50%;bottom:22px;translate:-50% 0;padding:8px 14px;border-radius:999px;background:rgba(90,76,82,.88);color:#fff;font:600 12px var(--cn);opacity:0;transition:opacity .25s;pointer-events:none;z-index:2;white-space:nowrap}
+:root[data-cf=sticker] #chat .kk-qs .ts.o{opacity:1}
+:root[data-cf=sticker] #chat .kk-cal .kk-pile{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1;border-radius:10px}
+:root[data-cf=sticker] #chat .kk-cal .cg i.s::after{content:"";position:absolute;left:50%;top:50%;width:25px;height:25px;translate:-50% -50%;border:1.3px dashed var(--hot);border-radius:50%}
+:root[data-cf=sticker] #chat .kk-cal .cf{position:absolute;right:12px;bottom:10px;color:var(--hot);font:700 10px/1 var(--cn);letter-spacing:.12em}
+:root[data-cf=sticker] #chat .kk-cal .cf button{border:0;background:none;padding:0;color:inherit;font:inherit;letter-spacing:inherit}
+:root[data-cf=sticker] #chat .kk-catst{position:absolute;left:-8px;bottom:-14px;width:86px;height:auto;filter:drop-shadow(1.5px 2px 1.5px rgba(90,70,76,.27))}
 :root[data-ct=pois] #chat .kk-cal{background:#f3f0f0 radial-gradient(#e3d9dc 1.2px,transparent 1.6px) 0 0/10px 10px;border:1.5px dashed #fff;box-shadow:0 0 0 1px rgba(134,103,98,.22)}
 :root[data-ct=pois] #chat .kk-cal::before,:root[data-ct=pois] #chat .kk-note::before{background:repeating-linear-gradient(45deg,#e3d9dc 0 4px,#f6f3f3 4px 8px)}
 :root[data-ct=pois] #chat .kk-note{background:#efecec radial-gradient(#ddd3d6 1.1px,transparent 1.5px) 0 0/9px 9px}
@@ -168,117 +168,117 @@
 :root[data-ct=pois] #chat .side .smn button:nth-child(-n+2)::after{background:repeating-linear-gradient(45deg,#e3d9dc 0 4px,#f6f3f3 4px 8px)}
 /* ===== 平板响应式：竖屏拉宽，横屏左右分栏 ===== */
 @media (min-width:600px) and (min-height:700px){
-  #stage,#chat .app{max-width:min(100%,740px)}
-  :root[data-cf=sticker] #chat .side{width:min(50%,380px);max-width:380px;padding:40px 26px 16px 46px}
-  #chat .sav{width:68px;height:68px;font-size:26px}
-  #chat .side .snm b{font-size:21px}
-  :root[data-cf=sticker] #chat .side .smn{gap:14px 12px}
-  :root[data-cf=sticker] #chat .side .smn button{min-height:58px;padding:11px 12px 9px;font-size:13.5px}
-  :root[data-cf=sticker] #chat .side .smn #sth{height:42px}
+:root[data-cf=sticker] #stage,:root[data-cf=sticker] #chat .app{max-width:min(100%,740px)}
+:root[data-cf=sticker] #chat .side{width:min(50%,380px);max-width:380px;padding:40px 26px 16px 46px}
+:root[data-cf=sticker] #chat .sav{width:68px;height:68px;font-size:26px}
+:root[data-cf=sticker] #chat .side .snm b{font-size:21px}
+:root[data-cf=sticker] #chat .side .smn{gap:14px 12px}
+:root[data-cf=sticker] #chat .side .smn button{min-height:58px;padding:11px 12px 9px;font-size:13.5px}
+:root[data-cf=sticker] #chat .side .smn #sth{height:42px}
 }
 @media (min-width:960px) and (min-height:600px) and (min-aspect-ratio:1/1){
-  #stage{max-width:1180px}
-  #home{right:auto;width:min(42%,470px)}
-  #chat{left:min(42%,470px);transform:none;pointer-events:auto;transition:none}
-  #stage.chat #home{transform:none;filter:none}
-  #chat .app{max-width:none}
-  #chat .bk{display:none}
+:root[data-cf=sticker] #stage{max-width:1180px}
+:root[data-cf=sticker] #home{right:auto;width:min(42%,470px)}
+:root[data-cf=sticker] #chat{left:min(42%,470px);transform:none;pointer-events:auto;transition:none}
+:root[data-cf=sticker] #stage.chat #home{transform:none;filter:none}
+:root[data-cf=sticker] #chat .app{max-width:none}
+:root[data-cf=sticker] #chat .bk{display:none}
 }
 /* 平板竖屏：头部、消息区、底栏、资料抽屉整体放大 1.3 倍 */
-:root{--tz:1}
+:root[data-cf=sticker]{--tz:1}
 @media (min-width:600px) and (min-height:700px) and (orientation:portrait){
-  :root{--tz:1.15}
-  #chat .app>.hd,#chat .app>#list,#chat .app>.bar,#chat .app>#side{zoom:1.15}
-  :root[data-cf=sticker] #chat .side{width:min(72%,340px);max-width:340px}
+:root[data-cf=sticker]{--tz:1.15}
+:root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.15}
+:root[data-cf=sticker] #chat .side{width:min(72%,340px);max-width:340px}
 }
 @media (min-width:760px) and (min-height:700px) and (orientation:portrait){
-  :root{--tz:1.25}
-  #chat .app>.hd,#chat .app>#list,#chat .app>.bar,#chat .app>#side{zoom:1.25}
+:root[data-cf=sticker]{--tz:1.25}
+:root[data-cf=sticker] #chat .app>.hd,:root[data-cf=sticker] #chat .app>#list,:root[data-cf=sticker] #chat .app>.bar,:root[data-cf=sticker] #chat .app>#side{zoom:1.25}
 }
 
 :root[data-ct=pois] #chat .kk-mm,:root[data-ct=pois] #chat .kk-sb{border:1.5px dashed #fff;box-shadow:0 0 0 1px rgba(134,103,98,.22),0 8px 14px -8px rgba(60,50,52,.45)}
-#chat .kk-more{position:relative;flex:none;display:flex;align-items:center;justify-content:center;gap:3px;width:30px;height:30px;margin-right:6px;padding:0;border:1.5px solid var(--ki);border-radius:50%;background:var(--kp);-webkit-tap-highlight-color:transparent}
-#chat .kk-more i{width:3.5px;height:3.5px;border-radius:50%;background:var(--ki)}
-#chat .kk-more[data-f]:not([data-f=""])::after{content:attr(data-f);position:absolute;right:-5px;top:-8px;font-size:11px;color:var(--kh)}
-#chat .kk-mm{position:absolute;right:10px;top:70px;z-index:40;display:none;flex-direction:column;min-width:170px;padding:6px;border-radius:14px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22),0 10px 18px -10px rgba(60,50,52,.5);transform-origin:100% 0;animation:kpop .22s cubic-bezier(.3,1.5,.5,1) both}
-#chat .kk-mm.on{display:flex}
-#chat .kk-mm button{border:0;background:none;padding:9px 12px;border-radius:9px;text-align:left;font:800 12.5px/1 var(--kf);letter-spacing:.08em;color:var(--ki)}
-#chat .kk-mm button:active{background:rgba(214,186,191,.4)}
-#chat .kk-mm button.warn{color:#c0646f}
-#chat .kk-sb{position:absolute;left:10px;right:10px;top:76px;z-index:41;display:none;align-items:center;gap:6px;padding:6px 8px;border-radius:16px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22)}
-#chat .kk-sb.on{display:flex}
-#chat .kk-sb input{flex:1;min-width:0;border:0;outline:0;background:none;font:700 13px/1.2 var(--kf);color:var(--ki);-webkit-user-select:text;user-select:text}
-#chat .kk-sb .sc{font:700 10px/1 var(--kf);letter-spacing:.1em;color:var(--kh)}
-#chat .kk-sb button{border:0;background:none;padding:2px 7px;font:800 16px/1 var(--kf);color:var(--kh)}
-#chat mark.kmk{border-radius:3px;padding:0 1px;background:rgba(236,200,120,.55);color:inherit}
-#chat mark.kmk.cur{background:rgba(224,140,160,.6);outline:1.5px dashed var(--kh)}
-#chat .kmul .m{position:relative;padding-left:30px}
-#chat .kc{position:absolute;left:6px;top:50%;translate:0 -50%;width:18px;height:18px;border:1.5px solid var(--kh);border-radius:50%;background:var(--kp)}
-#chat .m.ks .kc{background:var(--kh)}
-#chat .m.ks .kc::after{content:"";position:absolute;left:5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;rotate:40deg}
-#chat .kmul .m.ks .b{outline:1.5px dashed var(--kh);outline-offset:3px}
-#chat .kk-mb{position:absolute;left:0;right:0;bottom:0;z-index:35;display:none;align-items:center;justify-content:space-around;gap:4px;padding:0 10px;background:var(--kp);box-shadow:0 -6px 14px -8px rgba(60,50,52,.4)}
-#chat .kk-mb.on{display:flex}
-#chat .kk-mb .mc{font:800 12px/1 var(--kf);letter-spacing:.1em;color:var(--kh)}
-#chat .kk-mb button{border:0;border-radius:14px;padding:9px 13px;background:rgba(214,186,191,.35);font:800 12.5px/1 var(--kf);letter-spacing:.08em;color:var(--ki)}
-#chat .kv{position:absolute;left:8px;bottom:-12px;z-index:2;display:flex;align-items:center;gap:5px;padding:2px 7px;border-radius:10px;background:var(--kp);font:800 10px/1.4 var(--kf);font-style:normal;color:var(--kh);box-shadow:0 0 0 1.5px var(--kp),1px 2px 0 1.5px rgba(176,131,140,.2)}
-#chat .kv u{padding:0 3px;font-size:14px;line-height:1;text-decoration:none}
-#chat .m:has(.kv){margin-bottom:12px}
-#chat .kk-bar{top:80px;right:24px;height:98px}
-#chat .kk-btape{position:absolute;top:74px;right:16px;z-index:3;width:46px;height:13px;rotate:4deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
+:root[data-cf=sticker] #chat .kk-more{position:relative;flex:none;display:flex;align-items:center;justify-content:center;gap:3px;width:30px;height:30px;margin-right:6px;padding:0;border:1.5px solid var(--ki);border-radius:50%;background:var(--kp);-webkit-tap-highlight-color:transparent}
+:root[data-cf=sticker] #chat .kk-more i{width:3.5px;height:3.5px;border-radius:50%;background:var(--ki)}
+:root[data-cf=sticker] #chat .kk-more[data-f]:not([data-f=""])::after{content:attr(data-f);position:absolute;right:-5px;top:-8px;font-size:11px;color:var(--kh)}
+:root[data-cf=sticker] #chat .kk-mm{position:absolute;right:10px;top:70px;z-index:40;display:none;flex-direction:column;min-width:170px;padding:6px;border-radius:14px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22),0 10px 18px -10px rgba(60,50,52,.5);transform-origin:100% 0;animation:kpop .22s cubic-bezier(.3,1.5,.5,1) both}
+:root[data-cf=sticker] #chat .kk-mm.on{display:flex}
+:root[data-cf=sticker] #chat .kk-mm button{border:0;background:none;padding:9px 12px;border-radius:9px;text-align:left;font:800 12.5px/1 var(--kf);letter-spacing:.08em;color:var(--ki)}
+:root[data-cf=sticker] #chat .kk-mm button:active{background:rgba(214,186,191,.4)}
+:root[data-cf=sticker] #chat .kk-mm button.warn{color:#c0646f}
+:root[data-cf=sticker] #chat .kk-sb{position:absolute;left:10px;right:10px;top:76px;z-index:41;display:none;align-items:center;gap:6px;padding:6px 8px;border-radius:16px;background:var(--kp);box-shadow:0 0 0 2px var(--kp),2px 3px 0 2px rgba(176,131,140,.22)}
+:root[data-cf=sticker] #chat .kk-sb.on{display:flex}
+:root[data-cf=sticker] #chat .kk-sb input{flex:1;min-width:0;border:0;outline:0;background:none;font:700 13px/1.2 var(--kf);color:var(--ki);-webkit-user-select:text;user-select:text}
+:root[data-cf=sticker] #chat .kk-sb .sc{font:700 10px/1 var(--kf);letter-spacing:.1em;color:var(--kh)}
+:root[data-cf=sticker] #chat .kk-sb button{border:0;background:none;padding:2px 7px;font:800 16px/1 var(--kf);color:var(--kh)}
+:root[data-cf=sticker] #chat mark.kmk{border-radius:3px;padding:0 1px;background:rgba(236,200,120,.55);color:inherit}
+:root[data-cf=sticker] #chat mark.kmk.cur{background:rgba(224,140,160,.6);outline:1.5px dashed var(--kh)}
+:root[data-cf=sticker] #chat .kmul .m{position:relative;padding-left:30px}
+:root[data-cf=sticker] #chat .kc{position:absolute;left:6px;top:50%;translate:0 -50%;width:18px;height:18px;border:1.5px solid var(--kh);border-radius:50%;background:var(--kp)}
+:root[data-cf=sticker] #chat .m.ks .kc{background:var(--kh)}
+:root[data-cf=sticker] #chat .m.ks .kc::after{content:"";position:absolute;left:5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;rotate:40deg}
+:root[data-cf=sticker] #chat .kmul .m.ks .b{outline:1.5px dashed var(--kh);outline-offset:3px}
+:root[data-cf=sticker] #chat .kk-mb{position:absolute;left:0;right:0;bottom:0;z-index:35;display:none;align-items:center;justify-content:space-around;gap:4px;padding:0 10px;background:var(--kp);box-shadow:0 -6px 14px -8px rgba(60,50,52,.4)}
+:root[data-cf=sticker] #chat .kk-mb.on{display:flex}
+:root[data-cf=sticker] #chat .kk-mb .mc{font:800 12px/1 var(--kf);letter-spacing:.1em;color:var(--kh)}
+:root[data-cf=sticker] #chat .kk-mb button{border:0;border-radius:14px;padding:9px 13px;background:rgba(214,186,191,.35);font:800 12.5px/1 var(--kf);letter-spacing:.08em;color:var(--ki)}
+:root[data-cf=sticker] #chat .kv{position:absolute;left:8px;bottom:-12px;z-index:2;display:flex;align-items:center;gap:5px;padding:2px 7px;border-radius:10px;background:var(--kp);font:800 10px/1.4 var(--kf);font-style:normal;color:var(--kh);box-shadow:0 0 0 1.5px var(--kp),1px 2px 0 1.5px rgba(176,131,140,.2)}
+:root[data-cf=sticker] #chat .kv u{padding:0 3px;font-size:14px;line-height:1;text-decoration:none}
+:root[data-cf=sticker] #chat .m:has(.kv){margin-bottom:12px}
+:root[data-cf=sticker] #chat .kk-bar{top:80px;right:24px;height:98px}
+:root[data-cf=sticker] #chat .kk-btape{position:absolute;top:74px;right:16px;z-index:3;width:46px;height:13px;rotate:4deg;background:repeating-linear-gradient(45deg,rgba(214,176,186,.8) 0 4px,rgba(244,228,232,.8) 4px 8px)}
 :root[data-ct=pois] #chat .kk-btape{background:repeating-linear-gradient(45deg,#e3d9dc 0 4px,#f6f3f3 4px 8px)}
-#chat.knosway .kk-gl>i{animation:none}
-#chat.knowall .kk-wall,#chat.knospir .kk-spir{display:none!important}
-#chat .kk-tabs,#chat .kk-lib,#chat .kk-set{pointer-events:auto}
-#chat .kk-tabs{position:relative;z-index:2;display:flex;align-items:center;gap:8px;margin:0 0 14px}
-#chat .kk-tabs button{position:relative;padding:7px 12px;border:0;border-radius:9px 9px 4px 4px;background:rgba(255,255,255,.62);box-shadow:0 0 0 1.4px rgba(176,131,140,.5);color:var(--rt);font:800 12px/1 var(--cn);letter-spacing:.12em}
-#chat .kk-tabs button.on{background:var(--hot);color:#fff;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.2);rotate:-1.5deg}
-#chat .kk-tabs .ks{display:grid;place-items:center;width:30px;height:30px;margin-left:auto;padding:0;border-radius:50%}
-#chat .kk-tabs svg{width:18px;height:18px;fill:none;stroke:var(--hot);stroke-width:1.5;stroke-linecap:round}
-#chat .side.klib .kk-scr>*:not(.kk-lib){display:none!important}
-#chat .side:not(.klib) .kk-lib{display:none!important}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
-#chat .kk-set{position:absolute;left:38px;right:20px;top:74px;z-index:6;display:flex;flex-direction:column;padding:6px;border:1.5px dashed var(--hot);border-radius:12px;background:#fffdf9;box-shadow:2px 3px 0 rgba(90,70,76,.14)}
-#chat .kk-set[hidden]{display:none}
-#chat .kk-set button{display:flex;align-items:center;justify-content:space-between;padding:9px 8px;border:0;background:none;color:var(--rt);font:800 12.5px/1 var(--cn);letter-spacing:.08em}
-#chat .kk-set em{font-style:normal;color:var(--hot)}
-#chat .kk-set .sw{position:relative;width:30px;height:16px;border-radius:9px;background:rgba(150,142,146,.35)}
-#chat .kk-set .sw::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s}
-#chat .kk-set .sw.on{background:var(--hot)}#chat .kk-set .sw.on::after{left:16px}
-#chat .kk-lib{flex-direction:column;min-height:0;flex:1;font-family:var(--cn);color:var(--rt)}
-#chat .kk-lib button{font-family:inherit;color:inherit}
-#chat .lacc,#chat .lcl button{display:flex;align-items:center;gap:10px;text-align:left}
-#chat .lacc{margin:4px 0 8px}
-#chat .lav{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:var(--pk,#ead9dc);box-shadow:0 0 0 2px #fff;font:800 15px/1 var(--cn)}
-#chat .lnm b{display:block;font-size:16px;letter-spacing:.06em}
-#chat .lnm small,#chat .lt small{display:block;margin-top:3px;font-size:11px;letter-spacing:.1em;color:var(--hot)}
-#chat .lct{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 2px;border:0;border-bottom:1.5px dashed rgba(176,131,140,.45);background:none;font:800 13px/1 var(--cn);letter-spacing:.12em}
-#chat .lct i{font-style:normal;color:var(--hot);transition:rotate .2s}#chat .lct.open i{rotate:180deg}
-#chat .lcl{display:none;flex-direction:column;gap:6px;padding:8px 0}#chat .lcl.open{display:flex}
-#chat .lcl button{padding:6px 8px;border:0;border-radius:12px;background:rgba(255,255,255,.55)}
-#chat .lcl button.on{background:rgba(232,186,198,.4)}
-#chat .lcl .lav{width:30px;height:30px;font-size:13px}#chat .lcl .lnm b{font-size:14px}
-#chat .lnew{margin:12px 0 10px;padding:11px;border:1.5px dashed var(--hot);border-radius:10px;background:rgba(255,255,255,.62);color:var(--hot)!important;font:800 13px/1 var(--cn);letter-spacing:.14em}
-#chat .lq{font:700 11px/1 var(--cn);letter-spacing:.14em;color:var(--hot)}
-#chat .lin,#chat .lrn{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;outline:0;background:rgba(255,255,255,.7);font:700 13px/1.2 var(--cn);color:var(--rt)}
-#chat .lrn{margin:0;padding:4px 6px}
-#chat .lcap{margin:14px 0 6px;font:800 10px/1 var(--cn);letter-spacing:.2em;color:var(--hot);opacity:.75}
-#chat .ll{flex:1;min-height:0;overflow-y:auto}
-#chat .li{display:flex;align-items:center;justify-content:space-between;padding:9px 6px 9px 12px;border-radius:12px;cursor:pointer}
-#chat .li.on{background:rgba(232,186,198,.38);box-shadow:inset 3px 0 0 var(--hot)}
-#chat .lt b{font-size:15px;letter-spacing:.05em}
-#chat .lm{padding:6px 8px;border:0;background:none;color:var(--hot)!important;font:800 16px/1 var(--cn);letter-spacing:.1em}
-#chat .lx{display:flex;gap:6px;padding:0 12px 8px}#chat .lx[hidden]{display:none}
-#chat .lx button{padding:6px 10px;border:0;border-radius:10px;background:rgba(214,186,191,.35);font:800 11.5px/1 var(--cn);letter-spacing:.08em}
-#chat .le{padding:18px 0;text-align:center;font-size:12px;color:var(--hot)}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-holes{display:flex}
-#chat .kk-holes i{display:block}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set{display:flex}
-:root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set[hidden]{display:none}
-#chat .kk-scr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;margin:0 -8px 0 -14px;padding:8px 8px 8px 14px}
-#chat .kk-scr::-webkit-scrollbar{display:none}
-#chat .kk-scr>*{flex-shrink:0}
-#chat .kk-scr>.kk-lib{flex:1 0 auto}
-#chat .kk-scr .kk-bar{top:6px;right:6px;height:98px}
-#chat .kk-scr .kk-btape{top:0;right:-2px}
+:root[data-cf=sticker] #chat.knosway .kk-gl>i{animation:none}
+:root[data-cf=sticker] #chat.knowall .kk-wall,:root[data-cf=sticker] #chat.knospir .kk-spir{display:none!important}
+:root[data-cf=sticker] #chat .kk-tabs,:root[data-cf=sticker] #chat .kk-lib,:root[data-cf=sticker] #chat .kk-set{pointer-events:auto}
+:root[data-cf=sticker] #chat .kk-tabs{position:relative;z-index:2;display:flex;align-items:center;gap:8px;margin:0 0 14px}
+:root[data-cf=sticker] #chat .kk-tabs button{position:relative;padding:7px 12px;border:0;border-radius:9px 9px 4px 4px;background:rgba(255,255,255,.62);box-shadow:0 0 0 1.4px rgba(176,131,140,.5);color:var(--rt);font:800 12px/1 var(--cn);letter-spacing:.12em}
+:root[data-cf=sticker] #chat .kk-tabs button.on{background:var(--hot);color:#fff;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.2);rotate:-1.5deg}
+:root[data-cf=sticker] #chat .kk-tabs .ks{display:grid;place-items:center;width:30px;height:30px;margin-left:auto;padding:0;border-radius:50%}
+:root[data-cf=sticker] #chat .kk-tabs svg{width:18px;height:18px;fill:none;stroke:var(--hot);stroke-width:1.5;stroke-linecap:round}
+:root[data-cf=sticker] #chat .side.klib .kk-scr>*:not(.kk-lib){display:none!important}
+:root[data-cf=sticker] #chat .side:not(.klib) .kk-lib{display:none!important}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
+:root[data-cf=sticker] #chat .kk-set{position:absolute;left:38px;right:20px;top:74px;z-index:6;display:flex;flex-direction:column;padding:6px;border:1.5px dashed var(--hot);border-radius:12px;background:#fffdf9;box-shadow:2px 3px 0 rgba(90,70,76,.14)}
+:root[data-cf=sticker] #chat .kk-set[hidden]{display:none}
+:root[data-cf=sticker] #chat .kk-set button{display:flex;align-items:center;justify-content:space-between;padding:9px 8px;border:0;background:none;color:var(--rt);font:800 12.5px/1 var(--cn);letter-spacing:.08em}
+:root[data-cf=sticker] #chat .kk-set em{font-style:normal;color:var(--hot)}
+:root[data-cf=sticker] #chat .kk-set .sw{position:relative;width:30px;height:16px;border-radius:9px;background:rgba(150,142,146,.35)}
+:root[data-cf=sticker] #chat .kk-set .sw::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s}
+:root[data-cf=sticker] #chat .kk-set .sw.on{background:var(--hot)}#chat .kk-set .sw.on::after{left:16px}
+:root[data-cf=sticker] #chat .kk-lib{flex-direction:column;min-height:0;flex:1;font-family:var(--cn);color:var(--rt)}
+:root[data-cf=sticker] #chat .kk-lib button{font-family:inherit;color:inherit}
+:root[data-cf=sticker] #chat .lacc,:root[data-cf=sticker] #chat .lcl button{display:flex;align-items:center;gap:10px;text-align:left}
+:root[data-cf=sticker] #chat .lacc{margin:4px 0 8px}
+:root[data-cf=sticker] #chat .lav{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:var(--pk,#ead9dc);box-shadow:0 0 0 2px #fff;font:800 15px/1 var(--cn)}
+:root[data-cf=sticker] #chat .lnm b{display:block;font-size:16px;letter-spacing:.06em}
+:root[data-cf=sticker] #chat .lnm small,:root[data-cf=sticker] #chat .lt small{display:block;margin-top:3px;font-size:11px;letter-spacing:.1em;color:var(--hot)}
+:root[data-cf=sticker] #chat .lct{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 2px;border:0;border-bottom:1.5px dashed rgba(176,131,140,.45);background:none;font:800 13px/1 var(--cn);letter-spacing:.12em}
+:root[data-cf=sticker] #chat .lct i{font-style:normal;color:var(--hot);transition:rotate .2s}#chat .lct.open i{rotate:180deg}
+:root[data-cf=sticker] #chat .lcl{display:none;flex-direction:column;gap:6px;padding:8px 0}#chat .lcl.open{display:flex}
+:root[data-cf=sticker] #chat .lcl button{padding:6px 8px;border:0;border-radius:12px;background:rgba(255,255,255,.55)}
+:root[data-cf=sticker] #chat .lcl button.on{background:rgba(232,186,198,.4)}
+:root[data-cf=sticker] #chat .lcl .lav{width:30px;height:30px;font-size:13px}#chat .lcl .lnm b{font-size:14px}
+:root[data-cf=sticker] #chat .lnew{margin:12px 0 10px;padding:11px;border:1.5px dashed var(--hot);border-radius:10px;background:rgba(255,255,255,.62);color:var(--hot)!important;font:800 13px/1 var(--cn);letter-spacing:.14em}
+:root[data-cf=sticker] #chat .lq{font:700 11px/1 var(--cn);letter-spacing:.14em;color:var(--hot)}
+:root[data-cf=sticker] #chat .lin,:root[data-cf=sticker] #chat .lrn{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;outline:0;background:rgba(255,255,255,.7);font:700 13px/1.2 var(--cn);color:var(--rt)}
+:root[data-cf=sticker] #chat .lrn{margin:0;padding:4px 6px}
+:root[data-cf=sticker] #chat .lcap{margin:14px 0 6px;font:800 10px/1 var(--cn);letter-spacing:.2em;color:var(--hot);opacity:.75}
+:root[data-cf=sticker] #chat .ll{flex:1;min-height:0;overflow-y:auto}
+:root[data-cf=sticker] #chat .li{display:flex;align-items:center;justify-content:space-between;padding:9px 6px 9px 12px;border-radius:12px;cursor:pointer}
+:root[data-cf=sticker] #chat .li.on{background:rgba(232,186,198,.38);box-shadow:inset 3px 0 0 var(--hot)}
+:root[data-cf=sticker] #chat .lt b{font-size:15px;letter-spacing:.05em}
+:root[data-cf=sticker] #chat .lm{padding:6px 8px;border:0;background:none;color:var(--hot)!important;font:800 16px/1 var(--cn);letter-spacing:.1em}
+:root[data-cf=sticker] #chat .lx{display:flex;gap:6px;padding:0 12px 8px}#chat .lx[hidden]{display:none}
+:root[data-cf=sticker] #chat .lx button{padding:6px 10px;border:0;border-radius:10px;background:rgba(214,186,191,.35);font:800 11.5px/1 var(--cn);letter-spacing:.08em}
+:root[data-cf=sticker] #chat .le{padding:18px 0;text-align:center;font-size:12px;color:var(--hot)}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-holes{display:flex}
+:root[data-cf=sticker] #chat .kk-holes i{display:block}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-set{display:flex}
+:root[data-cf=sticker] :root:is([data-ct=doodle],:root[data-cf=sticker] [data-ct=pois]) #chat .kk-set[hidden]{display:none}
+:root[data-cf=sticker] #chat .kk-scr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;margin:0 -8px 0 -14px;padding:8px 8px 8px 14px}
+:root[data-cf=sticker] #chat .kk-scr::-webkit-scrollbar{display:none}
+:root[data-cf=sticker] #chat .kk-scr>*{flex-shrink:0}
+:root[data-cf=sticker] #chat .kk-scr>.kk-lib{flex:1 0 auto}
+:root[data-cf=sticker] #chat .kk-scr .kk-bar{top:6px;right:6px;height:98px}
+:root[data-cf=sticker] #chat .kk-scr .kk-btape{top:0;right:-2px}
