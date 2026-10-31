@@ -1,6 +1,6 @@
 import type { ChatMessage } from '../../../../types/domain';
-import { Icon } from '../../../Icon';
 import { useI18n } from '../../../../i18n';
+import '../../../../styles/thinking-dialog.css';
 
 type MessageMetaProps = {
   message: ChatMessage;
@@ -62,11 +62,11 @@ export function MessageMeta({
             className={`thinking-inline-trigger ${isThinkingActive ? 'active' : ''}`}
             aria-label={isThinkingActive ? t('chat.messageActions.openThinkingActive') : t('chat.messageActions.openThinking')}
             title={isThinkingActive ? t('chat.messageActions.thinkingTitleActive') : t('chat.messageActions.thinkingTitle')}
+            aria-haspopup="dialog"
             onClick={() => onOpenThinkingSummary(message)}
           >
-            <span className={`thinking-inline-icon ${isThinkingActive ? 'spinning' : ''}`} aria-hidden="true">
-              <Icon name="polarisStar" size={14} color="polarisDeepSpace" />
-            </span>
+            <span className="thinking-inline-label">thinking</span>
+            {isThinkingActive ? <span className="thinking-inline-progress" aria-hidden="true" /> : null}
           </button>
         ) : null}
       </div>
