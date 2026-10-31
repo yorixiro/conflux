@@ -2,4 +2,5 @@
 @import './message-turns/message-bubbles.css';
 @import './message-turns/message-card-references.css';
 @import './message-turns/message-memory-evidence.css';
+@import './message-turns/message-memory-recall.css';
 @import './message-turns/message-selection-rules.css';

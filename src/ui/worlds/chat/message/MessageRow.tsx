@@ -19,6 +19,7 @@ import { MessageEditInline } from './MessageEditInline';
 import { MessageMeta } from './MessageMeta';
 import { MessageTokenUsage } from './MessageTokenUsage';
 import { MessageGeneratedImages } from './MessageGeneratedImages';
+import { MessageMemoryRecallCard } from './MessageMemoryRecallCard';
 import { MessageToolEvent } from './MessageToolEvent';
 import { isProjectedCodeToolName } from './projectedCodeTools';
 import { buildAssistantSpeechText } from './messageSpeechText';
@@ -236,7 +237,6 @@ function MessageRowComponent({
       onEditUser={() => actions.editMessage(message)}
       onDelete={() => void actions.deleteMessage(message)}
       canOpenThinkingSummary={isAssistantReply && showThinking && showChatAvatars && Boolean(message.thinkingText)}
-      memoryEvidence={message.memoryEvidence ?? null}
       canRetryAssistant={state.canRetry}
       canEditAssistant={state.canEditAssistant}
       canForkAssistant={state.canEditAssistant}
@@ -429,6 +429,9 @@ function MessageRowComponent({
                 />
               ) : null}
               {messageBubble}
+              {!isStreamingLike && !state.editing && message.memoryEvidence?.items.length ? (
+                <MessageMemoryRecallCard evidence={message.memoryEvidence} />
+              ) : null}
               {toolMessages.length > 0 ? (
                 <div className="assistant-leading-tool-list">
                   {toolMessages.map((toolMessage) => (
