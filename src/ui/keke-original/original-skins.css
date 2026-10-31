@@ -30,7 +30,7 @@
 @media (prefers-reduced-motion:reduce){:root[data-cf=sticker] #chat .kk-gl>i{animation:none}}
 :root[data-ct=doodle] #chat .bgi{inset:-6%;animation:none}
 :root[data-cf=sticker] #chat .kk2{display:none;pointer-events:none;-webkit-user-select:none;user-select:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk2{display:block}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk2{display:block}
 :root[data-cf=sticker] #chat .kk-wall{position:absolute;inset:0;z-index:1;opacity:.34;--f1:var(--pk,#ead9dc);--f2:var(--yl,#ebe4d4);--f3:var(--bl,#dfe3e7)}
 :root[data-cf=sticker] #chat .kk-wall svg{position:absolute;stroke:var(--hot,#b0838c);stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round;overflow:visible}
 :root[data-cf=sticker] #chat .kk-holes{position:absolute;left:10px;top:44px;bottom:44px;z-index:1;display:flex;flex-direction:column;justify-content:space-around}
@@ -53,8 +53,8 @@
 :root[data-cf=sticker] #chat .sinfo{position:relative}
 :root[data-cf=sticker] #chat .sinfo>.rain{position:absolute;right:6px;top:-6px;width:128px;height:110px;margin:0;scale:.62;transform-origin:100% 0}
 :root[data-cf=sticker] #chat .sinfo>.rain .rtx{display:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .side .spaw{margin-top:12px}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk-low{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:22px}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .side .spaw{margin-top:12px}
 :root[data-cf=sticker] #chat .kk-low .kk-note{margin:0;width:128px}
 :root[data-cf=sticker] #chat .kk-low .kk-print{position:relative;right:auto;bottom:auto;flex:none;width:126px;height:136px;margin-right:-6px}
 :root[data-cf=sticker] #chat .kk-cal{position:relative;pointer-events:auto;margin:22px 0 18px;padding:10px 10px 44px;background:rgba(255,255,255,.58);border:1.5px dashed rgba(176,131,140,.55);border-radius:10px;box-shadow:1.5px 2.5px 0 rgba(90,70,76,.1);color:var(--rt,#6a6266)}
@@ -237,7 +237,7 @@
 :root[data-cf=sticker] #chat .kk-tabs svg{width:18px;height:18px;fill:none;stroke:var(--hot);stroke-width:1.5;stroke-linecap:round}
 :root[data-cf=sticker] #chat .side.klib .kk-scr>*:not(.kk-lib){display:none!important}
 :root[data-cf=sticker] #chat .side:not(.klib) .kk-lib{display:none!important}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .side.klib .kk-lib{display:flex}
 :root[data-cf=sticker] #chat .kk-set{position:absolute;left:38px;right:20px;top:74px;z-index:6;display:flex;flex-direction:column;padding:6px;border:1.5px dashed var(--hot);border-radius:12px;background:#fffdf9;box-shadow:2px 3px 0 rgba(90,70,76,.14)}
 :root[data-cf=sticker] #chat .kk-set[hidden]{display:none}
 :root[data-cf=sticker] #chat .kk-set button{display:flex;align-items:center;justify-content:space-between;padding:9px 8px;border:0;background:none;color:var(--rt);font:800 12.5px/1 var(--cn);letter-spacing:.08em}
@@ -271,11 +271,11 @@
 :root[data-cf=sticker] #chat .lx{display:flex;gap:6px;padding:0 12px 8px}:root[data-cf=sticker] #chat .lx[hidden]{display:none}
 :root[data-cf=sticker] #chat .lx button{padding:6px 10px;border:0;border-radius:10px;background:rgba(214,186,191,.35);font:800 11.5px/1 var(--cn);letter-spacing:.08em}
 :root[data-cf=sticker] #chat .le{padding:18px 0;text-align:center;font-size:12px;color:var(--hot)}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-holes{display:flex}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk-holes{display:flex}
 :root[data-cf=sticker] #chat .kk-holes i{display:block}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set{display:flex}
-:root[data-cf=sticker] :root:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set[hidden]{display:none}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk-tabs{display:flex;flex:none}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set{display:flex}
+:root[data-cf=sticker]:is([data-ct=doodle],[data-ct=pois]) #chat .kk-set[hidden]{display:none}
 :root[data-cf=sticker] #chat .kk-scr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;margin:0 -8px 0 -14px;padding:8px 8px 8px 14px}
 :root[data-cf=sticker] #chat .kk-scr::-webkit-scrollbar{display:none}
 :root[data-cf=sticker] #chat .kk-scr>*{flex-shrink:0}
