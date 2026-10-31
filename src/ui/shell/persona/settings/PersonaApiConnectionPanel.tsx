@@ -64,7 +64,11 @@ export function PersonaApiConnectionPanel({
 
       {legacyAcp && current && onUpdateProvider ? (
         <button type="button" className="btn-secondary compact"
-          onClick={() => onUpdateProvider(current.id, { agentTransport: 'devin-acp' })}>
+          onClick={() => {
+            // Explicit legacy conversion must also clear this persona's old HTTP model.
+            onUpdateProvider(current.id, { agentTransport: 'devin-acp' });
+            onUpdatePersona({ advanced: { modelOverride: '' } });
+          }}>
           将旧 Devin ACP 连接标记为代理类型
         </button>
       ) : null}
@@ -73,9 +77,22 @@ export function PersonaApiConnectionPanel({
           persona={activePersona} settings />
       ) : null}
       {isAcp ? (
-        <p className="ps-footnote" role="status">
-          Devin ACP 通过本地桥接发送聊天消息，无需 API Key 或模型 ID。桥接必须先在线。
-        </p>
+        <>
+          <p className="ps-footnote" role="status">
+            Devin ACP 通过本地桥接发送聊天消息，无需 API Key。桥接必须先在线。
+          </p>
+          {activePersona.advanced.modelOverride?.trim() ? (
+            <div className="ps-field">
+              <p className="ps-footnote" role="status">
+                当前角色仍有旧模型覆盖：{activePersona.advanced.modelOverride}。若 Devin 不提供该模型，发送会失败。
+              </p>
+              <button type="button" className="btn-secondary compact"
+                onClick={() => onUpdatePersona({ advanced: { modelOverride: '' } })}>
+                清除旧模型覆盖，使用代理配置的模型
+              </button>
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       {onOpenProviderSettings ? (

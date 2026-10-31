@@ -42,6 +42,12 @@ export function ApiProviderConfigForm({
   const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(api, matchedPreset?.id));
   const modelDiscovery = useProviderModelDiscovery(api);
   const presetModels = publicTrialProvider ? [] : (matchedPreset?.models ?? []);
+  // Legacy Devin records were stored as ordinary credential-less HTTP APIs.
+  // Offer explicit migration instead of silently rewriting user profiles.
+  const legacyAcp = api.agentTransport !== 'devin-acp'
+    && api.name.trim() === 'Devin ACP'
+    && !api.baseUrl.trim()
+    && !api.apiKey.trim();
 
   useEffect(() => {
     setSelectedPresetId(matchedPreset?.id ?? '');
@@ -109,6 +115,16 @@ export function ApiProviderConfigForm({
 
   return (
     <div className="api-provider-console">
+      {legacyAcp ? (
+        <div className="api-provider-setup-note" role="status">
+          <strong>这条旧 Devin ACP 连接仍被当成普通 API</strong>
+          <p>Devin 使用本地代理，不需要普通 API 地址或密钥。转换后，请在角色 API 设置中检查旧模型覆盖。</p>
+          <button type="button" className="btn-secondary compact"
+            onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
+            转换为 Devin ACP 本地代理连接
+          </button>
+        </div>
+      ) : null}
       {!builtInProvider ? (
         <div className="api-provider-setup-note" role="status">
           <strong>{missingFields.length

@@ -84,7 +84,7 @@ export function requestAcpPermissionChoice(args: {
     const onAbort = () => resolveAcpPermission(id, null);
     pendingPermissions.set(id, { resolve, signal: args.signal, onAbort });
     args.signal?.addEventListener('abort', onAbort, { once: true });
-    setCards([...cards.filter((card) => card.id !== id), {
+    const permissionCard: AcpToolCard = {
       id, conversationId: args.conversationId,
       title: args.title || 'Devin 请求操作权限',
       description: args.description,
@@ -92,7 +92,8 @@ export function requestAcpPermissionChoice(args: {
       options: args.options.filter((option) =>
         option.kind === 'allow_once' || option.kind === 'reject_once'
       )
-    }].slice(-30));
+    };
+    setCards([...cards.filter((card) => card.id !== id), permissionCard].slice(-30));
   });
 }
 

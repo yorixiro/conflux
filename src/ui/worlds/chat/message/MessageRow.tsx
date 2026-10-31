@@ -154,6 +154,12 @@ function MessageRowComponent({
     && (!isAssistantContinuation || (showThinking && Boolean(message.thinkingText)))
     && !showChatAvatars;
   const showAssistantChatIdentity = showChatAvatars && !isAssistantContinuation;
+  // Continuation replies have no avatar heading. Keep one thinking-only
+  // heading when they carry their own reasoning.
+  const showContinuationThinkingMeta = showChatAvatars
+    && isAssistantContinuation
+    && showThinking
+    && Boolean(message.thinkingText);
   const assistantAvatarPx = resolveChatAvatarSize(assistantAvatarSize);
   const userAvatarPx = resolveChatAvatarSize(userAvatarSize);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
@@ -455,13 +461,14 @@ function MessageRowComponent({
                   showThinking={showThinking}
                 />
               ) : null}
-              {showAssistantMeta ? (
+              {(showAssistantMeta || showContinuationThinkingMeta) ? (
                 <MessageMeta
                   message={message}
                   fallbackAssistantName={fallbackAssistantName}
                   isThinkingActive={isStreamingLike}
                   onOpenThinkingSummary={actions.openThinkingSummary}
-                  showIdentity={!isAssistantContinuation}
+                  showIdentity={!isAssistantContinuation && !showChatAvatars}
+                  showDetails={!showChatAvatars}
                   showThinking={showThinking}
                 />
               ) : null}
