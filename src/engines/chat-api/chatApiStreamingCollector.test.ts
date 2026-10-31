@@ -2,6 +2,42 @@ import { describe, expect, it } from 'vitest';
 import { createStreamingReplyCollector } from './chatApiStreamingCollector';
 
 describe('chatApiStreamingCollector', () => {
+  it('keeps reported OpenAI totals across output-only streaming updates', () => {
+    const collector = createStreamingReplyCollector('test-model');
+    for (const usage of [
+      { prompt_tokens: 500, completion_tokens: 100, total_tokens: 630 },
+      { completion_tokens: 120, total_tokens: 650 }
+    ]) {
+      collector.pushTextChunk(JSON.stringify({ choices: [], usage }) + '\n', false);
+    }
+    const result = collector.finish();
+    expect(result.tokenUsage).toEqual({
+      inputTokens: 500, outputTokens: 120, totalTokens: 650
+    });
+    expect(result.tokenCount).toBe(650);
+  });
+
+  it('recomputes inferred Anthropic totals from prior input and output-only delta', () => {
+    const collector = createStreamingReplyCollector('claude-test');
+    collector.pushTextChunk(JSON.stringify({
+      type: 'message_start',
+      message: { usage: {
+        input_tokens: 300,
+        cache_read_input_tokens: 200,
+        output_tokens: 10
+      } }
+    }) + '\n', false);
+    collector.pushTextChunk(JSON.stringify({
+      type: 'message_delta',
+      usage: { output_tokens: 70 }
+    }) + '\n', false);
+    const result = collector.finish();
+    expect(result.tokenUsage?.inputTokens).toBe(500);
+    expect(result.tokenUsage?.cachedInputTokens).toBe(200);
+    expect(result.tokenUsage?.outputTokens).toBe(70);
+    expect(result.tokenUsage?.totalTokens).toBe(570);
+  });
+
   it('surfaces provider error JSON instead of reporting an empty API response', () => {
     const collector = createStreamingReplyCollector('test-model');
 
