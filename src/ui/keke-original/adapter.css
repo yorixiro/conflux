@@ -155,7 +155,8 @@ html[data-keyboard-open="true"] #chat nav.tabs{display:none}
 #chat .thinking-inline-icon svg,#chat .assistant-stage-live-icon svg{display:none}
 #chat .thinking-inline-icon::before{content:'♡';display:block;color:var(--dot,var(--hot));font:700 13px/1 var(--cn);animation:twinkle 1.4s var(--ease,cubic-bezier(.22,.61,.36,1)) infinite}
 :root[data-ct=pois] #chat .thinking-inline-icon::before{content:'';width:13px;height:13px;background:#6a6466;-webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat;animation:paw 1.6s var(--ease,cubic-bezier(.22,.61,.36,1)) infinite}
-#chat .assistant-stage-live .kk-ty{display:inline-flex;justify-content:center;width:30px}
+#chat .assistant-stage-live{width:auto;min-width:30px;padding:0 10px;gap:4px}
+#chat .assistant-stage-live .kk-ty{display:inline-flex;justify-content:center}
 /* One meta line: time · 既読 · token, no wrapping. */
 #chat .message-usage-meta{flex-wrap:nowrap}
 
