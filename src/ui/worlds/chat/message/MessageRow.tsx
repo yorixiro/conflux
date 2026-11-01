@@ -413,7 +413,7 @@ function MessageRowComponent({
       data-message-id={message.id}
       data-row-state={state.lifecycle}
       style={isAssistantReply && showChatAvatars
-        ? { '--message-avatar-size': `${assistantAvatarPx}px` } as CSSProperties
+        ? { '--message-avatar-gutter': `${assistantAvatarPx + 9}px` } as CSSProperties
         : undefined}
       {...buildUserBubbleCycleAttrs(userBubbleIndex)}
       {...buildMessageCycleAttrs(state.messageCycleIndex)}
@@ -500,12 +500,8 @@ function MessageRowComponent({
                       ))}
                     </div>
                   ) : null}
-                  {!isStreamingLike && !state.editing ? (
-                    <div className="assistant-message-footer">
-                      {messageActions}
-                      <MessageTokenUsage message={message} />
-                    </div>
-                  ) : messageActions}
+                  {messageActions}
+                  {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
                 </div>
               </div>
             </div>

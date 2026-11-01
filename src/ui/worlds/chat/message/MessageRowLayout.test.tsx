@@ -63,9 +63,13 @@ function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuatio
 }
 
 describe('shared chat avatar/bubble layout', () => {
-  it('aligns assistant actions before usage in the shared footer below the bubble', () => {
+  it('keeps actions and usage in separate rows, in the original order', () => {
     const html = markup('assistant', true);
-    expect(html).toContain('<div class="assistant-message-footer"><div class="message-inline-actions"></div><span data-usage="true"></span></div>');
+    expect(html).not.toContain('assistant-message-footer');
+    const actionsIndex = html.indexOf('class="message-inline-actions"');
+    const usageIndex = html.indexOf('data-usage="true"');
+    expect(actionsIndex).toBeGreaterThan(-1);
+    expect(usageIndex).toBeGreaterThan(actionsIndex);
   });
 
   it('puts the assistant avatar beside the bubble, below its identity heading', () => {
@@ -79,7 +83,7 @@ describe('shared chat avatar/bubble layout', () => {
     expect(avatar).toBeGreaterThan(row);
     expect(bubble).toBeGreaterThan(avatar);
     const rowOpenTag = html.slice(html.indexOf('class="msg-row'), html.indexOf('>', html.indexOf('class="msg-row')));
-    expect(rowOpenTag).toContain('--message-avatar-size:34px');
+    expect(rowOpenTag).toContain('--message-avatar-gutter:43px');
   });
 
   it('keeps a continuation bubble in the same column with an empty avatar slot', () => {

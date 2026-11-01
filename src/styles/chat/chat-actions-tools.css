@@ -93,23 +93,7 @@
 }
 .message-inline-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0; }
 .message-inline-actions.user { justify-content: flex-end; }
-.user-message-footer,
-.assistant-message-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; max-width: 100%; }
-.user-message-footer { justify-content: flex-end; }
-.assistant-message-footer {
-  margin-top: 6px;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-}
-.assistant-message-footer > .message-usage-meta {
-  margin-left: auto;
-  text-align: right;
-}
-.message-turn.assistant .assistant-message-footer .message-inline-actions { margin: 0; padding: 0; }
-.message-usage-meta { min-width: 0; max-width: 100%; line-height: 1.4; }
-.message-usage-meta time { white-space: nowrap; }
-.message-token-trigger { min-width: 0; overflow-wrap: anywhere; text-align: start; }
+.user-message-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .message-turn.user .user-message-footer .message-inline-actions { padding: 0; }
 .user-message-footer .micro-action-btn { width: 32px; height: 32px; }
 .message-inline-actions.assistant { justify-content: flex-start; }
