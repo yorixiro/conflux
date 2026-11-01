@@ -156,6 +156,7 @@ export function useAppShellCollaboratorActions({
     setEditingCollaboratorId(nextId);
     setFrontstageCollaboratorId(nextId);
     revealCollaboratorInfo({ setWorld, setCollectionShelf });
+    return nextId;
   };
 
   const talkToCollaborator = (collaboratorId: string) => {
