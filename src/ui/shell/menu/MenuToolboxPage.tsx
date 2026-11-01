@@ -136,7 +136,7 @@ const TOOLBOX_TOGGLE_META: Record<PolarisToolPromptGroup, { icon: IconName; labe
 
 // All groups keep their original preferences, handlers and inline settings.
 // This only organizes the existing single toolbox page, not duplicate controls.
-const EXTERNAL_TOOL_GROUPS = new Set<PolarisToolPromptGroup>(['web', 'generation', 'mcp']);
+const EXTERNAL_TOOL_GROUPS = new Set<PolarisToolPromptGroup>(['web', 'mcp']);
 
 function getSearchProviderLabel(provider: WebSearchProviderType, t: I18nTranslator['t']) {
   return t(SEARCH_PROVIDER_LABEL_KEYS[provider]);
@@ -228,6 +228,7 @@ export function MenuToolboxPage({
   const displayedToolGroups = visibleToolGroups.filter((group) =>
     EXTERNAL_TOOL_GROUPS.has(group) === (toolCategory === 'external')
   );
+  const enabledShownCount = displayedToolGroups.filter((group) => toolPromptPreferences[group]).length;
 
   const handleSetThemeToolMode = (mode: ThemeState['toolMode']) => {
     if (mode === 'creative' && shouldShowCreativeModeWarning()) {
@@ -259,7 +260,7 @@ export function MenuToolboxPage({
       <section className="menu-section">
         <div className="menu-section-head">
           <span className="menu-section-kicker menu-section-kicker-row">
-            {toolCategory === 'local' ? t('settings.toolbox.alwaysOnSection') : '外部服务'}
+            {toolCategory === 'local' ? t('settings.toolbox.alwaysOnSection') : '外部服务'} · {enabledShownCount}/{displayedToolGroups.length}
             <HelpHint
               label={t('settings.toolbox.alwaysOnHelpLabel')}
               text={t('settings.toolbox.alwaysOnHelpText')}
@@ -267,7 +268,7 @@ export function MenuToolboxPage({
           </span>
           <p className="menu-section-note">{toolCategory === 'local'
             ? t('settings.toolbox.alwaysOnNote')
-            : '网页搜索、生成和 MCP 使用现有连接及权限设置，这里不建立第二份配置。'}</p>
+            : '网页搜索与 MCP 继续使用现有连接及权限设置，这里不建立第二份配置。'}</p>
         </div>
         <div className="memory-toggle-grid">
           {displayedToolGroups.map((group) => {
