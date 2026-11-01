@@ -271,7 +271,7 @@ export function AppShellView({
                   desktopSidebarProps.onCreateConversationForCollaborator?.(id);
                   setChatHubOpen(false);
                 }}
-                onCreateCustomCollaborator={desktopSidebarProps.onCreateCollaboratorFromBuilder}
+                onCreateCustomCollaborator={desktopSidebarProps.onCreateCustomCollaborator}
               />
             </div>
           ) : null}
