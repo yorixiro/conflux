@@ -58,6 +58,8 @@ export async function requestDevinAcpReply(params: {
   let thinkingText = '';
   let contextUsage: { used: number; size: number } | undefined;
   let reportedUsage: AssistantReply['acpTokenReport'];
+  let selectedModelId: string | undefined;
+  const replyModel = () => selectedModelId ? `Devin ACP · ${selectedModelId}` : 'Devin ACP';
   let finished = false;
   const validTokens = (value: unknown): value is number =>
     typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
@@ -92,6 +94,7 @@ export async function requestDevinAcpReply(params: {
         if (!data) continue;
         const event = JSON.parse(data) as {
           type: string;
+          modelId?: string;
           update?: {
             sessionUpdate?: string;
             content?: { type?: string; text?: string };
@@ -168,6 +171,12 @@ export async function requestDevinAcpReply(params: {
           continue;
         }
         if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
+        if (event.type === 'started' && typeof event.modelId === 'string') {
+          if (params.modelId && event.modelId !== params.modelId) {
+            throw new Error('Devin ACP 返回的模型与所选模型不一致');
+          }
+          selectedModelId = event.modelId;
+        }
         if (event.type === 'done') {
           finished = true;
           readAgentUsage(event.result?.usage);
@@ -187,7 +196,7 @@ export async function requestDevinAcpReply(params: {
             else continue;
             params.onProgress?.({
               content,
-              model: 'Devin ACP',
+              model: replyModel(),
               ...(thinkingText ? { thinkingText } : {})
             });
           }
@@ -222,7 +231,7 @@ export async function requestDevinAcpReply(params: {
     if (!content.trim()) throw new Error('Devin ACP returned no text');
     return {
       content,
-      model: 'Devin ACP',
+      model: replyModel(),
       ...(thinkingText ? { thinkingText } : {}),
       ...(contextUsage ? { acpContextUsage: contextUsage } : {}),
       ...(reportedUsage ? { acpTokenReport: reportedUsage } : {})
