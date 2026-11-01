@@ -97,6 +97,27 @@
 .message-turn.user .user-message-footer .message-inline-actions { padding: 0; }
 .user-message-footer .micro-action-btn { width: 32px; height: 32px; }
 .message-inline-actions.assistant { justify-content: flex-start; }
+/* The assistant footer is one compact content-sized row, not two stacked rows
+   or a full-width bar that pushes actions and token metadata apart. */
+.assistant-message-footer {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 6px;
+}
+.message-turn.assistant .assistant-message-footer .message-inline-actions {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+.assistant-message-footer .message-usage-meta {
+  min-width: 0;
+  max-width: 100%;
+}
 .message-turn.user .message-inline-actions { padding-right: 8px; }
 .message-turn.assistant .message-inline-actions {
   padding-left: 2px;

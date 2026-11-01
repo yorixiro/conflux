@@ -500,8 +500,12 @@ function MessageRowComponent({
                       ))}
                     </div>
                   ) : null}
-                  {messageActions}
-                  {!isStreamingLike && !state.editing ? <MessageTokenUsage message={message} /> : null}
+                  {!isStreamingLike && !state.editing ? (
+                    <div className="assistant-message-footer">
+                      {messageActions}
+                      <MessageTokenUsage message={message} />
+                    </div>
+                  ) : messageActions}
                 </div>
               </div>
             </div>
