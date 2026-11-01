@@ -334,7 +334,7 @@ function buildPromptPartBlock(part: AssistantPromptPart): RequestContextReceiptB
     charCount: part.charCount,
     estimatedTokens: estimateTextTokens(part.content),
     fingerprint: fingerprintRequestContextValue(part.content),
-    cachePrefixEligible: part.layer === 'identity' || part.layer === 'capability',
+    cachePrefixEligible: part.role === 'system' && (part.layer === 'identity' || part.layer === 'capability'),
     sentToProvider: part.enabled,
     topography: promptPartTopography(part),
     partNames: [part.name]
