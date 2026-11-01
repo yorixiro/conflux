@@ -279,7 +279,8 @@ export function assembleAssistantContext(params: AssembleAssistantContextParams)
   const toolLedgerLookups = buildToolLedgerLookups(effectiveToolLedger, availableConversationMessageIds);
   const stableSystemSegments = systemPromptParts
     ? systemPromptParts
-        .filter((part) => part.layer === 'identity' || part.layer === 'capability')
+        .filter((part) => (part.layer === 'identity' || part.layer === 'capability')
+          && !(part.name === 'persona_custom_slot' && part.role === 'assistant'))
         .map(buildPromptPartSystemSegment)
     : (systemPrompts ?? []).map((prompt) => {
         const content = typeof prompt === 'string' ? prompt : prompt.content;
@@ -300,6 +301,11 @@ export function assembleAssistantContext(params: AssembleAssistantContextParams)
   const latestUserContextMessages = latestUserContextParts.map(buildLatestUserContextMessage);
   const dynamicSystemSegments = dynamicPromptParts
     .filter((part) => part.name !== 'runtime_clock_context' || !latestUserMessageId)
+    .map(buildPromptPartSystemSegment);
+  // Example assistant turns belong after every system/memory instruction, before
+  // real conversation history. Do not place later system messages behind them.
+  const assistantSlotSegments = (systemPromptParts ?? [])
+    .filter((part) => part.name === 'persona_custom_slot' && part.role === 'assistant')
     .map(buildPromptPartSystemSegment);
 
   return {
@@ -324,6 +330,7 @@ export function assembleAssistantContext(params: AssembleAssistantContextParams)
       ...(workspaceReferenceSegment ? [workspaceReferenceSegment] : []),
       ...(historySummarySegment ? [historySummarySegment] : []),
       ...dynamicSystemSegments,
+      ...assistantSlotSegments,
       {
         kind: 'conversation',
         messages: conversationMessages.flatMap((message) => {
