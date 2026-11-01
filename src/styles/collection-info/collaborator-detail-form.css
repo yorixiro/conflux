@@ -102,6 +102,21 @@
   border-radius: 0;
 }
 
+.collaborator-info-nav .ps-nav-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.collaborator-info-nav .ps-nav-item svg {
+  flex: none;
+  opacity: 0.82;
+}
+.collaborator-info-nav .ps-nav-item--active svg {
+  opacity: 1;
+}
+
 .collaborator-info-nav .ps-nav-item--active {
   background: transparent;
   box-shadow: none;
