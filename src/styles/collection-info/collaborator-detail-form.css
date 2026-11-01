@@ -1223,3 +1223,23 @@
   .collaborator-info-content .prompt-slot-field-row { grid-template-columns: minmax(0, 1fr); }
   .collaborator-info-content .prompt-slots-toolbar { flex-wrap: wrap; }
 }
+
+/* New AI setup intentionally excludes advanced persona configuration. */
+.conflux-new-ai-setup .collaborator-info-content {
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+.conflux-new-ai-setup-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 16px 2px 28px;
+}
+.conflux-new-ai-setup-header h2 { margin: 0 0 8px; font-size: 20px; }
+.conflux-new-ai-setup-header p { margin: 0; font-size: 12px; line-height: 1.7; color: var(--text-soft); }
+.conflux-new-ai-setup-fields .ps-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.conflux-new-ai-setup-fields .ps-input { width: 100%; max-width: 100%; box-sizing: border-box; }
+.conflux-new-ai-setup-done { align-self: stretch; min-height: 44px; }
