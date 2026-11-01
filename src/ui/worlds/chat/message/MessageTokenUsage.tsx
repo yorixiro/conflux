@@ -10,7 +10,10 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const usage = message.tokenUsage;
-  const isDevinAcp = message.model === 'Devin ACP' || message.providerName === 'Devin ACP';
+  const isDevinAcp = message.model === 'Devin ACP'
+    || message.model?.startsWith('Devin ACP · ') === true
+    || message.providerName === 'Devin ACP'
+    || Boolean(message.acpContextUsage || message.acpTokenReport);
   const context = message.acpContextUsage;
   const acpReport = message.acpTokenReport;
   const tokenLabel = formatTokenCount(message.tokenCount, usage, {
