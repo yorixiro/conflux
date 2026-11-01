@@ -117,6 +117,7 @@ export function MenuSheet({
             onOpenGeneration={() => controller.onSetPage('generation')}
             onOpenVoice={() => controller.onSetPage('voice')}
             onOpenToolbox={() => controller.onSetPage('toolbox')}
+            onOpenAutomation={() => controller.onSetPage('automation')}
             onOpenMcp={() => controller.onSetPage('mcp')}
             onOpenDesktopLocal={() => controller.onSetPage('desktopLocal')}
             onOpenUsage={() => controller.onSetPage('usage')}
