@@ -1032,3 +1032,179 @@
     padding-inline: 14px;
   }
 }
+
+
+/* One compact editor for the saved core prompt and optional prompt slots. */
+.collaborator-info-content .prompt-slots-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.collaborator-info-content .prompt-slots-toolbar,
+.collaborator-info-content .prompt-slot-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.collaborator-info-content .prompt-slots-toolbar {
+  padding: 4px 0 12px;
+}
+
+.collaborator-info-content .prompt-slots-toolbar .ps-field-label small {
+  margin-left: 7px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.collaborator-info-content .prompt-core-panel,
+.collaborator-info-content .prompt-slot-card {
+  min-width: 0;
+  padding: 11px 0;
+  margin: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+}
+
+.collaborator-info-content .prompt-slots-editor .prompt-core-panel.ps-field--expanded {
+  margin-top: 0;
+}
+
+.collaborator-info-content .prompt-slots-editor .prompt-core-panel .ps-field-head,
+.collaborator-info-content .prompt-slots-editor .prompt-core-panel .ps-footnote,
+.collaborator-info-content .prompt-slots-editor .ps-textarea--prompt-editor {
+  box-sizing: border-box;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.collaborator-info-content .prompt-slot-preview,
+.collaborator-info-content .prompt-slot-trigger {
+  min-width: 0;
+  padding: 3px 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-soft);
+  text-align: left;
+  font: inherit;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.collaborator-info-content .prompt-slot-preview {
+  display: block;
+  width: 100%;
+  font-size: var(--type-small);
+  overflow-wrap: anywhere;
+}
+
+.collaborator-info-content .prompt-slot-trigger {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 9px;
+}
+
+.collaborator-info-content .prompt-slot-trigger strong {
+  color: var(--text);
+  font-size: var(--type-small);
+  font-weight: 600;
+}
+
+.collaborator-info-content .prompt-slot-summary {
+  flex-basis: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: var(--type-caption);
+}
+
+.collaborator-info-content .prompt-slot-role {
+  display: inline-block;
+  color: var(--text-muted);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.collaborator-info-content .prompt-slot-enable {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-soft);
+  font-size: var(--type-caption);
+  cursor: pointer;
+}
+
+.collaborator-info-content .prompt-slot-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.collaborator-info-content .prompt-slot-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 0.55fr);
+  gap: 10px;
+}
+
+.collaborator-info-content .prompt-slot-field-row label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+  color: var(--text-soft);
+  font-size: var(--type-caption);
+}
+
+.collaborator-info-content .prompt-slot-fields .ps-input,
+.collaborator-info-content .prompt-slot-fields .ps-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.collaborator-info-content .prompt-slot-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.collaborator-info-content .prompt-slot-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.collaborator-info-content .prompt-slot-variable-help {
+  color: var(--text-muted);
+  font-size: var(--type-caption);
+}
+
+.collaborator-info-content .prompt-slot-variable-help summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.collaborator-info-content .prompt-slot-variable-help .ps-footnote {
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .collaborator-info-content .prompt-slots-editor { padding-inline: 10px; }
+  .collaborator-info-content .prompt-slot-field-row { grid-template-columns: minmax(0, 1fr); }
+  .collaborator-info-content .prompt-slots-toolbar { flex-wrap: wrap; }
+}
