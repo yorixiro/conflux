@@ -45,7 +45,7 @@ describe('persona prompt slots share existing request context and storage path',
     });
     expect(context.segments[0]?.messages[0]?.role).toBe('system');
     expect(context.segments[1]?.messages[0]?.role).toBe('assistant');
-    expect(context.segments.at(-1)?.messages[0]?.content).toBe('现在开始');
+    expect(context.segments[context.segments.length - 1]?.messages[0]?.content).toBe('现在开始');
   });
 
   it('leaves old personas without slots unchanged', () => {
