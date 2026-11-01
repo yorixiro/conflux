@@ -773,7 +773,7 @@ export async function prepareCollaboratorReplyRequest(params: {
     systemPromptParts: selectedPromptParts.map((part) => ({
       name: part.name,
       layer: part.layer,
-      role: part.role,
+      role: part.role === 'assistant' ? 'assistant' : 'system',
       content: part.content
     })),
     messages: runtimeConversation,
