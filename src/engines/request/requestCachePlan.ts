@@ -72,7 +72,8 @@ export function resolveRequestCachePlan(args: {
         : DEFAULT_MINIMUM_BREAKPOINT_TOKENS
     );
   const enabledParts = promptParts.filter((part) => part.enabled);
-  const identityParts = enabledParts.filter((part) => part.layer === 'identity');
+  // Assistant examples are message turns, not system-prefix cache blocks.
+  const identityParts = enabledParts.filter((part) => part.layer === 'identity' && part.role !== 'assistant');
   const capabilityParts = enabledParts.filter((part) => part.layer === 'capability');
   const identityTokens = identityParts.reduce((total, part) => total + estimateTextTokens(part.content), 0);
   const capabilityTokens = capabilityParts.reduce((total, part) => total + estimateTextTokens(part.content), 0);
