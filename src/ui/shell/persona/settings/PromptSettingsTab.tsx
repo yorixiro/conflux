@@ -34,12 +34,21 @@ function PromptSlotsEditor({ activePersona, onUpdatePersona }: Pick<PersonaTabPr
   const save = (next: PersonaPromptSlot[]) => onUpdatePersona({ advanced: { promptSlots: next } });
   const edit = (id: string, patch: Partial<PersonaPromptSlot>) =>
     save(slots.map((slot) => slot.id === id ? { ...slot, ...patch } : slot));
+  const move = (index: number, direction: -1 | 1) => {
+    const destination = index + direction;
+    if (destination < 0 || destination >= slots.length) return;
+    const next = [...slots];
+    const [moving] = next.splice(index, 1);
+    if (!moving) return;
+    next.splice(destination, 0, moving);
+    save(next);
+  };
 
   return (
     <section className="ps-field prompt-settings-field" aria-label="补充提示词槽位">
       <div className="ps-field-head ps-field-head--inline-action">
         <span className="ps-field-label">补充提示词槽位</span>
-        <span className="ps-field-hint">{slots.length} 个 · 按顺序发送</span>
+        <span className="ps-field-hint">{slots.length} 个 · 可调整顺序</span>
         <button
           type="button" className="btn-secondary compact"
           onClick={() => save([...slots, {
@@ -49,10 +58,10 @@ function PromptSlotsEditor({ activePersona, onUpdatePersona }: Pick<PersonaTabPr
         >＋ 添加槽位</button>
       </div>
       <p className="ps-footnote">
-        可自由增删。SYSTEM 是补充系统提示，ASSISTANT 是示例助手消息；
+        可自由增删、调整顺序。SYSTEM 是补充系统提示，ASSISTANT 是示例助手消息；
         关闭的槽位和空白槽位不发送。不会重复保存到记忆库、世界书或消息模板。
       </p>
-      {slots.map((slot) => (
+      {slots.map((slot, index) => (
         <div key={slot.id} className="ps-field prompt-settings-field" style={{ marginTop: 12 }}>
           <div className="ps-field-head" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
             <input
@@ -73,6 +82,12 @@ function PromptSlotsEditor({ activePersona, onUpdatePersona }: Pick<PersonaTabPr
               <input type="checkbox" checked={slot.enabled !== false}
                 onChange={(e) => edit(slot.id, { enabled: e.target.checked })} /> 启用
             </label>
+            <button type="button" className="btn-secondary compact"
+              aria-label={'上移' + slot.title} disabled={index === 0}
+              onClick={() => move(index, -1)}>↑</button>
+            <button type="button" className="btn-secondary compact"
+              aria-label={'下移' + slot.title} disabled={index === slots.length - 1}
+              onClick={() => move(index, 1)}>↓</button>
             <button type="button" className="btn-secondary compact"
               aria-label={'删除' + slot.title}
               onClick={() => {
