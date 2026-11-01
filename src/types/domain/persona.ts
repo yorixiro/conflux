@@ -13,6 +13,14 @@ export interface PersonaDeepDefinition {
   hardBoundaryAction: string;
 }
 
+export interface PersonaPromptSlot {
+  id: string;
+  title: string;
+  role: 'system' | 'assistant';
+  content: string;
+  enabled: boolean;
+}
+
 export interface PersonaMemorySettings {
   inheritGlobal: boolean;
   crossConversationRecallEnabled: boolean;
@@ -209,6 +217,8 @@ export interface PersonaAdvancedSettings {
   regexRules: string;
   regexTriggers?: string;
   snippets: string[];
+  /** Optional editable prompt segments; old personas remain unchanged. */
+  promptSlots?: PersonaPromptSlot[];
 }
 
 export interface PersonaMcpSettings {
