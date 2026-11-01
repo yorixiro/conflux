@@ -152,43 +152,62 @@ export function PromptCoreSettingsPage({
   });
   const promptPreview = resolveSystemPromptVars(promptSource, promptPreviewContext);
   const promptDisplayValue = promptFocused ? promptSource : promptPreview;
+  const promptSnippet = promptPreview.trim().replace(/\s+/g, ' ').slice(0, 140);
 
   return (
     <div
       ref={promptFieldRef}
-      className={`ps-field prompt-settings-field ps-field--prompt-editor ${promptExpanded ? 'ps-field--expanded' : ''}`}
+      className={`ps-field prompt-settings-field ps-field--prompt-editor prompt-core-panel ${promptExpanded ? 'ps-field--expanded' : ''}`}
     >
       <div className="ps-field-head ps-field-head--inline-action">
-        <span className="ps-field-label">协作者提示词</span>
+        <span className="ps-field-label">核心提示词 <small className="prompt-slot-role">SYSTEM</small></span>
         <button
           type="button"
           className="ps-field-expand-btn"
           onClick={() => setPromptExpanded((current) => !current)}
         >
-          {promptExpanded ? '收起' : '展开'}
+          {promptExpanded ? '收起' : '编辑'}
         </button>
       </div>
-      <textarea
-        className={`ps-textarea ps-textarea--mono ps-textarea--prompt ps-textarea--prompt-editor ${promptExpanded ? 'ps-textarea--expanded-inline' : ''} ${promptExpanded && expandedUsesPageScroll ? 'ps-textarea--expanded-page-scroll' : ''}`}
-        rows={promptExpanded ? 18 : 10}
-        value={promptDisplayValue}
-        aria-label="角色人设"
-        onFocus={() => setPromptFocused(true)}
-        onBlur={() => setPromptFocused(false)}
-        onChange={(e) => {
-          const nextPrompt = e.target.value;
-          onUpdatePersona({
-            compiledPrompt: nextPrompt,
-            builderManaged: false,
-            generatedPromptMode: nextPrompt.trim() ? 'vnext' : 'off'
-          });
-        }}
-        placeholder="定义 TA 的核心人格、行为边界…"
-        autoFocus={promptExpanded}
-      />
-      <p className="ps-footnote">
-        支持变量：{'{cur_date}'} {'{cur_time}'} {'{cur_datetime}'} {'{assistant_name}'} {'{user_name}'} {'{nickname}'} {'{model_id}'} {'{model_name}'} {'{locale}'} {'{timezone}'} {'{system_version}'} {'{device_info}'} {'{battery_level}'}，也支持双花括号写法 {'{{char}}'} {'{{char_name}}'} {'{{user}}'}。未编辑时会按当前称呼显示，编辑时保留变量原文。{promptExpanded ? ' 按 Esc 也可以收起。' : ''}
-      </p>
+      {promptExpanded ? (
+        <textarea
+          className={`ps-textarea ps-textarea--mono ps-textarea--prompt ps-textarea--prompt-editor ${expandedUsesPageScroll ? 'ps-textarea--expanded-page-scroll' : ''}`}
+          rows={9}
+          value={promptDisplayValue}
+          aria-label="角色人设"
+          onFocus={() => setPromptFocused(true)}
+          onBlur={() => setPromptFocused(false)}
+          onChange={(e) => {
+            const nextPrompt = e.target.value;
+            onUpdatePersona({
+              compiledPrompt: nextPrompt,
+              builderManaged: false,
+              generatedPromptMode: nextPrompt.trim() ? 'vnext' : 'off'
+            });
+          }}
+          placeholder="写下核心人设…"
+          autoFocus
+        />
+      ) : (
+        <button
+          type="button"
+          className="prompt-slot-preview"
+          onClick={() => setPromptExpanded(true)}
+          aria-label="编辑核心提示词"
+        >
+          {promptSnippet || '尚未填写核心提示词'}
+        </button>
+      )}
+      {promptExpanded ? (
+        <details className="prompt-slot-variable-help">
+          <summary>变量说明</summary>
+          <p className="ps-footnote">
+            {'{cur_date}'} {'{cur_time}'} {'{cur_datetime}'} {'{assistant_name}'} {'{user_name}'} {'{nickname}'}
+            {'{model_id}'} {'{model_name}'} {'{locale}'} {'{timezone}'} {'{system_version}'}
+            {'{device_info}'} {'{battery_level}'} {'{{char}}'} {'{{char_name}}'} {'{{user}}'}
+          </p>
+        </details>
+      ) : null}
     </div>
   );
 }
