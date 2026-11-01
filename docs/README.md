@@ -1,32 +1,13 @@
-# Polaris Documentation
+# Conflux 文档
 
-This directory maps Polaris architecture, data boundaries, implementation plans,
-and verification commands.
+Conflux 是小欣独立维护的项目。开发流程统一见 [AGENTS.md](../AGENTS.md)，本目录中的技术参考和历史记录不另设工作流程。
 
-## Start Here
+- [架构与技术决策](CONFLUX_ARCHITECTURE.md)：设计取舍与模块关系。
+- [开发手册](handbook/DEVELOPER_GUIDE.md)：代码定位。
+- [数据与存储](handbook/DATA_AND_STORAGE.md)：现有存储结构。
+- [部署说明](../DEPLOYMENT.md)：运行和部署参考，以当前分支脚本为准。
+- [模块手册](handbook/README.md)：按需要查询具体模块。
 
-- [Polaris handbook](handbook/README.md): current-source guide for architecture,
-  development, data/storage, module boundaries, and publication gates.
-- [Deployment guide](../DEPLOYMENT.md): local development, static web hosting,
-  backend origin setup, Worker example, and native wrapper builds.
-- [Documentation pack](open-source/README.md): design intent, architecture, module, backend, and publication-boundary docs.
-- [Data and storage handbook](handbook/DATA_AND_STORAGE.md): current fact-source, row ownership, backend, import, and verification contracts.
-- [Publication gate](handbook/PUBLICATION_GATE.md): source, security, architecture, and channel gates.
-- [Connect your own backend](connect-your-own-backend.md): selfhost/API origin setup, expected `/api` routes, CORS, relay security, and known missing handlers.
+`open-source/` 中的上游设计、发布材料和早期任务书属于技术或历史参考；其中的旧产品偏好、审批和全量验收要求不作为日常开发规则。发布相关检查只在实际准备发布时使用。
 
-## Data Layer
-
-- [Data source decisions](open-source/data-source-decisions.md)
-- [Data integrity rules](data-integrity-rules.md)
-
-## App Architecture
-
-- [Architecture handbook](handbook/ARCHITECTURE.md)
-- [Layout contract](layout-contract.md)
-- [Memory and group chat intent](open-source/memory-and-group-chat-intent.md)
-
-## Documentation Layers
-
-When a document is meant for public readers, add it under `docs/open-source/` first. When a
-document is meant to guide implementation work, add it under `docs/handbook/`.
-Write docs as current-state explanation, not as implementation history.
+文档随相关实现更新，优先修改已有说明，不为每次小改动新建工单、审计或交接文件。

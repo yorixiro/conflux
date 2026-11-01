@@ -1,6 +1,6 @@
 # Developer Guide
 
-This guide answers "where should this change go?" for common Polaris work.
+This guide answers "where should this change go?" for Conflux work.
 
 ## Add Product Copy Or Knowledge
 
@@ -83,16 +83,6 @@ Theme may change look. It must not take ownership of viewport, keyboard, or shel
 Native capabilities live behind `src/native/`, `ios/`, or `android/`. Keep product semantics in
 shared `src/` code and expose only the capability boundary through native code.
 
-## Verification By Change Type
+## Verification
 
-| Change | Minimum gate |
-|---|---|
-| Docs only | Spell/read pass plus `git diff --check`. |
-| Type-only | `npm run typecheck`, `npm test`. |
-| Engines or stores | `npm run typecheck`, focused tests, `npm test`. |
-| LocalData/storage/import | `npm run typecheck`, `npm run test:data-boundary`, `npm test`, `npm run build`. |
-| Theme/tool protocol | `npm run typecheck`, focused theme/tool tests, `npm test`, `npm run build`. |
-| UI/CSS | `npm run typecheck`, relevant tests if logic changed, browser or screenshot check when visual behavior changed. |
-| Release/publication | `npm run verify`, plus channel-specific proof. |
-
-Every completed round should leave a clean git commit.
+开发流程和检查范围统一遵循 [AGENTS.md](../../AGENTS.md)。按本次修改选择定向检查，日常类型或引擎修改不默认运行全量测试；发布检查仅用于实际发布。

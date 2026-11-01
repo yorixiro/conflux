@@ -1,4 +1,8 @@
-# Polaris
+# Conflux
+
+个人维护流程见 [AGENTS.md](AGENTS.md)。本默认分支保留早期源码，当前功能开发位于 `feat/keke-original-theme-port`。
+
+## 上游技术背景
 
 Polaris is a local-first AI workspace for sustained work with models, collaborators, saved materials, tools, and personal project context.
 
@@ -31,11 +35,9 @@ Status files:
 
 Polaris source code is licensed under AGPL-3.0-only. See [LICENSE](/LICENSE).
 
-## Contributing
+## 开发
 
-Polaris welcomes issue reports, documentation improvements, focused bug fixes, tests, import/export adapters, backend/selfhost improvements, and platform bridge work. Product direction stays owner-led so the workspace remains coherent, but collaboration is welcome when a change preserves the data boundaries and user experience described in this repository.
-
-See [CONTRIBUTING.md](/CONTRIBUTING.md).
+日常维护遵循 [AGENTS.md](AGENTS.md)，不要求逐功能 PR 或团队审批。
 
 ## Code Map
 
@@ -81,15 +83,8 @@ npm run build
 
 ---
 
-## Conflux fork — Android / Web 融合工程
+## Conflux 个人开发
 
-此仓库是 Polaris 的个人融合开发 fork。目标是**同一套 React/TypeScript 业务代码**构建 Android APK 与 Web/PWA，选择性融合 InternalBeyond-Mobile 功能，并在后期增加可选的 Aru Host 接入。**当前仍是 Polaris 基线，不能把规划能力视为已完成。**
+本项目由小欣独立开发和维护。开发规则统一见 [AGENTS.md](AGENTS.md)，技术说明见 [文档目录](docs/README.md)。上述 Polaris 内容为本分支保留的上游技术背景，不规定 Conflux 的产品方向或开发流程。
 
-开发与 Codex 交接入口：
-- [系统架构书](docs/CONFLUX_ARCHITECTURE.md)
-- [功能迁移矩阵](docs/CONFLUX_MIGRATION_MATRIX.md)
-- [Codex 开发任务书（P0–P6）](docs/CONFLUX_CODEX_HANDOFF.md)
-- [Codex 仓库规则](AGENTS.md)
-
-当前任务：**P0 源码审计和双端基线构建**。验证通过后才进入 P1（Web/PWA、Android、Grok provider）；不要一开始复制 IB 整套 HTML 或重写 Polaris 聊天核心。此 fork 的 GitHub Issues 当前关闭，因此以开发任务书为准。
-
+当前功能开发线是 `feat/keke-original-theme-port`；本分支保留较早的业务代码，同步规则并不代表功能代码已合入。开始修改前核对当前运行版本。

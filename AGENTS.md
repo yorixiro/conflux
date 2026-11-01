@@ -1,30 +1,33 @@
-# Conflux repository instructions for Codex / coding agents
+# Conflux 开发规则
 
-This is a personal, local-first Polaris fork targeting Android APK and Web/PWA from one shared React/TypeScript core.
+Conflux 由小欣一人开发和维护，AI 按她的需求协助实现。产品、视觉和技术选择由她决定。当前用户指令优先于仓库内的旧方案。
 
-## Read first
-- docs/CONFLUX_ARCHITECTURE.md
-- docs/CONFLUX_MIGRATION_MATRIX.md
-- docs/CONFLUX_CODEX_HANDOFF.md
-- docs/open-source/architecture-overview.md
-- docs/handbook/DATA_AND_STORAGE.md
-- package.json and capacitor.config.ts
+## 工作方式
 
-## Hard rules
-- Use the existing Polaris domain owners: chat, group, persona, collection, runtime, tool-protocol, request, and LocalData. One canonical chat engine, one context compiler, one tool ledger and one data source.
-- Preserve Polaris visual style and responsive shell; port useful InternalBeyond functionality, NOT its iOS-like home/lock/wallet/skins. This product is Conflux; don't call it Nightward.
-- Keep the business implementation shared between Android and Web/PWA. Platform-dependent storage, secure credentials, permissions, background work, push and media go through explicit adapters.
-- Never edit the original InternalBeyond, huaxin or EH-UI repositories as part of this migration.
-- Do not add unreviewed old-storage fallbacks or startup auto-migration. Import external backups through staging, validation, preview, user confirmation, readback and rollback.
-- Never embed API keys or tokens in browser bundles, UI state, logs or exports. Never send private journal content or local files to AI/Host without explicit scope consent.
-- Do not claim Aru Host/iPhone protocol compatibility until verified against the published Host contract.
-- Treat third-party license boundaries seriously (Polaris AGPL-3.0-only, IB-Mobile PolyForm Noncommercial, Aru Host Apache-2.0); review before copying source across them.
-- Do not delete, overwrite or silently refactor existing user content. No duplicate implementation of memory, tool registry or local storage.
-- Do not report fake passing builds. State exactly which commands ran and which platforms were tested.
+- 先核对工作区、当前分支和最新提交，在已确认的开发线上完成相关修改。默认分支不一定是当前运行版本。
+- 默认沿现有分支直接提交和推送完整改动；不为小修改新开分支、PR、工单或验收报告。需要改变开发线时，先说明具体理由。
+- 用户已授权的任务持续做到收尾；常规实现选择由 AI 处理，不反复索要确认，也不把排查、整理分支和补齐遗漏推给用户。
+- 提交前检查已有改动，保留用户正在做的工作。强制覆盖历史、删除分支、合并 PR 或改动无关仓库需要用户明确要求。
+- 仓库级规则修改要考虑默认入口和当前开发入口；只同步文档，不为同步规则合并业务代码。旧分支恢复开发时再同步规则。
 
-## Work order
-P0 baseline -> P1 shared platform/xAI -> P2 IB staged import/memory -> P3 journal/letters/calendar/coread -> P4 social/media -> P5 optional Aru Host -> P6 release/sync.
-Implement one phase at a time in a small reviewable PR, with durable data/permission tests and a rollback path. Begin with P0 baseline only.
+## 读取与实现
 
-## Verification
-Read package.json for current scripts; baseline includes npm ci, npm run verify, and (when Android SDK available) npm run android:build-debug. Browser installation and Android actual-device testing are distinct acceptance gates. Every PR must state verified, blocked and untested steps separately.
+- 按任务读取相关代码和文档，不要求每轮通读架构书、路线图或历史验收。开发规则以本文件为准；其他文档解释实现或记录历史，不另设审批流程。
+- 优先修复问题源头，复用已有组件和数据路径；清理这次替换后不再使用的实现，避免叠加临时补丁或复制一套功能。
+- 功能改动要追踪受影响的界面、状态、执行和保存路径；涉及 AI 工具或上下文时，同步对应注册和描述。纯样式修改只改展示层。
+- 当前自定义主题、素材和用户提供的原型是视觉依据。适配真实组件时保留其外观，兼顾窄窗口、平板、键盘和长内容；共享功能在各皮肤可用。
+- 上游架构可按实际需要调整，不冻结品牌、导航、模型或技术栈。Android 与 Web/PWA 优先共用实现，平台差异放在适配层。
+- 聊天记录、角色归属和已有资料要保持可读取、可保存；修改存储结构时处理旧数据兼容。密钥不进入提交或日志，保留适用的版权与许可声明。
+
+## 按改动范围检查
+
+- 文档：检查内容、引用和差异即可，不运行代码测试或构建。
+- CSS/布局：检查实际页面的相关宽度和交互；涉及组件逻辑时补相应定向测试。
+- TypeScript/功能：运行一次类型检查和相关定向测试；只有涉及构建、打包或发布时才补构建。
+- 数据、请求或工具：重点验证本次涉及的保存、恢复、失败处理和调用链。
+- 全量回归留到大范围整合或发布收尾，或存在明确跨模块风险时再运行；不用每个小修改都跑。通过的检查不无故重跑，不用付费模型请求测试普通开发改动。
+- 能自己验证的由 AI 完成；只有必须依赖用户设备的观察才请用户看具体效果。未做过的检查如实说明一句，不堆免责声明或长清单。
+
+## 交付
+
+简短说明实际改动、检查结果、提交位置，以及确实影响使用的未解决问题。同步到用户运行环境时沿现有启动方式和端口（当前 Termux 开发端口 4173），区分远端已推送与本地已更新。日常工作维护现有文档即可，不额外制造交接材料。
