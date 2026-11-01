@@ -12,6 +12,14 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 
 const sessions = new Map();
+const selectedModels = new Map();
+const modelOption = (currentValue) => ({
+  id: 'model', type: 'select', category: 'model', currentValue,
+  options: [
+    { value: 'swe', name: 'SWE (default)' },
+    { value: 'alternate-model', name: 'Alternative test model' }
+  ]
+});
 const permissionWaiters = new Map();
 let permissionSequence = 10000;
 let counter = 0;
@@ -109,11 +117,32 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     if (message.method === 'session/new') {
       const sessionId = 'mock-session-' + ++counter;
       sessions.set(sessionId, message.params?.mcpServers || []);
-      send({ id: message.id, result: { sessionId, configOptions: [] } });
+      selectedModels.set(sessionId, 'swe');
+      send({ id: message.id, result: { sessionId, configOptions: [modelOption('swe')] } });
+      return;
+    }
+    if (message.method === 'session/set_config_option') {
+      const { sessionId, configId, value } = message.params || {};
+      if (!selectedModels.has(sessionId) || configId !== 'model'
+        || !['swe', 'alternate-model'].includes(value)) {
+        send({ id: message.id, error: { code: -32602, message: 'Unknown model' } });
+        return;
+      }
+      selectedModels.set(sessionId, value);
+      send({ id: message.id, result: { configOptions: [modelOption(value)] } });
       return;
     }
     if (message.method === 'session/prompt') {
       const promptText = message.params?.prompt?.map((part) => part.text || '').join('') || '';
+      if (promptText.includes('CHECK_MODEL_SELECTION')) {
+        send({ method: 'session/update', params: {
+          sessionId: message.params.sessionId,
+          update: { sessionUpdate: 'agent_message_chunk',
+            content: { type: 'text', text: 'Active model: ' + selectedModels.get(message.params.sessionId) } }
+        } });
+        send({ id: message.id, result: { stopReason: 'end_turn' } });
+        return;
+      }
       if (promptText.includes('CHECK_IMAGE')) {
         const image = message.params?.prompt?.find((part) => part.type === 'image');
         if (image?.mimeType !== 'image/png' || image?.data !== 'aGVsbG8=') {
@@ -299,6 +328,52 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
     const mediaStream = await mediaResponse.text();
     assert.match(mediaStream, /ACP image accepted/);
     assert.match(mediaStream, /"type":"done"/);
+
+    // Model discovery must be applied to the chat's own ACP session, not only
+    // the bridge's initialization session. No real Devin or paid model is used.
+    const modelsResponse = await fetch(base + '/models', { headers });
+    assert.equal(modelsResponse.status, 200);
+    assert.deepEqual((await modelsResponse.json()).models.map((entry) => entry.id),
+      ['swe', 'alternate-model']);
+    const selectedResponse = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        conversationId: 'mock-model-room',
+        prompt: 'CHECK_MODEL_SELECTION',
+        modelId: 'alternate-model',
+        tools: []
+      })
+    });
+    assert.equal(selectedResponse.status, 200);
+    const selectedStream = await selectedResponse.text();
+    assert.match(selectedStream, /"modelId":"alternate-model"/);
+    assert.match(selectedStream, /Active model: alternate-model/);
+
+    const switchBackResponse = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        conversationId: 'mock-model-room',
+        prompt: 'CHECK_MODEL_SELECTION',
+        modelId: 'swe',
+        tools: []
+      })
+    });
+    assert.equal(switchBackResponse.status, 200);
+    const switchBackStream = await switchBackResponse.text();
+    assert.match(switchBackStream, /"modelId":"swe"/);
+    assert.match(switchBackStream, /Active model: swe/);
+
+    const invalidModelResponse = await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        conversationId: 'mock-model-room',
+        prompt: 'CHECK_MODEL_SELECTION',
+        modelId: 'unsupported-model',
+        tools: []
+      })
+    });
+    assert.equal(invalidModelResponse.status, 400);
+    assert.match(await invalidModelResponse.text(), /所选模型不在当前 Devin ACP 会话的可用列表中/);
 
     const idleCatalog = await fetch(base + '/tools', {
       headers: { 'x-acp-bridge-token': token }
