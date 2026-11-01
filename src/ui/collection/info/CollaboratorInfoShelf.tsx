@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
-import type { Conversation, McpServerConfig, Persona, PolarisTriggerRule, PolarisTriggerSchedule, ProviderProfile } from '../../../types/domain';
+import type { McpServerConfig, Persona, ProviderProfile } from '../../../types/domain';
 import { BasicSettingsTab } from '../../shell/persona/settings/BasicSettingsTab';
 import { PersonaApiConnectionPanel } from '../../shell/persona/settings/PersonaApiConnectionPanel';
 import { MemorySettingsTab } from '../../shell/persona/settings/MemorySettingsTab';
 import { RequestSettingsTab } from '../../shell/persona/settings/RequestSettingsTab';
 import { RoomSettingsTab } from '../../shell/persona/settings/RoomSettingsTab';
-import { AutomationRulesPanel } from '../../shell/menu/AutomationRulesPanel';
 import type { PersonaUpdatePatch } from '../../shell/persona/personaUiShared';
 import { isCompanionCollaboratorId } from '../../../engines/companion';
 import { isProductGuidePersona } from '../../../engines/personaBuiltin';
 import type { I18nKey } from '../../../i18n/messages';
 import { useI18n } from '../../../i18n/useI18n';
 import { Icon, type IconName } from '../../Icon';
-const INFO_TABS = ['identity', 'request', 'memory', 'room', 'automation'] as const;
+const INFO_TABS = ['identity', 'request', 'memory', 'room'] as const;
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
 export type CollaboratorInfoPageRequest = {
   collaboratorId: string | null;
@@ -22,15 +21,13 @@ const INFO_TAB_ICON: Record<CollaboratorInfoTab, IconName> = {
   identity: 'persona',
   request: 'settings',
   memory: 'openBook',
-  room: 'brush',
-  automation: 'task'
+  room: 'brush'
 };
-const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'automation' && tab !== 'request');
+const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'request');
 const INFO_TAB_LABEL_KEYS = {
   identity: 'collaborator.info.tab.identity',
   memory: 'collaborator.info.tab.memory',
   room: 'collaborator.info.tab.room',
-  automation: 'collaborator.info.tab.automation',
   request: 'collaborator.info.tab.request'
 } satisfies Record<CollaboratorInfoTab, I18nKey>;
 
@@ -43,8 +40,6 @@ type CollaboratorInfoShelfProps = {
   showChatAvatars: boolean;
   providers: ProviderProfile[];
   activeProviderId: string | null;
-  conversations: Conversation[];
-  triggerRules: PolarisTriggerRule[];
   mcpServers: McpServerConfig[];
   mcpToolTimeoutSeconds: number;
   onUpdateCollaborator: (patch: PersonaUpdatePatch) => void;
@@ -55,18 +50,6 @@ type CollaboratorInfoShelfProps = {
   onCreateCustomCollaborator: () => void;
   onOpenProviderSettings: () => void;
   onUpdateProvider: (providerId: string, patch: Partial<ProviderProfile>) => void;
-  onCreateTriggerRule: (seed: {
-    collaboratorId: string;
-    conversationMode?: PolarisTriggerRule['target']['conversationMode'];
-    conversationId?: string | null;
-    schedule: PolarisTriggerSchedule;
-    prompt: string;
-    name?: string;
-  }) => string | null;
-  onUpdateTriggerRule: (ruleId: string, patch: Partial<PolarisTriggerRule>) => void;
-  onDeleteTriggerRule: (ruleId: string) => void;
-  onTestTriggerRule: (ruleId: string) => void;
-  onCopyTriggerUrl: (ruleId: string) => void;
   onCreateMcpServer: (seed?: Partial<McpServerConfig>) => string;
   onUpdateMcpServer: (serverId: string, patch: Partial<McpServerConfig>) => void;
 };
@@ -80,8 +63,6 @@ export function CollaboratorInfoShelf({
   showChatAvatars,
   providers,
   activeProviderId,
-  conversations,
-  triggerRules,
   mcpServers,
   mcpToolTimeoutSeconds,
   onUpdateCollaborator,
@@ -92,11 +73,6 @@ export function CollaboratorInfoShelf({
   onCreateCustomCollaborator,
   onOpenProviderSettings,
   onUpdateProvider,
-  onCreateTriggerRule,
-  onUpdateTriggerRule,
-  onDeleteTriggerRule,
-  onTestTriggerRule,
-  onCopyTriggerUrl,
   onCreateMcpServer,
   onUpdateMcpServer
 }: CollaboratorInfoShelfProps) {
@@ -272,23 +248,6 @@ export function CollaboratorInfoShelf({
                 activeCollaboratorId={currentCollaboratorId}
                 activePersona={currentCollaborator}
                 onUpdatePersona={onUpdateCollaborator}
-              />
-            )}
-            {activeTab === 'automation' && (
-              <AutomationRulesPanel
-                personas={[currentCollaborator]}
-                conversations={conversations}
-                triggerRules={triggerRules}
-                lockedCollaboratorId={currentCollaboratorId}
-                emptyTitle={t('settings.automation.collaboratorEmptyTitle')}
-                emptyActionLabel={t('settings.automation.collaboratorEmptyAction')}
-                formNote={t('settings.automation.collaboratorFormNote')}
-                rulesNote={t('settings.automation.collaboratorRulesNote')}
-                onCreateTriggerRule={onCreateTriggerRule}
-                onUpdateTriggerRule={onUpdateTriggerRule}
-                onDeleteTriggerRule={onDeleteTriggerRule}
-                onTestTriggerRule={onTestTriggerRule}
-                onCopyTriggerUrl={onCopyTriggerUrl}
               />
             )}
             {activeTab === 'request' && (
