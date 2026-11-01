@@ -645,6 +645,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   const promptParts = buildAssistantPromptParts({
     personaPrompt: personaPrompt.prompt,
     personaPromptSource: personaPrompt.source,
+    promptSlots: persona?.advanced.promptSlots,
     templateContext,
     regexTriggers: preparedAdvanced?.regexTriggers,
     includeRuntimeClockContext: persona?.systemTimeContextEnabled === true,
@@ -772,6 +773,7 @@ export async function prepareCollaboratorReplyRequest(params: {
     systemPromptParts: selectedPromptParts.map((part) => ({
       name: part.name,
       layer: part.layer,
+      role: part.role,
       content: part.content
     })),
     messages: runtimeConversation,
