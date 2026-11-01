@@ -63,9 +63,9 @@ function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuatio
 }
 
 describe('shared chat avatar/bubble layout', () => {
-  it('groups assistant usage and actions in one footer below the bubble', () => {
+  it('aligns assistant actions before usage in the shared footer below the bubble', () => {
     const html = markup('assistant', true);
-    expect(html).toContain('<div class="assistant-message-footer"><span data-usage="true"></span><div class="message-inline-actions"></div></div>');
+    expect(html).toContain('<div class="assistant-message-footer"><div class="message-inline-actions"></div><span data-usage="true"></span></div>');
   });
 
   it('puts the assistant avatar beside the bubble, below its identity heading', () => {

@@ -96,7 +96,16 @@
 .user-message-footer,
 .assistant-message-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; max-width: 100%; }
 .user-message-footer { justify-content: flex-end; }
-.assistant-message-footer { margin-top: 6px; }
+.assistant-message-footer {
+  margin-top: 6px;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+.assistant-message-footer > .message-usage-meta {
+  margin-left: auto;
+  text-align: right;
+}
 .message-turn.assistant .assistant-message-footer .message-inline-actions { margin: 0; padding: 0; }
 .message-usage-meta { min-width: 0; max-width: 100%; line-height: 1.4; }
 .message-usage-meta time { white-space: nowrap; }
