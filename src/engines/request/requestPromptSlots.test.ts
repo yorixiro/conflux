@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { buildAssistantPromptParts } from './requestPromptLayers';
 import { assembleAssistantContext } from './requestContext';
+import { createPersonaTemplate } from '../../config/persona/personaBuilder';
+import { normalizePersona } from '../../stores/personaStore';
 
 const templateContext = {
   cur_date: '2026-11-02',
@@ -46,6 +48,24 @@ describe('persona prompt slots share existing request context and storage path',
     expect(context.segments[0]?.messages[0]?.role).toBe('system');
     expect(context.segments[1]?.messages[0]?.role).toBe('assistant');
     expect(context.segments[context.segments.length - 1]?.messages[0]?.content).toBe('现在开始');
+  });
+
+  it('preserves saved slots through persona normalization and legacy template defaults', () => {
+    const draft = createPersonaTemplate({
+      id: 'persona-test',
+      name: '自定义',
+      description: '',
+      advanced: {
+        promptSlots: [{
+          id: 'slot-1', title: '世界观', role: 'system',
+          content: '背景内容', enabled: false
+        }]
+      }
+    });
+    const normalized = normalizePersona(draft);
+    expect(normalized.advanced.promptSlots).toEqual(draft.advanced.promptSlots);
+    expect(createPersonaTemplate({ id: 'old-role', name: '旧角色', description: '' }).advanced.promptSlots)
+      .toEqual([]);
   });
 
   it('leaves old personas without slots unchanged', () => {
