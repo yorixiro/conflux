@@ -32,6 +32,34 @@ describe('ACP chat reply over the existing request pipeline', () => {
     });
   });
 
+  it('uses the model ID acknowledged by the ACP bridge, not the generic SWE label', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"started","promptId":"test","modelId":"alternate-model"}', '',
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"Hello"}}}', '',
+      'data: {"type":"done","result":{}}', ''
+    ].join('\\n') + '\\n', { status: 200, headers: { 'content-type': 'text/event-stream' } }));
+    const onProgress = vi.fn();
+    const answer = await requestDevinAcpReply({
+      prompt: 'Hello', conversationId: 'chat-model', modelId: 'alternate-model', onProgress
+    });
+    expect(answer.model).toBe('Devin ACP · alternate-model');
+    expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({
+      model: 'Devin ACP · alternate-model'
+    }));
+    const [, options] = vi.mocked(globalThis.fetch).mock.calls[0]!;
+    expect(JSON.parse(String(options?.body)).modelId).toBe('alternate-model');
+  });
+
+  it('does not claim a selected model when the bridge did not acknowledge it', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"started","promptId":"legacy"}', '',
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"Hello"}}}', '',
+      'data: {"type":"done","result":{}}', ''
+    ].join('\\n') + '\\n', { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: 'Hello', modelId: 'alternate-model' });
+    expect(answer.model).toBe('Devin ACP');
+  });
+
   it('shows an inline permission card and sends the selected response with no browser confirm', async () => {
     const calls: string[] = [];
     globalThis.fetch = vi.fn<typeof fetch>(async (url, init) => {
