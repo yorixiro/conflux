@@ -1,8 +1,8 @@
 import type { AssistantToolContext } from '../assistantToolProtocol';
 import type { ProviderCapabilityPromptInjection } from '../provider-runtime';
 import type { AssistantPromptPart, PersonaRuntimePromptSource } from './requestAudit';
-import type { TemplateContext } from '../templateEngine';
-import type { ChatMessage, ConversationTaskState } from '../../types/domain';
+import { resolveSystemPromptVars, type TemplateContext } from '../templateEngine';
+import type { ChatMessage, ConversationTaskState, PersonaPromptSlot } from '../../types/domain';
 import { buildRegexTriggerContext } from '../regexTriggerProcessor';
 import { buildCapabilityEntries } from './requestPromptCapabilities';
 import { buildIdentityEntries } from './requestPromptIdentity';
@@ -13,6 +13,7 @@ import type { AssistantToolPromptProtocolMode } from '../tool-protocol/assistant
 export function buildAssistantPromptLayers(params: {
   personaPrompt: string;
   personaPromptSource: PersonaRuntimePromptSource;
+  promptSlots?: PersonaPromptSlot[];
   templateContext: TemplateContext;
   messages: ChatMessage[];
   regexTriggers?: string;
@@ -30,6 +31,7 @@ export function buildAssistantPromptLayers(params: {
 export function buildAssistantPromptParts(params: {
   personaPrompt: string;
   personaPromptSource: PersonaRuntimePromptSource;
+  promptSlots?: PersonaPromptSlot[];
   templateContext: TemplateContext;
   messages: ChatMessage[];
   regexTriggers?: string;
@@ -39,13 +41,25 @@ export function buildAssistantPromptParts(params: {
   toolContext?: AssistantToolContext;
   toolProtocolMode?: AssistantToolPromptProtocolMode;
 }): AssistantPromptPart[] {
-  const { personaPrompt, personaPromptSource, templateContext, messages, regexTriggers, currentTask, includeRuntimeClockContext, promptInjections, toolContext, toolProtocolMode } = params;
+  const { personaPrompt, personaPromptSource, promptSlots, templateContext, messages, regexTriggers, currentTask, includeRuntimeClockContext, promptInjections, toolContext, toolProtocolMode } = params;
   const systemIdentityEntries = buildSystemIdentityEntries();
   const identityEntries = buildIdentityEntries({
     personaPrompt,
     personaPromptSource,
     templateContext
   });
+  // Optional user-authored blocks are part of this persona, not a parallel preset.
+  // Inactive or blank slots never reach a model; preserve their saved drafts.
+  const customSlots = (promptSlots ?? [])
+    .filter((slot) => slot.enabled !== false && Boolean(slot.content?.trim()))
+    .map((slot, index) => ({
+      name: 'persona_custom_slot' as const,
+      label: slot.title?.trim() || '补充槽位 ' + (index + 1),
+      role: slot.role === 'assistant' ? 'assistant' as const : 'system' as const,
+      layer: 'identity' as const,
+      truncationPriority: 12,
+      content: resolveSystemPromptVars(slot.content, templateContext).trim()
+    }));
   const modelRuntimeEntry = buildModelRuntimeEntry({ promptInjections, toolContext });
   const runtimeClockEntry = includeRuntimeClockContext ? buildRuntimeClockEntry(templateContext) : null;
   const regexTriggerEntry = {
@@ -65,6 +79,7 @@ export function buildAssistantPromptParts(params: {
     ...systemIdentityEntries,
     ...identityEntries,
     ...capabilityEntries,
+    ...customSlots,
     ...(runtimeClockEntry ? [runtimeClockEntry] : []),
     ...(modelRuntimeEntry ? [modelRuntimeEntry] : []),
     regexTriggerEntry,
