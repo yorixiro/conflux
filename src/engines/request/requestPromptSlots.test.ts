@@ -34,7 +34,7 @@ describe('persona prompt slots share existing request context and storage path',
       templateContext,
       messages: []
     });
-    const slots = parts.filter((part) => part.name === 'persona_custom_slot');
+    const slots = parts.filter((part) => part.name.startsWith('persona_custom_slot:'));
     expect(slots.map((slot) => [slot.label, slot.role, slot.content])).toEqual([
       ['起始记忆', 'system', '关于星的设定'],
       ['示例回应', 'assistant', '你好，用户']
