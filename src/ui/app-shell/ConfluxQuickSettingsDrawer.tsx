@@ -1,18 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { ApiOverlayProps, MenuOverlayPage } from '../../app/shell/appShellContracts';
 import type { Persona } from '../../types/domain';
 import type { PersonaUpdatePatch } from '../../app/persona/personaUpdatePatch';
 import { usePersonaStore } from '../../stores/personaStore';
 import { useRuntimeStore } from '../../stores/runtimeStore';
 import { Icon, type IconName } from '../Icon';
-import { PromptSettingsTab } from '../shell/persona/settings/PromptSettingsTab';
-import { MemorySettingsTab } from '../shell/persona/settings/MemorySettingsTab';
-import { RoomSettingsTab } from '../shell/persona/settings/RoomSettingsTab';
-import { PersonaApiConnectionPanel } from '../shell/persona/settings/PersonaApiConnectionPanel';
-import { PersonaMcpSettingsPage } from '../shell/persona/settings/PersonaMcpSettingsPage';
-import { EngineSettingsTab } from '../shell/persona/settings/EngineSettingsTab';
-import { CustomRequestSettingsTab } from '../shell/persona/settings/CustomRequestSettingsTab';
 import './ConfluxQuickSettingsDrawer.css';
+
+const PromptSettingsTab = lazy(() => import('../shell/persona/settings/PromptSettingsTab').then((module) => ({ default: module.PromptSettingsTab })));
+const MemorySettingsTab = lazy(() => import('../shell/persona/settings/MemorySettingsTab').then((module) => ({ default: module.MemorySettingsTab })));
+const RoomSettingsTab = lazy(() => import('../shell/persona/settings/RoomSettingsTab').then((module) => ({ default: module.RoomSettingsTab })));
+const PersonaApiConnectionPanel = lazy(() => import('../shell/persona/settings/PersonaApiConnectionPanel').then((module) => ({ default: module.PersonaApiConnectionPanel })));
+const PersonaMcpSettingsPage = lazy(() => import('../shell/persona/settings/PersonaMcpSettingsPage').then((module) => ({ default: module.PersonaMcpSettingsPage })));
+const EngineSettingsTab = lazy(() => import('../shell/persona/settings/EngineSettingsTab').then((module) => ({ default: module.EngineSettingsTab })));
+const CustomRequestSettingsTab = lazy(() => import('../shell/persona/settings/CustomRequestSettingsTab').then((module) => ({ default: module.CustomRequestSettingsTab })));
 
 type RoomSettingsPage = 'basic' | 'prompt' | 'model' | 'memory' | 'tools' | 'appearance';
 
@@ -118,6 +119,7 @@ export function ConfluxQuickSettingsDrawer({
               ))}
             </nav>
             <div className="conflux-quick-settings-scroll conflux-room-settings-scroll" key={currentPersona.id + ':' + activePage}>
+              <Suspense fallback={<p className="conflux-room-settings-note">正在打开设置…</p>}>
               {activePage === 'basic' ? (
                 <section className="conflux-room-settings-fields" aria-label="房间基本信息">
                   <label className="ps-field">
@@ -171,6 +173,7 @@ export function ConfluxQuickSettingsDrawer({
               ) : null}
 
               {activePage === 'appearance' ? <RoomSettingsTab {...personaProps} /> : null}
+              </Suspense>
             </div>
           </>
         ) : (
