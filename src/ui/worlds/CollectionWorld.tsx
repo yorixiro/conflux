@@ -206,8 +206,6 @@ export function CollectionWorld({
                   showChatAvatars={controller.showChatAvatars}
                   providers={controller.providers}
                   activeProviderId={controller.activeProviderId}
-                  conversations={controller.conversations}
-                  triggerRules={controller.triggerRules}
                   mcpServers={controller.mcpServers}
                   mcpToolTimeoutSeconds={controller.mcpToolTimeoutSeconds}
                   onUpdateCollaborator={controller.onUpdateCurrentCollaborator}
@@ -218,11 +216,6 @@ export function CollectionWorld({
                   onChooseCollaborator={() => onCollaboratorSwitchOpenChange(true)}
                   onOpenProviderSettings={onOpenProviderSettings}
                   onUpdateProvider={controller.onUpdateProvider}
-                  onCreateTriggerRule={controller.onCreateAutomationRule}
-                  onUpdateTriggerRule={controller.onUpdateAutomationRule}
-                  onDeleteTriggerRule={controller.onDeleteAutomationRule}
-                  onTestTriggerRule={controller.onTestAutomationRule}
-                  onCopyTriggerUrl={controller.onCopyAutomationTriggerUrl}
                   onCreateMcpServer={controller.onCreateMcpServer}
                   onUpdateMcpServer={controller.onUpdateMcpServer}
                 />
