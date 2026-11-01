@@ -119,7 +119,7 @@ function buildPromptPartSystemSegment(part: Pick<AssistantPromptPart, 'name' | '
   return {
     kind: 'system',
     messages: [{
-      role: part.name === 'persona_custom_slot' && part.role === 'assistant' ? 'assistant' : 'system',
+      role: part.name.startsWith('persona_custom_slot:') && part.role === 'assistant' ? 'assistant' : 'system',
       content: part.content,
       promptPartName: part.name,
       promptPartLayer: part.layer
@@ -280,7 +280,7 @@ export function assembleAssistantContext(params: AssembleAssistantContextParams)
   const stableSystemSegments = systemPromptParts
     ? systemPromptParts
         .filter((part) => (part.layer === 'identity' || part.layer === 'capability')
-          && !(part.name === 'persona_custom_slot' && part.role === 'assistant'))
+          && !(part.name.startsWith('persona_custom_slot:') && part.role === 'assistant'))
         .map(buildPromptPartSystemSegment)
     : (systemPrompts ?? []).map((prompt) => {
         const content = typeof prompt === 'string' ? prompt : prompt.content;
@@ -305,7 +305,7 @@ export function assembleAssistantContext(params: AssembleAssistantContextParams)
   // Example assistant turns belong after every system/memory instruction, before
   // real conversation history. Do not place later system messages behind them.
   const assistantSlotSegments = (systemPromptParts ?? [])
-    .filter((part) => part.name === 'persona_custom_slot' && part.role === 'assistant')
+    .filter((part) => part.name.startsWith('persona_custom_slot:') && part.role === 'assistant')
     .map(buildPromptPartSystemSegment);
 
   return {
