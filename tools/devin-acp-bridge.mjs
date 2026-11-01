@@ -360,24 +360,40 @@ function modelSnapshot(session) {
   };
 }
 async function selectModel(session, modelId) {
-  if (!modelId) return;
+  if (!modelId) return null;
   const config = modelSelector(session);
   const supportedModels = config ? modelValues(config) : legacyModelValues(session);
   if (!supportedModels.some((model) => model.id === modelId)) {
-    throw new Error('所选模型不在当前 Devin ACP 可用列表中，请重新拉取');
+    throw new Error('所选模型不在当前 Devin ACP 会话的可用列表中，请重新拉取');
   }
   if (config) {
-    if (config.currentValue === modelId) return;
+    if (config.currentValue === modelId) return modelId;
     const result = await request('session/set_config_option', {
       sessionId: session, configId: config.id ?? config.configId, value: modelId
     });
-    if (Array.isArray(result?.configOptions)) sessionOptions.set(session, result.configOptions);
+    if (Array.isArray(result?.configOptions)) {
+      const confirmed = result.configOptions.find((option) =>
+        option?.type === 'select' &&
+        (option.category === 'model' || (option.id === 'model' && !option.category))
+      );
+      if (!confirmed || confirmed.currentValue !== modelId) {
+        throw new Error('Devin ACP 未确认所选模型，已阻止本轮发送');
+      }
+      sessionOptions.set(session, result.configOptions);
+    } else {
+      // Older ACP agents may acknowledge without returning configOptions.
+      // Cache the acknowledged value until a config_option_update arrives.
+      sessionOptions.set(session, (sessionOptions.get(session) || []).map((option) =>
+        option === config ? { ...option, currentValue: modelId } : option
+      ));
+    }
   } else {
     const legacy = legacySessionModels.get(session);
-    if (legacy?.currentModelId === modelId) return;
+    if (legacy?.currentModelId === modelId) return modelId;
     await request('session/set_model', { sessionId: session, modelId });
     legacySessionModels.set(session, { ...legacy, currentModelId: modelId });
   }
+  return modelId;
 }
 
 function writeJson(response, status, value) {
@@ -527,7 +543,7 @@ const server = createServer(async (req, res) => {
     }
     activeConversationKey = body.conversationId || null;
     const chat = await acquireChatSession(activeConversationKey);
-    if (body.modelId) await selectModel(chat.id, body.modelId);
+    const selectedModelId = await selectModel(chat.id, body.modelId);
     const promptText = chat.isNew && body.initialContext?.trim()
       ? body.initialContext
       : body.prompt;
@@ -552,7 +568,7 @@ const server = createServer(async (req, res) => {
       try { send({ method: 'session/cancel', params: { sessionId: chat.id } }); } catch { /* agent already exited */ }
     });
     const promptId = randomUUID();
-    write({ type: 'started', promptId });
+    write({ type: 'started', promptId, ...(selectedModelId ? { modelId: selectedModelId } : {}) });
     const result = await request('session/prompt', {
       sessionId: chat.id, prompt: [{ type: 'text', text: promptText }, ...images]
     }, 10 * 60 * 1000, promptAbortController.signal);
