@@ -1,12 +1,9 @@
-import { lazy, Suspense, useState } from 'react';
+import { useState } from 'react';
 import { ArchiveAlbumShelf } from '../album/ArchiveAlbumShelf';
+import { useMemoryGalaxy } from './MemoryGalaxyFullscreen';
 import './heartstring.css';
 
 type HeartstringSection = 'album' | 'letters' | 'timeline' | 'reading' | 'memory';
-
-const HeartstringMemoryAtlas = lazy(() => import('./HeartstringMemoryAtlas').then((module) => ({
-  default: module.HeartstringMemoryAtlas
-})));
 
 const sections: Array<{ id: HeartstringSection; label: string }> = [
   { id: 'album', label: '收藏册' },
@@ -35,7 +32,8 @@ const planned: Record<'letters' | 'timeline' | 'reading', { title: string; descr
 };
 
 export function HeartstringHub({ searchTerm }: { searchTerm: string }) {
-  const [active, setActive] = useState<HeartstringSection>('album');
+  const { open: memoryOpen, enter: enterMemory } = useMemoryGalaxy();
+  const [active, setActive] = useState<HeartstringSection>(memoryOpen ? 'memory' : 'album');
   return (
     <div className="heartstring-hub">
       <header className="heartstring-header">
@@ -69,9 +67,11 @@ export function HeartstringHub({ searchTerm }: { searchTerm: string }) {
       >
         {active === 'album' ? <ArchiveAlbumShelf searchTerm={searchTerm} /> : null}
         {active === 'memory' ? (
-          <Suspense fallback={<p className="heartstring-loading" role="status">正在打开记忆图谱…</p>}>
-            <HeartstringMemoryAtlas />
-          </Suspense>
+          <div className="heartstring-future heartstring-memory-entry">
+            <span className="heartstring-eyebrow">A CONSTELLATION OF MEMORIES</span>
+            <h3>记忆星河</h3><p>走进星光，读一段与你有关的记忆。</p>
+            <button type="button" data-enter-memory onClick={enterMemory}>进入记忆星河</button>
+          </div>
         ) : null}
         {active === 'letters' || active === 'timeline' || active === 'reading' ? (
           <div className="heartstring-future">

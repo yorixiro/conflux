@@ -15,6 +15,7 @@ type EditablePillProps = {
   selectOnFocus?: boolean;
   onEdit: (value: string) => void;
   onRemove: () => void;
+  editRequest?: object;
 };
 
 export function EditablePill({
@@ -31,13 +32,18 @@ export function EditablePill({
   multiline = false,
   selectOnFocus = true,
   onEdit,
-  onRemove
+  onRemove,
+  editRequest
 }: EditablePillProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(text);
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const Tag = display;
+
+  useEffect(() => {
+    if (editRequest) setEditing(true);
+  }, [editRequest]);
 
   useEffect(() => {
     setDraft(text);
