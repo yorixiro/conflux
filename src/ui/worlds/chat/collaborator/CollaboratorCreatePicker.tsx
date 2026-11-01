@@ -36,7 +36,7 @@ export function CollaboratorCreatePicker({
         ) : null}
       </div>
       <div className="persona-create-picker-actions">
-        <button type="button" className="persona-create-choice persona-create-choice--primary" onClick={onCreateFromBuilder}>
+        <button type="button" className="persona-create-choice" onClick={onCreateFromBuilder}>
           <span className="persona-create-choice-icon" aria-hidden="true">
             <Icon name="personaCreate" size={22} />
           </span>
@@ -44,7 +44,7 @@ export function CollaboratorCreatePicker({
             <strong>{t('collaborator.create.builder')}</strong>
           </span>
         </button>
-        <button type="button" className="persona-create-choice" onClick={onCreateCustomCollaborator}>
+        <button type="button" className="persona-create-choice persona-create-choice--primary" onClick={onCreateCustomCollaborator}>
           <span className="persona-create-choice-icon" aria-hidden="true">
             <Icon name="personaCustom" size={22} />
           </span>
