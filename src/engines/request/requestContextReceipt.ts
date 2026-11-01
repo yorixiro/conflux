@@ -255,6 +255,17 @@ function promptPartTopography(part: AssistantPromptPart): RequestContextMaterial
     };
   }
 
+  if (part.name.startsWith('persona_custom_slot:')) {
+    return {
+      lane: 'persona_default',
+      authority: 'high',
+      sourceOwner: 'prompt_layers',
+      expandability: 'fixed',
+      degradationPath: 'preserve user-authored role prompt when possible',
+      overlapKey: 'identity:' + part.name
+    };
+  }
+
   if (part.name.startsWith('persona_identity')) {
     return {
       lane: 'persona_default',
