@@ -43,7 +43,7 @@ function PromptSlotsEditor({ activePersona, onUpdatePersona }: Pick<PersonaTabPr
         <button
           type="button" className="btn-secondary compact"
           onClick={() => save([...slots, {
-            id: createUid(), title: '槽位 ' + (slots.length + 1),
+            id: createUid('prompt-slot'), title: '槽位 ' + (slots.length + 1),
             role: 'system', content: '', enabled: true
           }])}
         >＋ 添加槽位</button>
