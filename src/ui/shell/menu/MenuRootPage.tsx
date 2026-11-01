@@ -21,6 +21,7 @@ type MenuRootPageProps = {
   onOpenGeneration: () => void;
   onOpenVoice: () => void;
   onOpenToolbox: () => void;
+  onOpenAutomation: () => void;
   onOpenMcp: () => void;
   onOpenDesktopLocal: () => void;
   onOpenUsage: () => void;
@@ -50,6 +51,7 @@ export function MenuRootPage({
   onOpenGeneration,
   onOpenVoice,
   onOpenToolbox,
+  onOpenAutomation,
   onOpenMcp,
   onOpenDesktopLocal,
   onOpenUsage,
@@ -107,6 +109,12 @@ export function MenuRootPage({
           detail={t('settings.toolbox.detail', { count: formatNumber(enabledToolGroupsCount) })}
           helpText={t('settings.toolbox.help')}
           onClick={onOpenToolbox}
+        />
+        <MenuSheetItem
+          icon="zap"
+          title={t('settings.automation.title')}
+          detail={t('settings.automation.pageHelp')}
+          onClick={onOpenAutomation}
         />
         <MenuSheetItem
           icon="voice"
