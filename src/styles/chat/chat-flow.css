@@ -74,3 +74,20 @@
   font-size: 12.5px;
   line-height: 1.72;
 }
+
+/* Standalone history navigation occupies its own row instead of covering messages. */
+.chat-flow-shell:has(> .chat-floating-controls > .chat-floating-controls-stack) {
+  display: flex;
+  flex-direction: column;
+}
+.chat-flow-shell:has(> .chat-floating-controls > .chat-floating-controls-stack) > .chat-flow {
+  height: auto;
+}
+.chat-flow-shell > .chat-floating-controls:has(> .chat-floating-controls-stack) {
+  position: static;
+  flex: 0 0 auto;
+  padding: 4px 16px;
+}
+.chat-flow-shell > .chat-floating-controls > .chat-floating-controls-stack {
+  flex-direction: row;
+}

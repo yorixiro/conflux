@@ -1,48 +1,33 @@
-# Conflux: instructions for coding agents
+# Conflux 开发规则
 
-Conflux is the user's independently directed local-first AI conversation and workspace product. Its product, UI and architecture decisions are owned by the Conflux project, not by a previous upstream design.
+Conflux 由小欣一人开发和维护，AI 按她的需求协助实现。产品、视觉和技术选择由她决定。当前用户指令优先于仓库内的旧方案。
 
-## Read first
-- docs/UI_LAYOUT_SPEC.md
-- docs/roadmap/CONFLUX_USABILITY_INTEGRATION.md (for usability/navigation work; check current status and pending PRs before starting)
-- docs/CONFLUX_INDEPENDENCE_PLAN.md
-- docs/handbook/DATA_AND_STORAGE.md
-- docs/PROVENANCE.md
-- package.json and capacitor.config.ts
-- Read older docs only as technical/historical references; do not treat their Polaris-era visual or product preferences as current requirements.
+## 工作方式
 
-## Product and interface
-- Never restore upstream brand, UI styling, navigation conventions or arbitrary product rules merely because they existed in the inherited source.
-- Prioritize the currently selected, user-provided theme/prototype. Preserve its real assets and CSS when adapting to the React DOM; never imitate instead of porting.
-- Use the layout contract for meaningful sizing and device adaptation. Themes may have their own presentation variants; do not sacrifice touchability, keyboard avoidance or readable content.
-- Fix root causes of broken UX (conversation/persona identity, routing, overlays, responsiveness), not cosmetic symptoms alone.
-- Do not create new visual frameworks or duplicate components for small layout fixes; change only the relevant implementation.
+- 先核对工作区、当前分支和最新提交，在已确认的开发线上完成相关修改。默认分支不一定是当前运行版本。
+- 默认沿现有分支直接提交和推送完整改动；不为小修改新开分支、PR、工单或验收报告。需要改变开发线时，先说明具体理由。
+- 用户已授权的任务持续做到收尾；常规实现选择由 AI 处理，不反复索要确认，也不把排查、整理分支和补齐遗漏推给用户。
+- 提交前检查已有改动，保留用户正在做的工作。强制覆盖历史、删除分支、合并 PR 或改动无关仓库需要用户明确要求。
+- 仓库级规则修改要考虑默认入口和当前开发入口；只同步文档，不为同步规则合并业务代码。旧分支恢复开发时再同步规则。
 
-## Architecture and technical independence
-- New product direction is unconstrained by upstream architecture preferences. Audit inherited modules, replace poor abstractions incrementally, and maintain an explicit dependency/removal list.
-- Current facts still matter: keep chat sessions, data ownership, context compilation, tool receipts and the existing LocalData boundaries working until a replacement is implemented and verified.
-- Do not silently delete user data, reassign conversation/persona ownership or rename persistence keys. Migrations require a defined compatibility strategy and readback.
-- Prefer one implementation for shared Android and Web/PWA features, with thin platform adapters.
-- Do not change unrelated repositories, expose secrets, or send private data to external models without explicit scope.
+## 读取与实现
 
-## Feature lifecycle consistency
-- Before **adding, changing, hiding or removing** a product feature, proactively trace the complete implementation: UI entry points and interactions → actions/state → execution logic, tools/permissions and providers → AI context compilation/system prompts/tool descriptions (only if the feature is advertised or injected there) → persistence/schema/history compatibility → tests, docs and obsolete implementations.
-- Removing a UI button does **not** remove an executable capability. If a feature is retired, remove or disable every reachable invocation path, including AI tool registrations and prompt instructions where applicable; verify users cannot still trigger it by an alternate route.
-- Conversely, do **not** edit prompts/context compilation, backend code or storage just because a presentation detail changed. Change only layers actually affected, and preserve historical data unless an explicit, verified migration is approved.
-- New features must be wired to real actions and data, not placeholder controls. Changed features must keep all supported entry points, UI themes, Android/PWA behavior and stored data consistent.
-- During delivery, briefly state which layers were changed, which layers were intentionally left alone and why, what legacy paths were cleaned up, and what was actually tested. This cross-layer audit is the coding agent's responsibility, not something the user should have to repeatedly request.
+- 按任务读取相关代码和文档，不要求每轮通读架构书、路线图或历史验收。开发规则以本文件为准；其他文档解释实现或记录历史，不另设审批流程。
+- 优先修复问题源头，复用已有组件和数据路径；清理这次替换后不再使用的实现，避免叠加临时补丁或复制一套功能。
+- 功能改动要追踪受影响的界面、状态、执行和保存路径；涉及 AI 工具或上下文时，同步对应注册和描述。纯样式修改只改展示层。
+- 当前自定义主题、素材和用户提供的原型是视觉依据。适配真实组件时保留其外观，兼顾窄窗口、平板、键盘和长内容；共享功能在各皮肤可用。
+- 上游架构可按实际需要调整，不冻结品牌、导航、模型或技术栈。Android 与 Web/PWA 优先共用实现，平台差异放在适配层。
+- 聊天记录、角色归属和已有资料要保持可读取、可保存；修改存储结构时处理旧数据兼容。密钥不进入提交或日志，保留适用的版权与许可声明。
 
-## Independent repository and attribution
-- Independent GitHub ownership and visual identity do not require a GitHub fork relationship. The eventual new repository starts from a verified Conflux snapshot, **not** an obsolete default main.
-- Keep applicable original copyright, AGPL-3.0-only and third-party notices; see LICENSE and docs/PROVENANCE.md. These belong in technical/legal documentation, not in the product's branding or UI.
-- Historical function names and filenames may stay temporarily while dependencies are unwound. Do not mass-rename storage keys, packages or APIs just to change the logo.
+## 按改动范围检查
 
-## Process and delivery
-- **Conflux is a solo-maintained project.** The default is one active, runnable integration branch, not one branch/PR per small feature. Do not create a new branch, PR, work-order file, or paperwork without a concrete need or the owner's request.
-- Integrate related changes into the active development version and keep the runnable phone/PWA preview as the primary delivery target. A commit, PR, or passing check is not itself a delivered feature.
-- Keep changes understandable and scoped to the actual user goal, but prefer a complete vertical feature over endless micro-commits. Keep current theme, user data, ACP and Android/PWA functionality intact.
-- Check status and exact base commit before code edits. No force push/reset, branch deletion, or PR merge unless explicitly requested.
-- For UI changes run relevant typecheck/build and focused tests, then provide mobile/tablet acceptance steps. For storage or request changes, run corresponding stronger verification.
-- Never claim tests or real-device checks that did not occur. State commit SHA, changed files, and remaining blockers.
-- Report what actually runs in the active integration version, the user-visible path, and any remaining blockers. Update one current integration status rather than generating additional documentation PRs. When a separate PR is explicitly needed, record its integration state and never confuse 'code exists' with 'visible in the installed PWA'.
-- Before calling an integration complete, check whether existing feature branches contain unique code that was not brought into the active application. Never bulk-merge outdated branches over newer implementations; port missing behavior while preserving current data and UI.
+- 文档：检查内容、引用和差异即可，不运行代码测试或构建。
+- CSS/布局：检查实际页面的相关宽度和交互；涉及组件逻辑时补相应定向测试。
+- TypeScript/功能：运行一次类型检查和相关定向测试；只有涉及构建、打包或发布时才补构建。
+- 数据、请求或工具：重点验证本次涉及的保存、恢复、失败处理和调用链。
+- 全量回归留到大范围整合或发布收尾，或存在明确跨模块风险时再运行；不用每个小修改都跑。通过的检查不无故重跑，不用付费模型请求测试普通开发改动。
+- 能自己验证的由 AI 完成；只有必须依赖用户设备的观察才请用户看具体效果。未做过的检查如实说明一句，不堆免责声明或长清单。
+
+## 交付
+
+简短说明实际改动、检查结果、提交位置，以及确实影响使用的未解决问题。同步到用户运行环境时沿现有启动方式和端口（当前 Termux 开发端口 4173），区分远端已推送与本地已更新。日常工作维护现有文档即可，不额外制造交接材料。

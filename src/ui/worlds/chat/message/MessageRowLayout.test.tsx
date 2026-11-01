@@ -16,7 +16,7 @@ vi.mock('./MessageActions', () => ({
   MessageActions: () => <div className="message-inline-actions" />
 }));
 vi.mock('./MessageTokenUsage', () => ({
-  MessageTokenUsage: () => null
+  MessageTokenUsage: () => <span data-usage="true" />
 }));
 
 const state: MessageRowState = {
@@ -63,6 +63,11 @@ function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuatio
 }
 
 describe('shared chat avatar/bubble layout', () => {
+  it('groups assistant usage and actions in one footer below the bubble', () => {
+    const html = markup('assistant', true);
+    expect(html).toContain('<div class="assistant-message-footer"><span data-usage="true"></span><div class="message-inline-actions"></div></div>');
+  });
+
   it('puts the assistant avatar beside the bubble, below its identity heading', () => {
     const html = markup('assistant', true);
     const identity = html.indexOf('message-identity-row');
@@ -74,7 +79,7 @@ describe('shared chat avatar/bubble layout', () => {
     expect(avatar).toBeGreaterThan(row);
     expect(bubble).toBeGreaterThan(avatar);
     const rowOpenTag = html.slice(html.indexOf('class="msg-row'), html.indexOf('>', html.indexOf('class="msg-row')));
-    expect(rowOpenTag).toContain('--message-avatar-gutter:43px');
+    expect(rowOpenTag).toContain('--message-avatar-size:34px');
   });
 
   it('keeps a continuation bubble in the same column with an empty avatar slot', () => {

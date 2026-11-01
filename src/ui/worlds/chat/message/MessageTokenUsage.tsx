@@ -89,14 +89,14 @@ export function MessageTokenUsage({ message }: { message: ChatMessage }) {
       <time dateTime={new Date(message.timestamp).toISOString()}>
         {new Date(message.timestamp).toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' })}
       </time>
-      <button
+      {message.role === 'assistant' ? <button
         ref={triggerRef}
         type="button"
         className="message-token-trigger"
         aria-label={t('chat.messageMeta.openTokenUsage')}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-      >{tokenLabel || (isDevinAcp ? acpLabel : 'Token')}</button>
+      >{tokenLabel || (isDevinAcp ? acpLabel : 'Token')}</button> : null}
       {open ? (
         <dialog
           ref={dialogRef}

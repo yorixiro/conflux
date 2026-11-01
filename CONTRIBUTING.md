@@ -1,41 +1,7 @@
-# Contributing
+# Conflux 个人维护说明
 
-Polaris welcomes thoughtful contributions. The source license is AGPL-3.0-only, and product direction is owner-led so the workspace keeps a coherent shape across chat, collaborators, tools, LocalData, and platform surfaces.
+本项目由小欣独立开发和维护，AI 协助完成具体任务。统一流程见 [AGENTS.md](AGENTS.md)。
 
-Good contributions usually improve one clear product path: a bug fix, a focused test, a module note, an import/export adapter, backend/selfhost support, a native bridge improvement, or a small UI behavior that matches the existing design.
+日常修改在已确认的开发线上完成、检查、提交和推送；不要求团队评审、每项功能开 PR 或逐阶段审批。检查范围随实际改动确定。
 
-## Development Setup
-
-```bash
-npm i
-npm run dev
-```
-
-Before proposing a change, run the smallest relevant focused test first, then the broader gates when the change is ready:
-
-```bash
-npm run typecheck
-npm run test:data-boundary
-npm test
-```
-
-## Engineering Rules
-
-- Keep durable facts, recovery evidence, and UI projections separate.
-- Do not add compatibility bridges unless the boundary document for the current task explicitly requires one.
-- Do not persist failed, missing, or empty reads as current product data.
-- Put new UI components in the existing feature directory instead of flattening them into `src/ui/`.
-- Add focused tests for engine, persistence, parser, and tool-protocol changes.
-
-## Pull Request Shape
-
-A useful PR should explain:
-
-- the user-facing behavior it changes
-- the data owner or module boundary it touches
-- the verification commands that passed
-- screenshots or recordings for visible UI changes
-
-## Reproduction Data
-
-Use synthetic fixtures, configuration examples, and reproducible command output in contributions.
+本地启动命令以当前分支的 `package.json` 为准，继续使用已有运行环境和端口。技术模块定位可查 [开发手册](docs/handbook/DEVELOPER_GUIDE.md)。
