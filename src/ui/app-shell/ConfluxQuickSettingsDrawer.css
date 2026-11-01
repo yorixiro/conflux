@@ -158,3 +158,94 @@
   .conflux-quick-settings-drawer[open] { animation: conflux-quick-settings-enter 190ms ease-out; }
   @keyframes conflux-quick-settings-enter { from { transform: translateX(24px); opacity: 0.85; } to { transform: translateX(0); opacity: 1; } }
 }
+
+/* Room-scoped settings reuse the established persona editors without a second config tree. */
+.conflux-room-settings-drawer { width: min(520px, calc(100vw - 12px)); }
+.conflux-room-settings-drawer .conflux-quick-settings-content {
+  padding: max(18px, calc(12px + env(safe-area-inset-top, 0px))) 18px max(12px, env(safe-area-inset-bottom, 0px));
+}
+.conflux-room-settings-drawer .conflux-quick-settings-header h2 { font-size: 21px; }
+.conflux-room-settings-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.conflux-room-settings-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--sheet-readable-soft);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.conflux-room-settings-nav button svg { flex-shrink: 0; }
+.conflux-room-settings-nav button.active {
+  border-color: var(--border);
+  background: var(--control-surface);
+  color: var(--sheet-readable-text);
+}
+.conflux-room-settings-nav button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.conflux-room-settings-scroll {
+  padding: 16px 1px 24px;
+  overflow-x: hidden;
+}
+.conflux-room-settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.conflux-room-settings-fields .ps-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+.conflux-room-settings-fields .ps-input,
+.conflux-room-settings-fields .ps-textarea {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+.conflux-room-settings-note {
+  margin: 0 0 12px;
+  color: var(--sheet-readable-soft);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.conflux-room-settings-advanced {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+}
+.conflux-room-settings-advanced summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sheet-readable-text);
+  padding: 5px 0 12px;
+}
+.conflux-room-settings-advanced .ps-field,
+.conflux-room-settings-advanced .ps-slider {
+  margin-bottom: 14px;
+}
+@media (max-width: 440px) {
+  .conflux-room-settings-drawer .conflux-quick-settings-content { padding-left: 12px; padding-right: 12px; }
+  .conflux-room-settings-nav { gap: 3px; }
+  .conflux-room-settings-nav button { font-size: 11px; gap: 4px; }
+  .conflux-room-settings-nav button svg { width: 14px; height: 14px; }
+}
