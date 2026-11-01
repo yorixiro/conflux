@@ -37,7 +37,7 @@ describe('ACP chat reply over the existing request pipeline', () => {
       'data: {"type":"started","promptId":"test","modelId":"alternate-model"}', '',
       'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"Hello"}}}', '',
       'data: {"type":"done","result":{}}', ''
-    ].join('\\n') + '\\n', { status: 200, headers: { 'content-type': 'text/event-stream' } }));
+    ].join('\n') + '\n', { status: 200, headers: { 'content-type': 'text/event-stream' } }));
     const onProgress = vi.fn();
     const answer = await requestDevinAcpReply({
       prompt: 'Hello', conversationId: 'chat-model', modelId: 'alternate-model', onProgress
@@ -55,7 +55,7 @@ describe('ACP chat reply over the existing request pipeline', () => {
       'data: {"type":"started","promptId":"legacy"}', '',
       'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"Hello"}}}', '',
       'data: {"type":"done","result":{}}', ''
-    ].join('\\n') + '\\n', { status: 200 }));
+    ].join('\n') + '\n', { status: 200 }));
     const answer = await requestDevinAcpReply({ prompt: 'Hello', modelId: 'alternate-model' });
     expect(answer.model).toBe('Devin ACP');
   });
