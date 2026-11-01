@@ -224,7 +224,7 @@ export function DesktopAppSidebar({
       {isSidebarPresentation && sortedCollaborators.length === 0 ? <p className="conflux-sidebar-status">还没有 AI 角色，可以新建一个开始聊天。</p> : null}
       </div>
       {isSidebarPresentation ? <button type="button" className="conflux-sidebar-contact-reset" onClick={() => handleSelectCollaborator(null)}>查看全部对话</button> : null}
-      {presentation !== 'hub' ? <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>人设生成器</button></details> : null}
+      <details className="conflux-sidebar-contact-more"><summary>更多创建方式</summary><button type="button" onClick={onCreateCollaboratorFromBuilder}>人设生成器</button></details>
     </section>
   ) : null;
 
@@ -242,7 +242,7 @@ export function DesktopAppSidebar({
                 <h1>AI 通讯录</h1>
               </div>
             </div>
-            <button type="button" className="conflux-hub-new-role" onClick={onCreateCollaboratorFromBuilder} aria-label="新建 AI 角色" title="新建 AI 角色"><Icon name="plus" size={19} /><span>新建角色</span></button>
+            <button type="button" className="conflux-hub-new-role" onClick={onCreateCustomCollaborator} aria-label="新建 AI 角色" title="新建 AI 角色"><Icon name="plus" size={19} /><span>新建角色</span></button>
           </header>
         </>
       ) : null}
