@@ -10,12 +10,19 @@ import { isCompanionCollaboratorId } from '../../../engines/companion';
 import { isProductGuidePersona } from '../../../engines/personaBuiltin';
 import type { I18nKey } from '../../../i18n/messages';
 import { useI18n } from '../../../i18n/useI18n';
-import { Icon } from '../../Icon';
+import { Icon, type IconName } from '../../Icon';
 const INFO_TABS = ['identity', 'request', 'memory', 'room', 'automation'] as const;
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
 export type CollaboratorInfoPageRequest = {
   collaboratorId: string | null;
   tab: 'identity' | 'memory';
+};
+const INFO_TAB_ICON: Record<CollaboratorInfoTab, IconName> = {
+  identity: 'persona',
+  request: 'settings',
+  memory: 'openBook',
+  room: 'brush',
+  automation: 'task'
 };
 const PRODUCT_GUIDE_INFO_TABS = INFO_TABS.filter((tab) => tab !== 'automation' && tab !== 'request');
 const INFO_TAB_LABEL_KEYS = {
@@ -141,7 +148,8 @@ export function CollaboratorInfoShelf({
               className={`ps-nav-item ${activeTab === tab ? 'ps-nav-item--active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {t(INFO_TAB_LABEL_KEYS[tab])}
+              <Icon name={INFO_TAB_ICON[tab]} size={15} />
+              <span>{t(INFO_TAB_LABEL_KEYS[tab])}</span>
             </button>
           ))}
         </div>
