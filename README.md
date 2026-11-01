@@ -1,6 +1,6 @@
 # Conflux
 
-个人维护流程见 [AGENTS.md](AGENTS.md)。本默认分支保留早期源码，当前功能开发位于 `feat/keke-original-theme-port`。
+个人维护流程见 [AGENTS.md](AGENTS.md)。**当前唯一日常开发线是 [`conflux-dev`](https://github.com/yorixiro/conflux/tree/conflux-dev)**。本默认分支只保留较早源码与入口文档，不是正在运行的完整 Conflux；`feat/keke-original-theme-port` 为冻结的历史美化分支，不再承接新功能。
 
 ## 上游技术背景
 
@@ -87,4 +87,4 @@ npm run build
 
 本项目由小欣独立开发和维护。开发规则统一见 [AGENTS.md](AGENTS.md)，技术说明见 [文档目录](docs/README.md)。上述 Polaris 内容为本分支保留的上游技术背景，不规定 Conflux 的产品方向或开发流程。
 
-当前功能开发线是 `feat/keke-original-theme-port`；本分支保留较早的业务代码，同步规则并不代表功能代码已合入。开始修改前核对当前运行版本。
+当前功能开发线是 [`conflux-dev`](https://github.com/yorixiro/conflux/tree/conflux-dev)；本分支仅同步开发规则和导航说明，不代表功能代码已合入 `main`。不要在旧分支新建功能分支或 PR；开始修改前先核对 `conflux-dev` 与实际本地运行的 HEAD。
