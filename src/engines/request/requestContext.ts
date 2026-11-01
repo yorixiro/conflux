@@ -97,7 +97,7 @@ export type AssembleAssistantContextParams = {
       cachePrefixEligible?: boolean;
     }
   >;
-  systemPromptParts?: Array<Pick<AssistantPromptPart, 'name' | 'layer' | 'content'>>;
+  systemPromptParts?: Array<Pick<AssistantPromptPart, 'name' | 'layer' | 'content'> & { role?: 'system' | 'assistant' }>;
   messages: RequestMessage[];
   messagesPrepared?: boolean;
   toolLedger?: ToolLedgerEntry[];
@@ -115,11 +115,11 @@ export type AssembleAssistantContextParams = {
   cachePlan?: AssistantRequestCachePlan;
 };
 
-function buildPromptPartSystemSegment(part: Pick<AssistantPromptPart, 'name' | 'layer' | 'content'>): AssistantContextSegment {
+function buildPromptPartSystemSegment(part: Pick<AssistantPromptPart, 'name' | 'layer' | 'content'> & { role?: 'system' | 'assistant' }): AssistantContextSegment {
   return {
     kind: 'system',
     messages: [{
-      role: 'system',
+      role: part.name === 'persona_custom_slot' && part.role === 'assistant' ? 'assistant' : 'system',
       content: part.content,
       promptPartName: part.name,
       promptPartLayer: part.layer
