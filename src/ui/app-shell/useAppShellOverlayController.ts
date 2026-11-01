@@ -5,6 +5,7 @@ import { useAppModalState } from './useAppModalState';
 import { useAppShellOverlayNavigation } from './useAppShellOverlayNavigation';
 import { useThemeSessionActions } from '../../app/theme/useThemeSessionActions';
 import type { ThemeState } from '../../types/domain';
+import type { CollaboratorInfoPageRequest } from '../collection/info/CollaboratorInfoShelf';
 
 type UseAppShellOverlayControllerArgs = {
   stores: {
@@ -46,6 +47,7 @@ type UseAppShellOverlayControllerArgs = {
   };
   collection: {
     setCollaboratorSwitchOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
+    setInfoPageRequest: (request: CollaboratorInfoPageRequest | null) => void;
   };
   frontstage: {
     frontstageCollaboratorId: string | null;
@@ -165,7 +167,10 @@ export function useAppShellOverlayController({
       collection.setCollaboratorSwitchOpen(false);
       collaboratorActions.openCollaboratorBuilder(null);
     },
-    collectionCreateCustomCollaborator: collaboratorActions.createCustomCollaborator,
+    collectionCreateCustomCollaborator: () => {
+      const id = collaboratorActions.createCustomCollaborator();
+      collection.setInfoPageRequest({ collaboratorId: id, tab: 'setup' });
+    },
     collectionOpenProviderSettings: () => {
       collection.setCollaboratorSwitchOpen(false);
       navigation.openApiFromMenu('root');
