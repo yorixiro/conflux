@@ -102,6 +102,13 @@ export function MenuRootPage({
           />
         ) : null}
         <MenuSheetItem
+          icon="layers"
+          title={t('settings.toolbox.title')}
+          detail={t('settings.toolbox.detail', { count: formatNumber(enabledToolGroupsCount) })}
+          helpText={t('settings.toolbox.help')}
+          onClick={onOpenToolbox}
+        />
+        <MenuSheetItem
           icon="voice"
           title={t('settings.voice.title')}
           detail={t('settings.voice.detail')}
@@ -181,13 +188,6 @@ export function MenuRootPage({
           </span>
           <Icon name="chevron" size={16} />
         </summary>
-        <MenuSheetItem
-          icon="layers"
-          title={t('settings.toolbox.title')}
-          detail={t('settings.toolbox.detail', { count: formatNumber(enabledToolGroupsCount) })}
-          helpText={t('settings.toolbox.help')}
-          onClick={onOpenToolbox}
-        />
         <MenuSheetItem
           icon="mcpServer"
           title={t('settings.mcp.title')}
