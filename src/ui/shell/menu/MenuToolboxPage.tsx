@@ -134,6 +134,10 @@ const TOOLBOX_TOGGLE_META: Record<PolarisToolPromptGroup, { icon: IconName; labe
   }
 };
 
+// All groups keep their original preferences, handlers and inline settings.
+// This only organizes the existing single toolbox page, not duplicate controls.
+const EXTERNAL_TOOL_GROUPS = new Set<PolarisToolPromptGroup>(['web', 'generation', 'mcp']);
+
 function getSearchProviderLabel(provider: WebSearchProviderType, t: I18nTranslator['t']) {
   return t(SEARCH_PROVIDER_LABEL_KEYS[provider]);
 }
@@ -214,12 +218,16 @@ export function MenuToolboxPage({
 }: MenuToolboxPageProps) {
   const { t } = useI18n();
   const [creativeWarningOpen, setCreativeWarningOpen] = useState(false);
+  const [toolCategory, setToolCategory] = useState<'local' | 'external'>('local');
   const visibleThemeToolMode = theme.toolMode === 'off' ? 'stable' : theme.toolMode;
   const themeModeDescription = buildThemeToolModePanelDescription(visibleThemeToolMode, t);
   const taskToolsEnabled = toolPromptPreferences.task;
   const searchRequiresKey = search.provider !== 'bingLocal';
   const activeSearchLabel = getSearchProviderLabel(search.provider, t);
   const visibleToolGroups = getVisibleToolboxPromptGroups({ desktopLocalAvailable });
+  const displayedToolGroups = visibleToolGroups.filter((group) =>
+    EXTERNAL_TOOL_GROUPS.has(group) === (toolCategory === 'external')
+  );
 
   const handleSetThemeToolMode = (mode: ThemeState['toolMode']) => {
     if (mode === 'creative' && shouldShowCreativeModeWarning()) {
@@ -240,19 +248,29 @@ export function MenuToolboxPage({
         </div>
       </div>
 
+      <div className="theme-mode-switch" role="tablist" aria-label="工具分类">
+        <button type="button" role="tab" aria-selected={toolCategory === 'local'}
+          className={'theme-mode-chip' + (toolCategory === 'local' ? ' active' : '')}
+          onClick={() => setToolCategory('local')}>内置工具</button>
+        <button type="button" role="tab" aria-selected={toolCategory === 'external'}
+          className={'theme-mode-chip' + (toolCategory === 'external' ? ' active' : '')}
+          onClick={() => setToolCategory('external')}>外部服务</button>
+      </div>
       <section className="menu-section">
         <div className="menu-section-head">
           <span className="menu-section-kicker menu-section-kicker-row">
-            {t('settings.toolbox.alwaysOnSection')}
+            {toolCategory === 'local' ? t('settings.toolbox.alwaysOnSection') : '外部服务'}
             <HelpHint
               label={t('settings.toolbox.alwaysOnHelpLabel')}
               text={t('settings.toolbox.alwaysOnHelpText')}
             />
           </span>
-          <p className="menu-section-note">{t('settings.toolbox.alwaysOnNote')}</p>
+          <p className="menu-section-note">{toolCategory === 'local'
+            ? t('settings.toolbox.alwaysOnNote')
+            : '网页搜索、生成和 MCP 使用现有连接及权限设置，这里不建立第二份配置。'}</p>
         </div>
         <div className="memory-toggle-grid">
-          {visibleToolGroups.map((group) => {
+          {displayedToolGroups.map((group) => {
             const meta = TOOLBOX_TOGGLE_META[group];
             return (
               <ToolboxToggleRow
@@ -304,7 +322,7 @@ export function MenuToolboxPage({
         </div>
       </section>
 
-      {taskToolsEnabled ? (
+      {toolCategory === 'local' && taskToolsEnabled ? (
         <section className="menu-section">
           <div className="menu-section-head">
             <span className="menu-section-kicker menu-section-kicker-row">
