@@ -188,6 +188,28 @@ describe('resolvePersonaProviderBinding', () => {
     }).status).toBe('ready');
   });
 
+  it('uses the selected ACP provider model even when a persona has a stale HTTP model override', () => {
+    const acp = createProvider({
+      id: 'devin', name: 'Devin ACP', model: 'selected-non-default-model',
+      agentTransport: 'devin-acp', baseUrl: '', apiKey: ''
+    });
+    for (const advanced of [
+      { providerId: 'devin', providerRouteMode: 'fixed' as const, modelOverride: 'old-swe-model' },
+      { providerRouteMode: 'inherit' as const, modelOverride: 'old-swe-model' }
+    ]) {
+      const result = resolvePersonaProviderBinding({
+        globalApi: acp,
+        providers: [acp],
+        persona: createPersona(advanced)
+      });
+      expect(result.status).toBe('ready');
+      expect(result.api.agentTransport).toBe('devin-acp');
+      expect(result.modelId).toBe('selected-non-default-model');
+      expect(result.api.model).toBe('selected-non-default-model');
+      expect(result.modelOverride).toBe('old-swe-model');
+    }
+  });
+
   it('uses the collaborator provider and model together when both are pinned', () => {
     const result = resolvePersonaProviderBinding({
       globalApi,
