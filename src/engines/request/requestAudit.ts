@@ -15,6 +15,7 @@ export type AssistantPromptPartName =
   | 'persona_identity_core'
   | 'persona_identity_motive'
   | 'persona_identity_style'
+  | 'persona_custom_slot'
   | 'runtime_clock_context'
   | 'model_runtime_context'
   | 'regex_trigger_context'
