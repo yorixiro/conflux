@@ -51,7 +51,11 @@ export function resolvePersonaProviderBinding(args: {
   const modelOverride = fixedProviderId && !fixedProvider
     ? ''
     : args.persona?.advanced?.modelOverride.trim() || '';
-  const modelId = modelOverride || baseApi.model;
+  // ACP model selection is owned by the provider's agent session. A historical
+  // HTTP model override must never replace the selected ACP model.
+  const modelId = baseApi.agentTransport === 'devin-acp'
+    ? baseApi.model
+    : modelOverride || baseApi.model;
   const api = modelId && modelId !== baseApi.model
     ? { ...baseApi, model: modelId }
     : baseApi;
