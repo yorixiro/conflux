@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Conversation, McpServerConfig, Persona, PolarisTriggerRule, PolarisTriggerSchedule, ProviderProfile } from '../../../types/domain';
 import { BasicSettingsTab } from '../../shell/persona/settings/BasicSettingsTab';
+import { PersonaApiConnectionPanel } from '../../shell/persona/settings/PersonaApiConnectionPanel';
 import { MemorySettingsTab } from '../../shell/persona/settings/MemorySettingsTab';
 import { RequestSettingsTab } from '../../shell/persona/settings/RequestSettingsTab';
 import { RoomSettingsTab } from '../../shell/persona/settings/RoomSettingsTab';
@@ -15,7 +16,7 @@ const INFO_TABS = ['identity', 'request', 'memory', 'room', 'automation'] as con
 type CollaboratorInfoTab = (typeof INFO_TABS)[number];
 export type CollaboratorInfoPageRequest = {
   collaboratorId: string | null;
-  tab: 'identity' | 'memory';
+  tab: 'identity' | 'memory' | 'setup';
 };
 const INFO_TAB_ICON: Record<CollaboratorInfoTab, IconName> = {
   identity: 'persona',
@@ -106,7 +107,7 @@ export function CollaboratorInfoShelf({
   const collaboratorName = currentCollaborator?.name.trim() || t('collaborator.info.fallbackName');
 
   useEffect(() => {
-    setActiveTab(pageRequest?.collaboratorId === currentCollaboratorId ? pageRequest.tab : 'identity');
+    setActiveTab(pageRequest?.collaboratorId === currentCollaboratorId && pageRequest.tab !== 'setup' ? pageRequest.tab : 'identity');
   }, [currentCollaboratorId, pageRequest]);
 
   useEffect(() => {
@@ -130,6 +131,54 @@ export function CollaboratorInfoShelf({
   }
 
   return (
+  // Creation is deliberately small: details and API route only. All other
+  // persona controls live in the room's right-hand settings drawer.
+  if (pageRequest?.tab === 'setup' && pageRequest.collaboratorId === currentCollaboratorId) {
+    return (
+      <section className="collaborator-info-shelf conflux-new-ai-setup" aria-label="新 AI 基本设置">
+        <div className="collaborator-info-detail-shell">
+          <div className="conflux-role-navigation">
+            <button type="button" className="btn-secondary" onClick={onBackToChat}>返回聊天</button>
+            <span>新建 AI</span>
+          </div>
+          <div className="ps-content collaborator-info-content">
+            <div className="ps-section conflux-new-ai-setup-fields">
+              <div className="conflux-new-ai-setup-header">
+                <h2>新 AI · 基本设置</h2>
+                <p>先填写基本资料并选择 API。提示词、记忆、工具和房间外观可以进入聊天后在右侧「房间设置」中修改。</p>
+              </div>
+              <label className="ps-field">
+                <span className="ps-field-label">AI 名称</span>
+                <input className="ps-input" value={currentCollaborator.name}
+                  onChange={(event) => onUpdateCollaborator({ name: event.target.value })} />
+              </label>
+              <label className="ps-field">
+                <span className="ps-field-label">简介</span>
+                <input className="ps-input" value={currentCollaborator.description || ''}
+                  onChange={(event) => onUpdateCollaborator({ description: event.target.value })} />
+              </label>
+              <label className="ps-field">
+                <span className="ps-field-label">AI 对你的称呼</span>
+                <input className="ps-input" value={currentCollaborator.userName || ''}
+                  onChange={(event) => onUpdateCollaborator({ userName: event.target.value })} placeholder="以后可以随时更改" />
+              </label>
+              <PersonaApiConnectionPanel
+                activePersona={currentCollaborator}
+                providers={providers}
+                onUpdatePersona={onUpdateCollaborator}
+                onUpdateProvider={onUpdateProvider}
+                onOpenProviderSettings={onOpenProviderSettings}
+              />
+              <button className="btn-secondary conflux-new-ai-setup-done" type="button" onClick={onBackToChat}>
+                完成，返回聊天
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
     <section className={`collaborator-info-shelf ${fullscreenOpen ? 'collaborator-info-shelf--fullscreen' : ''}`.trim()}>
       <div className={`collaborator-info-detail-shell ${fullscreenOpen ? 'collaborator-info-detail-shell--fullscreen' : ''}`.trim()}>
         <div className="conflux-role-navigation">
