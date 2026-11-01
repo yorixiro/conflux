@@ -53,7 +53,7 @@ export function buildAssistantPromptParts(params: {
   const customSlots = (promptSlots ?? [])
     .filter((slot) => slot.enabled !== false && Boolean(slot.content?.trim()))
     .map((slot, index) => ({
-      name: 'persona_custom_slot' as const,
+      name: `persona_custom_slot:${slot.id}` as const,
       label: slot.title?.trim() || '补充槽位 ' + (index + 1),
       role: slot.role === 'assistant' ? 'assistant' as const : 'system' as const,
       layer: 'identity' as const,
