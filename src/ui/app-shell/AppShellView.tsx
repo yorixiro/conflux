@@ -5,10 +5,8 @@ import { AppReplyNotificationStack } from './AppReplyNotificationStack';
 import { ConfluxHome } from './ConfluxHome';
 import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
-import { usePersonaStore } from '../../stores/personaStore';
 import { useSpaceStore } from '../../stores/spaceStore';
 import '../keke-original';
-import { getProviderModelBindingValue } from '../shell/apiProviderDisplay';
 import type { AppTopbarActions } from '../shell/AppTopbar';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { DesktopAppSidebar } from './DesktopAppSidebar';
@@ -91,20 +89,6 @@ export function AppShellView({
   const [chatHubOpen, setChatHubOpen] = useState(true);
   const showChatHub = useBottomNavigation && !homeOpen && activeWorld === 'chat' && chatHubOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
-  const setChatCollaboratorProvider = (providerId: string) => {
-    if (!chatCollaborator) return;
-    if (providerId === '__unconfigured__' || providerId === '') {
-      usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
-        advanced: { providerId: '', providerRouteMode: providerId ? 'unconfigured' : 'inherit', modelOverride: '' }
-      });
-      return;
-    }
-    const selected = overlaysProps.api.providers.find((item) => item.id === providerId);
-    if (!selected) return;
-    usePersonaStore.getState().updateCollaborator(chatCollaborator.id, {
-      advanced: { providerId: selected.id, providerRouteMode: 'fixed', modelOverride: getProviderModelBindingValue(selected) }
-    });
-  };
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     setChatHubOpen(false);
@@ -242,9 +226,9 @@ export function AppShellView({
               type="button"
               className="conflux-quick-settings-desktop-trigger"
               onClick={() => setQuickSettingsOpen(true)}
-              aria-label="打开右侧快捷设置"
+              aria-label="打开右侧房间设置"
               aria-haspopup="dialog"
-              title="快捷设置"
+              title="房间设置"
             >
               <Icon name="settings" size={19} />
             </button>
@@ -346,11 +330,6 @@ export function AppShellView({
         onOpenApi={collectionOpenProviderSettings}
         onOpenMenu={openQuickMenuPage}
         currentPersona={chatCollaborator}
-        onSetPersonaProvider={setChatCollaboratorProvider}
-        onOpenPersona={chatCollaborator
-          ? () => desktopSidebarProps.onEditCollaborator(chatCollaborator.id)
-          : undefined}
-        onOpenCodeCards={() => desktopSidebarProps.onSelectShelf('code')}
       />
       <AppShellOverlays {...overlaysProps} />
     </main>
