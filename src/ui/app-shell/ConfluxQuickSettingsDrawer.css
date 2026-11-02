@@ -103,87 +103,123 @@
   @keyframes conflux-quick-settings-enter { from { transform: translateX(24px); opacity: 0.85; } to { transform: translateX(0); opacity: 1; } }
 }
 
-/* Room-scoped settings reuse the established persona editors without a second config tree. */
+/* Room settings: quiet spacing and a short, readable list. Keep existing theme colors. */
 .conflux-room-settings-drawer {
-  width: min(382px, calc(100vw - 12px));
+  width: min(388px, calc(100vw - 18px));
   max-width: none;
-  border-radius: 18px 0 0 18px;
+  border-radius: 16px 0 0 16px;
   background: var(--sheet-surface-fill);
-  background:
-    linear-gradient(155deg, color-mix(in srgb, var(--accent-soft) 56%, transparent), transparent 42%),
-    var(--sheet-surface-fill);
 }
 .conflux-room-settings-drawer::backdrop {
-  background: rgba(32, 29, 40, 0.12);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(32, 29, 40, 0.15);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 .conflux-room-settings-drawer .conflux-quick-settings-content {
-  padding: max(18px, calc(12px + env(safe-area-inset-top, 0px))) 18px max(12px, env(safe-area-inset-bottom, 0px));
+  padding: max(22px, calc(14px + env(safe-area-inset-top, 0px))) 20px max(16px, env(safe-area-inset-bottom, 0px));
 }
-.conflux-room-settings-drawer .conflux-quick-settings-header { padding-bottom: 12px; }
-.conflux-room-settings-drawer .conflux-quick-settings-eyebrow { margin-bottom: 7px; }
+.conflux-room-settings-drawer .conflux-quick-settings-header {
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+}
 .conflux-room-settings-drawer .conflux-quick-settings-header h2 {
-  font-size: 17px;
-  line-height: 1.35;
-  letter-spacing: 0.015em;
-}
-.conflux-room-settings-scroll { padding: 14px 1px 20px; overflow-x: hidden; }
-.conflux-room-settings-section-label {
-  margin: 7px 5px 9px;
-  color: var(--sheet-readable-soft);
-  font-size: 12px;
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: 0;
   font-weight: 650;
-  letter-spacing: .04em;
+  overflow-wrap: anywhere;
 }
+.conflux-room-settings-drawer .conflux-quick-settings-header h2 span { font-weight: 450; color: var(--sheet-readable-soft); }
+.conflux-room-settings-drawer .conflux-quick-settings-header p {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.conflux-room-settings-drawer .conflux-quick-settings-close {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border-color: transparent;
+  border-radius: 12px;
+}
+.conflux-room-settings-scroll { padding: 14px 0 16px; overflow-x: hidden; }
 .conflux-room-settings-nav {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin: 0 0 20px;
+  margin: 0;
   min-width: 0;
 }
 .conflux-room-settings-nav > button {
   display: flex;
-  width: 100%;
   align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 9px 10px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  background: transparent;
+  gap: 13px;
+  width: 100%;
+  min-height: 65px;
+  padding: 10px 5px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 0;
   color: var(--sheet-readable-text);
+  background: transparent;
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 .conflux-room-settings-nav > button:hover,
 .conflux-room-settings-nav > button:focus-visible {
-  border-color: var(--border);
-  background: var(--control-surface);
+  background: color-mix(in srgb, var(--control-surface) 68%, transparent);
 }
 .conflux-room-settings-entry-icon {
   display: grid;
   place-items: center;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
   color: var(--sheet-readable-soft);
-  background: var(--control-surface);
+  background: color-mix(in srgb, var(--control-surface) 75%, transparent);
 }
-.conflux-room-settings-entry-copy { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.conflux-room-settings-entry-copy strong { font-size: 13px; font-weight: 600; }
-.conflux-room-settings-entry-copy small { color: var(--sheet-readable-soft); font-size: 11px; line-height: 1.5; }
-.conflux-room-settings-nav > button > svg:last-child { color: var(--sheet-readable-muted); flex-shrink: 0; }
-.conflux-room-settings-nav--common > button { min-height: 46px; }
+.conflux-room-settings-entry-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.conflux-room-settings-entry-copy strong { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.conflux-room-settings-entry-copy small {
+  color: var(--sheet-readable-soft);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.conflux-room-settings-nav > button > svg:last-child { flex: none; color: var(--sheet-readable-muted); }
+.conflux-room-settings-app-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 22px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--sheet-readable-soft);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.conflux-room-settings-app-link span { flex: 1; }
+.conflux-room-settings-app-link:hover { background: var(--control-surface); color: var(--sheet-readable-text); }
 .conflux-room-settings-back {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 7px 2px 8px;
+  min-height: 40px;
+  padding: 0 3px;
   border: 0;
   background: transparent;
   color: var(--sheet-readable-soft);
@@ -193,11 +229,39 @@
 }
 .conflux-room-settings-back svg { transform: rotate(180deg); }
 .conflux-room-settings-detail-title {
-  margin: 6px 0 16px;
-  padding-bottom: 12px;
+  margin: 6px 0 14px;
+  padding-bottom: 11px;
   border-bottom: 1px solid var(--border);
   font-size: 17px;
   color: var(--sheet-readable-text);
+}
+.conflux-room-settings-api-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: -2px 0 17px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--control-surface) 55%, transparent);
+}
+.conflux-room-settings-api-tabs button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 5px 4px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--sheet-readable-soft);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.conflux-room-settings-api-tabs button[aria-current='page'] {
+  color: var(--sheet-readable-text);
+  background: var(--control-surface);
+  box-shadow: 0 1px 3px rgba(35, 30, 38, 0.05);
+  font-weight: 600;
 }
 .conflux-room-settings-detail { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .conflux-room-settings-detail .ps-field { min-width: 0; margin: 0 0 14px; }
@@ -241,10 +305,8 @@
   line-height: 1.65;
 }
 @media (max-width: 440px) {
-  .conflux-room-settings-drawer .conflux-quick-settings-content { padding-left: 12px; padding-right: 12px; }
-  .conflux-room-settings-nav > button { padding-left: 7px; padding-right: 7px; }
+  .conflux-room-settings-drawer .conflux-quick-settings-content { padding-left: 14px; padding-right: 14px; }
 }
-
 
 /* Reuse the established sticker-room paper and ink instead of a generic white modal. */
 body[data-polaris-preset='keke-doodle'] .conflux-room-settings-drawer,
