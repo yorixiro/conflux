@@ -1,4 +1,4 @@
-import { isRequestDebugCaptureEnabled } from '../../app/developer/debugCaptureRuntime';
+import { isRequestDebugCaptureEnabled, isRoomRequestCaptureEnabled } from '../../app/developer/debugCaptureRuntime';
 import { createDebugLog } from '../../infrastructure/debugLog';
 import type { AssistantRequestAudit } from './requestAudit';
 import { buildRequestInspectorModel, type AssistantRequestInspectorModel } from './requestInspector';
@@ -10,6 +10,8 @@ export type RequestDebugEntry = {
   at: number;
   phase: 'prepared' | 'completed' | 'failed';
   assistantName: string;
+  /** Stable owner id for room-scoped request history. Older records may not include it. */
+  collaboratorId?: string | null;
   providerId?: string;
   providerName?: string;
   modelId: string;
@@ -73,7 +75,7 @@ export function recordRequestDebugEntry(
     builtRequest?: ProviderHttpRequest | null;
   }
 ) {
-  if (!isRequestDebugCaptureEnabled()) return;
+  if (!isRequestDebugCaptureEnabled() && !isRoomRequestCaptureEnabled(audit.collaboratorId)) return;
 
   const inspector = buildRequestInspectorModel(audit);
   const reply = options?.reply;
@@ -88,6 +90,7 @@ export function recordRequestDebugEntry(
     at: Date.now(),
     phase: options?.phase ?? 'prepared',
     assistantName: audit.assistantName,
+    collaboratorId: audit.collaboratorId,
     providerId: audit.providerId,
     providerName: audit.providerName,
     modelId: audit.modelId,

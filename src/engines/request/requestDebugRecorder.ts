@@ -1,4 +1,4 @@
-import { isRequestDebugCaptureEnabled } from '../../app/developer/debugCaptureRuntime';
+import { isRequestDebugCaptureEnabled, isRoomRequestCaptureEnabled } from '../../app/developer/debugCaptureRuntime';
 import type { AssistantReply } from '../chatApi';
 import type { ProviderHttpRequest } from '../provider-runtime';
 import type { AssistantRequestAudit } from './requestAudit';
@@ -11,7 +11,7 @@ type RequestDebugRecordOptions = {
 };
 
 export function recordRequestDebug(audit: AssistantRequestAudit, options?: RequestDebugRecordOptions) {
-  if (!isRequestDebugCaptureEnabled()) return;
+  if (!isRequestDebugCaptureEnabled() && !isRoomRequestCaptureEnabled(audit.collaboratorId)) return;
 
   void import('./requestDebugRuntime')
     .then(({ recordRequestDebugEntry }) => {

@@ -336,3 +336,59 @@ body[data-polaris-preset='keke-pois'] .conflux-room-settings-drawer {
     repeating-linear-gradient(transparent 0 28px, rgba(120,114,116,.09) 28px 29px),
     #f6f5f5;
 }
+
+/* Room automation and request details reuse the existing drawer colors. */
+.conflux-room-automation { min-width: 0; }
+.conflux-room-automation .automation-rules-panel { min-width: 0; }
+.conflux-room-automation .automation-rule-card,
+.conflux-room-automation .automation-form-section { max-width: 100%; min-width: 0; }
+.conflux-room-automation .automation-rule-actions { flex-wrap: wrap; }
+.conflux-room-settings-preview-link {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; min-height: 44px; margin-top: 12px; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--control-surface); color: var(--sheet-readable-text);
+  font: inherit; font-size: 13px; text-align: left; cursor: pointer;
+}
+.conflux-room-settings-preview-link span { flex: 1; }
+.conflux-room-request-details { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.conflux-room-request-toolbar { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
+.conflux-room-request-toolbar p { flex: 1; }
+.conflux-room-request-refresh {
+  flex: none; min-height: 38px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 9px;
+  background: var(--control-surface); color: var(--sheet-readable-text);
+  font: inherit; font-size: 12px; cursor: pointer;
+}
+.conflux-room-request-meta {
+  display: flex; flex-direction: column; gap: 5px; padding: 12px;
+  border: 1px solid var(--border); border-radius: 11px;
+  background: color-mix(in srgb, var(--control-surface) 65%, transparent);
+  font-size: 12px; overflow-wrap: anywhere;
+}
+.conflux-room-request-meta strong { font-size: 13px; }
+.conflux-room-request-meta span, .conflux-room-request-counts { color: var(--sheet-readable-soft); font-size: 12px; }
+.conflux-room-request-part {
+  min-width: 0; border-bottom: 1px solid var(--border); padding: 8px 2px;
+}
+.conflux-room-request-part summary {
+  display: flex; align-items: center; gap: 8px; min-height: 38px;
+  cursor: pointer; overflow-wrap: anywhere; font-size: 12px;
+}
+.conflux-room-request-part summary span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.conflux-room-request-part summary small { flex: none; color: var(--sheet-readable-soft); }
+.conflux-room-request-part pre, .conflux-room-request-raw {
+  max-width: 100%; overflow: auto; max-height: min(55dvh, 420px);
+  padding: 10px; border-radius: 9px; box-sizing: border-box;
+  background: var(--control-surface); white-space: pre-wrap; overflow-wrap: anywhere;
+  font: 11px/1.55 monospace; color: var(--sheet-readable-text);
+}
+.conflux-room-request-part p { font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.conflux-room-request-capture {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
+  padding: 12px; border: 1px solid var(--border); border-radius: 11px;
+  background: color-mix(in srgb, var(--control-surface) 60%, transparent);
+}
+.conflux-room-request-capture .conflux-room-settings-note { margin: 0; }
+.conflux-room-request-part summary small { max-width: 44%; text-align: right; white-space: normal; }

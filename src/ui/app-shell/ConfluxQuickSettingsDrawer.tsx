@@ -15,16 +15,20 @@ const RoomSettingsTab = lazy(() => import('../shell/persona/settings/RoomSetting
 const PersonaApiConnectionPanel = lazy(() => import('../shell/persona/settings/PersonaApiConnectionPanel').then((module) => ({ default: module.PersonaApiConnectionPanel })));
 const PersonaMcpSettingsPage = lazy(() => import('../shell/persona/settings/PersonaMcpSettingsPage').then((module) => ({ default: module.PersonaMcpSettingsPage })));
 const EngineSettingsTab = lazy(() => import('../shell/persona/settings/EngineSettingsTab').then((module) => ({ default: module.EngineSettingsTab })));
+const RoomAutomationSettings = lazy(() => import('./RoomAutomationSettings').then((module) => ({ default: module.RoomAutomationSettings })));
+const RoomRequestDetails = lazy(() => import('./RoomRequestDetails').then((module) => ({ default: module.RoomRequestDetails })));
 const CustomRequestSettingsTab = lazy(() => import('../shell/persona/settings/CustomRequestSettingsTab').then((module) => ({ default: module.CustomRequestSettingsTab })));
 
-type RoomPage = 'identity' | 'prompt' | 'route' | 'engine' | 'custom' | 'mcp' | 'memory' | 'appearance';
+type RoomPage = 'identity' | 'prompt' | 'route' | 'engine' | 'custom' | 'mcp' | 'memory' | 'appearance' | 'automation' | 'preview' | 'logs';
 const ROOM_PAGES: Array<{ id: RoomPage; label: string; description: string; icon: IconName }> = [
   { id: 'identity', label: '角色资料', description: '名称、头像与基本信息', icon: 'persona' },
   { id: 'prompt', label: '提示词', description: '人设、消息模板与世界书', icon: 'promptScript' },
   { id: 'route', label: 'API 与模型', description: '模型、参数及自定义请求', icon: 'providerRoute' },
   { id: 'memory', label: '记忆', description: '记忆条目、摘要与资料', icon: 'memoryShelf' },
   { id: 'mcp', label: 'MCP 工具', description: '当前角色使用的服务器', icon: 'mcpServer' },
-  { id: 'appearance', label: '房间外观', description: '背景、贴纸与聊天主题', icon: 'brush' }
+  { id: 'appearance', label: '房间外观', description: '背景、贴纸与聊天主题', icon: 'brush' },
+  { id: 'automation', label: '主动消息', description: '当前角色的发送规则', icon: 'voice' },
+  { id: 'logs', label: '运行日志', description: '请求记录与应用错误', icon: 'layers' }
 ];
 const API_PAGES: Array<{ id: 'route' | 'engine' | 'custom'; label: string }> = [
   { id: 'route', label: '模型' },
@@ -165,7 +169,7 @@ export function ConfluxQuickSettingsDrawer({
               <button type="button" className="conflux-room-settings-back" onClick={() => navigate(null)}>
                 <Icon name="chevron" size={17} /> 返回房间设置
               </button>
-              <h3 className="conflux-room-settings-detail-title">{currentPageMeta?.label}</h3>
+              <h3 className="conflux-room-settings-detail-title">{activePage === 'preview' ? '请求预览' : currentPageMeta?.label}</h3>
               {isApiPage ? (
                 <nav className="conflux-room-settings-api-tabs" aria-label="API 与模型设置">
                   {API_PAGES.map((page) => (
@@ -183,7 +187,16 @@ export function ConfluxQuickSettingsDrawer({
                       onDeletePersona={deletePersona}
                     />
                   ) : null}
-                  {activePage === 'prompt' ? <PromptSettingsTab {...personaProps} expandedUsesPageScroll /> : null}
+                  {activePage === 'prompt' ? (
+                    <>
+                      <PromptSettingsTab {...personaProps} expandedUsesPageScroll />
+                      <button type="button" className="conflux-room-settings-preview-link" onClick={() => navigate('preview')}>
+                        <Icon name="promptScript" size={17} />
+                        <span>查看实际请求记录</span>
+                        <Icon name="chevron" size={16} />
+                      </button>
+                    </>
+                  ) : null}
                   {activePage === 'route' ? (
                     <PersonaApiConnectionPanel {...personaProps}
                       onOpenProviderSettings={() => closeAndRun(onOpenApi)}
@@ -202,6 +215,11 @@ export function ConfluxQuickSettingsDrawer({
                   ) : null}
                   {activePage === 'memory' ? <MemorySettingsTab {...personaProps} /> : null}
                   {activePage === 'appearance' ? <RoomSettingsTab {...personaProps} /> : null}
+                  {activePage === 'automation' ? (
+                    <RoomAutomationSettings collaboratorId={currentPersona.id} onAfterTest={onClose} />
+                  ) : null}
+                  {activePage === 'preview' ? <RoomRequestDetails collaboratorId={currentPersona.id} mode="preview" /> : null}
+                  {activePage === 'logs' ? <RoomRequestDetails collaboratorId={currentPersona.id} mode="logs" /> : null}
                 </Suspense>
               </div>
             </>
