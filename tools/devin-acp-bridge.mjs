@@ -222,23 +222,10 @@ function onMessage(message) {
         return;
       }
     }
-    const permissionId = randomUUID();
-    const current = active;
-    const timer = setTimeout(() => {
-      permissionCalls.delete(permissionId);
-      try { send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } }); }
-      catch { /* Agent may have exited. */ }
-    }, 45000);
-    permissionCalls.set(permissionId, { rpcId: message.id, session: current, options, timer });
-    current.write({
-      type: 'permission_request',
-      permissionId,
-      title: String(permission?.toolCall?.title || permission?.title || 'Devin 请求操作权限').slice(0, 250),
-      description: JSON.stringify(permission?.toolCall?.rawInput || permission?.subject || {}).slice(0, 1200),
-      options: options.map(({ optionId, name, kind }) => ({
-        optionId, name: name.slice(0, 140), kind
-      }))
-    });
+    // Conflux chat uses its own persona-scoped tools. Never expose or approve
+    // Devin's separate coding-agent file, shell, or client tool requests here.
+    // Its internal prompt is owned by Devin and is not changed by this gate.
+    send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
     return;
   }
   // Never implicitly grant any other agent-side file, shell or client RPC.
