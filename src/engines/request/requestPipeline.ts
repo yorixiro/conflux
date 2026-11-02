@@ -54,20 +54,6 @@ function toAcpText(content: unknown): string {
   return content.filter((part) => part.type === 'text').map((part) => part.text).join('\n');
 }
 
-// Keep the active room identity in each ACP continuation. Devin sessions retain
-// their own conversation state, while the full Conflux context is sent on session/new.
-function buildAcpRoomTurnPrompt(context: { segments: Array<{ kind: string; messages: Array<{
-  role: string; content: unknown; promptPartLayer?: string
-}> }> }, latestUser: string): string {
-  const identity = context.segments
-    .filter((segment) => segment.kind === 'system')
-    .flatMap((segment) => segment.messages)
-    .filter((message) => message.promptPartLayer === 'identity')
-    .map((message) => '[' + message.role + ']\n' + toAcpText(message.content))
-    .join('\n\n');
-  return identity ? identity + '\n\n[user]\n' + latestUser : latestUser;
-}
-
 function messageContainsImageMissingModelPayload(message: Pick<RequestMessage, 'attachments'> | undefined): boolean {
   return Boolean(message?.attachments?.some((attachment) =>
     attachment.kind === 'image'
@@ -198,7 +184,7 @@ export async function requestCollaboratorReply(params: {
     recordRequestDebug(prepared.audit, { phase: 'prepared' });
     try {
       const reply = await requestDevinAcpReply({
-        prompt: buildAcpRoomTurnPrompt(prepared.context, latestUser.trim() ? latestUser : prompt),
+        prompt: typeof latestUser === 'string' && latestUser.trim() ? latestUser : prompt,
         initialContext: prompt,
         images,
         // ACP model selection belongs to the provider. Old persona HTTP model
