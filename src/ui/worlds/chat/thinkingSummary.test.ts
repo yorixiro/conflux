@@ -95,7 +95,7 @@ describe('buildThinkingSessionSummary', () => {
       kind: 'thinking',
       label: '这轮在想什么'
     });
-    expect(summary?.rawSections).toHaveLength(1);
+    expect(summary?.steps[0]).toMatchObject({ rawText: '先梳理目标。\n\n再确定约束。' });
   });
 
   it('keeps multi-step runs in order across thinking and tool steps', () => {
@@ -143,6 +143,7 @@ describe('buildThinkingSessionSummary', () => {
       kind: 'thinking',
       label: '把结果收束成回答'
     });
-    expect(summary?.rawSections).toHaveLength(2);
+    expect(summary?.steps[0]).toMatchObject({ rawText: '先确认要查什么，再决定往哪搜。' });
+    expect(summary?.steps[2]).toMatchObject({ rawText: '看完结果后，把最关键的两条收束成一句话。' });
   });
 });

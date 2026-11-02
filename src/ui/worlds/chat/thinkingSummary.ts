@@ -12,8 +12,6 @@ export type ThinkingSessionThoughtStep = {
   id: string;
   kind: 'thinking';
   label: string;
-  preview: string;
-  items: ThinkingSummaryItem[];
   rawText: string;
 };
 
@@ -25,21 +23,13 @@ export type ThinkingSessionToolStep = {
 
 export type ThinkingSessionStep = ThinkingSessionThoughtStep | ThinkingSessionToolStep;
 
-export type ThinkingSessionRawSection = {
-  id: string;
-  label: string;
-  content: string;
-};
-
 export type ThinkingSessionSummary = {
   statsLabel: string;
   hasTools: boolean;
   steps: ThinkingSessionStep[];
-  rawSections: ThinkingSessionRawSection[];
 };
 
 export type ThinkingSummaryCopy = {
-  previewFallback: () => string;
   statsLabel: (thoughtCount: number, toolCount: number) => string;
   phaseLabel: (args: {
     phaseIndex: number;
@@ -51,7 +41,6 @@ export type ThinkingSummaryCopy = {
 
 export function createThinkingSummaryCopy(t: I18nTranslator['t']): ThinkingSummaryCopy {
   return {
-    previewFallback: () => t('chat.thinking.previewFallback'),
     statsLabel: (thoughtCount, toolCount) => {
       if (thoughtCount > 0 && toolCount > 0) {
         return t('chat.thinking.stats.thoughtAndTool', { thoughtCount, toolCount });
@@ -226,12 +215,6 @@ export function buildThinkingSummary(thinkingText: string, limit?: number): Thin
     }));
 }
 
-export function buildThinkingPreview(thinkingText: string, copy: ThinkingSummaryCopy) {
-  const first = buildThinkingSummary(thinkingText, 1)[0];
-  if (!first) return copy.previewFallback();
-  return first.detail.length <= 80 ? first.detail : `${first.detail.slice(0, 80)}...`;
-}
-
 function collectThinkingSessionMessages(messages: ChatMessage[], activeMessageId: string) {
   const activeIndex = messages.findIndex((message) => message.id === activeMessageId);
   if (activeIndex < 0) return [];
@@ -257,8 +240,7 @@ function collectThinkingSessionMessages(messages: ChatMessage[], activeMessageId
 export function buildThinkingSessionSummary(
   messages: ChatMessage[],
   activeMessageId: string,
-  copy: ThinkingSummaryCopy,
-  itemLimit?: number
+  copy: ThinkingSummaryCopy
 ): ThinkingSessionSummary | null {
   const sessionMessages = collectThinkingSessionMessages(messages, activeMessageId);
   if (sessionMessages.length === 0) return null;
@@ -303,29 +285,17 @@ export function buildThinkingSessionSummary(
         hasToolsBefore,
         hasToolsAfter
       }),
-      preview: buildThinkingPreview(message.thinkingText, copy),
-      items: buildThinkingSummary(message.thinkingText, itemLimit),
       rawText: message.thinkingText
     }];
   });
 
   if (steps.length === 0) return null;
 
-  const rawSections = steps.flatMap<ThinkingSessionRawSection>((step) =>
-    step.kind === 'thinking'
-      ? [{
-          id: `${step.id}-raw`,
-          label: step.label,
-          content: step.rawText
-        }]
-      : []
-  );
   const hasTools = toolMessages.length > 0;
 
   return {
     statsLabel: copy.statsLabel(thoughtMessages.length, toolMessages.length),
     hasTools,
-    steps,
-    rawSections
+    steps
   };
 }

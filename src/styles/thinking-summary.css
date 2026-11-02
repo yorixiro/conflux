@@ -195,36 +195,24 @@
   color: var(--text);
 }
 
-.thinking-summary-phase-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.thinking-summary-phase-item {
-  display: grid;
-  grid-template-columns: 10px 1fr;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.thinking-summary-phase-dot {
-  width: 6px;
-  height: 6px;
-  margin-top: 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text-muted) 32%, var(--surface-solid));
-}
-
-.thinking-summary-phase-dot.action {
-  background: color-mix(in srgb, var(--accent) 58%, var(--text-soft) 42%);
-}
-
-.thinking-summary-phase-copy p {
-  margin: 0;
+.thinking-summary-thought-kicker {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--text-muted);
   font-size: var(--type-caption);
-  line-height: 1.65;
+  letter-spacing: .035em;
+}
+
+.thinking-summary-thought-body {
+  margin: 0;
   color: var(--text);
+  font-family: inherit;
+  font-size: var(--type-small);
+  font-weight: 400;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .thinking-summary-tool-head {
@@ -282,56 +270,6 @@
   color: var(--text-soft);
   font-size: 10px;
   line-height: 1.4;
-}
-
-.thinking-summary-raw-sections {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.thinking-summary-raw-section {
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  background: color-mix(in srgb, var(--surface) 76%, transparent);
-}
-
-.thinking-summary-raw-kicker {
-  display: inline-block;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.thinking-summary-raw {
-  margin-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  padding-top: 14px;
-}
-
-.thinking-summary-raw-toggle {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--text-soft);
-  font: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-.thinking-summary-raw-body {
-  margin-top: 10px;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: var(--type-caption);
-  line-height: 1.65;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 @media (max-width: 640px) {

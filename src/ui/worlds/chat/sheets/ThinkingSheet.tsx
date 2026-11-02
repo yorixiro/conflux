@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { ChatMessage, ToolInvocation } from '../../../../types/domain';
 import type { I18nTranslator } from '../../../../i18n';
@@ -44,17 +44,12 @@ export function ThinkingSheet({
   onClose
 }: ThinkingSheetProps) {
   const { t } = useI18n();
-  const [rawExpanded, setRawExpanded] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const copy = useMemo(() => createThinkingSummaryCopy(t), [t]);
   const session = useMemo(
     () => (message ? buildThinkingSessionSummary(messages, message.id, copy) : null),
     [copy, message, messages]
   );
-
-  useEffect(() => {
-    setRawExpanded(false);
-  }, [message?.id]);
 
   const isAvailable = Boolean(message && session);
   useEffect(() => {
@@ -105,16 +100,12 @@ export function ThinkingSheet({
               </div>
               <div className={`thinking-summary-step-shell ${step.kind} ${step.kind === 'tool' ? step.tool.status : ''}`}>
                 {step.kind === 'thinking' ? (
-                  <div className="thinking-summary-phase-list">
-                    {step.items.map((item) => (
-                      <div key={item.id} className={`thinking-summary-phase-item ${item.kind}`}>
-                        <span className={`thinking-summary-phase-dot ${item.kind}`} aria-hidden="true" />
-                        <div className="thinking-summary-phase-copy">
-                          <p>{item.detail}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <>
+                    {session.steps.length > 1 ? (
+                      <span className="thinking-summary-thought-kicker">{step.label}</span>
+                    ) : null}
+                    <pre className="thinking-summary-thought-body">{step.rawText}</pre>
+                  </>
                 ) : (
                   <>
                     <div className="thinking-summary-tool-head">
@@ -144,27 +135,6 @@ export function ThinkingSheet({
           ))}
         </div>
 
-        <div className="thinking-summary-raw">
-          <button
-            type="button"
-            className="thinking-summary-raw-toggle"
-            onClick={() => setRawExpanded((value) => !value)}
-            aria-expanded={rawExpanded}
-          >
-            <span>{t('chat.thinking.raw')}</span>
-            <Icon name={rawExpanded ? 'chevronUp' : 'chevronDown'} size={14} />
-          </button>
-          {rawExpanded ? (
-            <div className="thinking-summary-raw-sections">
-              {session.rawSections.map((section) => (
-                <section key={section.id} className="thinking-summary-raw-section">
-                  <span className="thinking-summary-raw-kicker">{section.label}</span>
-                  <pre className="thinking-summary-raw-body">{section.content}</pre>
-                </section>
-              ))}
-            </div>
-          ) : null}
-        </div>
       </div>
     </div>,
     portalHost
