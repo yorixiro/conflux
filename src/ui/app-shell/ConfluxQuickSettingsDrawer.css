@@ -227,51 +227,11 @@
   border-color: var(--border);
   background: var(--control-surface);
 }
-.conflux-room-settings-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-.conflux-room-settings-fields .ps-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  margin: 0;
-}
-.conflux-room-settings-fields .ps-input,
-.conflux-room-settings-fields .ps-textarea {
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  font-size: 13px;
-  border-radius: 11px;
-}
-.conflux-room-settings-fields .ps-input { min-height: 39px; }
-.conflux-room-settings-fields .ps-textarea { min-height: 84px; }
-.conflux-room-settings-fields .ps-field-label { font-size: 12px; }
 .conflux-room-settings-note {
   margin: 0 0 12px;
   color: var(--sheet-readable-soft);
   font-size: 12px;
   line-height: 1.65;
-}
-.conflux-room-settings-advanced {
-  min-width: 0;
-  border-top: 1px solid var(--border);
-  padding: 12px 0;
-}
-.conflux-room-settings-advanced summary {
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--sheet-readable-text);
-  padding: 5px 0 12px;
-}
-.conflux-room-settings-advanced .ps-field,
-.conflux-room-settings-advanced .ps-slider {
-  margin-bottom: 14px;
 }
 @media (max-width: 440px) {
   .conflux-room-settings-drawer .conflux-quick-settings-content { padding-left: 12px; padding-right: 12px; }
