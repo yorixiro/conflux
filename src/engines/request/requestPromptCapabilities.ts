@@ -34,7 +34,12 @@ function buildToolCapabilityEntries(
           : section.name === 'workspace_write_capability' || section.name === 'tool_rules_capability'
             ? 2
             : 3,
-    content: section.content
+    content: section.name === 'tool_capability'
+      ? [
+          '以下是当前可用的工具目录和执行规则；要动界面、房间、附件、记忆或联网时直接用。',
+          section.content
+        ].join('\n\n')
+      : section.content
   }));
 }
 
