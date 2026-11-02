@@ -2,12 +2,13 @@ import { saveAsset, dataUrlToBlob } from '../infrastructure/assetStore';
 import { createDomainObjectBase } from '../engines/domainObject';
 import { isGenericImageTitle } from '../engines/imageAssetNaming';
 import { inferImageAssetTags, normalizeImageAssetTags } from '../engines/imageAssetTags';
+import { normalizeStickerMetadata } from '../engines/stickerCatalog';
 import type { ImageAssetCard } from '../types/domain';
 
 export type ImageCardPatch = Partial<Pick<
   ImageAssetCard,
   'publicShareId' | 'publicShareUrl' | 'publicSharedAt' | 'tags' | 'title'
->>;
+>> & { sticker?: ImageAssetCard['sticker'] | null };
 
 export type SaveImageFromChatInput = {
   assetId: string;
@@ -64,6 +65,7 @@ export function normalizeImageCard(
   return {
     id: card.id,
     assetId: card.assetId,
+    sticker: normalizeStickerMetadata(card.sticker),
     title: deriveImageCardTitle(fallbackImageName, card.title, resolvedTags),
     tags: resolvedTags,
     ownerCollaboratorId:
@@ -132,6 +134,7 @@ export function patchImageCards(
             ...patch,
             title: patch.title !== undefined ? patch.title : card.title,
             tags: patch.tags !== undefined ? patch.tags : card.tags,
+            sticker: patch.sticker === null ? undefined : patch.sticker !== undefined ? patch.sticker : card.sticker,
             updatedAt: Date.now()
           })
         : card
