@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../../../../Icon';
 import starterCategories from './DefaultKaomoji.json';
+import { StickerPickerPanel } from './StickerPickerPanel';
 import './kaomoji-drawer.css';
 
 type KaomojiCategory = { name: string; items: string[] };
@@ -34,11 +35,13 @@ function readKaomojiLibrary(): KaomojiCategory[] {
   }
 }
 
-export function KaomojiDrawer({ onSelect, onClose }: {
+export function KaomojiDrawer({ onSelect, onSelectSticker, onClose }: {
   onSelect: (face: string) => void;
+  onSelectSticker: (assetId: string, fallbackName: string) => Promise<void>;
   onClose: () => void;
 }) {
   const [categories, setCategories] = useState(readKaomojiLibrary);
+  const [activeTab, setActiveTab] = useState<'kaomoji' | 'stickers'>('kaomoji');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [newFace, setNewFace] = useState('');
@@ -82,16 +85,24 @@ export function KaomojiDrawer({ onSelect, onClose }: {
   };
 
   return (
-    <section className="kaomoji-drawer" id="composer-kaomoji-drawer" role="dialog" aria-label="颜文字抽屉" onKeyDown={event => {
+    <section className="kaomoji-drawer" id="composer-kaomoji-drawer" role="dialog" aria-label="颜文字与表情包选择器" onKeyDown={event => {
       if (event.key === 'Escape') { event.stopPropagation(); onClose(); }
     }}>
       <header className="kaomoji-drawer-heading">
-        <button type="button" className={editing ? 'active' : ''} aria-label={editing ? '完成整理' : '整理颜文字'} aria-pressed={editing} title={editing ? '完成整理' : '整理颜文字'} onClick={() => setEditing(value => !value)}>
-          <Icon name="edit" size={17} />
-        </button>
-        <div><strong>颜文字</strong><small>{faceCount} 个表情 · 轻点加入输入框</small></div>
-        <button type="button" aria-label="关闭颜文字" title="关闭" onClick={onClose}><Icon name="x" size={18} /></button>
+        {activeTab === 'kaomoji' ? (
+          <button type="button" className={editing ? 'active' : ''} aria-label={editing ? '完成整理' : '整理颜文字'}
+            aria-pressed={editing} onClick={() => setEditing(value => !value)}><Icon name="edit" size={17} /></button>
+        ) : <span className="kaomoji-drawer-heading-spacer" />}
+        <div className="kaomoji-main-tabs" role="tablist" aria-label="选择内容类型">
+          <button type="button" role="tab" aria-selected={activeTab === 'kaomoji'}
+            className={activeTab === 'kaomoji' ? 'active' : ''} onClick={() => setActiveTab('kaomoji')}>颜文字</button>
+          <button type="button" role="tab" aria-selected={activeTab === 'stickers'}
+            className={activeTab === 'stickers' ? 'active' : ''} onClick={() => setActiveTab('stickers')}>表情包</button>
+        </div>
+        <button type="button" aria-label="关闭选择器" title="关闭" onClick={onClose}><Icon name="x" size={18} /></button>
       </header>
+      {activeTab === 'kaomoji' ? (
+      <>
       <div className="kaomoji-category-tabs" role="group" aria-label="颜文字分类">
         <button type="button" className={activeCategory === null ? 'active' : ''} aria-pressed={activeCategory === null} onClick={() => setActiveCategory(null)}>全部</button>
         {categories.map(category => <button type="button" key={category.name} className={activeCategory === category.name ? 'active' : ''} aria-pressed={activeCategory === category.name} onClick={() => setActiveCategory(category.name)}>{category.name}</button>)}
@@ -114,6 +125,8 @@ export function KaomojiDrawer({ onSelect, onClose }: {
           {saveFailed ? <p role="status">本地保存未成功，本次修改可能无法在刷新后保留。</p> : null}
         </form>
       </div>
+      </>
+      ) : <StickerPickerPanel onPick={onSelectSticker} />}
     </section>
   );
 }
