@@ -14,6 +14,12 @@ import {
 import { readLocalRuntimeLogEntries, type LocalRuntimeLogEntry } from '../../app/shell/localRuntimeLog';
 
 type Mode = 'preview' | 'logs';
+type LocalRuntimeVersion = { app: 'Conflux'; mode: string; branch?: string; commit?: string };
+
+// This stamp is compiled into the frontend bundle by vite.config.ts.
+// Unlike /api/health, a cached PWA cannot silently pick up a newer stamp.
+const bundleCommit = import.meta.env.VITE_CONFLUX_BUNDLE_SHA || '';
+const bundleBranch = import.meta.env.VITE_CONFLUX_BUNDLE_BRANCH || '';
 
 function readRoomEntries(id: string) {
   // Never infer ownership from a role name; identical names may belong to different rooms.
@@ -41,9 +47,19 @@ export function RoomRequestDetails({ collaboratorId, mode }: {
   const [showRequestBody, setShowRequestBody] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [captureId, setCaptureId] = useState(readRoomRequestCaptureId);
+  const [runtimeVersion, setRuntimeVersion] = useState<LocalRuntimeVersion | null>(null);
   const refresh = () => {
     setRequests(readRoomEntries(collaboratorId));
     setLogs(readLocalRuntimeLogEntries(50));
+    void fetch('/api/health', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() as Promise<unknown> : null)
+      .then((value) => {
+        const health = value as Partial<LocalRuntimeVersion> | null;
+        setRuntimeVersion(health?.app === 'Conflux' && typeof health.mode === 'string'
+          ? { app: 'Conflux', mode: health.mode, branch: health.branch, commit: health.commit }
+          : null);
+      })
+      .catch(() => setRuntimeVersion(null));
   };
 
   useEffect(() => {
@@ -59,6 +75,8 @@ export function RoomRequestDetails({ collaboratorId, mode }: {
 
   const latest = requests[0] ?? null;
   const captured = isRequestDebugCaptureEnabled() || isRoomRequestCaptureEnabled(collaboratorId);
+  const versionMismatch = Boolean(bundleCommit && runtimeVersion?.commit && bundleCommit !== runtimeVersion.commit);
+  const shortSha = (sha?: string) => sha ? sha.slice(0, 7) : '未知';
   return (
     <section className="conflux-room-request-details">
       <div className="conflux-room-request-toolbar">
@@ -69,6 +87,15 @@ export function RoomRequestDetails({ collaboratorId, mode }: {
         </p>
         <button type="button" className="conflux-room-request-refresh" onClick={refresh}>刷新</button>
       </div>
+      <p className="conflux-room-settings-note">
+        当前页面：{shortSha(bundleCommit)} · {bundleBranch || '未知分支'} · {import.meta.env.DEV ? '实时开发' : '已构建页面'}
+        {runtimeVersion ? `；4173 服务：${runtimeVersion.mode} · ${shortSha(runtimeVersion.commit)} · ${runtimeVersion.branch || '未知分支'}` : '；无法读取本地服务版本'}
+      </p>
+      {versionMismatch ? (
+        <p className="conflux-room-settings-note" role="status">
+          页面与服务器源码版本不同。先核对是否用了旧 PWA 或未重启的开发服务；不要清除聊天数据。
+        </p>
+      ) : null}
 
       {mode === 'preview' ? (
         <>

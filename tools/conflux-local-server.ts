@@ -1,4 +1,5 @@
 import { createServer, request as httpRequest, type IncomingMessage, type ServerResponse } from 'node:http';
+import { execFileSync } from 'node:child_process';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -49,6 +50,19 @@ self.addEventListener('activate', (event) => {
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const maxBodyBytes = 32 * 1024 * 1024;
+
+// Read Git at request time so /api/health can identify a source change
+// even if the dev server has not yet been restarted.
+function currentGitVersion(): { branch?: string; commit?: string } {
+  try {
+    const git = (...args: string[]) => execFileSync('git', args, {
+      cwd: repo, encoding: 'utf8', timeout: 2000, stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+    return { branch: git('branch', '--show-current') || 'detached', commit: git('rev-parse', 'HEAD') };
+  } catch {
+    return {};
+  }
+}
 
 function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) {
   const token = process.env.DEVIN_ACP_BRIDGE_TOKEN?.trim();
@@ -162,7 +176,7 @@ export async function startLocalServer({ dev = false, port = 4173, root = resolv
           json(res, 403, { error: 'Same-origin requests only.' }); return;
         }
         if (url.pathname === '/api/health' && req.method === 'GET') {
-          json(res, 200, { app: 'Conflux', mode: dev ? 'development' : 'pwa' }); return;
+          json(res, 200, { app: 'Conflux', mode: dev ? 'development' : 'pwa', ...currentGitVersion() }); return;
         }
         const handler = handlers[url.pathname];
         if (!handler) {
