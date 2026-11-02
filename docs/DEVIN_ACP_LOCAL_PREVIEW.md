@@ -8,7 +8,17 @@ Status: **implementation in progress**, not yet accepted on Android. The ACP con
 
 The bridge owns the Devin process and ACP session. The browser never sees the bridge token, Devin credentials or the stdio channel. It is not an OpenAI-compatible endpoint; do **not** enter it as a Base URL in an API provider.
 
-## Start in the Ubuntu PRoot with Devin installed
+## Normal Termux + Ubuntu PRoot startup
+
+Use the existing paired launcher from Termux at the Conflux repository root:
+
+```bash
+bash tools/termux-acp-dev.sh
+```
+
+It starts the 4173 hot-dev frontend **and** the 47831 Devin ACP bridge, shares a private token, and manages both processes. Stop already-running instances normally before starting it. `npm run termux:dev` alone starts only the frontend/proxy and **does not** launch the bridge. Do not replace the paired launcher with a frontend-only instruction.
+
+## Manual standalone bridge startup (troubleshooting only)
 
 From the Conflux checkout containing this integration:
 

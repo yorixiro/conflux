@@ -3,7 +3,9 @@
 本页不再指导切换历史美化、导航或 ACP 分支。唯一日常开发分支为 `conflux-dev`，详见 [AGENTS.md](../AGENTS.md)。
 
 - 项目路径：`~/my_st_termux/conflux`
-- 平板开发服务端口：**4173**，现有脚本：`npm run termux:dev`
+- 平板前端服务端口：**4173**；Devin ACP 桥接端口：**47831**。
+- **日常联合启动**（Termux + Ubuntu PRoot）：`bash tools/termux-acp-dev.sh`。现有脚本启动、管理两个进程，并共用保存在仓库外的 ACP 密钥。
+- `npm run termux:dev` **仅启动 4173 热开发服务及其 ACP 转发路由，不会启动 47831 的 Devin 桥接进程**；只有故意单独调试前端时才使用。
 - 不要把普通 `npm run dev` 的 Vite 默认端口当作原 Termux 服务
 - PWA 必须使用安装时相同的主机名、端口与来源；`localhost` 和 `127.0.0.1` 并不相同
 
@@ -22,7 +24,14 @@ git fetch origin
 git pull --ff-only origin conflux-dev
 ```
 
-如果还在历史分支、存在未提交改动或无法快进，先核对差异，不要自动切分支、合并、重置或清理数据。已有服务运行时，不重复启动；原服务停止后才运行 `npm run termux:dev`。
+如果还在历史分支、存在未提交改动或无法快进，先核对差异，不要自动切分支、合并、重置或清理数据。已有服务运行时，不重复启动；先确认并正常停止旧前端/桥接进程，两个端口都空闲后，再运行联合启动脚本：
+
+```bash
+cd ~/my_st_termux/conflux
+bash tools/termux-acp-dev.sh
+```
+
+脚本遇到占用端口会拒绝启动，不会替你强杀旧服务。不要删除聊天数据、缓存或重复开进程来排查。
 
 ## PWA 排查
 
