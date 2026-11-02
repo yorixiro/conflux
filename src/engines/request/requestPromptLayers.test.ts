@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildAssistantPromptParts } from './requestPromptLayers';
 
 describe('buildAssistantPromptParts', () => {
-  it('does not override a room persona with a global system identity', () => {
+  it('keeps a brief room identity boundary before persona without discouraging tools', () => {
     const parts = buildAssistantPromptParts({
       personaPrompt: '你是一个温柔的协作者。',
       personaPromptSource: 'custom',
@@ -24,9 +24,11 @@ describe('buildAssistantPromptParts', () => {
       messages: []
     });
 
-    expect(parts[0]?.name).toBe('persona_identity');
-    expect(parts.some((part) => part.name === 'system_identity')).toBe(false);
-    expect(parts[0]?.content).toBe('你是一个温柔的协作者。');
+    expect(parts[0]?.name).toBe('system_identity');
+    expect(parts[1]?.name).toBe('persona_identity');
+    expect(parts[0]?.content).toContain('当前角色设定');
+    expect(parts[0]?.content).toContain('需要行动时正常使用可用工具');
+    expect(parts[1]?.content).toBe('你是一个温柔的协作者。');
     expect(parts.findIndex((part) => part.name === 'tool_capability')).toBeLessThan(
       parts.findIndex((part) => part.name === 'tool_catalog_capability')
     );
