@@ -8,7 +8,7 @@ function promptPart(seed: {
   label: string;
   layer: AssistantPromptPart['layer'];
   content: string;
-}): AssistantPromptPart {
+}): AssistantPromptPart & { role: 'system' } {
   return {
     ...seed,
     role: 'system',
