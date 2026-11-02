@@ -129,27 +129,21 @@ export function buildCardContextPrompt(context: AssistantToolContext | undefined
 export function buildUiContextPrompt(context: AssistantToolContext | undefined): string {
   const ui = context?.uiSnapshot;
   if (!ui) return '';
-  const collectionShelfLabel =
-    ui.collectionShelf === 'info'
-      ? '协作者信息'
-      : ui.collectionShelf === 'dialogue'
-      ? '对话收藏'
-      : ui.collectionShelf === 'image'
-        ? '图片收藏'
-        : ui.collectionShelf === 'album'
-          ? '收藏册'
-        : '代码收藏';
+
+  // Use only current runtime facts; UI labels, menus and button locations are
+  // presentation details and must never become long-lived model instructions.
+  const area = ui.activeWorld === 'chat'
+    ? '聊天'
+    : ui.activeWorld === 'collection'
+      ? '收藏'
+      : '群聊';
   const lines = [
-    `当前界面：${ui.activeWorld === 'chat' ? '对话区' : '收藏区'}${ui.activeWorld === 'collection' ? ` · ${collectionShelfLabel}` : ''}`,
-    ui.activeConversationTitle
-      ? `当前对话：${ui.activeConversationTitle}${ui.activeCollaboratorName ? ` · 协作者=${ui.activeCollaboratorName}` : ''}`
-      : ui.activeCollaboratorName
-        ? `当前协作者：${ui.activeCollaboratorName}`
-        : null,
-    ui.activeWorld === 'chat' && ui.chatAvatarLayoutEnabled
-      ? '当前对话开启了对话式头像布局：界面会显示双方头像并调整消息位置，但回复正文仍然渲染在同一个助手气泡里。闲聊可以自然分段；代码、列表、表格、工具说明或任务账本这类结构化内容保持整段，不要硬拆。'
-      : null
+    `当前区域：${area}`,
+    ui.activeWorld === 'collection' ? `当前收藏分类：${ui.collectionShelf}` : null,
+    ui.activeConversationTitle ? `当前对话：${ui.activeConversationTitle}` : null,
+    ui.activeCollaboratorName ? `当前角色：${ui.activeCollaboratorName}` : null
   ].filter(Boolean) as string[];
+
   return lines.join('\n');
 }
 

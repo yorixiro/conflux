@@ -43,18 +43,6 @@ function buildToolCapabilityEntries(
   }));
 }
 
-function buildReplyMarkupLayer() {
-  return [
-    '正文默认继续用 markdown。',
-    '如果你想让气泡里的表达更细，可以额外使用一层轻量富文本，但只限安全白名单，不要输出 script、iframe、外链样式或外部资源。',
-    '允许的内联写法：`<span style="...">...</span>`、`<small>`、`<sub>`、`<sup>`、`<mark>`、`<u>`、`<br>`。',
-    '其中 `<span style>` 只支持轻量样式子集：color、background/background-color、border/border-color、border-radius、padding、font-size、font-weight、font-style、letter-spacing、text-transform、text-decoration、box-shadow、opacity、margin-left、margin-right、display:inline-block。',
-    '允许的块级写法：`<details><summary>标题</summary>内容</details>` 用来做折叠段落。',
-    '还允许轻量卡片：`<polaris-card title="标题" kicker="角标" tone="mist|warm|cool|rose|gold">内容</polaris-card>`。',
-    '这些富文本只服务内容表达，不要拿它冒充工具结果，也不要塞需要宿主额外执行的东西。'
-  ].join('\n');
-}
-
 export function buildCapabilityEntries(args: {
   messages: ChatMessage[];
   toolContext?: AssistantToolContext;
@@ -62,15 +50,5 @@ export function buildCapabilityEntries(args: {
 }): Array<Omit<AssistantPromptPart, 'enabled' | 'charCount'>> {
   void args.messages;
 
-  return [
-    ...buildToolCapabilityEntries(args.toolContext, args.toolProtocolMode),
-    {
-    name: 'reply_markup_capability',
-    label: '回复富文本',
-    role: 'system',
-    layer: 'capability',
-    truncationPriority: 1,
-    content: buildReplyMarkupLayer()
-    }
-  ];
+  return buildToolCapabilityEntries(args.toolContext, args.toolProtocolMode);
 }

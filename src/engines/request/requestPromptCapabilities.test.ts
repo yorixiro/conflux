@@ -2,17 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { buildCapabilityEntries } from './requestPromptCapabilities';
 
 describe('buildCapabilityEntries', () => {
-  it('exposes reply rich markup capability in the system prompt', () => {
+  it('does not inject product markup tutorials into ordinary replies', () => {
     const entries = buildCapabilityEntries({
       messages: [],
       toolContext: undefined,
       toolProtocolMode: 'hybrid'
     });
 
-    const markupEntry = entries.find((entry) => entry.name === 'reply_markup_capability');
-    expect(markupEntry?.content).toContain('<details><summary>标题</summary>内容</details>');
-    expect(markupEntry?.content).toContain('<polaris-card title="标题" kicker="角标" tone="mist|warm|cool|rose|gold">内容</polaris-card>');
-    expect(markupEntry?.content).toContain('<span style="...">...</span>');
+    expect(entries.some((entry) => entry.name === 'reply_markup_capability')).toBe(false);
+    expect(entries.some((entry) => entry.content.includes('<polaris-card title='))).toBe(false);
   });
 
   it('passes the unlocked experimental runCode sandbox profile into the capability prompt', () => {
@@ -171,9 +169,11 @@ describe('buildCapabilityEntries', () => {
       layer: 'context'
     });
     const uiContext = entries.find((entry) => entry.name === 'ui_context_capability')?.content;
-    expect(uiContext).toContain('当前界面：对话区');
-    expect(uiContext).toContain('对话式头像布局');
-    expect(uiContext).toContain('回复正文仍然渲染在同一个助手气泡里');
+    expect(uiContext).toContain('当前区域：聊天');
+    expect(uiContext).toContain('当前对话：测试对话');
+    expect(uiContext).toContain('当前角色：Pharos');
+    expect(uiContext).not.toContain('对话式头像布局');
+    expect(uiContext).not.toContain('按钮');
     expect(entries.find((entry) => entry.name === 'attachment_context_capability')?.content).toContain('最近一条用户附件：');
     expect(entries.find((entry) => entry.name === 'desktop_local_context_capability')?.content).toContain('本机环境：');
     expect(entries.find((entry) => entry.name === 'room_context_capability')?.content).toContain('当前活动工作区：Mini Phone');

@@ -393,8 +393,8 @@ export function buildAssistantToolPromptSections(
       name: 'tool_capability',
       label: '工具契约',
       content: [
-        '下面这段只管执行，不改你的 persona；Polaris 是应用名，不是你的名字。',
-        '工具提示只教现实边界，不教脑内流程：说明真实对象、可用能力、输入输出、副作用和作用域，不替你规定固定步骤。',
+        '以下仅说明当前真正可用的工具，不覆盖角色人设。',
+        '以当前工具目录、参数和执行结果为准；不要根据旧产品指南猜测界面按钮或入口。',
         '这里只列这轮当前已打开的工具；工具动作按需要使用，正文按当前对话语境回应。',
         '如果用户只是普通聊天、写自介、润色文案或表达想法，先自然回答，不要输出工具协议、代码草稿或调试残片。',
         ...buildToolEnforcementLines(context, protocolMode),

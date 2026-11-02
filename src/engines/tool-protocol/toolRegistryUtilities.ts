@@ -423,10 +423,10 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     name: 'readPolarisKnowledge',
     group: 'knowledge',
     resultReplayMode: 'full-detail',
-    brief: '读取 Polaris 内置产品知识文档',
+    brief: '按需读取历史产品参考资料（不反映实时界面）',
     schema: {
       name: 'readPolarisKnowledge',
-      description: '按需读取 Polaris 内置产品知识文档。不填 topic 会先返回章节索引；用于理解 Polaris 的对象边界、请求链路、工具箱、MCP、工作区、记忆、备份、隐私边界和主题美化选区映射。',
+      description: '按需读取历史产品参考资料。不填 topic 返回章节索引。旧资料可能含过时按钮、名称与功能位置；涉及当前界面和功能可用性，必须改以实时状态或当前工具结果为准。',
       parameters: objectParameters({
         topic: stringProperty('可选。想聚焦的主题关键词；不填返回章节索引；传“全文”才读取完整产品知识文档。'),
         targetLabel: stringProperty('可选目标说明。')
@@ -435,7 +435,7 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     rules: [
       '产品知识动作：',
       '1. readPolarisKnowledge：读取 Polaris 内置结构知识文档。',
-      '- 这个工具只读取产品知识，不读取当前运行状态、用户数据、项目文件或外部服务。',
+      '- 这些是历史参考资料，不是当前界面或按钮的事实来源。查询真实入口与可用功能时，以实时环境工具结果为准；没有实时证据就不要编造操作路径。',
       '- 不确定该读哪章时，先不填 topic 读取章节索引；再用章节名或关键词读取正文。',
       '- 不要默认读取全文；只有需要全局核对时才用 topic="全文"。',
       '- 找主题美化 selector 时，可以用 topic="主题美化选区" 读取自然语言意图到可改区域的映射。'
