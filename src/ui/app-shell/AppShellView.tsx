@@ -42,7 +42,6 @@ export function AppShellView({
   collectionCreateCustomCollaborator,
   collectionOpenProviderSettings,
   collectionOpenSettings,
-  openQuickMenuPage,
   collectionOpenDesktopLocalSettings,
   collectionDeleteCollaborator,
   collaboratorTransitionKey,
@@ -89,6 +88,19 @@ export function AppShellView({
   const [chatHubOpen, setChatHubOpen] = useState(true);
   const showChatHub = useBottomNavigation && !homeOpen && activeWorld === 'chat' && chatHubOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
+  // Gear buttons edit their own AI, even when another conversation is active.
+  const [roomSettingsTargetId, setRoomSettingsTargetId] = useState<string | null>(null);
+  const roomSettingsPersona = roomSettingsTargetId
+    ? desktopSidebarProps.collaborators.find((persona) => persona.id === roomSettingsTargetId) ?? null
+    : chatCollaborator;
+  const openRoomSettings = (collaboratorId?: string) => {
+    setRoomSettingsTargetId(collaboratorId ?? chatCollaborator?.id ?? null);
+    setQuickSettingsOpen(true);
+  };
+  const closeRoomSettings = () => {
+    setQuickSettingsOpen(false);
+    setRoomSettingsTargetId(null);
+  };
   const onOpenHomeConversation = (id: string) => {
     desktopSidebarProps.onOpenConversation(id);
     setChatHubOpen(false);
@@ -214,6 +226,7 @@ export function AppShellView({
         <DesktopAppShellFrame
           desktopSidebarProps={{
             ...desktopSidebarProps,
+            onEditCollaborator: openRoomSettings,
             onOpenApi: collectionOpenProviderSettings,
             collapsed: effectiveDesktopSidebarCollapsed,
             onToggleCollapsed: toggleDesktopSidebarCollapsed,
@@ -225,7 +238,7 @@ export function AppShellView({
             <button
               type="button"
               className="conflux-quick-settings-desktop-trigger"
-              onClick={() => setQuickSettingsOpen(true)}
+              onClick={() => openRoomSettings()}
               aria-label="打开右侧房间设置"
               aria-haspopup="dialog"
               title="房间设置"
@@ -237,13 +250,13 @@ export function AppShellView({
       ) : (
         <MobileAppShellFrame
           chatHubOpen={showChatHub}
-          sidebarProps={{ ...desktopSidebarProps, onOpenApi: collectionOpenProviderSettings, onOpenHome: () => onHomeOpenChange(true) }}
+          sidebarProps={{ ...desktopSidebarProps, onEditCollaborator: openRoomSettings, onOpenApi: collectionOpenProviderSettings, onOpenHome: () => onHomeOpenChange(true) }}
           topbarProps={{
             ...topbarProps,
             actions: {
               ...mobileTopbarActions,
               onOpenConversationList: activeWorld === 'chat' ? () => setChatHubOpen(true) : undefined,
-              onOpenQuickSettings: () => setQuickSettingsOpen(true)
+              onOpenQuickSettings: () => openRoomSettings()
             }
           }}
         >
@@ -252,6 +265,7 @@ export function AppShellView({
             <div className="conflux-chat-hub">
               <DesktopAppSidebar
                 {...desktopSidebarProps}
+                onEditCollaborator={openRoomSettings}
                 presentation="hub"
                 initialTab="library"
                 collapsed={false}
@@ -324,12 +338,11 @@ export function AppShellView({
         onOpenBackup={onOpenBackupFromReadFailure}
       />
       <ConfluxQuickSettingsDrawer
-        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat' && !showChatHub}
-        onClose={() => setQuickSettingsOpen(false)}
+        open={quickSettingsOpen && !homeOpen && activeWorld === 'chat'}
+        onClose={closeRoomSettings}
         provider={overlaysProps.api}
         onOpenApi={collectionOpenProviderSettings}
-        onOpenMenu={openQuickMenuPage}
-        currentPersona={chatCollaborator}
+        currentPersona={roomSettingsPersona}
       />
       <AppShellOverlays {...overlaysProps} />
     </main>
