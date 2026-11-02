@@ -37,10 +37,18 @@ function PromptSlotsEditor({
   const slots = activePersona?.advanced.promptSlots ?? [];
   const editable = canEditPersonaPrompt(activePersona);
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
+  const [systemIdentityDraft, setSystemIdentityDraft] = useState(
+    activePersona?.advanced.systemIdentityPrompt ?? DEFAULT_SYSTEM_IDENTITY_PROMPT
+  );
+  const effectiveSystemIdentity = activePersona?.advanced.systemIdentityPrompt ?? DEFAULT_SYSTEM_IDENTITY_PROMPT;
+  const systemIdentityChanged = systemIdentityDraft !== effectiveSystemIdentity;
 
   useEffect(() => {
     setEditingSlotId(null);
   }, [activeCollaboratorId]);
+  useEffect(() => {
+    setSystemIdentityDraft(effectiveSystemIdentity);
+  }, [activeCollaboratorId, effectiveSystemIdentity]);
 
   const save = (next: PersonaPromptSlot[]) => onUpdatePersona({ advanced: { promptSlots: next } });
   const edit = (id: string, patch: Partial<PersonaPromptSlot>) =>
@@ -72,25 +80,42 @@ function PromptSlotsEditor({
       <div className="prompt-slot-card" aria-label="系统身份提示词">
         <div className="prompt-slot-card-head">
           <strong>系统身份 <small className="prompt-slot-role">SYSTEM</small></strong>
-          <button
-            type="button"
-            className="ps-field-expand-btn"
-            disabled={!editable || activePersona?.advanced.systemIdentityPrompt === undefined}
-            onClick={() => onUpdatePersona({ advanced: { systemIdentityPrompt: undefined } })}
-          >
-            恢复默认
-          </button>
+          <span className="prompt-slot-summary">当前房间 · 默认原版</span>
         </div>
         <div className="prompt-slot-fields">
-          <p className="conflux-room-settings-note">原始 System Prompt 默认用于所有房间；这里编辑的内容只覆盖当前角色，注入顺序保持不变。留空时使用默认文本。</p>
+          <p className="conflux-room-settings-note">恢复的原版 System Prompt 默认适用于所有房间；这里仅覆盖当前角色。手动保存后才改变缓存前缀，注入位置不变。</p>
           <textarea
             className="ps-textarea ps-textarea--mono"
             aria-label="系统身份提示词内容"
             rows={9}
-            disabled={!editable}
-            value={activePersona?.advanced.systemIdentityPrompt ?? DEFAULT_SYSTEM_IDENTITY_PROMPT}
-            onChange={(event) => onUpdatePersona({ advanced: { systemIdentityPrompt: event.target.value } })}
+            value={systemIdentityDraft}
+            onChange={(event) => setSystemIdentityDraft(event.target.value)}
           />
+          <div className="prompt-slot-actions">
+            <button
+              type="button" className="ps-field-expand-btn"
+              disabled={!activePersona || !systemIdentityChanged || !systemIdentityDraft.trim()}
+              onClick={() => onUpdatePersona({
+                advanced: {
+                  systemIdentityPrompt: systemIdentityDraft === DEFAULT_SYSTEM_IDENTITY_PROMPT
+                    ? undefined : systemIdentityDraft
+                }
+              })}
+            >
+              保存系统身份
+            </button>
+            <button
+              type="button" className="ps-field-expand-btn"
+              disabled={!activePersona || (activePersona.advanced.systemIdentityPrompt === undefined && !systemIdentityChanged)}
+              onClick={() => {
+                setSystemIdentityDraft(DEFAULT_SYSTEM_IDENTITY_PROMPT);
+                onUpdatePersona({ advanced: { systemIdentityPrompt: undefined } });
+              }}
+            >
+              恢复默认
+            </button>
+          </div>
+          {systemIdentityChanged ? <p className="ps-footnote">当前有未保存的修改。</p> : null}
         </div>
       </div>
 
