@@ -26,10 +26,12 @@ function StickerTile({ card, editing, onPick, onEdit }: {
   );
 }
 
-export function StickerPickerPanel({ onPick }: {
+export function StickerPickerPanel({ onPick, ownerCollaboratorId }: {
   onPick: (assetId: string, fallbackName: string) => Promise<void>;
+  ownerCollaboratorId?: string;
 }) {
-  const cards = useCollectionStore((state) => state.imageCards);
+  const allCards = useCollectionStore((state) => state.imageCards);
+  const cards = allCards.filter((card) => !card.ownerCollaboratorId || card.ownerCollaboratorId === ownerCollaboratorId);
   const createImageCardFromAsset = useCollectionStore((state) => state.createImageCardFromAsset);
   const updateImageCard = useCollectionStore((state) => state.updateImageCard);
   const [editing, setEditing] = useState(false);
@@ -75,6 +77,7 @@ export function StickerPickerPanel({ onPick }: {
           fileName: file.name || 'sticker.png',
           mimeType: file.type || 'image/png',
           source: 'manual',
+          ownerCollaboratorId,
           createImageCardFromAsset
         });
         if (result) {
