@@ -128,42 +128,104 @@
   line-height: 1.35;
   letter-spacing: 0.015em;
 }
-.conflux-room-settings-nav {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+.conflux-room-settings-scroll { padding: 14px 1px 20px; overflow-x: hidden; }
+.conflux-room-settings-section-label {
+  margin: 7px 5px 9px;
+  color: var(--sheet-readable-soft);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .04em;
 }
-.conflux-room-settings-nav button {
+.conflux-room-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0 0 20px;
+  min-width: 0;
+}
+.conflux-room-settings-nav > button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--sheet-readable-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.conflux-room-settings-nav > button:hover,
+.conflux-room-settings-nav > button:focus-visible {
+  border-color: var(--border);
+  background: var(--control-surface);
+}
+.conflux-room-settings-entry-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--sheet-readable-soft);
+  background: var(--control-surface);
+}
+.conflux-room-settings-entry-copy { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.conflux-room-settings-entry-copy strong { font-size: 13px; font-weight: 600; }
+.conflux-room-settings-entry-copy small { color: var(--sheet-readable-soft); font-size: 11px; line-height: 1.5; }
+.conflux-room-settings-nav > button > svg:last-child { color: var(--sheet-readable-muted); flex-shrink: 0; }
+.conflux-room-settings-nav--common > button { min-height: 46px; }
+.conflux-room-settings-back {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 38px;
-  padding: 6px 4px;
-  border: 1px solid transparent;
-  border-radius: 9px;
+  gap: 4px;
+  padding: 7px 2px 8px;
+  border: 0;
   background: transparent;
   color: var(--sheet-readable-soft);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
-.conflux-room-settings-nav button svg { flex-shrink: 0; }
-.conflux-room-settings-nav button.active {
-  border-color: var(--border);
-  background: var(--control-surface);
+.conflux-room-settings-back svg { transform: rotate(180deg); }
+.conflux-room-settings-detail-title {
+  margin: 6px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 17px;
   color: var(--sheet-readable-text);
 }
-.conflux-room-settings-nav button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.conflux-room-settings-detail { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.conflux-room-settings-detail .ps-field { min-width: 0; margin: 0 0 14px; }
+.conflux-room-settings-detail .ps-input,
+.conflux-room-settings-detail .ps-textarea { width: 100%; max-width: 100%; box-sizing: border-box; }
+.conflux-room-settings-detail .room-theme-page-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  margin-bottom: 16px;
 }
-.conflux-room-settings-scroll {
-  padding: 14px 2px 20px;
-  overflow-x: hidden;
+.conflux-room-settings-detail .room-theme-page-nav > button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex: none;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  text-align: left;
+  white-space: normal;
+}
+.conflux-room-settings-detail .room-theme-page-nav > button.active {
+  border-color: var(--border);
+  background: var(--control-surface);
 }
 .conflux-room-settings-fields {
   display: flex;
@@ -213,10 +275,9 @@
 }
 @media (max-width: 440px) {
   .conflux-room-settings-drawer .conflux-quick-settings-content { padding-left: 12px; padding-right: 12px; }
-  .conflux-room-settings-nav { gap: 3px; }
-  .conflux-room-settings-nav button { font-size: 11px; gap: 4px; }
-  .conflux-room-settings-nav button svg { width: 14px; height: 14px; }
+  .conflux-room-settings-nav > button { padding-left: 7px; padding-right: 7px; }
 }
+
 
 /* Reuse the established sticker-room paper and ink instead of a generic white modal. */
 body[data-polaris-preset='keke-doodle'] .conflux-room-settings-drawer,
