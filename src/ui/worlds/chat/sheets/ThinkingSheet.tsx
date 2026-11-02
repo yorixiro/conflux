@@ -5,7 +5,7 @@ import type { I18nTranslator } from '../../../../i18n';
 import { useI18n } from '../../../../i18n';
 import { Icon } from '../../../Icon';
 import { toolIconName } from '../chatToolIcons';
-import { buildThinkingSessionSummary, createThinkingSummaryCopy } from '../thinkingSummary';
+import { buildThinkingSessionSummary } from '../thinkingSummary';
 
 type ThinkingSheetProps = {
   message: ChatMessage | null;
@@ -45,10 +45,9 @@ export function ThinkingSheet({
 }: ThinkingSheetProps) {
   const { t } = useI18n();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const copy = useMemo(() => createThinkingSummaryCopy(t), [t]);
   const session = useMemo(
-    () => (message ? buildThinkingSessionSummary(messages, message.id, copy) : null),
-    [copy, message, messages]
+    () => (message ? buildThinkingSessionSummary(messages, message.id) : null),
+    [message, messages]
   );
 
   const isAvailable = Boolean(message && session);
@@ -86,55 +85,43 @@ export function ThinkingSheet({
           </button>
           <div className="thinking-summary-title">
             <strong>thinking</strong>
-            <span>{[message.assistantName || assistantName, session.statsLabel].filter(Boolean).join(' · ')}</span>
+            <span>{message.assistantName || assistantName}</span>
           </div>
           <div className="thinking-summary-spacer" aria-hidden="true" />
         </div>
         <div className="thinking-summary-list">
           {session.steps.map((step) => (
             <article key={step.id} className={`thinking-summary-step ${step.kind}`}>
-              <div className="thinking-summary-item-rail" aria-hidden="true">
-                <span className={`thinking-summary-item-dot ${step.kind} ${step.kind === 'tool' ? step.tool.status : ''}`}>
-                  {step.kind === 'thinking' ? <Icon name="polarisStar" size={11} color="polarisDeepSpace" /> : <Icon name={toolIconName(step.tool)} size={12} />}
-                </span>
-              </div>
-              <div className={`thinking-summary-step-shell ${step.kind} ${step.kind === 'tool' ? step.tool.status : ''}`}>
-                {step.kind === 'thinking' ? (
-                  <>
-                    {session.steps.length > 1 ? (
-                      <span className="thinking-summary-thought-kicker">{step.label}</span>
-                    ) : null}
-                    <pre className="thinking-summary-thought-body">{step.rawText}</pre>
-                  </>
-                ) : (
-                  <>
-                    <div className="thinking-summary-tool-head">
-                      <span className="thinking-summary-step-kicker">{t('chat.thinking.toolKicker')}</span>
-                      <span className={`thinking-summary-tool-status ${step.tool.status}`}>{localizeToolStatus(step.tool.status, t)}</span>
+              {step.kind === 'thinking' ? (
+                <pre className="thinking-summary-thought-body">{step.rawText}</pre>
+              ) : (
+                <div className={`thinking-summary-tool-card ${step.tool.status}`}>
+                  <div className="thinking-summary-tool-head">
+                    <span className="thinking-summary-tool-heading">
+                      <Icon name={toolIconName(step.tool)} size={14} />
+                      {t('chat.thinking.toolKicker')}
+                    </span>
+                    <span className={`thinking-summary-tool-status ${step.tool.status}`}>
+                      {localizeToolStatus(step.tool.status, t)}
+                    </span>
+                  </div>
+                  <strong className="thinking-summary-tool-title">{step.tool.title}</strong>
+                  <p className="thinking-summary-tool-detail">{step.tool.summary}</p>
+                  {step.tool.themeSurfaceLabels?.length ? (
+                    <div className="thinking-summary-tool-chip-row">
+                      {step.tool.themeSurfaceLabels.map((label) => <span key={label}>{label}</span>)}
                     </div>
-                    <strong className="thinking-summary-step-preview">{step.tool.title}</strong>
-                    <p className="thinking-summary-tool-detail">{step.tool.summary}</p>
-                    {step.tool.themeSurfaceLabels?.length ? (
-                      <div className="thinking-summary-tool-chip-row">
-                        {step.tool.themeSurfaceLabels.map((label) => (
-                          <span key={label}>{label}</span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {step.tool.memoryItems?.length ? (
-                      <div className="thinking-summary-tool-chip-row">
-                        {step.tool.memoryItems.map((item) => (
-                          <span key={item}>{item}</span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </div>
+                  ) : null}
+                  {step.tool.memoryItems?.length ? (
+                    <div className="thinking-summary-tool-chip-row">
+                      {step.tool.memoryItems.map((item) => <span key={item}>{item}</span>)}
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </article>
           ))}
         </div>
-
       </div>
     </div>,
     portalHost

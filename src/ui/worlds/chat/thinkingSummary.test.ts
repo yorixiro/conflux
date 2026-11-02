@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createTranslator } from '../../../i18n';
 import type { ChatMessage } from '../../../types/domain';
-import { buildThinkingSessionSummary, buildThinkingSummary, createThinkingSummaryCopy } from './thinkingSummary';
-
-const zhCopy = createThinkingSummaryCopy(createTranslator('zh-CN').t);
+import { buildThinkingSessionSummary, buildThinkingSummary } from './thinkingSummary';
 
 function createMessage(patch: Partial<ChatMessage> & Pick<ChatMessage, 'id' | 'role' | 'content'>): ChatMessage {
   return {
@@ -73,77 +70,29 @@ describe('buildThinkingSessionSummary', () => {
     ]);
   });
 
-  it('builds a single thought step when the run only contains reasoning', () => {
+  it('displays the provider original thinking text without modifying its formatting', () => {
+    const original = '先梳理目标。\\n\\n再确定约束。';
     const summary = buildThinkingSessionSummary([
-      createMessage({
-        id: 'user-1',
-        role: 'user',
-        content: '帮我想想'
-      }),
-      createMessage({
-        id: 'assistant-1',
-        role: 'assistant',
-        content: '我想好了。',
-        thinkingText: '先梳理目标。\n\n再确定约束。'
-      })
-    ], 'assistant-1', zhCopy);
+      createMessage({ id: 'user-1', role: 'user', content: '帮我想想' }),
+      createMessage({ id: 'assistant-1', role: 'assistant', content: '我想好了。', thinkingText: original })
+    ], 'assistant-1');
 
-    expect(summary?.hasTools).toBe(false);
-    expect(summary?.statsLabel).toBe('1 段思路');
-    expect(summary?.steps).toHaveLength(1);
-    expect(summary?.steps[0]).toMatchObject({
-      kind: 'thinking',
-      label: '这轮在想什么'
-    });
-    expect(summary?.steps[0]).toMatchObject({ rawText: '先梳理目标。\n\n再确定约束。' });
+    expect(summary?.steps).toEqual([{ id: 'assistant-1', kind: 'thinking', rawText: original }]);
   });
 
-  it('keeps multi-step runs in order across thinking and tool steps', () => {
+  it('keeps provider thinking and tool events in original order', () => {
     const summary = buildThinkingSessionSummary([
+      createMessage({ id: 'user-1', role: 'user', content: '查一下再回答' }),
+      createMessage({ id: 'assistant-1', role: 'assistant', content: '', thinkingText: '先确认查询范围。' }),
       createMessage({
-        id: 'user-1',
-        role: 'user',
-        content: '查一下再回答'
+        id: 'tool-1', role: 'system', origin: 'tool-runtime', content: '已联网搜索',
+        toolInvocation: { id: 'tool-1', kind: 'webSearch', status: 'executed', title: '联网搜索', summary: '已找到结果' }
       }),
-      createMessage({
-        id: 'assistant-1',
-        role: 'assistant',
-        content: '',
-        thinkingText: '先确认要查什么，再决定往哪搜。'
-      }),
-      createMessage({
-        id: 'tool-1',
-        role: 'system',
-        origin: 'tool-runtime',
-        content: '已联网搜索',
-        toolInvocation: {
-          id: 'tool-1',
-          kind: 'webSearch',
-          status: 'executed',
-          title: '联网搜索',
-          summary: '已找到 3 条网页结果'
-        }
-      }),
-      createMessage({
-        id: 'assistant-2',
-        role: 'assistant',
-        content: '我整理好了。',
-        thinkingText: '看完结果后，把最关键的两条收束成一句话。'
-      })
-    ], 'assistant-2', zhCopy);
+      createMessage({ id: 'assistant-2', role: 'assistant', content: '整理完毕。', thinkingText: '根据结果回答。' })
+    ], 'assistant-2');
 
-    expect(summary?.hasTools).toBe(true);
-    expect(summary?.statsLabel).toBe('2 段思路 · 1 次工具');
-    expect(summary?.steps.map((step) => step.kind)).toEqual(['thinking', 'tool', 'thinking']);
-    expect(summary?.steps[0]).toMatchObject({
-      kind: 'thinking',
-      label: '先把方向想清楚'
-    });
-    expect(summary?.steps[2]).toMatchObject({
-      kind: 'thinking',
-      label: '把结果收束成回答'
-    });
-    expect(summary?.steps[0]).toMatchObject({ rawText: '先确认要查什么，再决定往哪搜。' });
-    expect(summary?.steps[2]).toMatchObject({ rawText: '看完结果后，把最关键的两条收束成一句话。' });
+    expect(summary?.steps.map(step => step.kind)).toEqual(['thinking', 'tool', 'thinking']);
+    expect(summary?.steps[0]).toMatchObject({ rawText: '先确认查询范围。' });
+    expect(summary?.steps[2]).toMatchObject({ rawText: '根据结果回答。' });
   });
 });

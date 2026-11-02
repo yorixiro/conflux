@@ -1,5 +1,4 @@
 import type { ChatMessage, ToolInvocation } from '../../../types/domain';
-import type { I18nTranslator } from '../../../i18n';
 
 export type ThinkingSummaryItem = {
   id: string;
@@ -11,7 +10,6 @@ export type ThinkingSummaryItem = {
 export type ThinkingSessionThoughtStep = {
   id: string;
   kind: 'thinking';
-  label: string;
   rawText: string;
 };
 
@@ -24,60 +22,8 @@ export type ThinkingSessionToolStep = {
 export type ThinkingSessionStep = ThinkingSessionThoughtStep | ThinkingSessionToolStep;
 
 export type ThinkingSessionSummary = {
-  statsLabel: string;
-  hasTools: boolean;
   steps: ThinkingSessionStep[];
 };
-
-export type ThinkingSummaryCopy = {
-  statsLabel: (thoughtCount: number, toolCount: number) => string;
-  phaseLabel: (args: {
-    phaseIndex: number;
-    phaseCount: number;
-    hasToolsBefore: boolean;
-    hasToolsAfter: boolean;
-  }) => string;
-};
-
-export function createThinkingSummaryCopy(t: I18nTranslator['t']): ThinkingSummaryCopy {
-  return {
-    statsLabel: (thoughtCount, toolCount) => {
-      if (thoughtCount > 0 && toolCount > 0) {
-        return t('chat.thinking.stats.thoughtAndTool', { thoughtCount, toolCount });
-      }
-      if (thoughtCount > 0) {
-        return t('chat.thinking.stats.thought', { thoughtCount });
-      }
-      if (toolCount > 0) {
-        return t('chat.thinking.stats.tool', { toolCount });
-      }
-      return t('chat.thinking.stats.run');
-    },
-    phaseLabel: (args) => {
-      const {
-        phaseIndex,
-        phaseCount,
-        hasToolsBefore,
-        hasToolsAfter
-      } = args;
-
-      if (phaseCount <= 1) {
-        if (hasToolsBefore || hasToolsAfter) return t('chat.thinking.phase.connectRun');
-        return t('chat.thinking.phase.currentThought');
-      }
-
-      if (phaseIndex === 0) {
-        return hasToolsAfter ? t('chat.thinking.phase.firstDirection') : t('chat.thinking.phase.firstJudgement');
-      }
-
-      if (phaseIndex === phaseCount - 1) {
-        return hasToolsBefore ? t('chat.thinking.phase.finalAnswer') : t('chat.thinking.phase.finalJudgement');
-      }
-
-      return t('chat.thinking.phase.continue');
-    }
-  };
-}
 
 const ACTION_PATTERN = /^(解压|审视|检查|读取|查看|分析|整理|追踪|确认|提取|生成|计划|修复|定位|判断|比较|对照|汇总|梳理)/;
 const LIST_ITEM_PATTERN = /^([\-*+•●○▪◦]|\d+[.)]|[A-Za-z][.)])\s+/;
@@ -239,63 +185,19 @@ function collectThinkingSessionMessages(messages: ChatMessage[], activeMessageId
 
 export function buildThinkingSessionSummary(
   messages: ChatMessage[],
-  activeMessageId: string,
-  copy: ThinkingSummaryCopy
+  activeMessageId: string
 ): ThinkingSessionSummary | null {
   const sessionMessages = collectThinkingSessionMessages(messages, activeMessageId);
   if (sessionMessages.length === 0) return null;
 
-  const thoughtMessages = sessionMessages.filter((message) =>
-    message.role === 'assistant'
-    && !message.toolInvocation
-    && Boolean(message.thinkingText?.trim())
-  );
-  const toolMessages = sessionMessages.filter((message) => Boolean(message.toolInvocation));
-  const thoughtMessageIds = new Set(thoughtMessages.map((message) => message.id));
-  let thoughtPhaseIndex = 0;
-
-  const steps = sessionMessages.flatMap<ThinkingSessionStep>((message, sessionIndex) => {
+  // Display the provider's original thinking text; never re-summarize or reformat it.
+  const steps = sessionMessages.flatMap<ThinkingSessionStep>((message) => {
     if (message.toolInvocation) {
-      return [{
-        id: message.id,
-        kind: 'tool',
-        tool: message.toolInvocation
-      }];
+      return [{ id: message.id, kind: 'tool', tool: message.toolInvocation }];
     }
-
-    if (!thoughtMessageIds.has(message.id) || !message.thinkingText?.trim()) {
-      return [];
-    }
-
-    const phaseIndex = thoughtPhaseIndex;
-    thoughtPhaseIndex += 1;
-    const hasToolsBefore = sessionMessages
-      .slice(0, sessionIndex)
-      .some((candidate) => Boolean(candidate.toolInvocation));
-    const hasToolsAfter = sessionMessages
-      .slice(sessionIndex + 1)
-      .some((candidate) => Boolean(candidate.toolInvocation));
-
-    return [{
-      id: message.id,
-      kind: 'thinking',
-      label: copy.phaseLabel({
-        phaseIndex,
-        phaseCount: thoughtMessages.length,
-        hasToolsBefore,
-        hasToolsAfter
-      }),
-      rawText: message.thinkingText
-    }];
+    if (message.role !== 'assistant' || !message.thinkingText?.trim()) return [];
+    return [{ id: message.id, kind: 'thinking', rawText: message.thinkingText }];
   });
 
-  if (steps.length === 0) return null;
-
-  const hasTools = toolMessages.length > 0;
-
-  return {
-    statsLabel: copy.statsLabel(thoughtMessages.length, toolMessages.length),
-    hasTools,
-    steps
-  };
+  return steps.length > 0 ? { steps } : null;
 }

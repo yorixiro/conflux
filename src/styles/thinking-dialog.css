@@ -73,61 +73,47 @@
   }
 }
 
-/* The two sticker variants borrow their own paper, ink and decoration tokens.
-   Default/cloud themes keep the shared Thinking dialog unchanged. */
+/* The two sticker skins reuse their existing paper and colour tokens.
+   Both use the same single-surface Thinking layout. */
 :root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-sheet {
+  border: 1px solid var(--keke-ink);
   border-radius: 16px;
-  border: 1.2px solid var(--keke-ink);
   background: var(--keke-paper);
   color: var(--text);
-  box-shadow: 3px 4px 0 rgba(176, 131, 140, .22), 0 18px 38px rgba(90, 70, 76, .16);
+  box-shadow: 3px 4px 0 rgba(176, 131, 140, .2), 0 18px 44px rgba(90, 70, 76, .18);
 }
 :root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-topbar {
   border-bottom: 1px dashed var(--keke-rose);
-  padding-bottom: 10px;
-}
-:root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-step-shell {
-  border: 1.2px solid var(--keke-ink);
-  border-radius: 12px;
-  background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(157, 171, 185, .11) 27px 28px), var(--keke-paper);
-  box-shadow: 2px 3px 0 rgba(176, 131, 140, .14);
 }
 :root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-close {
   border: 1px solid var(--keke-ink);
-  background: var(--keke-paper);
   color: var(--keke-ink);
+  background: #fff;
 }
-:root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-item-dot {
-  border-color: var(--keke-ink);
-  background: var(--keke-paper);
+:root[data-cf="sticker"][data-ct="doodle"] .app-shell.chat .thinking-summary-tool-card {
+  border: 1px dashed var(--keke-rose);
+  background: #fffaf8;
 }
 
 :root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-sheet {
-  border: 1.5px dashed rgba(255, 255, 255, .85);
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 16px 36px rgba(70, 64, 66, .16);
+  border: 1px solid rgba(134, 103, 98, .4);
+  border-radius: 18px;
+  background: var(--surface-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 20px 48px rgba(70, 64, 66, .23);
 }
 :root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-topbar {
-  border-bottom: 1px dashed color-mix(in srgb, var(--accent) 44%, transparent);
-  padding-bottom: 10px;
-}
-:root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-step-shell {
-  border: 1.5px dashed rgba(255, 255, 255, .9);
-  border-radius: 16px;
-  background: rgba(242, 242, 242, .68);
-  box-shadow: 0 2px 10px rgba(70, 64, 66, .05);
+  border-bottom: 1px dashed rgba(165, 133, 140, .48);
 }
 :root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-close {
-  background: rgba(255, 255, 255, .75);
-  color: var(--text-soft);
-  border: 1px dashed var(--border-hover);
+  border: 1px solid rgba(165, 133, 140, .4);
+  background: #fff;
+  color: var(--text);
 }
-:root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-item-dot {
-  background: var(--surface-solid);
-  border: 1px dashed var(--border-hover);
+:root[data-cf="sticker"][data-ct="pois"] .app-shell.chat .thinking-summary-tool-card {
+  border: 1px dashed rgba(165, 133, 140, .43);
+  background: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {
