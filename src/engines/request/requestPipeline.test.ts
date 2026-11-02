@@ -73,9 +73,7 @@ describe('requestPipeline', () => {
   it('routes a selected Devin ACP provider through chat with real context separators and streamed output', async () => {
     const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
       const body = JSON.parse(init.body as string) as { prompt: string; initialContext: string };
-      expect(body.prompt).toContain('[system]\n你是这间房里持续存在的一个');
-      expect(body.prompt).toContain('[user]\nhello');
-      expect(body.prompt).not.toContain('工具目录：');
+      expect(body.prompt).toBe('hello');
       expect(body.initialContext).toContain('[user]\nhello');
       expect(body.initialContext).not.toContain(']\\\\n');
       return new Response('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"hi"}}}\n\ndata: {"type":"done"}\n\n', {
