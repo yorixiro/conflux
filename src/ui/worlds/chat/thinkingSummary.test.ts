@@ -71,7 +71,7 @@ describe('buildThinkingSessionSummary', () => {
   });
 
   it('displays the provider original thinking text without modifying its formatting', () => {
-    const original = '先梳理目标。\\n\\n再确定约束。';
+    const original = '先梳理目标。\n\n再确定约束。';
     const summary = buildThinkingSessionSummary([
       createMessage({ id: 'user-1', role: 'user', content: '帮我想想' }),
       createMessage({ id: 'assistant-1', role: 'assistant', content: '我想好了。', thinkingText: original })
