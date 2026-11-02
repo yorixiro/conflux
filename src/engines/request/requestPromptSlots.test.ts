@@ -41,7 +41,7 @@ describe('persona prompt slots share existing request context and storage path',
     ]);
     const context = assembleAssistantContext({
       systemPromptParts: slots.map((slot) => ({
-        name: slot.name, layer: slot.layer, role: slot.role, content: slot.content
+        name: slot.name, layer: slot.layer, role: slot.role === 'assistant' ? 'assistant' as const : 'system' as const, content: slot.content
       })),
       messages: [{ id: 'u1', role: 'user', content: '现在开始', timestamp: 1 }]
     });
