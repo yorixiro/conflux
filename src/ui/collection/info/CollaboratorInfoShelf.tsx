@@ -106,7 +106,6 @@ export function CollaboratorInfoShelf({
     );
   }
 
-  return (
   // Creation is deliberately small: details and API route only. All other
   // persona controls live in the room's right-hand settings drawer.
   if (pageRequest?.tab === 'setup' && pageRequest.collaboratorId === currentCollaboratorId) {
@@ -155,6 +154,7 @@ export function CollaboratorInfoShelf({
     );
   }
 
+  return (
     <section className={`collaborator-info-shelf ${fullscreenOpen ? 'collaborator-info-shelf--fullscreen' : ''}`.trim()}>
       <div className={`collaborator-info-detail-shell ${fullscreenOpen ? 'collaborator-info-detail-shell--fullscreen' : ''}`.trim()}>
         <div className="conflux-role-navigation">
