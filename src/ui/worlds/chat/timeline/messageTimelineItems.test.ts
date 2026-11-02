@@ -100,6 +100,42 @@ describe('buildTimelineRenderItems', () => {
     expect(items[0]?.isTerminalAssistantInUserTurn).toBe(false);
   });
 
+  it('keeps execution receipts visible when their original assistant message is not loaded', () => {
+    const tool = buildMessage({
+      id: 'tool-orphan',
+      role: 'system',
+      origin: 'tool-runtime',
+      content: '已写入文件',
+      toolInvocation: {
+        id: 'tool-orphan',
+        kind: 'createProjectFile',
+        status: 'executed',
+        title: '创建文件',
+        summary: '已写入文件',
+        originMessageId: 'assistant-not-loaded',
+        codeWriteDetails: [{
+          label: 'index.html',
+          language: 'html',
+          code: '<main>hi</main>',
+          addedLines: 1,
+          removedLines: 0
+        }]
+      }
+    });
+    const unrelatedAssistant = buildMessage({
+      id: 'assistant-visible',
+      role: 'assistant',
+      content: '我还在这里。'
+    });
+
+    const items = buildTimelineRenderItems([tool, unrelatedAssistant]);
+
+    expect(items.map((item) => item.message.id)).toEqual(['tool-orphan', 'assistant-visible']);
+    expect(items[0]?.toolMessages).toEqual([]);
+    expect(items[0]?.message.toolInvocation?.codeWriteDetails?.[0]?.code).toBe('<main>hi</main>');
+    expect(items[1]?.toolMessages).toEqual([]);
+  });
+
   it('marks only the last assistant segment in a user turn as terminal', () => {
     const user = buildMessage({
       id: 'user-1',

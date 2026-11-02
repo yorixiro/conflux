@@ -11,7 +11,7 @@ export type TimelineRenderItem = {
 
 const EMPTY_TOOL_MESSAGES: ChatMessage[] = [];
 
-function buildToolMessagesByOriginId(messages: ChatMessage[]) {
+function buildToolMessagesByOriginId(messages: ChatMessage[], availableAssistantIds: ReadonlySet<string>) {
   const toolMessagesByOriginId = new Map<string, ChatMessage[]>();
 
   messages.forEach((message) => {
@@ -23,7 +23,9 @@ function buildToolMessagesByOriginId(messages: ChatMessage[]) {
     if (!isRuntimeToolMessage) return;
 
     const originMessageId = message.toolInvocation?.originMessageId?.trim();
-    if (!originMessageId) return;
+    // An execution receipt must remain visible even when its originating
+    // assistant message was deleted or excluded from the loaded history.
+    if (!originMessageId || !availableAssistantIds.has(originMessageId)) return;
 
     const bucket = toolMessagesByOriginId.get(originMessageId) ?? [];
     bucket.push(message);
@@ -35,7 +37,12 @@ function buildToolMessagesByOriginId(messages: ChatMessage[]) {
 
 export function buildTimelineRenderItems(messages: ChatMessage[]): TimelineRenderItem[] {
   const items: TimelineRenderItem[] = [];
-  const toolMessagesByOriginId = buildToolMessagesByOriginId(messages);
+  const availableAssistantIds = new Set(
+    messages
+      .filter((message) => message.role === 'assistant' && !message.toolInvocation)
+      .map((message) => message.id)
+  );
+  const toolMessagesByOriginId = buildToolMessagesByOriginId(messages, availableAssistantIds);
   let cycleIndex = 0;
   let userBubbleIndex = 0;
   let hasAssistantInCurrentUserTurn = false;
@@ -52,7 +59,7 @@ export function buildTimelineRenderItems(messages: ChatMessage[]): TimelineRende
       && Boolean(message.toolInvocation);
     const originMessageId = message.toolInvocation?.originMessageId?.trim();
 
-    if (isRuntimeToolMessage && originMessageId) {
+    if (isRuntimeToolMessage && originMessageId && availableAssistantIds.has(originMessageId)) {
       return;
     }
 
