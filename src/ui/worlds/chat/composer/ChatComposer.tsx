@@ -19,6 +19,7 @@ import { ComposerCardReferenceStrip } from './ComposerCardReferenceStrip';
 import { ComposerPreviewStrip } from './ComposerPreviewStrip';
 import { SlashCommandSuggestions } from './SlashCommandSuggestions';
 import { KaomojiDrawer, KaomojiFaceIcon } from './kaomoji/KaomojiDrawer';
+import { prepareStoredStickerFile } from './kaomoji/StickerPickerPanel';
 import { useComposerFileIngest } from './useComposerFileIngest';
 import { useComposerDictation } from './useComposerDictation';
 import { useI18n } from '../../../../i18n';
@@ -239,6 +240,15 @@ export function ChatComposer() {
       textarea?.setSelectionRange(start + face.length, start + face.length);
     });
   };
+  const handlePickSticker = async (assetId: string, fallbackName: string) => {
+    try {
+      const file = await prepareStoredStickerFile(assetId, fallbackName);
+      await handleAddAttachments([file]);
+      setKaomojiOpen(false);
+    } catch (error) {
+      actions.setCommandStatus(error instanceof Error ? error.message : '表情包读取失败。', true);
+    }
+  };
   const handlePickSlashCommand = (insertText: string) => {
     updateLocalDraft(insertText);
     writeDraftToStore(insertText, draftConversationIdRef.current);
@@ -332,7 +342,7 @@ export function ChatComposer() {
             onSetPickerOpen={setAttachmentPickerOpen}
             onSetPendingCardReference={actions.setPendingCardReference}
           />
-          {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onClose={() => setKaomojiOpen(false)} /> : null}
+          {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onSelectSticker={handlePickSticker} onClose={() => setKaomojiOpen(false)} /> : null}
           {ui.submitFlight ? (
             <div key={ui.submitFlight.id} className="chat-submit-flight" aria-hidden="true">
               <span className="chat-submit-flight-orbit">
