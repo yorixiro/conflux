@@ -222,6 +222,13 @@
   padding: 8px 10px;
   text-align: left;
   white-space: normal;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--sheet-readable-soft);
+  font: inherit;
+  font-size: 12px;
 }
 .conflux-room-settings-detail .room-theme-page-nav > button.active {
   border-color: var(--border);
