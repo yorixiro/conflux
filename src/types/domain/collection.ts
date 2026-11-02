@@ -122,8 +122,15 @@ export interface ChatCardReference {
   mode: 'continue' | 'reference';
 }
 
+/** Human-readable sticker usage attached to an existing image card; the card ID is the sticker ID. */
+export type ImageStickerMetadata = {
+  purpose: string;
+  moods: string[];
+};
+
 export interface ImageAssetCard {
   id: string;
+  sticker?: ImageStickerMetadata;
   assetId: string;
   title: string;
   tags: string[];
