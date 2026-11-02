@@ -1,7 +1,7 @@
 # Polaris Handbook
 
 This handbook is the current-source guide for Polaris. It explains the codebase as it is
-meant to be maintained: by responsibility, owner boundary, data flow, and verification gate.
+meant to be maintained: by responsibility, owner boundary, and data flow.
 
 Use `docs/open-source/` for public-facing design documentation. Use this handbook when changing the
 repository.
@@ -45,11 +45,10 @@ what it must not own, and how to extend it.
 
 - Current architecture and module ownership.
 - How to add or modify a feature without crossing boundaries.
-- Verification commands and expected proof.
+- Technical references; routine checks are defined only in [AGENTS.md](../../AGENTS.md).
 - Current implementation facts.
 
 ## Maintenance Rule
 
-When a refactor lands, update the module note in the same commit or the next documentation-only
-commit. A module is documented when a new reader can tell its purpose, boundaries, source map,
-extension rules, and verification gate from the checked-in docs.
+Update an existing module note when a real change makes its content inaccurate. Do not create
+a separate audit, handoff document, or approval gate for an ordinary change.

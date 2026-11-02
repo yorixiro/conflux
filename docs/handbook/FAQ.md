@@ -33,9 +33,9 @@ preview metadata and execution paths stay intact and the theme tests pass.
 
 ## Where should a new model tool be added?
 
-Start with the tool protocol and end with UI/replay evidence. Add schema, parser/action type,
-describer, executor, UI event details, request-context projection, and tests. Then document the
-module boundary.
+First reuse an existing tool when possible. For a real new capability, connect model visibility,
+parsing, execution, and visible results. Verify that the off switch blocks execution. The only
+daily workflow is in [AGENTS.md](../../AGENTS.md).
 
 ## Where should a new visual component go?
 
@@ -44,6 +44,6 @@ belong in `src/styles/` unless the local pattern already scopes them differently
 
 ## Which test should I run?
 
-For most code changes: `npm run typecheck`, focused tests, `npm test`, and `npm run build`. For
-storage/import work: include `npm run test:data-boundary`. For publication or release claims:
-`npm run verify` plus channel-specific proof.
+Follow [AGENTS.md](../../AGENTS.md): use typecheck and a relevant focused test for TypeScript
+changes; inspect the affected page for visual changes. Full tests, builds, and release checks
+are reserved for changes that actually need them.

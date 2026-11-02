@@ -72,16 +72,10 @@ Do not make ordinary startup read old storage as if it were current data.
 
 ## Tool Spine
 
-Model-visible tools must close the full loop:
-
-```txt
-schema + prompt visibility -> parser/canonicalizer -> ToolAction -> describer -> preview/executor
--> UI evidence -> request-context replay -> tests
-```
-
-`toolExecutorDescribe.ts` is intentionally a dispatcher. Domain description logic lives in
-`toolExecutorDescribe<Domain>.ts` modules; feature execution belongs in the appropriate app,
-engine, or store module.
+A model tool must be available only when enabled, parse valid arguments, execute its intended
+action, and return the result to the conversation. Reuse existing registration and execution
+paths rather than building parallel tool systems. For daily architecture review and tests,
+follow [AGENTS.md](../../AGENTS.md) instead of a separate gate.
 
 ## Theme Spine
 

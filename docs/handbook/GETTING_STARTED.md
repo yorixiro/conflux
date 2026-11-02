@@ -28,31 +28,16 @@ npm run build
 
 This runs TypeScript project build and the Vite production build.
 
-## Core Verification
+## 日常检查
 
-Use these commands before treating a source change as done:
+统一按 [AGENTS.md](../../AGENTS.md) 的五问架构检查和最少验证执行。日常 TypeScript 改动通常运行：
 
 ```bash
 npm run typecheck
-npm test
-npm run build
+npx vitest run <本次相关测试文件>
 ```
 
-For data-boundary work, also run:
-
-```bash
-npm run test:data-boundary
-```
-
-For a broad release-style source check:
-
-```bash
-npm run verify
-```
-
-`npm run verify` includes extra typechecks, worker typecheck, full tests, and a production build.
-It may do more work than a small documentation or pure UI pass needs, but it is the correct gate
-before a publication or release claim.
+文档不用跑测试；纯样式检查对应页面即可。只有实际涉及构建、发布或跨模块整合时才加 `npm run build` 或全量回归。数据层按本次风险选定向测试，发布时才考虑 `npm run verify`；不要把它们当作每次修改的必跑清单。
 
 ## Native Wrappers
 

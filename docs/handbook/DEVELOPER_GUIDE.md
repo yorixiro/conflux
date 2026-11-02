@@ -26,19 +26,9 @@ by the specific path so ownership stays visible.
 
 ## Add A Tool
 
-Close the full loop:
+先确认现有工具能否复用。需要新能力时，沿实际调用链修改：工具描述及可见性 → 参数解析 → 执行 → 结果回显；已有的记录/回放路径受影响时再同步更新。**关闭工具必须真正禁用执行，而非只隐藏提示词。**
 
-1. Tool schema and prompt visibility.
-2. Parser/canonicalizer/action type.
-3. Describer and preview metadata if needed.
-4. Executor or direct action runner.
-5. UI evidence in tool events.
-6. Request-context replay projection.
-7. Focused tests.
-8. Module documentation.
-
-If the new tool is just another action description, add it to the correct
-`toolExecutorDescribe<Domain>.ts` module and keep `toolExecutorDescribe.ts` as the dispatcher.
+验证只针对这次改动的调用和关闭场景；不要求每个工具额外建一份流程、模块文档或八阶段验收。
 
 ## Add Or Change Persistence
 
