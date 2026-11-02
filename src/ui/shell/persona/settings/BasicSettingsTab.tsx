@@ -15,8 +15,9 @@ export function BasicSettingsTab({
   onUpdatePersona,
   onDeletePersona,
   deletePersonaLabel,
-  deletePersonaHint
-}: PersonaTabProps) {
+  deletePersonaHint,
+  showPromptSettings = true
+}: PersonaTabProps & { showPromptSettings?: boolean }) {
   const { t } = useI18n();
   const fieldId = useId();
   const isGuide = isProductGuidePersona(activePersona);
@@ -109,7 +110,7 @@ export function BasicSettingsTab({
         />
       </div>
 
-      <PromptSettingsTab activeCollaboratorId={activeCollaboratorId} activePersona={activePersona} onUpdatePersona={onUpdatePersona} />
+      {showPromptSettings ? <PromptSettingsTab activeCollaboratorId={activeCollaboratorId} activePersona={activePersona} onUpdatePersona={onUpdatePersona} /> : null}
 
       {activePersona && onDeletePersona ? (
         <div className="collaborator-identity-danger-zone">
