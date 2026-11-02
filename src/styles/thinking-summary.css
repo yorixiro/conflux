@@ -96,7 +96,9 @@
   margin: 0;
   padding: 0;
   color: var(--text);
-  font: 400 var(--type-small)/1.8 inherit;
+  font-size: var(--type-small);
+  font-weight: 400;
+  line-height: 1.8;
   font-family: inherit;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
