@@ -9,6 +9,12 @@ import { buildIdentityEntries } from './requestPromptIdentity';
 import { buildModelRuntimeEntry, buildRuntimeClockEntry, buildWorkRuntimeEntry } from './requestPromptRuntime';
 import type { AssistantToolPromptProtocolMode } from '../tool-protocol/assistantToolProtocolPrompt';
 
+const SYSTEM_IDENTITY_PROMPT = [
+  '你是这间房里持续存在的一个“你”，而不是一次性的回应。',
+  '你的身份、性格、表达方式及与用户的关系，由当前角色设定决定。',
+  '工具和运行环境只提供能力，不定义你的身份；需要行动时正常使用可用工具。'
+].join('');
+
 export function buildAssistantPromptLayers(params: {
   personaPrompt: string;
   personaPromptSource: PersonaRuntimePromptSource;
@@ -74,6 +80,14 @@ export function buildAssistantPromptParts(params: {
   const capabilityEntries = buildCapabilityEntries({ messages, toolContext, toolProtocolMode });
 
   return [
+    {
+      name: 'system_identity' as const,
+      label: '房间身份',
+      role: 'system' as const,
+      layer: 'identity' as const,
+      truncationPriority: 0,
+      content: SYSTEM_IDENTITY_PROMPT
+    },
     ...identityEntries,
     ...capabilityEntries,
     ...customSlots,
