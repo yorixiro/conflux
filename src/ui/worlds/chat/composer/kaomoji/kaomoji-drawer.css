@@ -7,9 +7,9 @@
   z-index: 12;
   display: flex;
   flex-direction: column;
-  width: min(100%, 520px);
-  max-height: min(55dvh, 470px);
-  min-height: min(280px, 45dvh);
+  width: min(100%, 420px);
+  max-height: min(46dvh, 350px);
+  min-height: min(230px, 36dvh);
   overflow: hidden;
   box-sizing: border-box;
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
@@ -52,4 +52,45 @@
 .kaomoji-add-input button { display:grid; place-items:center; flex:none; width:42px; min-height:42px; border:0; border-radius:12px; background:var(--accent); color:var(--chat-send-active-text,#fff); }
 .kaomoji-add-input button:disabled { opacity:.45; cursor:default; }
 .kaomoji-add p { font-size:12px; color:#b5445b; }
-@media (max-width:390px) { .kaomoji-drawer { max-height:min(58dvh,440px); border-radius:17px; } .kaomoji-drawer-heading { padding-inline:10px; } .kaomoji-drawer-scroll { padding-inline:10px; } }
+@media (max-width:390px) { .kaomoji-drawer { max-height:min(48dvh,350px); border-radius:17px; } .kaomoji-drawer-heading { padding-inline:10px; } .kaomoji-drawer-scroll { padding-inline:10px; } }
+
+/* Compact two-tab picker; built on the same theme tokens as the existing composer. */
+.kaomoji-drawer-heading-spacer { width:40px; flex:none; }
+.kaomoji-main-tabs { display:flex; gap:3px; align-items:center; padding:3px; border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--surface) 65%,transparent); }
+.kaomoji-main-tabs button { padding:6px 15px; min-height:30px; border:0; border-radius:999px; background:transparent; color:var(--text-soft); font-size:12px; }
+.kaomoji-main-tabs button.active { background:var(--accent); color:var(--chat-send-active-text,#fff); }
+.kaomoji-drawer-scroll { gap:10px; }
+.kaomoji-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,106px),1fr)); gap:6px; }
+.kaomoji-face { min-height:41px; padding:5px 8px; }
+.sticker-picker-panel { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:4px 12px 14px; scrollbar-width:thin; }
+.sticker-picker-actions { display:flex; gap:5px; align-items:center; position:sticky; top:0; z-index:1; padding-bottom:8px; background:var(--surface-solid,var(--surface)); }
+.sticker-picker-actions button, .sticker-picker-library-toggle, .sticker-picker-editor button {
+  flex:none; border:1px solid var(--border); border-radius:10px; padding:7px 9px; min-height:34px; background:var(--surface); color:var(--text); font-size:11px;
+}
+.sticker-picker-actions button.active { background:var(--accent-soft); border-color:var(--accent); }
+.sticker-picker-search, .sticker-picker-editor input { box-sizing:border-box; min-width:0; min-height:34px; padding:7px 9px; border:1px solid var(--border); border-radius:10px; background:var(--surface-solid,var(--surface)); color:var(--text); font-size:12px; }
+.sticker-picker-search { flex:1; }
+.sticker-picker-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.sticker-picker-tile { min-width:0; }
+.sticker-picker-tile-main { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:100%; min-height:104px; padding:6px; border:1px solid var(--border); border-radius:12px; background:color-mix(in srgb,var(--surface) 76%,transparent); color:var(--text); }
+.sticker-picker-tile-main img { display:block; height:72px; width:100%; object-fit:contain; }
+.sticker-picker-tile-main small { display:block; width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:10px; color:var(--text-soft); text-align:center; }
+.sticker-picker-no-preview, .sticker-picker-empty, .sticker-picker-status { font-size:11px; color:var(--text-soft); }
+.sticker-picker-empty { padding:12px 8px; }
+.sticker-picker-status { padding:4px 2px; }
+.sticker-picker-editor { display:flex; flex-direction:column; gap:7px; margin:5px 0 12px; padding:9px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+.sticker-picker-editor small { font-size:10px; color:var(--text-soft); overflow-wrap:anywhere; }
+.sticker-picker-editor > div { display:flex; gap:6px; flex-wrap:wrap; }
+.sticker-picker-library-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin-top:10px; text-align:left; }
+.sticker-picker-library-toggle svg { transform:rotate(-90deg); }
+.sticker-picker-library-toggle[aria-expanded="true"] svg { transform:rotate(90deg); }
+.sticker-picker-library { display:flex; flex-direction:column; gap:4px; padding:5px 0; }
+.sticker-picker-library button { text-align:left; border:0; border-radius:8px; padding:8px; background:color-mix(in srgb,var(--surface) 75%,transparent); color:var(--text); font-size:12px; }
+.sticker-picker-library small { color:var(--text-soft); }
+@media(max-width:390px) {
+  .sticker-picker-panel { padding-inline:9px; }
+  .sticker-picker-grid { gap:5px; }
+  .sticker-picker-tile-main img { height:58px; }
+  .sticker-picker-tile-main { min-height:87px; }
+  .kaomoji-main-tabs button { padding-inline:10px; }
+}
