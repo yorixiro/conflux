@@ -35,9 +35,10 @@ function readKaomojiLibrary(): KaomojiCategory[] {
   }
 }
 
-export function KaomojiDrawer({ onSelect, onSelectSticker, onClose }: {
+export function KaomojiDrawer({ onSelect, onSelectSticker, ownerCollaboratorId, onClose }: {
   onSelect: (face: string) => void;
   onSelectSticker: (assetId: string, fallbackName: string) => Promise<void>;
+  ownerCollaboratorId?: string;
   onClose: () => void;
 }) {
   const [categories, setCategories] = useState(readKaomojiLibrary);
@@ -126,7 +127,7 @@ export function KaomojiDrawer({ onSelect, onSelectSticker, onClose }: {
         </form>
       </div>
       </>
-      ) : <StickerPickerPanel onPick={onSelectSticker} />}
+      ) : <StickerPickerPanel onPick={onSelectSticker} ownerCollaboratorId={ownerCollaboratorId} />}
     </section>
   );
 }
