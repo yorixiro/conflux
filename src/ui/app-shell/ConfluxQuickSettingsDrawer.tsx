@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import type { ApiOverlayProps, MenuOverlayPage } from '../../app/shell/appShellContracts';
+import type { ApiOverlayProps } from '../../app/shell/appShellContracts';
 import type { Persona } from '../../types/domain';
 import type { PersonaUpdatePatch } from '../../app/persona/personaUpdatePatch';
 import { usePersonaStore } from '../../stores/personaStore';
@@ -31,7 +31,6 @@ type QuickSettingsProps = {
   onClose: () => void;
   provider: Pick<ApiOverlayProps, 'providers' | 'activeProviderId' | 'api' | 'onSetActiveProvider'>;
   onOpenApi: () => void;
-  onOpenMenu: (page: MenuOverlayPage) => void;
   currentPersona: Persona | null;
 };
 
@@ -41,7 +40,6 @@ export function ConfluxQuickSettingsDrawer({
   onClose,
   provider,
   onOpenApi,
-  onOpenMenu,
   currentPersona
 }: QuickSettingsProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -93,9 +91,9 @@ export function ConfluxQuickSettingsDrawer({
       <div className="conflux-quick-settings-content">
         <header className="conflux-quick-settings-header">
           <div>
-            <span className="conflux-quick-settings-eyebrow">CONFLUX / ROOM</span>
-            <h2>房间设置</h2>
-            <p>{currentPersona?.name.trim() || '尚未选择 AI'} · 修改自动保存</p>
+            <span className="conflux-quick-settings-eyebrow">ROOM / CONFLUX</span>
+            <h2>{currentPersona?.name.trim() || '当前 AI'} · 房间设置</h2>
+            <p>只修改这个房间 · 自动保存</p>
           </div>
           <button type="button" className="conflux-quick-settings-close" onClick={onClose} aria-label="关闭房间设置">
             <Icon name="x" size={20} />
@@ -181,13 +179,6 @@ export function ConfluxQuickSettingsDrawer({
             <p className="conflux-room-settings-note">先进入一个 AI 房间，再编辑它的设置。</p>
           </div>
         )}
-        <footer className="conflux-quick-settings-footer">
-          <button type="button" onClick={() => closeAndRun(() => onOpenMenu('root'))}>
-            <Icon name="settings" size={18} />
-            <span>应用全局设置</span>
-            <Icon name="chevron" size={16} />
-          </button>
-        </footer>
       </div>
     </dialog>
   );
