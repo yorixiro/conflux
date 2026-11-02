@@ -160,16 +160,35 @@
 }
 
 /* Room-scoped settings reuse the established persona editors without a second config tree. */
-.conflux-room-settings-drawer { width: min(520px, calc(100vw - 12px)); }
+.conflux-room-settings-drawer {
+  width: min(382px, calc(100vw - 12px));
+  max-width: none;
+  border-radius: 18px 0 0 18px;
+  background: var(--sheet-surface-fill);
+  background:
+    linear-gradient(155deg, color-mix(in srgb, var(--accent-soft) 56%, transparent), transparent 42%),
+    var(--sheet-surface-fill);
+}
+.conflux-room-settings-drawer::backdrop {
+  background: rgba(32, 29, 40, 0.12);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
 .conflux-room-settings-drawer .conflux-quick-settings-content {
   padding: max(18px, calc(12px + env(safe-area-inset-top, 0px))) 18px max(12px, env(safe-area-inset-bottom, 0px));
 }
-.conflux-room-settings-drawer .conflux-quick-settings-header h2 { font-size: 21px; }
+.conflux-room-settings-drawer .conflux-quick-settings-header { padding-bottom: 12px; }
+.conflux-room-settings-drawer .conflux-quick-settings-eyebrow { margin-bottom: 7px; }
+.conflux-room-settings-drawer .conflux-quick-settings-header h2 {
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: 0.015em;
+}
 .conflux-room-settings-nav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  padding: 12px 0;
+  gap: 5px;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
 .conflux-room-settings-nav button {
@@ -178,8 +197,8 @@
   justify-content: center;
   gap: 6px;
   min-width: 0;
-  min-height: 40px;
-  padding: 7px 5px;
+  min-height: 38px;
+  padding: 6px 4px;
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
@@ -199,13 +218,13 @@
   outline-offset: 1px;
 }
 .conflux-room-settings-scroll {
-  padding: 16px 1px 24px;
+  padding: 14px 2px 20px;
   overflow-x: hidden;
 }
 .conflux-room-settings-fields {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 .conflux-room-settings-fields .ps-field {
@@ -220,7 +239,12 @@
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 11px;
 }
+.conflux-room-settings-fields .ps-input { min-height: 39px; }
+.conflux-room-settings-fields .ps-textarea { min-height: 84px; }
+.conflux-room-settings-fields .ps-field-label { font-size: 12px; }
 .conflux-room-settings-note {
   margin: 0 0 12px;
   color: var(--sheet-readable-soft);
