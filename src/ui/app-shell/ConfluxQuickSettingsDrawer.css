@@ -71,70 +71,14 @@
   overscroll-behavior: contain;
   padding: 4px 0 12px;
 }
-.conflux-quick-settings-section { padding: 16px 0 12px; border-bottom: 1px solid var(--border); }
-.conflux-quick-settings-section h3 { margin: 0 0 13px 3px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: var(--sheet-readable-soft); }
-.conflux-quick-settings-action {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 48px;
-  padding: 8px 9px;
-  border: none;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--sheet-readable-text);
-  text-align: left;
-  cursor: pointer;
+.conflux-quick-settings-close:hover { background: var(--accent-soft); }
+.conflux-quick-settings-drawer button:focus-visible,
+.conflux-quick-settings-drawer select:focus-visible,
+.conflux-quick-settings-drawer input:focus-visible,
+.conflux-quick-settings-drawer textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
-.conflux-quick-settings-action-icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  color: var(--sheet-readable-soft);
-  background: var(--control-surface);
-}
-.conflux-quick-settings-action-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; font-size: 14px; }
-.conflux-quick-settings-action-copy small { font-size: 11px; color: var(--sheet-readable-muted); }
-.conflux-quick-settings-action > svg:last-child { flex: none; color: var(--sheet-readable-muted); }
-.conflux-quick-settings-action > svg:last-child,
-.conflux-quick-settings-footer svg:last-child { opacity: 0.72; }
-.conflux-quick-settings-provider {
-  margin: 0 0 6px;
-  padding: 15px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--control-surface);
-}
-.conflux-quick-settings-provider-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-.conflux-quick-settings-provider-mark { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: var(--accent); background: var(--accent-soft); }
-.conflux-quick-settings-provider-heading div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.conflux-quick-settings-provider-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; }
-.conflux-quick-settings-provider-heading small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--sheet-readable-soft); }
-.conflux-quick-settings-provider-label { display: block; margin-bottom: 7px; font-size: 11px; color: var(--sheet-readable-soft); }
-.conflux-quick-settings-provider select {
-  display: block;
-  width: 100%;
-  min-height: 42px;
-  padding: 7px 11px;
-  border: var(--control-border);
-  border-radius: 9px;
-  background: var(--control-surface-solid);
-  color: var(--control-text);
-  font: inherit;
-  font-size: 13px;
-}
-.conflux-quick-settings-provider select:disabled { opacity: 0.5; }
-.conflux-quick-settings-provider p { margin-top: 9px; color: var(--sheet-readable-soft); font-size: 11px; line-height: 1.6; }
-.conflux-quick-settings-footer { flex: none; border-top: 1px solid var(--border); padding-top: 12px; }
-.conflux-quick-settings-footer button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--control-surface); color: var(--sheet-readable-text); text-align: left; cursor: pointer; }
-.conflux-quick-settings-footer span { flex: 1; }
-.conflux-quick-settings-action:hover, .conflux-quick-settings-close:hover, .conflux-quick-settings-footer button:hover { background: var(--accent-soft); }
-.conflux-quick-settings-drawer button:focus-visible, .conflux-quick-settings-drawer select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .conflux-quick-settings-desktop-trigger {
   position: absolute;
   top: max(18px, calc(10px + env(safe-area-inset-top, 0px)));
