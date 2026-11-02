@@ -214,6 +214,7 @@ export function createPersonaTemplate(
       regexRules: overrides.advanced?.regexRules ?? '',
       regexTriggers: overrides.advanced?.regexTriggers ?? '',
       snippets: overrides.advanced?.snippets ?? [],
+      systemIdentityPrompt: overrides.advanced?.systemIdentityPrompt,
       promptSlots: overrides.advanced?.promptSlots ?? []
     },
     mcp: {

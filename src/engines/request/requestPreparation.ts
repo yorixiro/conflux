@@ -645,6 +645,7 @@ export async function prepareCollaboratorReplyRequest(params: {
   const promptParts = buildAssistantPromptParts({
     personaPrompt: personaPrompt.prompt,
     personaPromptSource: personaPrompt.source,
+    systemIdentityPrompt: persona?.advanced.systemIdentityPrompt,
     promptSlots: persona?.advanced.promptSlots,
     templateContext,
     regexTriggers: preparedAdvanced?.regexTriggers,

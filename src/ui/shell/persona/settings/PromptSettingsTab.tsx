@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { canEditPersonaPrompt, isProductGuidePersona } from '../../../../engines/personaBuiltin';
 import { createUid } from '../../../../engines/id';
+import { DEFAULT_SYSTEM_IDENTITY_PROMPT } from '../../../../engines/request/requestPromptLayers';
 import type { PersonaPromptSlot } from '../../../../types/domain';
 import { Icon, type IconName } from '../../../Icon';
 import { type PersonaTabProps } from '../personaUiShared';
@@ -62,10 +63,35 @@ function PromptSlotsEditor({
   return (
     <section className="prompt-slots-editor" aria-label="提示词编辑">
       <div className="prompt-slots-toolbar">
-        <span className="ps-field-label">提示词 <small>{1 + slots.length} 个槽位</small></span>
+        <span className="ps-field-label">提示词 <small>{2 + slots.length} 个槽位</small></span>
         {editable ? (
           <button type="button" className="ps-field-expand-btn" onClick={add}>＋ 添加槽位</button>
         ) : null}
+      </div>
+
+      <div className="prompt-slot-card" aria-label="系统身份提示词">
+        <div className="prompt-slot-card-head">
+          <strong>系统身份 <small className="prompt-slot-role">SYSTEM</small></strong>
+          <button
+            type="button"
+            className="ps-field-expand-btn"
+            disabled={!editable || activePersona?.advanced.systemIdentityPrompt === undefined}
+            onClick={() => onUpdatePersona({ advanced: { systemIdentityPrompt: undefined } })}
+          >
+            恢复默认
+          </button>
+        </div>
+        <div className="prompt-slot-fields">
+          <p className="conflux-room-settings-note">原始 System Prompt 默认用于所有房间；这里编辑的内容只覆盖当前角色，注入顺序保持不变。留空时使用默认文本。</p>
+          <textarea
+            className="ps-textarea ps-textarea--mono"
+            aria-label="系统身份提示词内容"
+            rows={9}
+            disabled={!editable}
+            value={activePersona?.advanced.systemIdentityPrompt ?? DEFAULT_SYSTEM_IDENTITY_PROMPT}
+            onChange={(event) => onUpdatePersona({ advanced: { systemIdentityPrompt: event.target.value } })}
+          />
+        </div>
       </div>
 
       <PromptCoreSettingsPage

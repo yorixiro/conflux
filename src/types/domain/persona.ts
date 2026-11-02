@@ -217,6 +217,8 @@ export interface PersonaAdvancedSettings {
   regexRules: string;
   regexTriggers?: string;
   snippets: string[];
+  /** Optional room-only override of the default system identity; undefined uses the original text. */
+  systemIdentityPrompt?: string;
   /** Optional editable prompt segments; old personas remain unchanged. */
   promptSlots?: PersonaPromptSlot[];
 }

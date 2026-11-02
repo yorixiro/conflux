@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildAssistantPromptParts } from './requestPromptLayers';
+import { buildAssistantPromptParts, DEFAULT_SYSTEM_IDENTITY_PROMPT } from './requestPromptLayers';
 
 describe('buildAssistantPromptParts', () => {
-  it('keeps a brief room identity boundary before persona without discouraging tools', () => {
+  it('restores original system identity at the stable prefix before persona', () => {
     const parts = buildAssistantPromptParts({
       personaPrompt: '你是一个温柔的协作者。',
       personaPromptSource: 'custom',
@@ -26,8 +26,9 @@ describe('buildAssistantPromptParts', () => {
 
     expect(parts[0]?.name).toBe('system_identity');
     expect(parts[1]?.name).toBe('persona_identity');
-    expect(parts[0]?.content).toContain('当前角色设定');
-    expect(parts[0]?.content).toContain('需要行动时正常使用可用工具');
+    expect(parts[0]?.content).toBe(DEFAULT_SYSTEM_IDENTITY_PROMPT);
+    expect(parts[0]?.content).toContain('persona 是你在这段关系里的名字和轮廓');
+    expect(parts[0]?.content).toContain('显而易见的意图不用反复确认');
     expect(parts[1]?.content).toBe('你是一个温柔的协作者。');
     expect(parts.findIndex((part) => part.name === 'tool_capability')).toBeLessThan(
       parts.findIndex((part) => part.name === 'tool_catalog_capability')
@@ -35,6 +36,30 @@ describe('buildAssistantPromptParts', () => {
     expect(parts[0]?.layer).toBe('identity');
     expect(parts.map((part) => part.content).join('\n')).not.toContain('当前本地完整时间');
     expect(parts.map((part) => part.content).join('\n')).not.toContain('当前时区');
+  });
+
+  it('allows a room-only system identity override without moving its cache-prefix position', () => {
+    const context = {
+      cur_date: '2026-04-06', cur_time: '05:00', cur_datetime: '2026-04-06 05:00:00',
+      timezone: 'Asia/Shanghai', model_id: 'test', model_name: 'test', locale: 'zh-CN',
+      system_version: 'test', device_info: 'test', battery_level: '100%',
+      nickname: '用户', user_name: '用户', assistant_name: 'Pharos'
+    };
+    const params = {
+      personaPrompt: '当前房间人设',
+      personaPromptSource: 'custom' as const,
+      templateContext: context,
+      messages: []
+    };
+    const overridden = buildAssistantPromptParts({
+      ...params, systemIdentityPrompt: '当前房间独立的 SYSTEM 身份'
+    });
+    expect(overridden[0]?.name).toBe('system_identity');
+    expect(overridden[0]?.content).toBe('当前房间独立的 SYSTEM 身份');
+    expect(overridden[1]?.name).toBe('persona_identity');
+    expect(overridden[1]?.content).toBe('当前房间人设');
+    const reset = buildAssistantPromptParts({ ...params, systemIdentityPrompt: '  ' });
+    expect(reset[0]?.content).toBe(DEFAULT_SYSTEM_IDENTITY_PROMPT);
   });
 
   it('adds current local time as dynamic request context when enabled', () => {
