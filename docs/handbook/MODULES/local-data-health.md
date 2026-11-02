@@ -93,22 +93,7 @@ type (e.g. `LocalAssetStorageHealth`), so no caller repoints when a concern move
 
 ## Verification
 
-```bash
-npm run typecheck
-npm test -- src/infrastructure/localDataHealth.test.ts \
-  src/infrastructure/localDataHealth/buckets.test.ts \
-  src/infrastructure/localDataHealth/chatConsistency.test.ts \
-  src/infrastructure/localDataHealth/docBodyConsistency.test.ts \
-  src/infrastructure/localDataHealth/collectionConsistency.test.ts \
-  src/infrastructure/localDataHealth/assetHealth.test.ts \
-  src/infrastructure/localDataHealth/domainSources.test.ts \
-  src/infrastructure/localDataHealth/collaboratorOrphans.test.ts \
-  src/infrastructure/localDataHealthSource.test.ts \
-  src/infrastructure/localDataPromotionReadiness.test.ts \
-  src/stores/startupFactSourceBoundary.test.ts
-npm test
-npm run build
-```
+定向检查与测试范围统一见 [AGENTS.md](../../../AGENTS.md)。只验本次受影响的模块，除发布或大范围整合外，不默认运行全量测试或构建。
 
 When a concern is extracted, the facade snapshot test proves output parity end-to-end and the
 extracted module gets a focused responsibility test (e.g. `assetHealth.test.ts`). Do not replace

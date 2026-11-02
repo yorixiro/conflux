@@ -68,10 +68,5 @@ active LocalData facts + owned blobs/bodies -> package manifest -> zip
 
 ## Verification
 
-```bash
-npm run typecheck
-npm run test:data-boundary
-npm test -- src/stores/storeImportPackage.test.ts src/stores/storeExportPackage.test.ts src/stores/kelivoImportAdapter.test.ts src/infrastructure/assetStore.test.ts
-npm test
-npm run build
-```
+定向检查与测试范围统一见 [AGENTS.md](../../../AGENTS.md)。只验本次受影响的模块，除发布或大范围整合外，不默认运行全量测试或构建。
+

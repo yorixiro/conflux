@@ -179,15 +179,4 @@ Missing metadata, missing body text, and missing binary payloads are separate fa
 
 ## Verification
 
-Run these after storage changes:
-
-```bash
-npm run typecheck
-npm run test:data-boundary
-npm test
-npm run build
-```
-
-Storage changes that touch native SQLite should also cover
-`src/native/localDataSqliteNativeParity.test.ts` and at least one native channel sync/build before
-making a channel-specific readiness claim.
+按 [AGENTS.md](../../AGENTS.md) 选择本次存储变动涉及的读、写、失败与回读用例；`npm run test:data-boundary` 中相关测试可按需选用，不默认跑所有测试与构建。涉及原生 SQLite 时检查 `src/native/localDataSqliteNativeParity.test.ts`；平台发布声明才需要对应同步、构建和真机验证。

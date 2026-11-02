@@ -1,5 +1,7 @@
 # Deployment
 
+> 此页保留既有部署技术细节，部分环境变量及脚本名称仍含旧项目命名；命令以实际 `package.json` 与部署环境为准。日常开发流程只见 [AGENTS.md](AGENTS.md)，不额外设测试门槛。
+
 Polaris has separate deployment paths for the source checkout, a web build,
 backend API routes, and native wrappers. A working source build is not the same
 thing as an Android APK, iOS/TestFlight build, or hosted service release.

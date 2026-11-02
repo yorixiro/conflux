@@ -1,5 +1,7 @@
 # Polaris Data Integrity Rules
 
+> 保留上游数据完整性的技术安全约束供 Conflux 参考；它不是第二套日常验收流程。实际开发验证范围统一见 [AGENTS.md](../AGENTS.md)，旧产品称谓不代表继承其 UI 规则。
+
 This document is the data-layer contract for Polaris. It is not a test plan and not a migration
 plan. It defines the rules that tests, migrations, imports, cleanup tasks, and platform persistence
 backends must obey.

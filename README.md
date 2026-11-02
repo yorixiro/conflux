@@ -57,7 +57,7 @@ npm run termux:dev
 
 - [开发规则](AGENTS.md)
 - [UI 尺寸与布局规范](docs/UI_LAYOUT_SPEC.md)
-- [独立化迁移清单](docs/CONFLUX_INDEPENDENCE_PLAN.md)
+- [架构与技术决策](docs/CONFLUX_ARCHITECTURE.md)
 - [数据与持久化说明](docs/handbook/DATA_AND_STORAGE.md)
 - [来源及许可信息](docs/PROVENANCE.md)
 

@@ -1,13 +1,17 @@
 # Conflux 文档
 
-Conflux 是小欣独立维护的项目。开发流程统一见 [AGENTS.md](../AGENTS.md)，本目录中的技术参考和历史记录不另设工作流程。
+Conflux 由个人维护。**唯一日常开发规则为 [AGENTS.md](../AGENTS.md)**。本目录的其他文件仅为技术参考或历史证据，不另设验收、PR 或审批流程。
 
-- [架构与技术决策](CONFLUX_ARCHITECTURE.md)：设计取舍与模块关系。
-- [开发手册](handbook/DEVELOPER_GUIDE.md)：代码定位。
-- [数据与存储](handbook/DATA_AND_STORAGE.md)：现有存储结构。
-- [部署说明](../DEPLOYMENT.md)：运行和部署参考，以当前分支脚本为准。
-- [模块手册](handbook/README.md)：按需要查询具体模块。
+## 当前可查的资料
 
-`open-source/` 只保留两份历史存储技术证据，不是开发规则；旧的产品理念、模块意图和重复的发布流程文档已从当前树中清理，原内容仍可在 Git 历史中查阅。日常开发遵循根目录 `AGENTS.md`，发布检查仅在实际发布时使用。
+- [架构和技术选择](CONFLUX_ARCHITECTURE.md)、[UI 布局规范](UI_LAYOUT_SPEC.md)
+- [模块技术索引](handbook/README.md)、[数据与存储](handbook/DATA_AND_STORAGE.md)、[数据完整性保护](data-integrity-rules.md)
+- [Termux/PWA 开发](CONFLUX_TERMUX.md)、[部署](../DEPLOYMENT.md)、[ACP 预览](DEVIN_ACP_LOCAL_PREVIEW.md)
+- [心弦功能边界](HEARTSTRING_SPEC.md)、[整合路线图](roadmap/CONFLUX_USABILITY_INTEGRATION.md)
+- [来源与许可](PROVENANCE.md)、[LICENSE](../LICENSE)
 
-文档随相关实现更新，优先修改已有说明，不为每次小改动新建工单、审计或交接文件。
+## 历史资料
+
+`work-orders/`、`CONFLUX_ROLE_SETTINGS.md` 及部分上游模块笔记是历史实现/验证记录，**不能作为现在强制执行的工单或 UI 规则**。`open-source/` 只保留两份底层存储证据。删除的过期交接、审计和重复发布门槛仍可从 Git 历史找回。
+
+功能完成度、代码实际运行状态都以当前 `conflux-dev` 为准。相关实现改变时更新已有文件，不为普通小改新建文档。

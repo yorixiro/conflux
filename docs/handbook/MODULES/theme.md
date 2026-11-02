@@ -69,9 +69,5 @@ space store theme state -> LocalData space rows -> hydration/export/import
 
 ## Verification
 
-```bash
-npm run typecheck
-npm test -- src/engines/toolExecutorDescribe.test.ts src/engines/request/requestContextMessages.test.ts src/engines/themeToolState.test.ts src/stores/spaceStoreThemePersistence.test.ts src/stores/spaceStoreSkinActions.test.ts
-npm test
-npm run build
-```
+定向检查与测试范围统一见 [AGENTS.md](../../../AGENTS.md)。只验本次受影响的模块，除发布或大范围整合外，不默认运行全量测试或构建。
+

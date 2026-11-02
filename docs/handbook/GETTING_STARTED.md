@@ -16,7 +16,7 @@ npm i
 npm run dev
 ```
 
-The Vite dev server serves the shared frontend. It does not start a backend by itself. For
+On Termux, use `npm run termux:dev` for the existing 4173 service instead of launching a second ordinary Vite server. The Vite dev server serves the shared frontend. It does not start a backend by itself. For
 split-origin backend development, copy `.env.example` to `.env.local` and set
 `VITE_POLARIS_API_ORIGIN` to a deployer-owned API origin.
 
@@ -65,7 +65,7 @@ have desktop file or terminal access.
 
 ## Where To Start Reading
 
-- Product structure: [Architecture](ARCHITECTURE.md)
+- Product structure: [Conflux architecture](../CONFLUX_ARCHITECTURE.md)
 - Data model: [Data And Storage](DATA_AND_STORAGE.md)
 - Module ownership: [Module notes](README.md#module-notes)
 - Backend/selfhost setup: [../connect-your-own-backend.md](../connect-your-own-backend.md)

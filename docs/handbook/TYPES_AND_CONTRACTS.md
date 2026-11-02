@@ -43,12 +43,4 @@ the rest of the tree while the type ownership is readable.
 
 ## Verification
 
-Type-only changes should run:
-
-```bash
-npm run typecheck
-npm test
-```
-
-If a type change alters tool protocol, LocalData rows, import/export package shape, or request
-context replay, run the focused tests for that subsystem too.
+按 [AGENTS.md](../../AGENTS.md) 进行类型检查及本次影响范围内的定向测试。类型改变涉及工具协议、存储行、导入导出或请求上下文时，再验证相关的实际链路；普通类型修改不默认跑全量测试。

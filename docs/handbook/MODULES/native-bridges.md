@@ -78,11 +78,6 @@ the returned shape structured and product-neutral so shared code can decide prod
 
 ## Verification
 
-```bash
-npm run typecheck
-npm test -- src/native/localDataSqliteNativeParity.test.ts src/infrastructure/nativePersistenceBackend.test.ts
-npm test
-npm run build
-```
+定向检查与测试范围统一见 [AGENTS.md](../../../AGENTS.md)。只验本次受影响的模块，除发布或大范围整合外，不默认运行全量测试或构建。
 
 Before a channel claim, also run the appropriate Android or iOS sync/build command.
