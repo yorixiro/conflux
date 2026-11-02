@@ -87,7 +87,7 @@ export function buildAssistantPromptParts(params: {
   return [
     {
       name: 'system_identity' as const,
-      label: '房间身份',
+      label: '关系底座',
       role: 'system' as const,
       layer: 'identity' as const,
       truncationPriority: 0,

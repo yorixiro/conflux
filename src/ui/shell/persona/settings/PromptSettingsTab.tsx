@@ -77,16 +77,16 @@ function PromptSlotsEditor({
         ) : null}
       </div>
 
-      <div className="prompt-slot-card" aria-label="系统身份提示词">
+      <div className="prompt-slot-card" aria-label="关系底座">
         <div className="prompt-slot-card-head">
-          <strong>系统身份 <small className="prompt-slot-role">SYSTEM</small></strong>
+          <strong>关系底座 <small className="prompt-slot-role">SYSTEM</small></strong>
           <span className="prompt-slot-summary">当前房间 · 默认原版</span>
         </div>
         <div className="prompt-slot-fields">
-          <p className="conflux-room-settings-note">恢复的原版 System Prompt 默认适用于所有房间；这里仅覆盖当前角色。手动保存后才改变缓存前缀，注入位置不变。</p>
+          <p className="conflux-room-settings-note">原版关系底座默认适用于所有房间；这里仅覆盖当前角色。手动保存后才改变缓存前缀，注入位置不变。</p>
           <textarea
             className="ps-textarea ps-textarea--mono"
-            aria-label="系统身份提示词内容"
+            aria-label="关系底座内容"
             rows={9}
             value={systemIdentityDraft}
             onChange={(event) => setSystemIdentityDraft(event.target.value)}
@@ -102,7 +102,7 @@ function PromptSlotsEditor({
                 }
               })}
             >
-              保存系统身份
+              保存关系底座
             </button>
             <button
               type="button" className="ps-field-expand-btn"
