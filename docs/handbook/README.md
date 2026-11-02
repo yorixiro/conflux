@@ -3,8 +3,9 @@
 This handbook is the current-source guide for Polaris. It explains the codebase as it is
 meant to be maintained: by responsibility, owner boundary, and data flow.
 
-Use `docs/open-source/` for public-facing design documentation. Use this handbook when changing the
-repository.
+Use [AGENTS.md](../../AGENTS.md) for the single daily development workflow. This handbook
+is a technical reference, not an additional review process. Historical storage evidence is
+listed in [docs/open-source/](../open-source/README.md).
 
 ## Reading Order
 

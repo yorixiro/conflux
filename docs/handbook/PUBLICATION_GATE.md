@@ -10,7 +10,7 @@ required before any public archive, public branch, or release claim.
 - `npm run test:data-boundary` passes.
 - `npm run verify` passes.
 - `README.md`, `docs/README.md`, and this handbook describe current source, not stale plans.
-- `docs/open-source/` is self-contained enough for a public reader.
+- `docs/PROVENANCE.md` documents inherited code and unresolved third-party reuse conditions; historical storage proof remains accessible as reference, not an extra publication gate.
 - Worker developer dependency audit is reviewed separately with `npm --prefix workers/polaris-api audit`; any Wrangler major upgrade is handled as its own toolchain pass.
 
 ## Data And Credential Gate
