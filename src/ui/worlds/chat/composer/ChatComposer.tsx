@@ -342,7 +342,7 @@ export function ChatComposer() {
             onSetPickerOpen={setAttachmentPickerOpen}
             onSetPendingCardReference={actions.setPendingCardReference}
           />
-          {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onSelectSticker={handlePickSticker} onClose={() => setKaomojiOpen(false)} /> : null}
+          {kaomojiOpen ? <KaomojiDrawer onSelect={handlePickKaomoji} onSelectSticker={handlePickSticker} ownerCollaboratorId={persona?.id} onClose={() => setKaomojiOpen(false)} /> : null}
           {ui.submitFlight ? (
             <div key={ui.submitFlight.id} className="chat-submit-flight" aria-hidden="true">
               <span className="chat-submit-flight-orbit">
