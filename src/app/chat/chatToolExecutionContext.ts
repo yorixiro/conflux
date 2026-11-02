@@ -1,3 +1,4 @@
+import { listStickerCatalog } from '../../engines/stickerCatalog';
 import {
   filterImageCardsForCollaboratorScope,
   filterProjectFilesForCollaboratorScope
@@ -288,6 +289,23 @@ export function buildDirectToolExecutionContext({
       return {
         ok: false as const,
         error: `“${target}”匹配到多个图片库素材：${matches.map((card) => card.title).join('、')}`
+      };
+    }
+    // Check the same room-scoped image catalog for sticker purpose/mood.
+    // An ambiguous emotion never silently selects a random image.
+    const stickerMatches = listStickerCatalog(imageCards, normalized).filter((item) =>
+      [item.purpose, ...item.moods].some((value) =>
+        normalizeImageMaterialTarget(value).includes(normalized)
+      )
+    );
+    if (stickerMatches.length === 1) {
+      const sticker = imageCards.find((card) => card.id === stickerMatches[0].id);
+      if (sticker) return { ok: true as const, attachment: await imageCardToAttachment(sticker) };
+    }
+    if (stickerMatches.length > 1) {
+      return {
+        ok: false as const,
+        error: `“${target}”匹配到多个表情包，请按 ID 指定：${stickerMatches.map((item) => `${item.title} (${item.id})`).join('、')}`
       };
     }
     return attachmentResult;
