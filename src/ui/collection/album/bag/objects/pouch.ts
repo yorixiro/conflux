@@ -176,6 +176,8 @@ function filmMaterial(T: Tracker, u: FilmU, normal: THREE.Texture): THREE.MeshPh
     blendSrc: THREE.OneFactor,
     blendDst: THREE.OneMinusSrcAlphaFactor,
     side: THREE.DoubleSide,
+    // Separate film surfaces already provide both faces. Avoid a duplicate transparency pass.
+    forceSinglePass: true,
     normalMap: normal,
     normalScale: new THREE.Vector2(0.4, 0.4),
   });

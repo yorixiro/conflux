@@ -78,6 +78,8 @@ export function buildStamp(item: StampItem, ctx: ObjectCtx): ObjectDef {
     alphaTest: 0.2,
     alphaToCoverage: true,
     side: THREE.DoubleSide,
+    // The single relief surface needs one transparency pass, not two.
+    forceSinglePass: true,
     displacementScale: depth,
     displacementBias: -depth * 0.5,
   }));

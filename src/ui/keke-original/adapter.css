@@ -1,3 +1,10 @@
+/* Preserve the old sticker skin's pink inline-code treatment without tinting other chat skins. */
+:root[data-cf=sticker] #chat .message-markdown-code-inline {
+  background: color-mix(in srgb, #f4a7bb 30%, var(--surface));
+  border-color: color-mix(in srgb, #e48aa3 45%, transparent);
+  color: color-mix(in srgb, #b4466a 68%, var(--text));
+}
+
 /* Adapter: the real composer uses a <textarea> where the prototype has <input id="in">.
    The rules below are the prototype's own `.fd input` rules, retargeted at textarea. */
 :root[data-cf=sticker] #chat .fd textarea{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;padding:0 4px;color:var(--rt);font:400 15px/1 var(--cn);letter-spacing:.04em}
