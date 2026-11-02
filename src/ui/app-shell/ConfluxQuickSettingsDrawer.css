@@ -273,3 +273,32 @@
   .conflux-room-settings-nav button { font-size: 11px; gap: 4px; }
   .conflux-room-settings-nav button svg { width: 14px; height: 14px; }
 }
+
+/* Reuse the established sticker-room paper and ink instead of a generic white modal. */
+body[data-polaris-preset='keke-doodle'] .conflux-room-settings-drawer,
+body[data-polaris-preset='keke-pois'] .conflux-room-settings-drawer {
+  --sheet-readable-text: #5d5357;
+  --sheet-readable-soft: #7a6d71;
+  --sheet-readable-muted: #a39599;
+  --control-text: #5d5357;
+  --control-surface: rgba(255, 255, 255, 0.58);
+  --control-surface-solid: #fbf8f7;
+  --border: rgba(122, 109, 113, 0.21);
+  --accent: #b0838c;
+  --accent-soft: #ead9dc;
+  background:
+    repeating-linear-gradient(transparent 0 28px, rgba(157,171,185,.12) 28px 29px),
+    #faf7f5;
+  color: var(--sheet-readable-text);
+}
+body[data-polaris-preset='keke-pois'] .conflux-room-settings-drawer {
+  --sheet-readable-text: #6e6668;
+  --sheet-readable-soft: #84787c;
+  --control-text: #6e6668;
+  --control-surface-solid: #f6f5f5;
+  --accent: #a5858c;
+  --accent-soft: #e9dadc;
+  background:
+    repeating-linear-gradient(transparent 0 28px, rgba(120,114,116,.09) 28px 29px),
+    #f6f5f5;
+}
