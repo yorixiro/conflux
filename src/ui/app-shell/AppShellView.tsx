@@ -42,6 +42,7 @@ export function AppShellView({
   collectionCreateCustomCollaborator,
   collectionOpenProviderSettings,
   collectionOpenSettings,
+  openQuickMenuPage,
   collectionOpenDesktopLocalSettings,
   collectionDeleteCollaborator,
   collaboratorTransitionKey,
@@ -342,6 +343,8 @@ export function AppShellView({
         onClose={closeRoomSettings}
         provider={overlaysProps.api}
         onOpenApi={collectionOpenProviderSettings}
+        onOpenMenu={openQuickMenuPage}
+        onDeleteCollaborator={collectionDeleteCollaborator}
         currentPersona={roomSettingsPersona}
       />
       <AppShellOverlays {...overlaysProps} />
