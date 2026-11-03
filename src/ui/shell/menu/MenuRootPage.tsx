@@ -214,6 +214,13 @@ export function MenuRootPage({
           helpText={t('settings.generation.help')}
           onClick={onOpenGeneration}
         />
+        <MenuSheetItem
+          icon="lighthouse"
+          title={t('settings.gateway.title')}
+          detail={t('settings.gateway.detail')}
+          helpText={t('settings.gateway.help')}
+          onClick={onOpenGateway}
+        />
         {desktopLocalAvailable ? (
           <MenuSheetItem
             icon="folder"

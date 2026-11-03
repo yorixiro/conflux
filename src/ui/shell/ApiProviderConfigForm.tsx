@@ -3,7 +3,8 @@ import { resolveProviderCapability } from '../../engines/provider-runtime';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
-import { isLegacyDevinAcpProvider } from './apiProviderDisplay';
+import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
+import { getProviderMissingFields, isLegacyDevinAcpProvider } from './apiProviderDisplay';
 import {
   ApiProviderCapabilitiesSection,
   ApiProviderImageUnderstandingSection,
@@ -32,8 +33,10 @@ export function ApiProviderConfigForm({
   const { t } = useI18n();
   const publicTrialProvider = resolveProviderCapability(api).route.isBuiltInTrial;
   const builtInProvider = publicTrialProvider;
+  const missingFields = getProviderMissingFields(api);
   const {
-    matchedPreset
+    matchedPreset,
+    interfacePath
   } = resolveApiProviderFormViewModel(api);
   const [selectedPresetId, setSelectedPresetId] = useState(matchedPreset?.id ?? '');
   const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(api, matchedPreset?.id));
@@ -83,25 +86,37 @@ export function ApiProviderConfigForm({
     void handleDiscoverModels();
   }
 
-  // Keep existing ACP records intact until the owner explicitly converts one.
+  // A legacy ACP record must never fall through to the ordinary Base URL / API Key form.
+  // Keep its stored data unchanged until the owner explicitly activates ACP transport.
   if (api.agentTransport === 'devin-acp' || legacyAcp) {
     return (
       <div className="api-provider-console">
-        <section className="api-provider-section api-provider-section-config">
-          <div className="api-provider-section-head"><h3>Devin ACP</h3></div>
-          <button type="button" className="btn-secondary"
-            onClick={() => onSetApiConfig({
-              agentTransport: undefined,
-              name: '自建中转',
-              protocol: 'openai-completions',
-              path: '/chat/completions',
-              baseUrl: '',
-              apiKey: '',
-              model: ''
-            })}>
-            改为普通 API 连接
-          </button>
-        </section>
+        {legacyAcp ? (
+          <div className="api-provider-setup-note" role="status">
+            <strong>旧 Devin ACP 连接等待启用本地代理</strong>
+            <p>这条连接不需要 Base URL 或 API Key。启用后保留连接 ID 和角色绑定，并使用本地 Devin 模型配置。</p>
+            <button type="button" className="btn-secondary compact"
+              onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
+              启用 Devin ACP 本地代理
+            </button>
+          </div>
+        ) : (
+          <>
+            <DevinAcpConnectionPanel
+              selectedModel={api.model === 'Devin ACP' ? '' : api.model}
+              onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
+            />
+            <details className="api-provider-more-settings">
+              <summary>图片理解（独立看图 API）</summary>
+              <ApiProviderImageUnderstandingSection
+                api={api}
+                providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
+                onSetApiConfig={onSetApiConfig}
+                requireExplicitProvider
+              />
+            </details>
+          </>
+        )}
       </div>
     );
   }
@@ -109,10 +124,20 @@ export function ApiProviderConfigForm({
   return (
     <div className="api-provider-console">
       {!builtInProvider ? (
+        <div className="api-provider-setup-note" role="status">
+          <strong>{missingFields.length
+            ? t('apiProvider.setup.missing', { fields: missingFields.map(field => t(`apiProvider.setup.${field}`)).join(' / ') })
+            : t('apiProvider.setup.complete')}</strong>
+          <p>{t('apiProvider.setup.autosave')}</p>
+        </div>
+      ) : null}
+      {!builtInProvider ? (
         <ApiProviderConnectionSection
           api={api}
+          matchedPresetName={matchedPreset ? t('apiProvider.connection.presetAdopted', { name: matchedPreset.name }) : ''}
           selectedPresetId={selectedPresetId}
           advancedOpen={advancedOpen}
+          interfacePath={interfacePath}
           onSetSelectedPresetId={setSelectedPresetId}
           onSetAdvancedOpen={setAdvancedOpen}
           onSetApiConfig={onSetApiConfig}
