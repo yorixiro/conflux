@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildAssistantPromptParts, DEFAULT_SYSTEM_IDENTITY_PROMPT } from './requestPromptLayers';
 
 describe('buildAssistantPromptParts', () => {
-  it('restores original system identity at the stable prefix before persona', () => {
+  it('keeps the default system identity at the stable prefix before persona', () => {
     const parts = buildAssistantPromptParts({
       personaPrompt: '你是一个温柔的协作者。',
       personaPromptSource: 'custom',
@@ -28,7 +28,10 @@ describe('buildAssistantPromptParts', () => {
     expect(parts[1]?.name).toBe('persona_identity');
     expect(parts[0]?.content).toBe(DEFAULT_SYSTEM_IDENTITY_PROMPT);
     expect(parts[0]?.content).toContain('persona 是你在这段关系里的名字和轮廓');
-    expect(parts[0]?.content).toContain('显而易见的意图不用反复确认');
+    expect(parts[0]?.content).toContain('无需等对方逐字下令');
+    expect(parts[0]?.content).toContain('主动分享已有表情包');
+    expect(parts[0]?.content).toContain('不要求对方每次都说“记住”');
+    expect(parts[0]?.content).toContain('遵守实际权限与确认流程');
     expect(parts[1]?.content).toBe('你是一个温柔的协作者。');
     expect(parts.findIndex((part) => part.name === 'tool_capability')).toBeLessThan(
       parts.findIndex((part) => part.name === 'tool_catalog_capability')
