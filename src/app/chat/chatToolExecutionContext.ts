@@ -15,7 +15,7 @@ import {
 } from '../../engines/attachmentToolExecutor';
 import { prewarmRunCodeSandbox, runCodeInSandbox } from '../../engines/codeSandbox';
 import { ensureRoomState, updateRoomState } from '../../engines/roomStatePersistence';
-import { readWebPageContent, runWebSearch } from '../../engines/webSearchTool';
+import { fetchRemoteImageForAttachment, readWebPageContent, runWebSearch } from '../../engines/webSearchTool';
 import { resolveAttachmentTargetEntry, toAttachmentEntries } from '../../engines/attachmentToolEntries';
 import {
   createImageAttachmentVariant,
@@ -187,7 +187,7 @@ async function importImageSourceForSend(target: string | undefined, title?: stri
   try {
     const response = await fetch(source.value);
     if (!response.ok) {
-      return { ok: false, error: `读取图片 URL 失败：${response.status}` };
+      throw new Error(`图片 URL 返回 ${response.status}`);
     }
     const blob = await response.blob();
     const mimeType = response.headers.get('content-type')?.split(';')[0]?.trim() || blob.type || 'image/*';
@@ -210,10 +210,23 @@ async function importImageSourceForSend(target: string | undefined, title?: stri
       ].join('\n')
     };
   } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? `读取图片 URL 失败：${error.message}` : '读取图片 URL 失败。'
-    };
+    try {
+      // Public image hosts frequently block cross-origin reads. The existing
+      // same-origin search API validates the remote URL and limits file size.
+      const imported = await fetchRemoteImageForAttachment(source.value);
+      const name = imageNameFromUrl(source.url, title);
+      return {
+        ok: true,
+        attachment: await createStoredAttachmentFromDataUrl({
+          kind: 'image', name, mimeType: imported.mimeType, dataUrl: imported.dataUrl
+        }),
+        detailText: `图片：${name}\n来源：${source.value}\n导入：本地联网代理`
+      };
+    } catch (proxyError) {
+      const originalReason = error instanceof Error ? error.message : '未知错误';
+      const proxyReason = proxyError instanceof Error ? proxyError.message : '未知错误';
+      return { ok: false, error: `图片导入失败（直接读取：${originalReason}；代理读取：${proxyReason}）` };
+    }
   }
 }
 

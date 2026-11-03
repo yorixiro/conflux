@@ -157,6 +157,17 @@ export async function runWebSearch(
   }
 }
 
+export async function fetchRemoteImageForAttachment(url: string): Promise<{ dataUrl: string; mimeType: string }> {
+  const result = await postSearchPayload<{ dataUrl: string; mimeType: string }>({
+    mode: 'image-import', url
+  });
+  if (!/^data:image\/(?:png|jpeg|webp|gif);base64,/.test(result.dataUrl)
+    || !/^image\/(?:png|jpeg|webp|gif)$/.test(result.mimeType)) {
+    throw new Error('图片导入服务返回的格式不正确。');
+  }
+  return result;
+}
+
 export async function readWebPageContent(url: string, maxChars?: number): Promise<ReadWebPageResult> {
   const normalizedUrl = url.trim();
   if (!normalizedUrl) {
