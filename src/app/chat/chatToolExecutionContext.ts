@@ -354,7 +354,7 @@ export function buildDirectToolExecutionContext({
     }),
     ...buildProactiveToolExecutionContext({ runtime, ownerCollaboratorId, conversationId }),
     inspectAttachments: (scope, query) => inspectConversationAttachments(getConversationMessages(), scope, query),
-    webSearch: (query, maxResults) => runWebSearch(query, maxResults, getLatestRuntimeSearchConfig()),
+    webSearch: (query, maxResults, searchType) => runWebSearch(query, maxResults, getLatestRuntimeSearchConfig(), searchType),
     readWebPage: (url, maxChars) => readWebPageContent(url, maxChars),
     listCalendars: () => listNativeCalendars(),
     readCalendarEvents: (query) => readNativeCalendarEvents(query),

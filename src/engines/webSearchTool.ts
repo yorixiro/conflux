@@ -12,6 +12,8 @@ type WebSearchRequestConfig =
   Pick<WebSearchConfig, 'provider' | 'apiKey' | 'bochaSummary' | 'bochaFreshness'>
   & Partial<Pick<WebSearchConfig, 'customEndpoint' | 'customAdapter' | 'customLabel'>>;
 
+export type WebSearchType = 'web' | 'images';
+
 export type WebSearchItem = {
   title: string;
   url: string;
@@ -80,7 +82,8 @@ function buildSearchProviderPayload(searchConfig?: WebSearchRequestConfig | null
 export async function runWebSearch(
   query: string,
   maxResults?: number,
-  searchConfig?: WebSearchRequestConfig | null
+  searchConfig?: WebSearchRequestConfig | null,
+  searchType: WebSearchType = 'web'
 ): Promise<WebSearchResult> {
   const normalizedQuery = query.trim();
   if (!normalizedQuery) {
@@ -96,7 +99,7 @@ export async function runWebSearch(
       warning?: string;
       results: WebSearchItem[];
     }>({
-      mode: 'search',
+      mode: searchType === 'images' ? 'image-search' : 'search',
       query: normalizedQuery,
       maxResults: limit,
       ...buildSearchProviderPayload(searchConfig)
@@ -131,7 +134,9 @@ export async function runWebSearch(
             item.snippet
           ].filter(Boolean).join('\n')
       ),
-      '下一步：如果用户要事实、时效信息、产品/地点/新闻/规则判断，请继续用 readWebPage 读取已返回的相关结果页；只有用户只要链接时，才直接根据搜索结果回答。不要对同一个查询再次调用 webSearch 来等待更好的结果；如果候选来源不足或不可读，直接说明限制。'
+      searchType === 'images'
+        ? '结果里的 URL 是候选图片文件链接，并非已经下载。挑选来源可靠的图片后，用 sendImageAttachment 导入，再用 saveAttachmentToCollection 和 stickerPurpose、stickerMoods 存成表情包。部分链接可能失效或不允许下载；只有成功执行才能声称已保存。'
+        : '下一步：如果用户要事实、时效信息、产品/地点/新闻/规则判断，请继续用 readWebPage 读取已返回的相关结果页；只有用户只要链接时，才直接根据搜索结果回答。不要对同一个查询再次调用 webSearch 来等待更好的结果；如果候选来源不足或不可读，直接说明限制。'
     ].filter(Boolean);
 
     return {

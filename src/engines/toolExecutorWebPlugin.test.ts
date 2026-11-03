@@ -62,7 +62,14 @@ describe('webToolExecutorPlugin', () => {
         ]
       }
     });
-    expect(ctx.webSearch).toHaveBeenCalledWith('polaris', 3);
+    expect(ctx.webSearch).toHaveBeenCalledWith('polaris', 3, undefined);
+  });
+
+  it('passes image mode to the existing search executor', async () => {
+    const ctx = createContext();
+    const result = await webToolExecutorPlugin.execute({ kind: 'webSearch', query: '猫表情包', searchType: 'images' }, ctx);
+    expect(ctx.webSearch).toHaveBeenCalledWith('猫表情包', undefined, 'images');
+    expect(result).toMatchObject({ ok: true, summary: '已找到 1 张图片候选 · mock' });
   });
 
   it('handles read web page actions', async () => {

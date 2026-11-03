@@ -133,17 +133,19 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     brief: '联网搜索',
     schema: {
       name: 'webSearch',
-      description: '联网搜索网页结果。',
+      description: '联网搜索网页或图片。支持按语境主动寻找图片、GIF 和表情包素材。'
       parameters: objectParameters({
         query: stringProperty('搜索词。'),
         maxResults: numberProperty('可选结果数。'),
+        searchType: stringProperty('web 搜网页，images 搜图片文件 URL。', { enum: ['web', 'images'] }),
         targetLabel: stringProperty('可选目标说明。')
       }, ['query'])
     },
     rules: [
       '联网动作：',
-      '1. webSearch：联网搜索网页结果。query 填搜索词，maxResults 可选。',
-      '- webSearch 只返回候选网页和搜索摘要，不等于已经读过来源正文。',
+      '1. webSearch：按 searchType 搜网页（web，默认）或图片（images）；query 填搜索词。',
+      '- webSearch 只返回候选搜索结果，不代表已经读过网页正文或看过图片。',
+      '- 对话中适合添加新表情包时，可以自主用 searchType=images 搜图，依次调用 sendImageAttachment 和 saveAttachmentToCollection 并提供 stickerPurpose、stickerMoods；不必等用户逐次下令。'
       '- 普通搜索质量取决于用户在设置里的联网搜索服务；未配置搜索 Key 时会返回降级候选，但 readWebPage 仍可读取用户给出的具体链接。',
       '- 回答新闻、价格、版本、地点、产品、法律、规则、近期事件等会随时间变化的信息时，先 webSearch 找候选，再用 readWebPage 读取 2-3 个相关/可信来源后再下结论。',
       '- 如果 webSearch 标记为降级结果，更不能只根据 snippet 回答；除非用户只要链接，否则继续读取网页正文。'

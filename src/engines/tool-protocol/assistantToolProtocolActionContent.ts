@@ -401,6 +401,7 @@ export function parseContentToolAction(
         kind: 'webSearch',
         query,
         maxResults: normalizePositiveInt(action.maxResults),
+        searchType: action.searchType === 'images' ? 'images' : 'web',
         targetLabel: normalizeOptionalString(action.targetLabel)
       } };
     }

@@ -6,6 +6,20 @@ afterEach(() => {
 });
 
 describe('runWebSearch', () => {
+  it('uses image search mode for image candidates', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      query: '猫表情包', provider: 'Bing Images',
+      results: [{ title: '猫', url: 'https://img.example/cat.png', snippet: '出处' }]
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await runWebSearch('猫表情包', 3, null, 'images');
+    expect(result.ok).toBe(true);
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual(expect.objectContaining({ mode: 'image-search', maxResults: 3 }));
+    if (result.ok) expect(result.detailText).toContain('sendImageAttachment');
+  });
+
+
   it('sends the user search provider config with the search request', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({
       query: '小红书 链接',

@@ -26,11 +26,13 @@ function formatWebSearchSummary(result: Awaited<ReturnType<ToolContext['webSearc
 async function executeWebToolAction(action: WebToolAction, ctx: ToolContext): Promise<ToolExecutionResult> {
   switch (action.kind) {
     case 'webSearch': {
-      const result = await ctx.webSearch(action.query, action.maxResults);
+      const result = await ctx.webSearch(action.query, action.maxResults, action.searchType);
       if (!result.ok) return result;
       return {
         ok: true,
-        summary: formatWebSearchSummary(result),
+        summary: action.searchType === 'images'
+          ? `已找到 ${result.results.length} 张图片候选 · ${result.provider}`
+          : formatWebSearchSummary(result),
         detailText: result.detailText,
         ...(result.webSearch ? { webSearch: result.webSearch } : {})
       };

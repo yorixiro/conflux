@@ -191,7 +191,7 @@ export type ToolContext = {
     triggerRuleId: string;
   }>;
   inspectAttachments: (scope?: 'latest' | 'all', query?: string) => InspectAttachmentsResult;
-  webSearch: (query: string, maxResults?: number) => Promise<WebSearchResult>;
+  webSearch: (query: string, maxResults?: number, searchType?: 'web' | 'images') => Promise<WebSearchResult>;
   readWebPage: (url: string, maxChars?: number) => Promise<ReadWebPageResult>;
   listCalendars: () => Promise<NativeCalendarsResult>;
   readCalendarEvents: (query: NativeCalendarQuery) => Promise<NativeCalendarEventsResult>;

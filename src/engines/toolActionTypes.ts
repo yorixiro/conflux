@@ -276,6 +276,7 @@ export type CanonicalToolAction =
       kind: 'webSearch';
       query: string;
       maxResults?: number;
+      searchType?: 'web' | 'images';
       targetLabel?: string;
     }
   | {
