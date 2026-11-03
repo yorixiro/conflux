@@ -4,6 +4,10 @@ import { isAllowedPolarisApiOrigin } from '../src/engines/server/corsOrigin.js';
 
 const BRAVE_SEARCH_URL = 'https://api.search.brave.com/res/v1/web/search';
 const BING_SEARCH_URL = 'https://www.bing.com/search';
+const BING_IMAGES_URL = 'https://www.bing.com/images/search';
+const BRAVE_IMAGES_URL = 'https://api.search.brave.com/res/v1/images/search';
+const MAX_IMAGE_IMPORT_BYTES = 6 * 1024 * 1024;
+const IMPORT_IMAGE_MIMES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const DEFAULT_SEARCH_LIMIT = 8;
 const MAX_SEARCH_LIMIT = 20;
 const DEFAULT_READ_MAX_CHARS = 40_000;
@@ -172,6 +176,119 @@ async function runBingSearch(query: string, maxResults: number): Promise<{ provi
   return { provider: 'Bing', results };
 }
 
+
+async function runBraveImageSearch(query: string, maxResults: number, clientApiKey?: string) {
+  const apiKey = clientApiKey?.trim() || process.env.BRAVE_SEARCH_API_KEY?.trim();
+  if (!apiKey) throw new Error('Brave Image Search requires an API key');
+  const url = new URL(BRAVE_IMAGES_URL);
+  url.searchParams.set('q', query);
+  url.searchParams.set('count', String(maxResults));
+  url.searchParams.set('safesearch', 'strict');
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json', 'X-Subscription-Token': apiKey }
+  });
+  if (!response.ok) throw new Error('Brave image search failed (' + response.status + ')');
+  const data = await response.json() as {
+    results?: Array<{
+      title?: string | null;
+      url?: string | null;
+      source?: string | null;
+      properties?: { url?: string | null };
+      thumbnail?: { src?: string | null };
+    }>;
+  };
+  const results: SearchResultItem[] = (data.results ?? []).flatMap((item) => {
+    const imageUrl = item.properties?.url || item.thumbnail?.src || '';
+    if (!/^https?:\/\//i.test(imageUrl)) return [];
+    return [{
+      title: item.title?.trim() || '图片',
+      url: imageUrl,
+      snippet: item.url ? '图片来源页：' + item.url : '',
+      source: item.source || 'Brave Images'
+    }];
+  });
+  return { provider: 'Brave Images', results: results.slice(0, maxResults) };
+}
+
+async function runBingImageSearch(query: string, maxResults: number) {
+  const url = new URL(BING_IMAGES_URL);
+  url.searchParams.set('q', query);
+  url.searchParams.set('adlt', 'strict');
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; ConfluxBot/1.0)',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+    }
+  });
+  if (!response.ok) throw new Error('Bing image search failed (' + response.status + ')');
+  const html = await response.text();
+  const tags = html.match(/<a\b[^>]*\bclass=(["'])[^"']*\biusc\b[^"']*\1[^>]*>/gi) ?? [];
+  const results: SearchResultItem[] = [];
+  const seen = new Set<string>();
+  for (const tag of tags) {
+    if (results.length >= maxResults) break;
+    const metadata = tag.match(/\bm=(["'])([\s\S]*?)\1/i)?.[2];
+    if (!metadata) continue;
+    try {
+      const entry = JSON.parse(decodeHtml(metadata)) as {
+        murl?: string; turl?: string; purl?: string; t?: string;
+      };
+      const imageUrl = entry.murl || entry.turl || '';
+      if (!/^https?:\/\//i.test(imageUrl) || seen.has(imageUrl)) continue;
+      seen.add(imageUrl);
+      results.push({
+        title: entry.t?.trim() || '图片',
+        url: imageUrl,
+        snippet: entry.purl ? '图片来源页：' + entry.purl : '',
+        source: 'Bing Images'
+      });
+    } catch {
+      // Ignore malformed search metadata.
+    }
+  }
+  return { provider: 'Bing Images', results };
+}
+
+async function importRemoteImage(rawUrl: string) {
+  const { response, finalUrl } = await fetchRemotePageWithSafeRedirects(rawUrl, {
+    headers: { Accept: 'image/png,image/jpeg,image/webp,image/gif' },
+    signal: AbortSignal.timeout(15_000)
+  });
+  if (!response.ok) throw new Error('图片读取失败（' + response.status + '）');
+  const mimeType = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (!IMPORT_IMAGE_MIMES.has(mimeType)) {
+    throw new Error('图片只支持 PNG、JPEG、WebP 或 GIF 格式。');
+  }
+  const contentLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(contentLength) && contentLength > MAX_IMAGE_IMPORT_BYTES) {
+    throw new Error('图片超过 6 MiB 限制。');
+  }
+  if (!response.body) throw new Error('图片响应缺少文件内容。');
+  const reader = response.body.getReader();
+  const chunks: Buffer[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_IMAGE_IMPORT_BYTES) {
+        await reader.cancel();
+        throw new Error('图片超过 6 MiB 限制。');
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  if (!size) throw new Error('图片文件为空。');
+  return {
+    url: finalUrl,
+    mimeType,
+    dataUrl: 'data:' + mimeType + ';base64,' + Buffer.concat(chunks).toString('base64')
+  };
+}
+
 function htmlToReadableText(html: string) {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const metaTags = html.match(/<meta\b[^>]*>/gi) ?? [];
@@ -306,6 +423,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('X-RateLimit-Remaining', String(Math.max(0, remaining)));
   };
   try {
+    if (body.mode === 'image-import') {
+      const rawUrl = typeof body.url === 'string' ? body.url.trim() : '';
+      if (!rawUrl) {
+        res.status(400).json({ error: { message: '缺少图片 URL', type: 'invalid_request' } });
+        return;
+      }
+      const rateLimit = getRateLimitState(userId);
+      setRateLimitHeaders(rateLimit.remaining);
+      if (!rateLimit.allowed) {
+        res.status(429).json({ error: { message: '今天的联网查询次数用完了。', type: 'rate_limit' } });
+        return;
+      }
+      const nextRateLimit = consumeRateLimit(userId);
+      setRateLimitHeaders(nextRateLimit.remaining);
+      res.status(200).json(await importRemoteImage(rawUrl));
+      return;
+    }
     if (body.mode === 'read') {
       const url = typeof body.url === 'string' ? body.url.trim() : '';
       const maxChars = Math.max(1000, Math.min(MAX_READ_MAX_CHARS, Number(body.maxChars) || DEFAULT_READ_MAX_CHARS));
@@ -347,14 +481,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let provider = '';
     let results: SearchResultItem[] = [];
-    try {
-      const brave = await runBraveSearch(query, maxResults);
-      provider = brave.provider;
-      results = brave.results;
-    } catch {
-      const bing = await runBingSearch(query, maxResults);
-      provider = bing.provider;
-      results = bing.results;
+    if (body.mode === 'image-search') {
+      try {
+        const brave = await runBraveImageSearch(
+          query,
+          maxResults,
+          body.searchProvider === 'brave' && typeof body.searchApiKey === 'string'
+            ? body.searchApiKey
+            : undefined
+        );
+        provider = brave.provider;
+        results = brave.results;
+      } catch {
+        const bing = await runBingImageSearch(query, maxResults);
+        provider = bing.provider;
+        results = bing.results;
+      }
+    } else {
+      try {
+        const brave = await runBraveSearch(query, maxResults);
+        provider = brave.provider;
+        results = brave.results;
+      } catch {
+        const bing = await runBingSearch(query, maxResults);
+        provider = bing.provider;
+        results = bing.results;
+      }
     }
 
     const nextRateLimit = consumeRateLimit(userId);
