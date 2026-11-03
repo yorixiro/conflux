@@ -313,7 +313,7 @@ describe('attachmentToolExecutorPlugin', () => {
       summary: '已存入图片收藏 · Poster',
       imageCardId: 'image-1'
     });
-    expect(ctx.saveAttachmentToCollection).toHaveBeenCalledWith('poster.png', 'Poster', ['海报'], true);
+    expect(ctx.saveAttachmentToCollection).toHaveBeenCalledWith('poster.png', 'Poster', ['海报'], true, undefined);
   });
 
   it('saves text attachments and archive entries as code cards', async () => {

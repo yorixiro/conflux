@@ -408,7 +408,7 @@ export function buildDirectToolExecutionContext({
       if (!resolved.ok) return resolved;
       return createImageAttachmentVariant(resolved.attachment, options);
     },
-    saveAttachmentToCollection: (target, title, tags, openInCollection) => {
+    saveAttachmentToCollection: (target, title, tags, openInCollection, sticker) => {
       const resolved = resolveAttachmentForSave(target, { kind: 'image', noun: '图片附件' });
       if (!resolved.ok) return resolved;
 
@@ -424,6 +424,12 @@ export function buildDirectToolExecutionContext({
       });
 
       if (!saveResult) return { ok: false, error: '保存图片收藏失败。' };
+      if (sticker) {
+        if (!collection.updateImageCard) return { ok: false, error: '图片收藏未提供表情包标签保存接口。' };
+        collection.updateImageCard(saveResult.cardId, {
+          sticker: { purpose: sticker.purpose?.trim() ?? '', moods: sticker.moods ?? [] }
+        });
+      }
       if (openInCollection) {
         revealCollectionShelf(space, 'image');
       }

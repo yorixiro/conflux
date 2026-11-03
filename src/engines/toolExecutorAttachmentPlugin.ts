@@ -174,7 +174,10 @@ async function executeAttachmentToolAction(
         action.target,
         action.title,
         action.tags,
-        action.openInCollection
+        action.openInCollection,
+        action.stickerPurpose !== undefined || (action.stickerMoods?.length ?? 0) > 0
+          ? { purpose: action.stickerPurpose, moods: action.stickerMoods }
+          : undefined
       );
       if (!result.ok) return result;
       return {

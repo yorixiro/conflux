@@ -399,6 +399,7 @@ export type ChatToolStoreBindings = {
       blockIndex: number;
       blockTitle?: string;
     }) => { cardId: string; created: boolean; title: string } | null;
+    updateImageCard?: (cardId: string, patch: { sticker?: ImageAssetCard['sticker'] | null }) => void;
     saveImageCardFromChat: (input: {
       assetId: string;
       title?: string;

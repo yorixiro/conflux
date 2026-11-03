@@ -138,6 +138,17 @@ describe('parseAssistantToolAction', () => {
     });
   });
 
+  it('preserves sticker purpose and mood metadata for image collections', () => {
+    const result = parseAssistantToolAction({
+      kind: 'saveAttachmentToCollection', target: 'cat.png',
+      stickerPurpose: '开心时回复', stickerMoods: ['开心', '喜欢']
+    });
+    expect(result.action).toMatchObject({
+      kind: 'saveAttachmentToCollection', target: 'cat.png',
+      stickerPurpose: '开心时回复', stickerMoods: ['开心', '喜欢']
+    });
+  });
+
   it('infers readWebPage from url payloads', () => {
     const result = parseAssistantToolAction({
       url: 'https://example.com/readme',

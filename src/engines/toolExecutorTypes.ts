@@ -224,7 +224,8 @@ export type ToolContext = {
     target?: string,
     title?: string,
     tags?: string[],
-    openInCollection?: boolean
+    openInCollection?: boolean,
+    sticker?: { purpose?: string; moods?: string[] }
   ) => SaveAttachmentToCollectionResult;
   saveAttachmentAsCodeCard: (
     target?: string,

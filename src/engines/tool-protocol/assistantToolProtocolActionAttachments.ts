@@ -192,6 +192,8 @@ export function parseAttachmentToolAction(action: Record<string, unknown>): Pars
         target: normalizeOptionalString(action.target),
         title: normalizeOptionalString(action.title),
         tags: normalizeStringArray(action.tags),
+        ...(typeof action.stickerPurpose === 'string' ? { stickerPurpose: action.stickerPurpose.trim() } : {}),
+        ...(Array.isArray(action.stickerMoods) ? { stickerMoods: normalizeStringArray(action.stickerMoods) } : {}),
         openInCollection: action.openInCollection !== false,
         targetLabel: normalizeOptionalString(action.targetLabel)
       } };

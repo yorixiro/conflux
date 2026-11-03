@@ -383,6 +383,8 @@ export type CanonicalToolAction =
       target?: string;
       title?: string;
       tags?: string[];
+      stickerPurpose?: string;
+      stickerMoods?: string[];
       openInCollection?: boolean;
       targetLabel?: string;
     }

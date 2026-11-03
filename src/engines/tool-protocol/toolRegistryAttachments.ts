@@ -200,13 +200,16 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
         target: stringProperty('目标附件 id 或文件名。'),
         title: stringProperty('可选标题。'),
         tags: stringArrayProperty('可选中文标签。'),
+        stickerPurpose: stringProperty('存为表情包时的用途，例如打招呼、庆祝或安慰。'),
+        stickerMoods: stringArrayProperty('存为表情包时的情绪标签，例如开心、委屈。'),
         openInCollection: booleanProperty('是否在收藏区打开。'),
         targetLabel: stringProperty('可选目标说明。')
       })
     },
     rules: [
       '8. saveAttachmentToCollection：把图片附件收进图片收藏。',
-      '- 用户说“把这张图/二维码收起来”或“放进我们的收藏册”时，用 saveAttachmentToCollection；收藏册与图片收藏共用同一份图片卡。'
+      '- 用户要求收藏，或者对话中发现适合长期复用的表情包时，可以调用保存；不要自动收藏每一张临时图片。',
+      '- 存表情包时传 stickerPurpose 和 stickerMoods，才能成为按情绪和用途检索的表情包；普通收藏不传这两项。'
     ]
   },
   saveAttachmentAsCodeCard: {
