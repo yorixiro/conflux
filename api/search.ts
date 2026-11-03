@@ -250,6 +250,46 @@ async function runBingImageSearch(query: string, maxResults: number) {
   return { provider: 'Bing Images', results };
 }
 
+
+async function runCommonsImageSearch(query: string, maxResults: number) {
+  const cleaned = query.replace(/表情包|动图|贴纸|图片/g, ' ').trim();
+  const terms = [query.trim(), cleaned];
+  const animal = /猫/.test(query) ? 'cat' : /狗|犬/.test(query) ? 'dog'
+    : /兔/.test(query) ? 'rabbit' : /熊猫/.test(query) ? 'panda' : '';
+  if (animal) terms.push(animal + ' meme', animal);
+  for (const term of [...new Set(terms.filter(Boolean))]) {
+    const url = new URL('https://commons.wikimedia.org/w/api.php');
+    for (const [key, value] of Object.entries({
+      action: 'query', format: 'json', generator: 'search',
+      gsrsearch: term, gsrnamespace: '6', gsrlimit: String(Math.min(30, maxResults * 5)),
+      prop: 'imageinfo', iiprop: 'url|mime|size'
+    })) url.searchParams.set(key, value);
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json', 'User-Agent': 'Conflux/1.0 (image search)' },
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!response.ok) throw new Error('Commons image search failed (' + response.status + ')');
+    const data = await response.json() as { query?: { pages?: Record<string, {
+      title?: string;
+      imageinfo?: Array<{ url?: string; mime?: string; size?: number; descriptionurl?: string }>;
+    }> } };
+    const results: SearchResultItem[] = Object.values(data.query?.pages ?? {}).flatMap(page => {
+      const image = page.imageinfo?.[0];
+      if (!image?.url?.startsWith('https://') ||
+        !IMPORT_IMAGE_MIMES.has(image.mime || '') ||
+        (typeof image.size === 'number' && image.size > MAX_IMAGE_IMPORT_BYTES)) return [];
+      return [{
+        title: page.title?.replace(/^File:/, '') || '图片',
+        url: image.url,
+        snippet: image.descriptionurl ? '图片来源：' + image.descriptionurl : '',
+        source: 'Wikimedia Commons'
+      }];
+    }).slice(0, maxResults);
+    if (results.length) return { provider: 'Wikimedia Commons', results };
+  }
+  return { provider: 'Wikimedia Commons', results: [] as SearchResultItem[] };
+}
+
 async function importRemoteImage(rawUrl: string) {
   const { response, finalUrl } = await fetchRemotePageWithSafeRedirects(rawUrl, {
     headers: { Accept: 'image/png,image/jpeg,image/webp,image/gif' },
@@ -483,38 +523,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let provider = '';
     let results: SearchResultItem[] = [];
     if (body.mode === 'image-search') {
-      // Honour the selected search provider. Bing requires no key; other
-      // text-only providers must not be treated as image-search services.
-      if (body.searchProvider === 'brave') {
+      // The default Bing image search does not require a key.
+      const imageKey = body.searchProvider === 'brave' && typeof body.searchApiKey === 'string'
+        ? body.searchApiKey.trim() : '';
+      if (imageKey || process.env.BRAVE_SEARCH_API_KEY?.trim()) {
         try {
-          const brave = await runBraveImageSearch(
-            query,
-            maxResults,
-            typeof body.searchApiKey === 'string' ? body.searchApiKey : undefined
-          );
-          provider = brave.provider;
-          results = brave.results;
-        } catch {
-          // A missing key or unavailable provider does not disable free search.
-        }
+          const brave = await runBraveImageSearch(query, maxResults, imageKey);
+          if (brave.results.length) { provider = brave.provider; results = brave.results; }
+        } catch { /* Try the free providers. */ }
       }
       if (!results.length) {
         try {
           const bing = await runBingImageSearch(query, maxResults);
-          provider = bing.provider;
-          results = bing.results;
-        } catch {
-          // Bing sometimes blocks HTML scraping or changes its page structure.
-        }
+          if (bing.results.length) { provider = bing.provider; results = bing.results; }
+        } catch { /* Bing's HTML layout is not stable. */ }
       }
       if (!results.length) {
-        const fallback = await searchPublicImages(query, maxResults);
-        provider = fallback.provider;
-        results = fallback.results;
+        const commons = await runCommonsImageSearch(query, maxResults);
+        provider = commons.provider;
+        results = commons.results;
       }
-      if (!results.length) {
-        throw new Error('图片搜索没有返回可用图片；Bing 和公开图片库均无可用结果。');
-      }
+      if (!results.length) throw new Error('图片搜索未找到可用的图片，不能把空结果当成成功。');
     } else {
       try {
         const brave = await runBraveSearch(query, maxResults);
