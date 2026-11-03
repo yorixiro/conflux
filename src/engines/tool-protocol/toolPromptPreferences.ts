@@ -54,7 +54,7 @@ export const DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES: Record<PolarisToolPromptGr
   attachment: true,
   generation: false,
   archive: false,
-  web: false,
+  web: true,
   personalData: false,
   mcp: true,
   knowledge: true,

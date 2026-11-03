@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES,
+  DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES,
   POLARIS_TOOL_PROMPT_GROUP_DESCRIPTIONS,
   POLARIS_TOOL_PROMPT_GROUP_ORDER,
   POLARIS_TOOLBOX_PROMPT_GROUP_ORDER
 } from './toolPromptPreferences';
 
 describe('toolPromptPreferences', () => {
+  it('exposes web browsing by default while preserving saved user preferences', () => {
+    expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.web).toBe(true);
+  });
   it('allows contextual image sharing and low-risk memory capture by default without opening scheduled outreach', () => {
     expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.attachment).toBe(true);
     expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.memoryWrite).toBe(true);

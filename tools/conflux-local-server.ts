@@ -9,6 +9,7 @@ import embeddings from '../api/provider-embeddings.js';
 import images from '../api/provider-images.js';
 import audio from '../api/provider-audio.js';
 import diagnostics from '../api/client-diagnostics.js';
+import search from '../api/search.js';
 
 // Local transport only: reuse the existing provider handlers and their validators.
 // No provider selection, credentials, chat data, or migrations belong here.
@@ -18,6 +19,7 @@ const handlers: Record<string, typeof providerRelay> = {
   '/api/provider-images': images,
   '/api/provider-audio': audio,
   '/api/client-diagnostics': diagnostics,
+  '/api/search': search,
 };
 const mime: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
