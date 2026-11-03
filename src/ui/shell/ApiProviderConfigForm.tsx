@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { resolveProviderCapability } from '../../engines/provider-runtime';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
+import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
 import { isLegacyDevinAcpProvider } from './apiProviderDisplay';
 import {
@@ -28,6 +29,7 @@ export function ApiProviderConfigForm({
   onToggleModelPicker,
   onRunApiTest
 }: ApiProviderConfigFormProps) {
+  const { t } = useI18n();
   const publicTrialProvider = resolveProviderCapability(api).route.isBuiltInTrial;
   const builtInProvider = publicTrialProvider;
   const {
