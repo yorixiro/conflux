@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { fetchRemotePageWithSafeRedirects } from '../src/engines/server/remotePageReader.js';
+import { searchPublicImages } from '../src/engines/server/imageSearchFallback.js';
 import { isAllowedPolarisApiOrigin } from '../src/engines/server/corsOrigin.js';
 
 const BRAVE_SEARCH_URL = 'https://api.search.brave.com/res/v1/web/search';
@@ -482,20 +483,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let provider = '';
     let results: SearchResultItem[] = [];
     if (body.mode === 'image-search') {
-      try {
-        const brave = await runBraveImageSearch(
-          query,
-          maxResults,
-          body.searchProvider === 'brave' && typeof body.searchApiKey === 'string'
-            ? body.searchApiKey
-            : undefined
-        );
-        provider = brave.provider;
-        results = brave.results;
-      } catch {
-        const bing = await runBingImageSearch(query, maxResults);
-        provider = bing.provider;
-        results = bing.results;
+      // Honour the selected search provider. Bing requires no key; other
+      // text-only providers must not be treated as image-search services.
+      if (body.searchProvider === 'brave') {
+        try {
+          const brave = await runBraveImageSearch(
+            query,
+            maxResults,
+            typeof body.searchApiKey === 'string' ? body.searchApiKey : undefined
+          );
+          provider = brave.provider;
+          results = brave.results;
+        } catch {
+          // A missing key or unavailable provider does not disable free search.
+        }
+      }
+      if (!results.length) {
+        try {
+          const bing = await runBingImageSearch(query, maxResults);
+          provider = bing.provider;
+          results = bing.results;
+        } catch {
+          // Bing sometimes blocks HTML scraping or changes its page structure.
+        }
+      }
+      if (!results.length) {
+        const fallback = await searchPublicImages(query, maxResults);
+        provider = fallback.provider;
+        results = fallback.results;
+      }
+      if (!results.length) {
+        throw new Error('图片搜索没有返回可用图片；Bing 和公开图片库均无可用结果。');
       }
     } else {
       try {
