@@ -316,6 +316,19 @@ describe('attachmentToolExecutorPlugin', () => {
     expect(ctx.saveAttachmentToCollection).toHaveBeenCalledWith('poster.png', 'Poster', ['海报'], true, undefined);
   });
 
+  it('passes purpose and moods when saving a web image as a sticker', async () => {
+    const ctx = createContext();
+    const result = await attachmentToolExecutorPlugin.execute({
+      kind: 'saveAttachmentToCollection', target: 'https://example.com/cat.png',
+      stickerPurpose: '开心时回复', stickerMoods: ['开心'], openInCollection: false
+    }, ctx);
+    expect(result).toMatchObject({ ok: true, imageCardId: 'image-1' });
+    expect(ctx.saveAttachmentToCollection).toHaveBeenCalledWith(
+      'https://example.com/cat.png', undefined, undefined, false,
+      { purpose: '开心时回复', moods: ['开心'] }
+    );
+  });
+
   it('saves text attachments and archive entries as code cards', async () => {
     const ctx = createContext();
 

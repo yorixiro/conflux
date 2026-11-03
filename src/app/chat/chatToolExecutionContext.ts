@@ -189,10 +189,19 @@ async function importImageSourceForSend(target: string | undefined, title?: stri
     if (!response.ok) {
       throw new Error(`图片 URL 返回 ${response.status}`);
     }
+    const mimeType = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() || '';
+    if (mimeType && !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(mimeType)) {
+      return { ok: false, error: `不支持的图片类型：${mimeType}` };
+    }
+    const declaredLength = Number(response.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > 6 * 1024 * 1024) {
+      return { ok: false, error: '图片超过 6 MiB 限制。' };
+    }
     const blob = await response.blob();
-    const mimeType = response.headers.get('content-type')?.split(';')[0]?.trim() || blob.type || 'image/*';
-    if (!mimeType.toLowerCase().startsWith('image/')) {
-      return { ok: false, error: `这个 URL 返回的不是图片：${mimeType}` };
+    if (blob.size > 6 * 1024 * 1024) return { ok: false, error: '图片超过 6 MiB 限制。' };
+    const actualMimeType = mimeType || blob.type.toLowerCase();
+    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(actualMimeType)) {
+      return { ok: false, error: `这个 URL 返回的不是支持的图片：${actualMimeType}` };
     }
 
     const name = imageNameFromUrl(source.url, title);
@@ -201,7 +210,7 @@ async function importImageSourceForSend(target: string | undefined, title?: stri
       attachment: await createStoredAttachment({
         kind: 'image',
         name,
-        mimeType,
+        mimeType: actualMimeType,
         blob
       }),
       detailText: [

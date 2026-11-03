@@ -109,7 +109,7 @@ export async function runWebSearch(
       throw new Error('搜索服务返回格式异常。');
     }
     if (!data.results.length) {
-      return { ok: false, error: `没有找到和“${normalizedQuery}”相关的网页结果。` };
+      return { ok: false, error: `没有找到和“${normalizedQuery}”相关的${searchType === 'images' ? '图片' : '网页'}结果。` };
     }
 
     const webSearch: WebSearchEvidence = {
