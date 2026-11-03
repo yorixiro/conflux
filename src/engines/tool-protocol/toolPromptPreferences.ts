@@ -51,7 +51,7 @@ export const DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES: Record<PolarisToolPromptGr
   project: false,
   desktop: true,
   theme: true,
-  attachment: false,
+  attachment: true,
   generation: false,
   archive: false,
   web: false,
@@ -60,7 +60,7 @@ export const DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES: Record<PolarisToolPromptGr
   knowledge: true,
   memory: true,
   memoryRecall: true,
-  memoryWrite: false,
+  memoryWrite: true,
   proactive: false
 };
 
@@ -91,7 +91,7 @@ export const POLARIS_TOOL_PROMPT_GROUP_DESCRIPTIONS: Record<PolarisToolPromptGro
   project: '内部场景开关：进入工作区后自动使用文件工具，不作为普通对话里的常驻工具展示。',
   desktop: '让官网 Mac 桌面版协作者使用你授权的本机文件夹和需要逐次确认的命令行。',
   theme: '让协作者能试穿、精修和回滚界面换肤。',
-  attachment: '让协作者查看、读取和保存当前对话里的附件。',
+  attachment: '让协作者查看附件，并在聊天中按语境主动发送已有图片或表情包；收藏写入仍按要求。',
   generation: '让协作者生成新的产物附件，比如二维码。',
   archive: '让协作者处理 zip 和压缩包里的条目。',
   web: '让协作者联网搜索或读网页。',
@@ -100,7 +100,7 @@ export const POLARIS_TOOL_PROMPT_GROUP_DESCRIPTIONS: Record<PolarisToolPromptGro
   knowledge: '当你不知道怎么使用北极星时，可以打开这个工具，让协作者读取产品知识来指引你，或者你也可以直接看使用文档。',
   memory: '让协作者读取当前协作者的长期资料全文。',
   memoryRecall: '让协作者在不确定你当前指代、但过往对话可能有帮助时，主动搜索旧摘要和原文锚点。',
-  memoryWrite: '让协作者把稳定线索写进长期记忆。',
+  memoryWrite: '让协作者主动记录明确且低风险的稳定偏好与长期线索；敏感条目仍需确认。',
   proactive: '让协作者在对话中为自己创建主动消息规则，之后按时间主动开口。'
 };
 

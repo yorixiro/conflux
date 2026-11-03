@@ -1,7 +1,7 @@
 export const MEMORY_RELEASE_GATES = {
   showGlobalConversationSummarySettings: true,
   showCollaboratorConversationSummaryStatus: true,
-  enableAutomaticConversationSummary: false,
+  enableAutomaticConversationSummary: true,
   enableConversationSummaryRequestLane: true,
   showVectorIndexSettings: true,
   enableVectorRequestRecall: true

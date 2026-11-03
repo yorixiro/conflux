@@ -118,10 +118,11 @@ describe('resolveAutomaticConversationSummaryPlan', () => {
     expect(plan.shouldRun).toBe(false);
   });
 
-  it('stays off while the release gate hides automatic summaries', () => {
+  it('stays off when an explicit release gate disables automatic summaries', () => {
     const persona = createPersonaTemplate({ id: 'mimo', name: 'Mimo', description: '' });
     const plan = resolveAutomaticConversationSummaryPlan({
       settings: { enabled: true, autoUpdateEnabled: true, lastUpdatedAt: 0 },
+      releaseEnabled: false,
       startupReady: true,
       chatHydrated: true,
       personaHydrated: true,

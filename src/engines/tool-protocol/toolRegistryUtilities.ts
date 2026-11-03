@@ -317,7 +317,7 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     brief: '写入长期记忆',
     schema: {
       name: 'writeMemory',
-      description: '写入稳定偏好和低风险长期记忆。',
+      description: '把自然对话中明确表达且有持续价值的低风险偏好、约定与事实写入当前协作者记忆；无需用户每次明确下令。',
       parameters: objectParameters({
         memory: stringArrayProperty('要写入的长期记忆条目。'),
         targetLabel: stringProperty('可选目标说明。')
@@ -325,8 +325,9 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
     },
     rules: [
       '写入记忆动作：',
-      '1. writeMemory：只写稳定偏好和低风险长期记忆。',
-      '- 只有用户明确要你记住、记录偏好或写进长期记忆时，再用它。'
+      '1. writeMemory：写入当前协作者明确、稳定、未来仍有用的低风险记忆。',
+      '- 可根据对话内容主动记录偏好、约定和持续项目，不以用户说出“记住”为必要条件。',
+      '- 不保存臆测、一次性情绪、重复条目或用户要求不要保存的内容；敏感条目遵循现有待确认流程，未确认不得声称已写入。'
     ]
   },
   writeMemoryDoc: {
@@ -349,7 +350,8 @@ export const UTILITY_TOOL_DEFINITION_MAP = {
       '写入长期资料动作：',
       '1. writeMemoryDoc：新建或更新当前协作者的长期资料文档。',
       '- 资料适合长背景、设定、关系资料、项目资料或长期日志；短偏好和一句话事实继续用 writeMemory。',
-      '- 如果要更新已有资料，使用长期资料目录里的 docId；如果没有明确目标，就新建一份标题清楚的资料。'
+      '- 如果要更新已有资料，使用长期资料目录里的 docId；确实需要新的长期资料时再新建，不把每次闲聊拆成独立文档。',
+      '- writeMemoryDoc 先生成待确认卡片，用户确认后才真正持久化；未确认不能声称已保存。'
     ]
   },
   readMemoryDoc: {

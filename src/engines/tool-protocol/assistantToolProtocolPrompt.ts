@@ -169,7 +169,7 @@ function buildToolEnforcementLines(
     '执行态指引：',
     themeOnly
       ? '这轮已经进入美化辅助，只允许调用换肤工具，不要改房间卡、附件、记忆或联网。'
-      : '这轮用户已经明确在要你真的动 Polaris 界面、房间、附件、记忆或联网结果。',
+      : '这轮依据对话语境执行已启用且有权限的动作。主动发送已有表情包、检索记忆或写入低风险长期偏好，不必等待用户逐项命令；外部写入、删除和其他高影响动作仍按授权执行。',
     protocolMode === 'native-first'
       ? '原生 tool call 代表真实动作；读取/检查工具只返回证据，不代表写入、应用或完成。'
       : '原生 tool call 或 `polaris-tools` 工具块代表真实动作；读取/检查工具只返回证据，不代表写入、应用或完成。',
@@ -395,7 +395,7 @@ export function buildAssistantToolPromptSections(
       content: [
         '以下仅说明当前真正可用的工具，不覆盖角色人设。',
         '以当前工具目录、参数和执行结果为准；不要根据旧产品指南猜测界面按钮或入口。',
-        '这里只列这轮当前已打开的工具；工具动作按需要使用，正文按当前对话语境回应。',
+        '这里只列这轮当前已打开的工具；按语境决定是否主动使用，不以用户显式点名工具为前提，正文保持自然回应。',
         '如果用户只是普通聊天、写自介、润色文案或表达想法，先自然回答，不要输出工具协议、代码草稿或调试残片。',
         ...buildToolEnforcementLines(context, protocolMode),
         ...buildObjectBoundaryLines(receipt)

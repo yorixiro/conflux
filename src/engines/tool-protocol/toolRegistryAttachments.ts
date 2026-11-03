@@ -109,7 +109,7 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     brief: '把已有图片发到聊天里',
     schema: {
       name: 'sendImageAttachment',
-      description: '发送已有的图片附件、图片收藏或表情包；表情包可按稳定 ID、用途或情绪标签选择。不调用生图模型。',
+      description: '发送已有的图片附件、图片收藏或表情包；可在对话中自主挑选合适的现有图片。表情包支持稳定 ID、用途或情绪标签，不调用生图模型。',
       parameters: objectParameters({
         target: stringProperty('图片 URL、图片附件 id、图片卡/表情包 id、assetId、文件名、标题、表情包用途或情绪；省略时使用最近/唯一可用图片。'),
         title: stringProperty('可选显示文件名。'),
@@ -118,9 +118,9 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     },
     rules: [
       '4. sendImageAttachment：把已有图片发到聊天里，返回本地图片附件。',
-      '- 用户要“发这张图/把图片库里的某张图发出来/找一张已有图给我看/把这个图片链接发出来”时，用 sendImageAttachment。',
+      '- 用户明确要图时直接发送；普通聊天中若现有表情包与语境自然契合，也可以主动调用 sendImageAttachment，不必先征求一次性发图指令。',
       '- sendImageAttachment 只复用或导入已有图片，不需要生图模型，也不要改用 generateImage。',
-      '- 若用户想用现有表情包，先按用途或情绪搜索；多张匹配时使用明确的表情包 ID，不要随意猜测。'
+      '- 选择表情包时可按用途或情绪匹配；多张匹配时使用明确的表情包 ID，不要随意猜测，也不要为了刷存在感反复发图。'
     ]
   },
   inspectImageAsset: {

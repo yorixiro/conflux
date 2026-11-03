@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES,
   POLARIS_TOOL_PROMPT_GROUP_DESCRIPTIONS,
   POLARIS_TOOL_PROMPT_GROUP_ORDER,
   POLARIS_TOOLBOX_PROMPT_GROUP_ORDER
 } from './toolPromptPreferences';
 
 describe('toolPromptPreferences', () => {
+  it('allows contextual image sharing and low-risk memory capture by default without opening scheduled outreach', () => {
+    expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.attachment).toBe(true);
+    expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.memoryWrite).toBe(true);
+    expect(DEFAULT_POLARIS_TOOL_PROMPT_PREFERENCES.proactive).toBe(false);
+  });
+
   it('keeps workspace out of the user-facing toolbox toggles', () => {
     expect(POLARIS_TOOLBOX_PROMPT_GROUP_ORDER).not.toContain('project');
   });

@@ -11,6 +11,14 @@ import { TOOL_INVOCATION_KINDS } from '../../types/toolInvocationKinds';
 import { POLARIS_TOOL_EXECUTOR_BY_ACTION_KIND } from './toolManifest';
 
 describe('toolRegistry', () => {
+  it('lets visible agents proactively share existing images and save stable low-risk memory', () => {
+    const imageRules = POLARIS_TOOL_REGISTRY_BY_NAME.sendImageAttachment.rules?.join('\n') ?? '';
+    const memoryRules = POLARIS_TOOL_REGISTRY_BY_NAME.writeMemory.rules?.join('\n') ?? '';
+    expect(imageRules).toContain('主动调用 sendImageAttachment');
+    expect(memoryRules).toContain('不以用户说出“记住”为必要条件');
+    expect(memoryRules).toContain('敏感条目遵循现有待确认流程');
+  });
+
   it('materializes one complete manifest receipt for invocation, replay, and executor consumers', () => {
     expect(Object.keys(POLARIS_TOOL_MANIFEST_BY_NAME)).toEqual(TOOL_INVOCATION_KINDS);
     for (const name of TOOL_INVOCATION_KINDS) {
