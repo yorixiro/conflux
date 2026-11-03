@@ -16,9 +16,34 @@ describe('runWebSearch', () => {
     expect(result.ok).toBe(true);
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(JSON.parse(String(init.body))).toEqual(expect.objectContaining({ mode: 'image-search', maxResults: 3 }));
-    if (result.ok) expect(result.detailText).toContain('sendImageAttachment');
+    if (result.ok) {
+      expect(result.detailText).toContain('sendImageAttachment');
+      expect(result.detailText).toContain('saveAttachmentToCollection');
+    }
   });
 
+
+  it('keeps every image candidate with its full URL and source note in the model result', async () => {
+    const candidates = Array.from({ length: 12 }, (_, index) => ({
+      title: `表情包 ${index + 1}`,
+      url: `https://img.example/sticker-${index + 1}.png`,
+      snippet: `来源页 https://example.com/${index + 1}`
+    }));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      query: '表情包', provider: 'Image Search', results: candidates
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
+
+    const result = await runWebSearch('表情包', 12, null, 'images');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.webSearch.results).toEqual(candidates);
+    for (const candidate of candidates) {
+      expect(result.detailText).toContain(candidate.title);
+      expect(result.detailText).toContain(candidate.url);
+      expect(result.detailText).toContain(candidate.snippet);
+    }
+    expect(result.detailText).not.toContain('部分链接可能失效');
+  });
 
   it('sends the user search provider config with the search request', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({
