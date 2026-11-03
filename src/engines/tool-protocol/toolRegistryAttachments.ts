@@ -195,7 +195,7 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     brief: '把图片附件收进图片收藏',
     schema: {
       name: 'saveAttachmentToCollection',
-      description: '把当前对话的图片附件或联网搜到的图片 URL 存进当前协作者图片收藏；可同时指定表情包用途和情绪标签。'
+      description: '把当前对话的图片附件或联网搜到的图片 URL 存进当前协作者图片收藏；可同时指定表情包用途和情绪标签。',
       parameters: objectParameters({
         target: stringProperty('目标图片附件 id、文件名，或联网找到的图片文件 http(s) URL。'),
         title: stringProperty('可选标题。'),
