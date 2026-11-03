@@ -191,7 +191,7 @@ export function isPolarisNativeToolVisible(
 
   if (!matchesThemeMode(tool, visibilityState)) return false;
   if (!sceneMatches) return false;
-  if (tool.group === 'attachment' && tool.name !== 'sendImageAttachment' && !hasAvailableAttachment(context)) {
+  if (tool.group === 'attachment' && tool.name !== 'sendImageAttachment' && tool.name !== 'saveAttachmentToCollection' && !hasAvailableAttachment(context)) {
     return false;
   }
   if (tool.group === 'archive' && !hasAvailableArchiveAttachment(context)) {

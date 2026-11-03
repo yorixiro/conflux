@@ -140,6 +140,27 @@ describe('toolVisibility', () => {
     })).toBe(true);
   });
 
+  it('exposes network image collection even without a preexisting chat attachment', () => {
+    const saveTool = POLARIS_TOOL_REGISTRY_BY_NAME.saveAttachmentToCollection;
+    expect(isPolarisNativeToolVisible(saveTool, {
+      enabledToolGroups: { attachment: true },
+      attachmentSnapshot: { latest: [], available: [] }
+    })).toBe(true);
+    expect(isPolarisNativeToolVisible(saveTool, {
+      enabledToolGroups: { attachment: false },
+      attachmentSnapshot: { latest: [], available: [] }
+    })).toBe(false);
+    expect(isPolarisNativeToolVisible(POLARIS_TOOL_REGISTRY_BY_NAME.inspectAttachments, {
+      enabledToolGroups: { attachment: true },
+      attachmentSnapshot: { latest: [], available: [] }
+    })).toBe(false);
+    expect(isParsedAssistantActionVisible({
+      actionKind: 'saveAttachmentToCollection',
+      tool: saveTool,
+      context: { enabledToolGroups: { attachment: true } }
+    })).toBe(true);
+  });
+
   it('shows personal data tools only for enabled and available native capabilities', () => {
     expect(isPolarisNativeToolVisible(POLARIS_TOOL_REGISTRY_BY_NAME.listCalendars, {
       enabledToolGroups: { personalData: true },
