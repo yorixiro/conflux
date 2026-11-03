@@ -195,9 +195,9 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     brief: '把图片附件收进图片收藏',
     schema: {
       name: 'saveAttachmentToCollection',
-      description: '把当前对话的图片附件存进当前协作者的图片收藏；档案里的该协作者收藏册会展示同一张图片。',
+      description: '把当前对话的图片附件或联网搜到的图片 URL 存进当前协作者图片收藏；可同时指定表情包用途和情绪标签。'
       parameters: objectParameters({
-        target: stringProperty('目标附件 id 或文件名。'),
+        target: stringProperty('目标图片附件 id、文件名，或联网找到的图片文件 http(s) URL。'),
         title: stringProperty('可选标题。'),
         tags: stringArrayProperty('可选中文标签。'),
         stickerPurpose: stringProperty('存为表情包时的用途，例如打招呼、庆祝或安慰。'),
@@ -209,7 +209,8 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
     rules: [
       '8. saveAttachmentToCollection：把图片附件收进图片收藏。',
       '- 用户要求收藏，或者对话中发现适合长期复用的表情包时，可以调用保存；不要自动收藏每一张临时图片。',
-      '- 存表情包时传 stickerPurpose 和 stickerMoods，才能成为按情绪和用途检索的表情包；普通收藏不传这两项。'
+      '- 存表情包时传 stickerPurpose 和 stickerMoods，才能成为按情绪和用途检索的表情包；普通收藏不传这两项。',
+      '- 联网搜索找到合适的图片文件 URL 后，可直接将 URL 作为 target 收藏，不需要先发送到聊天。不要把网页链接误认为图片文件链接。'
     ]
   },
   saveAttachmentAsCodeCard: {

@@ -421,20 +421,39 @@ export function buildDirectToolExecutionContext({
       if (!resolved.ok) return resolved;
       return createImageAttachmentVariant(resolved.attachment, options);
     },
-    saveAttachmentToCollection: (target, title, tags, openInCollection, sticker) => {
-      const resolved = resolveAttachmentForSave(target, { kind: 'image', noun: '图片附件' });
-      if (!resolved.ok) return resolved;
-
-      const saveResult = collection.saveImageCardFromChat({
-        assetId: resolved.entry.attachment.assetId,
-        title,
-        tags,
-        ownerCollaboratorId: writeOwnerCollaboratorId,
-        imageName: resolved.entry.name,
-        conversationId,
-        messageId: resolved.entry.messageId,
-        attachmentId: resolved.entry.id
-      });
+    saveAttachmentToCollection: async (target, title, tags, openInCollection, sticker) => {
+      const imageUrl = parseImageSourceUrl(target);
+      let saveResult: { cardId: string; created: boolean; title: string } | null;
+      if (imageUrl) {
+        if (!collection.createImageCardFromAsset) {
+          return { ok: false, error: '图片收藏不支持从网络地址直接入库。' };
+        }
+        const imported = await importImageSourceForSend(target, title);
+        if (!imported?.ok) {
+          return imported ?? { ok: false, error: '没有找到可导入的图片 URL。' };
+        }
+        saveResult = collection.createImageCardFromAsset({
+          assetId: imported.attachment.assetId,
+          title,
+          tags,
+          ownerCollaboratorId: writeOwnerCollaboratorId,
+          imageName: imported.attachment.name,
+          source: 'chat-generated'
+        });
+      } else {
+        const resolved = resolveAttachmentForSave(target, { kind: 'image', noun: '图片附件' });
+        if (!resolved.ok) return resolved;
+        saveResult = collection.saveImageCardFromChat({
+          assetId: resolved.entry.attachment.assetId,
+          title,
+          tags,
+          ownerCollaboratorId: writeOwnerCollaboratorId,
+          imageName: resolved.entry.name,
+          conversationId,
+          messageId: resolved.entry.messageId,
+          attachmentId: resolved.entry.id
+        });
+      }
 
       if (!saveResult) return { ok: false, error: '保存图片收藏失败。' };
       if (sticker) {

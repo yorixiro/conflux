@@ -400,6 +400,14 @@ export type ChatToolStoreBindings = {
       blockTitle?: string;
     }) => { cardId: string; created: boolean; title: string } | null;
     updateImageCard?: (cardId: string, patch: { sticker?: ImageAssetCard['sticker'] | null }) => void;
+    createImageCardFromAsset?: (input: {
+      assetId: string;
+      title?: string;
+      tags?: string[];
+      ownerCollaboratorId?: string;
+      imageName: string;
+      source?: ImageAssetCard['source'];
+    }) => { cardId: string; created: boolean; title: string } | null;
     saveImageCardFromChat: (input: {
       assetId: string;
       title?: string;

@@ -170,7 +170,7 @@ async function executeAttachmentToolAction(
       };
     }
     case 'saveAttachmentToCollection': {
-      const result = ctx.saveAttachmentToCollection(
+      const result = await ctx.saveAttachmentToCollection(
         action.target,
         action.title,
         action.tags,
