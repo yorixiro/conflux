@@ -1,13 +1,12 @@
 import type { ImageUnderstandingSettings, ProviderProfile } from '../../types/domain';
-import { canDiscoverProviderModels, type ProviderModelOption } from '../../engines/providerModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
-import { getProviderModelDisplayLabel, isBuiltInProviderDisplay } from './apiProviderDisplay';
+import { getProviderModelDisplayLabel } from './apiProviderDisplay';
+import type { ApiProviderModelPickerState } from './ApiProviderConfigShared';
 
 type ApiProviderModelSectionProps = {
   api: ProviderProfile;
   modelPickerOpen: boolean;
-  presetModels: string[];
-  discoveredModels: ProviderModelOption[];
+  picker: ApiProviderModelPickerState;
   modelDiscoveryStatus: 'idle' | 'loading' | 'success' | 'error';
   modelDiscoveryError: string | null;
   onSetApiConfig: (patch: Partial<ProviderProfile>) => void;
@@ -18,8 +17,7 @@ type ApiProviderModelSectionProps = {
 export function ApiProviderModelSection({
   api,
   modelPickerOpen,
-  presetModels,
-  discoveredModels,
+  picker,
   modelDiscoveryStatus,
   modelDiscoveryError,
   onSetApiConfig,
@@ -27,24 +25,16 @@ export function ApiProviderModelSection({
   onRefreshModels
 }: ApiProviderModelSectionProps) {
   const { t } = useI18n();
-  const builtInProvider = isBuiltInProviderDisplay(api);
-  const acp = api.agentTransport === 'devin-acp';
+  const { builtIn: builtInProvider, acp, loading: discoveryLoading } = picker;
   const modelValue = builtInProvider
     ? getProviderModelDisplayLabel(api, t('apiProvider.model.emptyFallback'), t('apiProvider.model.builtInPlaceholder'))
     : acp && api.model === 'Devin ACP' ? '' : api.model;
-  const discoveredModelIds = discoveredModels.map((model) => model.id);
-  const displayedModels = discoveredModelIds.length > 0 ? discoveredModelIds : presetModels;
-  const canPickModels = acp || displayedModels.length > 0;
-  const canDiscoverModels = !builtInProvider && canDiscoverProviderModels(api);
-  const discoveryLoading = modelDiscoveryStatus === 'loading';
-  const modelPickerActionDisabled = builtInProvider || discoveryLoading || (!canPickModels && !canDiscoverModels);
-  const shouldPullBeforeOpen = !acp && canDiscoverModels && discoveredModelIds.length === 0 && modelDiscoveryStatus !== 'error';
-  const modelPickerActionLabel = discoveryLoading
-    ? t('apiProvider.model.loadingList')
-    : modelPickerOpen
-      ? t('apiProvider.model.collapseList')
-      : shouldPullBeforeOpen
-        ? t('apiProvider.model.fetchList')
+  const modelPickerActionLabel = modelPickerOpen
+    ? t('apiProvider.model.collapseList')
+    : picker.action === 'discover'
+      ? t('apiProvider.model.fetchList')
+      : discoveryLoading && picker.action === 'disabled'
+        ? t('apiProvider.model.loadingList')
         : t('apiProvider.model.expandList');
 
   return (
@@ -71,7 +61,7 @@ export function ApiProviderModelSection({
             onClick={onOpenModelPicker}
             aria-label={modelPickerActionLabel}
             title={modelPickerActionLabel}
-            disabled={modelPickerActionDisabled}
+            disabled={picker.action === 'disabled'}
           >
             {modelPickerOpen ? '▴' : '▾'}
           </button>
@@ -80,23 +70,23 @@ export function ApiProviderModelSection({
           type="button"
           className="btn-secondary compact"
           onClick={onRefreshModels}
-          disabled={!canDiscoverModels || discoveryLoading}
-        >{discoveryLoading ? '正在拉取…' : discoveredModels.length ? '刷新模型列表' : '拉取模型列表'}</button> : null}
-        {!builtInProvider && modelPickerOpen && canPickModels ? (
+          disabled={!picker.canRefresh}
+        >{discoveryLoading ? '正在拉取…' : picker.liveModelCount ? '刷新模型列表' : '拉取模型列表'}</button> : null}
+        {!builtInProvider && modelPickerOpen && (acp || picker.models.length > 0) ? (
           <div className="provider-model-list">
             {acp ? <button
               type="button"
               className={`provider-model-chip ${!modelValue ? 'active' : ''}`}
               onClick={() => onSetApiConfig({ model: '' })}
             >Devin 默认模型</button> : null}
-            {displayedModels.map((model) => (
+            {picker.models.map((model) => (
               <button
-                key={model}
+                key={model.id}
                 type="button"
-                className={`provider-model-chip ${api.model === model ? 'active' : ''}`}
-                onClick={() => onSetApiConfig({ model })}
+                className={`provider-model-chip ${api.model === model.id ? 'active' : ''}`}
+                onClick={() => onSetApiConfig({ model: model.id })}
               >
-                {discoveredModels.find((option) => option.id === model)?.label || model}
+                {model.label || model.id}
               </button>
             ))}
           </div>
@@ -104,13 +94,13 @@ export function ApiProviderModelSection({
         {!builtInProvider && discoveryLoading ? (
           <p className="api-provider-inline-note">{t('apiProvider.model.fetchingNote')}</p>
         ) : null}
-        {!builtInProvider && modelDiscoveryStatus === 'success' && discoveredModels.length > 0 ? (
-          <p className="api-provider-inline-note">{t('apiProvider.model.fetchedNote', { count: discoveredModels.length })}</p>
+        {!builtInProvider && modelDiscoveryStatus === 'success' && picker.liveModelCount > 0 ? (
+          <p className="api-provider-inline-note">{t('apiProvider.model.fetchedNote', { count: picker.liveModelCount })}</p>
         ) : null}
         {!builtInProvider && modelDiscoveryStatus === 'error' && modelDiscoveryError ? (
           <p className="api-provider-inline-note">{modelDiscoveryError}</p>
         ) : null}
-        {acp && modelDiscoveryStatus === 'success' && discoveredModels.length === 0 ? (
+        {acp && modelDiscoveryStatus === 'success' && picker.liveModelCount === 0 ? (
           <p className="api-provider-inline-note">代理未公开可选模型，可使用默认模型聊天。</p>
         ) : null}
       </div>

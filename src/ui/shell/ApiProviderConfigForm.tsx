@@ -12,6 +12,7 @@ import {
 import {
   ApiProviderConfigFormProps,
   resolveApiProviderFormViewModel,
+  resolveApiProviderModelPickerState,
   shouldOpenAdvancedSettings
 } from './ApiProviderConfigShared';
 import {
@@ -30,8 +31,7 @@ export function ApiProviderConfigForm({
   onRunApiTest
 }: ApiProviderConfigFormProps) {
   const { t } = useI18n();
-  const publicTrialProvider = resolveProviderCapability(api).route.isBuiltInTrial;
-  const builtInProvider = publicTrialProvider;
+  const builtInProvider = resolveProviderCapability(api).route.isBuiltInTrial;
   const missingFields = getProviderMissingFields(api);
   const {
     matchedPreset,
@@ -40,7 +40,13 @@ export function ApiProviderConfigForm({
   const [selectedPresetId, setSelectedPresetId] = useState(matchedPreset?.id ?? '');
   const [advancedOpen, setAdvancedOpen] = useState(() => shouldOpenAdvancedSettings(api, matchedPreset?.id));
   const modelDiscovery = useProviderModelDiscovery(api);
-  const presetModels = publicTrialProvider ? [] : (matchedPreset?.models ?? []);
+  const modelPicker = resolveApiProviderModelPickerState({
+    api,
+    open: modelPickerOpen,
+    presetModels: builtInProvider ? [] : (matchedPreset?.models ?? []),
+    discoveredModels: modelDiscovery.models,
+    status: modelDiscovery.status
+  });
   const legacyAcp = isLegacyDevinAcpProvider(api);
   const acp = api.agentTransport === 'devin-acp';
 
@@ -63,28 +69,14 @@ export function ApiProviderConfigForm({
     }
   }, [api.path, api.protocol, matchedPreset?.id]);
 
-  async function handleDiscoverModels() {
-    const succeeded = await modelDiscovery.refresh();
-    if (succeeded && !modelPickerOpen) onToggleModelPicker();
+  function handleDiscoverModels() {
+    if (!modelPickerOpen) onToggleModelPicker();
+    void modelDiscovery.refresh();
   }
 
   function handleModelPickerAction() {
-    if (modelPickerOpen) {
-      onToggleModelPicker();
-      return;
-    }
-    if (
-      acp
-      || modelDiscovery.models.length > 0
-      || (
-        presetModels.length > 0
-        && (!api.baseUrl.trim() || !api.apiKey.trim() || modelDiscovery.status === 'error')
-      )
-    ) {
-      onToggleModelPicker();
-      return;
-    }
-    void handleDiscoverModels();
+    if (modelPicker.action === 'discover') handleDiscoverModels();
+    else onToggleModelPicker();
   }
 
   // A legacy ACP record must never fall through to the ordinary Base URL / API Key form.
@@ -130,13 +122,12 @@ export function ApiProviderConfigForm({
       <ApiProviderModelSection
         api={api}
         modelPickerOpen={modelPickerOpen}
-        presetModels={presetModels}
-        discoveredModels={modelDiscovery.models}
+        picker={modelPicker}
         modelDiscoveryStatus={modelDiscovery.status}
         modelDiscoveryError={modelDiscovery.error}
         onSetApiConfig={onSetApiConfig}
         onOpenModelPicker={handleModelPickerAction}
-        onRefreshModels={() => void handleDiscoverModels()}
+        onRefreshModels={handleDiscoverModels}
       />
 
       <details className="api-provider-more-settings">
