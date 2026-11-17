@@ -39,6 +39,17 @@ describe('MessageGeneratedImages', () => {
     expect(html).not.toContain('attachment-save-btn');
   });
 
+  it('renders stickers as a bare small square without caption or save button', () => {
+    const html = renderToStaticMarkup(createElement(MessageGeneratedImages, {
+      attachments: [createImageAttachment({ presentation: 'sticker' })],
+      onSave: () => {}
+    }));
+
+    expect(html).toContain('generated-image-sticker');
+    expect(html).not.toContain('generated-image-caption');
+    expect(html).not.toContain('attachment-save-btn');
+  });
+
   it('renders nothing without attachments', () => {
     const html = renderToStaticMarkup(createElement(MessageGeneratedImages, {
       attachments: []

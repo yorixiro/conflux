@@ -244,5 +244,7 @@ export interface ChatAttachment {
   size: number;
   textContent?: string;
   clearedAt?: number;
+  /** Image sent from a sticker-tagged collection card; rendered as a small square, not a showcase. */
+  presentation?: 'sticker';
 }
 

@@ -104,7 +104,8 @@ async function imageCardToAttachment(card: ImageAssetCard): Promise<ChatAttachme
     kind: 'image',
     name: meta?.name ?? card.title,
     mimeType: meta?.mimeType ?? 'image/*',
-    size: meta?.size ?? 0
+    size: meta?.size ?? 0,
+    ...(card.sticker ? { presentation: 'sticker' as const } : {})
   };
 }
 
@@ -132,7 +133,7 @@ async function cloneImageAttachmentForSend(source: ChatAttachment, title?: strin
 
   return {
     ok: true as const,
-    attachment,
+    attachment: source.presentation ? { ...attachment, presentation: source.presentation } : attachment,
     detailText: [
       `图片：${name}`,
       `assetId=${source.assetId}`,

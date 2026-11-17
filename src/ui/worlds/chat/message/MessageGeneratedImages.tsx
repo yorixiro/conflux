@@ -23,6 +23,16 @@ function GeneratedImageCard({
   const assetUrl = useAssetObjectUrl(shouldLoad && !cleared ? attachment.assetId : undefined, true);
   const sizeLabel = formatAttachmentSize(attachment.size);
 
+  if (attachment.presentation === 'sticker' && !cleared) {
+    return (
+      <figure ref={ref} className="generated-image-sticker">
+        {assetUrl
+          ? <img src={assetUrl} alt={attachment.name} title={attachment.name} loading="lazy" />
+          : <span className="generated-image-canvas is-loading" aria-hidden="true" />}
+      </figure>
+    );
+  }
+
   const canvas = assetUrl ? (
     <img src={assetUrl} alt={attachment.name} loading="lazy" />
   ) : (

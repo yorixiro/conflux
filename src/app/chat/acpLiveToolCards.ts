@@ -9,6 +9,8 @@ export type AcpToolCard = {
   conversationId: string;
   title: string;
   description: string;
+  /** ACP ToolKind: read / edit / delete / move / search / execute / think / fetch / other. */
+  kind?: string;
   state: 'running' | 'executed' | 'failed' | 'approval';
   options?: Array<{ optionId: string; name: string; kind: string }>;
 };
@@ -50,6 +52,7 @@ export function publishAcpToolUpdate(conversationId: string, update: {
   toolCallId?: string;
   title?: string;
   name?: string;
+  kind?: string;
   status?: string;
 }) {
   if ((update.sessionUpdate !== 'tool_call' && update.sessionUpdate !== 'tool_call_update')
@@ -65,6 +68,7 @@ export function publishAcpToolUpdate(conversationId: string, update: {
     id, conversationId,
     title: update.title || prior?.title || update.name || 'Devin 工具',
     description: prior?.description || '',
+    kind: update.kind || prior?.kind,
     state
   };
   setCards([...cards.filter((card) => card.id !== id || card.conversationId !== conversationId), next].slice(-30));
