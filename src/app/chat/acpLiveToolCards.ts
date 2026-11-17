@@ -25,7 +25,12 @@ function notify() {
   for (const callback of listeners) callback();
 }
 function setCards(next: AcpToolCard[]) {
-  cards = next;
+  // Keep unanswered permissions visible even when the agent sends many tool updates.
+  // Limit the ordinary activity history, not the buttons required to unblock it.
+  const pending = next.filter((card) => card.state === 'approval').slice(-30);
+  const activity = next.filter((card) => card.state !== 'approval')
+    .slice(-Math.max(0, 30 - pending.length));
+  cards = [...activity, ...pending];
   notify();
 }
 export function subscribeAcpToolCards(callback: () => void) {
@@ -67,7 +72,7 @@ export function publishAcpToolUpdate(conversationId: string, update: {
     description: prior?.description || '',
     state
   };
-  setCards([...cards.filter((card) => card.id !== id || card.conversationId !== conversationId), next].slice(-30));
+  setCards([...cards.filter((card) => card.id !== id || card.conversationId !== conversationId), next]);
 }
 
 export function requestAcpPermissionChoice(args: {
@@ -93,7 +98,7 @@ export function requestAcpPermissionChoice(args: {
         option.kind === 'allow_once' || option.kind === 'reject_once'
       )
     };
-    setCards([...cards.filter((card) => card.id !== id), permissionCard].slice(-30));
+    setCards([...cards.filter((card) => card.id !== id), permissionCard]);
   });
 }
 

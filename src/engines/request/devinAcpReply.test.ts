@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { requestDevinAcpReply } from './devinAcpReply';
 import {
+  beginAcpToolStream,
+  finishAcpToolStream,
   getAcpToolCardsSnapshot,
+  publishAcpToolUpdate,
+  requestAcpPermissionChoice,
   resolveAcpPermission,
   subscribeAcpToolCards
 } from '../../app/chat/acpLiveToolCards';
@@ -107,5 +111,34 @@ describe('ACP chat reply over the existing request pipeline', () => {
     ));
     await expect(requestDevinAcpReply({ prompt: '测试' }))
       .rejects.toThrow('without completion');
+  });
+
+  it('keeps an unanswered permission visible after many tool updates', async () => {
+    const conversationId = 'permission-overflow-test';
+    beginAcpToolStream(conversationId);
+    const choice = requestAcpPermissionChoice({
+      conversationId, permissionId: 'overflow', title: '运行命令',
+      description: '', options: [
+        { optionId: 'allow', name: '允许本次', kind: 'allow_once' },
+        { optionId: 'deny', name: '拒绝', kind: 'reject_once' }
+      ]
+    });
+    try {
+      for (let index = 0; index < 40; index++) {
+        publishAcpToolUpdate(conversationId, {
+          sessionUpdate: 'tool_call', toolCallId: 'burst-' + index,
+          title: '工具 ' + index, status: 'running'
+        });
+      }
+      const visible = getAcpToolCardsSnapshot().filter((card) => card.conversationId === conversationId);
+      expect(visible).toHaveLength(30);
+      expect(visible.slice(-5).some((card) => card.id === 'permission:overflow' && card.state === 'approval'))
+        .toBe(true);
+      resolveAcpPermission('permission:overflow', 'deny');
+      await expect(choice).resolves.toBe('deny');
+    } finally {
+      resolveAcpPermission('permission:overflow', null);
+      finishAcpToolStream(conversationId, false);
+    }
   });
 });
