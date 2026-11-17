@@ -61,6 +61,31 @@
 :root[data-cf=sticker] #chat .acp-live-tool-cards .tool-event-status {
   border-color:var(--mark);color:var(--hot)
 }
+
+/* A CLI shell permission must remain visible while the ACP bridge is waiting.
+ * Keep the request above the composer instead of relying on timeline scrolling. */
+#chat .acp-live-tool-cards.has-pending-permission {
+  position:fixed;
+  z-index:1200;
+  box-sizing:border-box;
+  left:max(12px,env(safe-area-inset-left));
+  right:max(12px,env(safe-area-inset-right));
+  bottom:calc(92px + env(safe-area-inset-bottom));
+  width:min(440px,calc(100vw - 24px));
+  max-width:calc(100vw - 24px);
+  max-height:45dvh;
+  overflow-y:auto;
+  margin:0 auto;
+  padding:10px;
+  border:1px solid var(--ailine,var(--gline));
+  border-radius:var(--R,18px);
+  background:var(--ai,var(--bub-r,var(--glass)));
+  box-shadow:0 10px 28px rgba(35,30,38,.2);
+}
+#chat .acp-live-tool-cards.has-pending-permission .tool-event.expanded {
+  width:100%;
+}
+
 @media (prefers-reduced-motion:reduce) {
   #chat .acp-live-tool-cards .tool-event-icon.running {animation:none}
 }
