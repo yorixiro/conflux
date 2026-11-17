@@ -1,9 +1,22 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { Icon, type IconName } from '../../../Icon';
 import {
   getAcpToolCardsSnapshot,
   resolveAcpPermission,
   subscribeAcpToolCards
 } from '../../../../app/chat/acpLiveToolCards';
+
+const toolKinds = new Map<string, { icon: IconName; label: string }>([
+  ['read', { icon: 'fileText', label: '读取文件' }],
+  ['edit', { icon: 'edit', label: '编辑文件' }],
+  ['delete', { icon: 'trash', label: '删除文件' }],
+  ['move', { icon: 'folder', label: '移动文件' }],
+  ['search', { icon: 'search', label: '搜索' }],
+  ['execute', { icon: 'code', label: '执行命令' }],
+  ['think', { icon: 'sparkle', label: '思考' }],
+  ['fetch', { icon: 'download', label: '读取网络内容' }],
+  ['other', { icon: 'mcpService', label: '工具调用' }]
+]);
 
 /** Inline, non-modal ACP activity. Existing Conflux tool cards remain unchanged. */
 export function AcpLiveToolCards({ conversationId }: { conversationId: string | null }) {
@@ -27,6 +40,7 @@ export function AcpLiveToolCards({ conversationId }: { conversationId: string | 
     <div ref={cardRef} className="acp-live-tool-cards" aria-live="polite">
       {visible.map((card) => {
         const pending = card.state === 'approval';
+        const appearance = toolKinds.get(card.kind ?? '') ?? toolKinds.get('other')!;
         const status = pending ? 'running' : card.state;
         const allow = card.options?.find((option) => option.kind === 'allow_once');
         const reject = card.options?.find((option) => option.kind === 'reject_once');
@@ -34,7 +48,8 @@ export function AcpLiveToolCards({ conversationId }: { conversationId: string | 
           <div key={card.conversationId + ':' + card.id}
             className={`tool-event ${status} ${pending ? 'expanded' : 'collapsed'}`}>
             <div className="tool-event-compact">
-              <span className={`tool-event-icon ${status}`} aria-hidden="true">⌘</span>
+              <span className={`tool-event-icon ${status}`} data-tool-kind={card.kind ?? 'other'}
+                title={appearance.label} aria-hidden="true"><Icon name={appearance.icon} size={16} /></span>
               <div className="tool-event-compact-copy">
                 <div className="tool-event-summary tool-event-summary-inline">
                   {card.title}

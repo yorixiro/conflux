@@ -345,8 +345,15 @@ function MessageRowComponent({
           />
         ) : (
           <>
+            <MessageGeneratedImages
+              attachments={(message.attachments ?? []).filter((attachment) =>
+                attachment.kind === 'image' && attachment.presentation === 'sticker'
+              )}
+            />
             <ChatAttachmentStrip
-              attachments={message.attachments}
+              attachments={message.attachments?.filter((attachment) =>
+                attachment.kind !== 'image' || attachment.presentation !== 'sticker'
+              )}
               tone="message"
               onSaveImage={(attachment) => actions.saveImageAttachment(message, attachment)}
             />

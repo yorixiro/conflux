@@ -1,11 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildDirectToolExecutionContext } from './chatToolExecutionContext';
+import * as assets from '../../infrastructure/assetStore';
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('buildDirectToolExecutionContext', () => {
-  it('keeps the environment directory in the composed execution surface', () => {
+  it('keeps environment access and sticker metadata in the composed execution surface', async () => {
+    vi.spyOn(assets, 'getAssetMeta').mockImplementation(async (id) => ({
+      id, kind: 'image', name: 'image.png', mimeType: 'image/png', size: 20, createdAt: 1
+    }));
+    vi.spyOn(assets, 'getAssetBlob').mockResolvedValue(new Blob(['image'], { type: 'image/png' }));
     const collectionState = {
       cards: [],
-      imageCards: [],
+      imageCards: [
+        { id: 'sticker-card', assetId: 'sticker-asset', title: '安慰', tags: [], source: 'manual',
+          createdAt: 1, updatedAt: 1, sticker: { purpose: '安慰', moods: ['抱抱'] } },
+        { id: 'image-card', assetId: 'image-asset', title: '照片', tags: [], source: 'manual',
+          createdAt: 1, updatedAt: 1 }
+      ],
       roomProjects: [],
       projectFiles: [],
       workspaceReferenceDocs: []
@@ -53,5 +65,12 @@ describe('buildDirectToolExecutionContext', () => {
     } as unknown as Parameters<typeof buildDirectToolExecutionContext>[0]);
 
     expect(context.readEnvironmentDirectory).toBeTypeOf('function');
+    const sticker = await context.sendImageAttachment?.('sticker-card', '抱抱.png');
+    expect(sticker).toMatchObject({ ok: true, attachment: {
+      assetId: 'sticker-asset', name: '抱抱.png', presentation: 'sticker'
+    } });
+    const image = await context.sendImageAttachment?.('image-card');
+    expect(image).toMatchObject({ ok: true, attachment: { assetId: 'image-asset' } });
+    if (image?.ok) expect(image.attachment.presentation).toBeUndefined();
   });
 });

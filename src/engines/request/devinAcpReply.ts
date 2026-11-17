@@ -106,7 +106,7 @@ export async function requestDevinAcpReply(params: {
             sessionUpdate?: string;
             content?: { type?: string; text?: string };
             used?: number; size?: number;
-            toolCallId?: string; title?: string; name?: string; status?: string;
+            toolCallId?: string; title?: string; name?: string; kind?: string; status?: string;
           };
           result?: { stopReason?: string; usage?: unknown };
           error?: string;

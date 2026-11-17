@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { AcpLiveToolCards } from '../../ui/worlds/chat/timeline/AcpLiveToolCards';
 import {
   beginAcpToolStream,
   getAcpToolCardsSnapshot,
@@ -15,10 +18,15 @@ describe('ACP inline tool activity', () => {
       sessionUpdate: 'tool_call',
       toolCallId: 'tool-1',
       title: '读取工作区文件',
+      kind: 'read',
       status: 'in_progress'
     });
     expect(getAcpToolCardsSnapshot().find((card) => card.conversationId === conversationId)?.state)
       .toBe('running');
+    const html = renderToStaticMarkup(createElement(AcpLiveToolCards, { conversationId }));
+    expect(html).toContain('title="读取文件"');
+    expect(html).toContain('data-tool-kind="read"');
+    expect(html).not.toContain('⌘');
     publishAcpToolUpdate(conversationId, {
       sessionUpdate: 'tool_call_update',
       toolCallId: 'tool-1',
@@ -26,6 +34,19 @@ describe('ACP inline tool activity', () => {
     });
     expect(getAcpToolCardsSnapshot().find((card) => card.conversationId === conversationId)?.state)
       .toBe('executed');
+    expect(getAcpToolCardsSnapshot().find((card) => card.conversationId === conversationId)?.kind)
+      .toBe('read');
+    beginAcpToolStream(conversationId);
+  });
+
+  it('renders an unknown agent tool kind with the generic tool appearance', () => {
+    const conversationId = 'test-unknown-tool-kind';
+    beginAcpToolStream(conversationId);
+    publishAcpToolUpdate(conversationId, {
+      sessionUpdate: 'tool_call', toolCallId: 'unknown', kind: 'future-tool', title: '扩展工具', status: 'in_progress'
+    });
+    expect(renderToStaticMarkup(createElement(AcpLiveToolCards, { conversationId })))
+      .toContain('title="工具调用"');
     beginAcpToolStream(conversationId);
   });
 

@@ -13,7 +13,8 @@ export function createComposerFileIngestor(loadAttachmentProcessor: AttachmentPr
   return async function ingestComposerFiles(
     files: FileList | File[],
     onAddAttachments: (attachments: ChatAttachment[]) => void,
-    onStatus: (text: string, isError?: boolean) => void
+    onStatus: (text: string, isError?: boolean) => void,
+    presentation?: ChatAttachment['presentation']
   ) {
     attachmentProcessorPromise ??= loadAttachmentProcessor();
     let attachmentProcessor: AttachmentProcessorModule;
@@ -27,7 +28,9 @@ export function createComposerFileIngestor(loadAttachmentProcessor: AttachmentPr
     const { attachments, rejected, warnings } = await attachmentProcessor.readFilesAsAttachments(files);
 
     if (attachments.length > 0) {
-      onAddAttachments(attachments);
+      onAddAttachments(presentation ? attachments.map((attachment) =>
+        attachment.kind === 'image' ? { ...attachment, presentation } : attachment
+      ) : attachments);
     }
 
     const statusLines = [...(warnings ?? []), ...rejected];

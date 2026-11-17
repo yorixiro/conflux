@@ -46,8 +46,18 @@ describe('MessageGeneratedImages', () => {
     }));
 
     expect(html).toContain('generated-image-sticker');
+    expect(html).toContain('sticker-only');
     expect(html).not.toContain('generated-image-caption');
     expect(html).not.toContain('attachment-save-btn');
+  });
+
+  it('keeps cleared sticker placeholders readable and mixed ordinary images as showcase cards', () => {
+    const html = renderToStaticMarkup(createElement(MessageGeneratedImages, {
+      attachments: [createImageAttachment({ presentation: 'sticker', clearedAt: 5 }), createImageAttachment({ id: 'ordinary' })]
+    }));
+    expect(html).toContain('is-cleared');
+    expect(html).toContain('generated-image-caption');
+    expect(html).not.toContain('sticker-only');
   });
 
   it('renders nothing without attachments', () => {

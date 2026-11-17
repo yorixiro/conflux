@@ -294,9 +294,26 @@ a.generated-image-frame:focus-visible {
   margin: 0;
   width: 120px;
   height: 120px;
+  max-width: 100%;
   border-radius: 16px;
   overflow: hidden;
   animation: generatedImageReveal 240ms var(--ease-out) both;
+}
+
+.generated-image-stack.sticker-only {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.generated-image-sticker > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.generated-image-sticker > a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .generated-image-sticker img,
@@ -305,7 +322,7 @@ a.generated-image-frame:focus-visible {
   width: 100%;
   height: 100%;
   aspect-ratio: 1;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .generated-image-caption {

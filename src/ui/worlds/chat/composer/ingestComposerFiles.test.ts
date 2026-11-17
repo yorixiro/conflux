@@ -15,6 +15,20 @@ function createAttachment(): ChatAttachment {
 }
 
 describe('ingestComposerFiles', () => {
+  it('keeps selected stickers distinct from ordinary images and file attachments', async () => {
+    const image: ChatAttachment = { ...createAttachment(), id: 'image-1', kind: 'image', mimeType: 'image/png' };
+    const file = createAttachment();
+    const onAddAttachments = vi.fn();
+    const ingest = createComposerFileIngestor(async () => ({
+      readFilesAsAttachments: async () => ({ attachments: [image, file], rejected: [], warnings: [] })
+    }));
+    await ingest([], onAddAttachments, vi.fn(), 'sticker');
+    expect(onAddAttachments).toHaveBeenLastCalledWith([{ ...image, presentation: 'sticker' }, file]);
+    await ingest([], onAddAttachments, vi.fn());
+    expect(onAddAttachments).toHaveBeenLastCalledWith([image, file]);
+    expect(image.presentation).toBeUndefined();
+  });
+
   it('retries the attachment processor import after a previous chunk load failure', async () => {
     const attachment = createAttachment();
     const onAddAttachments = vi.fn();

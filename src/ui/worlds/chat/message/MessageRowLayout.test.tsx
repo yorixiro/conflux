@@ -35,9 +35,10 @@ const state: MessageRowState = {
 };
 const actions = {} as MessageRowActions;
 
-function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuation = false) {
+function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuation = false,
+  attachments?: ChatMessage['attachments']) {
   const message: ChatMessage = {
-    id: 'message-1', role, content: '消息内容', timestamp: 1
+    id: 'message-1', role, content: '消息内容', timestamp: 1, attachments
   };
   return renderToStaticMarkup(
     <MessageRow
@@ -63,6 +64,21 @@ function markup(role: ChatMessage['role'], showChatAvatars: boolean, continuatio
 }
 
 describe('shared chat avatar/bubble layout', () => {
+  it('uses the same compact sticker rendering in user and assistant messages without duplicating the attachment', () => {
+    const sticker = {
+      id: 'sticker-1', assetId: 'sticker-asset', kind: 'image' as const,
+      name: 'sticker.png', mimeType: 'image/png', size: 20, presentation: 'sticker' as const
+    };
+    const ordinary = { ...sticker, id: 'ordinary-1', name: 'ordinary.png', presentation: undefined };
+    for (const role of ['user', 'assistant'] as const) {
+      const html = markup(role, true, false, [sticker, ordinary]);
+      expect(html).toContain('generated-image-sticker');
+      expect(html.match(/class="attachment-chip image message"/g)).toHaveLength(1);
+      expect(html).toContain('ordinary.png');
+      expect(html).not.toContain('generated-image-caption');
+    }
+  });
+
   it('groups assistant actions first and usage second in one compact footer below the bubble', () => {
     for (const withAvatar of [true, false]) {
       const html = markup('assistant', withAvatar);

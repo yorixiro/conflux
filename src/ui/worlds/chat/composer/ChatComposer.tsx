@@ -243,7 +243,7 @@ export function ChatComposer() {
   const handlePickSticker = async (assetId: string, fallbackName: string) => {
     try {
       const file = await prepareStoredStickerFile(assetId, fallbackName);
-      await handleAddAttachments([file]);
+      await handleAddAttachments([file], 'sticker');
       setKaomojiOpen(false);
     } catch (error) {
       actions.setCommandStatus(error instanceof Error ? error.message : '表情包读取失败。', true);

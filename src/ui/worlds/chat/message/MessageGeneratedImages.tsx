@@ -20,15 +20,20 @@ function GeneratedImageCard({
   const { t } = useI18n();
   const { ref, shouldLoad } = useNearViewportAssetLoading();
   const cleared = Boolean(attachment.clearedAt);
-  const assetUrl = useAssetObjectUrl(shouldLoad && !cleared ? attachment.assetId : undefined, true);
+  const sticker = attachment.presentation === 'sticker';
+  const assetUrl = useAssetObjectUrl(shouldLoad && !cleared ? attachment.assetId : undefined, !sticker);
   const sizeLabel = formatAttachmentSize(attachment.size);
 
-  if (attachment.presentation === 'sticker' && !cleared) {
+  if (sticker && !cleared) {
+    const image = assetUrl
+      ? <img src={assetUrl} alt={attachment.name} title={attachment.name} loading="lazy" />
+      : <span className="generated-image-canvas is-loading" aria-hidden="true" />;
     return (
       <figure ref={ref} className="generated-image-sticker">
-        {assetUrl
-          ? <img src={assetUrl} alt={attachment.name} title={attachment.name} loading="lazy" />
-          : <span className="generated-image-canvas is-loading" aria-hidden="true" />}
+        {assetUrl && canOpenImagePreviewLink() ? (
+          <a href={assetUrl} target="_blank" rel="noreferrer"
+            aria-label={t('chat.attachment.openAria', { name: attachment.name })}>{image}</a>
+        ) : image}
       </figure>
     );
   }
@@ -78,7 +83,9 @@ function GeneratedImageCard({
 export function MessageGeneratedImages({ attachments, onSave }: MessageGeneratedImagesProps) {
   if (attachments.length === 0) return null;
   return (
-    <div className="generated-image-stack">
+    <div className={`generated-image-stack${attachments.every((attachment) =>
+      attachment.presentation === 'sticker' && !attachment.clearedAt
+    ) ? ' sticker-only' : ''}`}>
       {attachments.map((attachment) => (
         <GeneratedImageCard key={attachment.id} attachment={attachment} onSave={onSave} />
       ))}
