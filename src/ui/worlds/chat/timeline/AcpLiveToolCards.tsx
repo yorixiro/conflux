@@ -24,7 +24,7 @@ export function AcpLiveToolCards({ conversationId }: { conversationId: string | 
   if (!visible.length) return null;
 
   return (
-    <div ref={cardRef} className="acp-live-tool-cards" aria-live="polite">
+    <div ref={cardRef} className={`acp-live-tool-cards${pendingId ? " has-pending-permission" : ""}`} aria-live="assertive" role={pendingId ? "region" : undefined} aria-label={pendingId ? "等待授权的 ACP 工具请求" : undefined}>
       {visible.map((card) => {
         const pending = card.state === 'approval';
         const status = pending ? 'running' : card.state;
