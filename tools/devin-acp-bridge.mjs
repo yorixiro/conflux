@@ -204,28 +204,49 @@ function onMessage(message) {
     }
     // The current chat has already exposed these Conflux tools through its
     // persona-scoped catalog. Grant their one-time MCP permissions automatically,
-    // including writes, without approving unrelated CLI exec or other servers.
+    // including writes. Disabled Conflux tools must not bypass this catalog.
     const toolCall = permission?.toolCall || permission?.subject?.toolCall;
     const currentToolName = toolCall?.name ||
       (typeof toolCall?.toolCallId === 'string'
         ? reportedToolNames.get(permission.sessionId + ':' + toolCall.toolCallId)
         : null);
     const confluxToolPrefix = 'mcp__conflux__';
-    if (typeof currentToolName === 'string' &&
-      currentToolName.startsWith(confluxToolPrefix) &&
-      toolCatalog.has(currentToolName.slice(confluxToolPrefix.length))) {
+    if (typeof currentToolName === 'string' && currentToolName.startsWith(confluxToolPrefix)) {
       const allowOnce = options.find((option) => option.kind === 'allow_once');
-      if (allowOnce) {
+      if (toolCatalog.has(currentToolName.slice(confluxToolPrefix.length)) && allowOnce) {
         send({ id: message.id, result: {
           outcome: { outcome: 'selected', optionId: allowOnce.optionId }
         } });
-        return;
+      } else {
+        send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
       }
+      return;
     }
-    // Conflux chat uses its own persona-scoped tools. Never expose or approve
-    // Devin's separate coding-agent file, shell, or client tool requests here.
-    // Its internal prompt is owned by Devin and is not changed by this gate.
-    send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
+
+    // The CLI applies its own allow/deny/ask rules before requesting permission.
+    // Forward remaining choices to the existing inline card instead of silently
+    // cancelling native tools. Only this operation can be approved in the chat.
+    const onceOptions = options.filter((option) =>
+      option.kind === 'allow_once' || option.kind === 'reject_once'
+    );
+    if (!onceOptions.length) {
+      send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
+      return;
+    }
+    const permissionId = randomUUID();
+    const current = active;
+    const timer = setTimeout(() => {
+      if (!permissionCalls.delete(permissionId)) return;
+      send({ id: message.id, result: { outcome: { outcome: 'cancelled' } } });
+    }, 120000);
+    permissionCalls.set(permissionId, { rpcId: message.id, session: current, options, timer });
+    const input = toolCall?.rawInput;
+    current.write({
+      type: 'permission_request', permissionId,
+      title: toolCall?.title || currentToolName || 'CLI 请求操作权限',
+      description: (typeof input === 'string' ? input : JSON.stringify(input) || '').slice(0, 16000),
+      options: onceOptions
+    });
     return;
   }
   // Never implicitly grant any other agent-side file, shell or client RPC.

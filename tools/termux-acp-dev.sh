@@ -56,9 +56,9 @@ for file in tools/devin-acp-bridge.mjs tools/conflux-acp-mcp.mjs .devin/mcp_conf
   cat "$file" | proot-distro login ubuntu -- sh -c "cat > /root/.conflux-acp/$file"
 done
 
-# Authorize every Conflux MCP tool in this dedicated local ACP workspace.
-# Upgrade old five-tool settings on startup, preserving unrelated user rules.
-# Only the Conflux MCP server is covered; not other MCP servers or CLI projects.
+# Let this local CLI use its native tools alongside the existing Conflux tools.
+# Merge permissions in this dedicated workspace; preserve user deny/ask rules
+# and unrelated settings. Other MCP servers and CLI projects are unchanged.
 proot-distro login ubuntu -- node - /root/.conflux-acp/.devin/config.local.json <<'JS'
 const fs = require('node:fs');
 const path = process.argv[2];
@@ -79,7 +79,9 @@ if (!config.permissions || typeof config.permissions !== 'object'
   || Array.isArray(config.permissions)) process.exit(1);
 const oldAllow = config.permissions.allow ?? [];
 if (!Array.isArray(oldAllow)) process.exit(1);
-const allow = [...new Set([...oldAllow, 'mcp__conflux__*'])];
+const allow = [...new Set([
+  ...oldAllow, 'mcp__conflux__*', 'read', 'grep', 'glob', 'edit', 'exec'
+])];
 if (JSON.stringify(allow) !== JSON.stringify(oldAllow)) {
   config.permissions.allow = allow;
   const temp = path + '.tmp-' + process.pid;

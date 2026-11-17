@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdtemp, writeFile, chmod, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, chmod, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +24,7 @@ const permissionWaiters = new Map();
 let permissionSequence = 10000;
 let counter = 0;
 const send = (value) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ...value }) + '\n');
-const requestPermission = (sessionId, name) => new Promise((resolve, reject) => {
+const requestPermission = (sessionId, name, extraOptions = []) => new Promise((resolve, reject) => {
   const id = ++permissionSequence;
   permissionWaiters.set(id, { resolve, reject });
   // ACP agents can omit name from permission requests; the previous tool
@@ -36,10 +36,11 @@ const requestPermission = (sessionId, name) => new Promise((resolve, reject) => 
   send({ id, method: 'session/request_permission', params: {
     sessionId,
     toolCall: { toolCallId: 'permission-' + id, title: 'Use ' + name,
-      kind: 'edit', status: 'pending' },
+      rawInput: { command: 'node --version' }, kind: 'edit', status: 'pending' },
     options: [
       { optionId: 'allow-once', name: 'Allow once', kind: 'allow_once' },
-      { optionId: 'reject-once', name: 'Reject once', kind: 'reject_once' }
+      { optionId: 'reject-once', name: 'Reject once', kind: 'reject_once' },
+      ...extraOptions
     ]
   } });
 });
@@ -134,6 +135,21 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     }
     if (message.method === 'session/prompt') {
       const promptText = message.params?.prompt?.map((part) => part.text || '').join('') || '';
+      if (/CHECK_(CLI|DISABLED|FOREIGN)_PERMISSION/.test(promptText)) {
+        const targetSession = message.params.sessionId + (promptText.includes('FOREIGN') ? '-other' : '');
+        const name = promptText.includes('DISABLED') ? 'mcp__conflux__disabledTool' : 'exec';
+        const permission = await requestPermission(targetSession, name, [
+          { optionId: 'allow-always', name: 'Always allow', kind: 'allow_always' }
+        ]);
+        send({ method: 'session/update', params: {
+          sessionId: message.params.sessionId,
+          update: { sessionUpdate: 'agent_message_chunk', content: {
+            type: 'text', text: 'Permission reply: ' + JSON.stringify(permission.outcome)
+          } }
+        } });
+        send({ id: message.id, result: { stopReason: 'end_turn' } });
+        return;
+      }
       if (promptText.includes('CHECK_MODEL_SELECTION')) {
         send({ method: 'session/update', params: {
           sessionId: message.params.sessionId,
@@ -219,6 +235,75 @@ function tool(name, properties = {}, required = []) {
     }
   };
 }
+
+async function readEvents(response, onEvent) {
+  assert.equal(response.status, 200);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const events = [];
+  let pending = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    pending += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+    let boundary;
+    while ((boundary = pending.indexOf('\n\n')) >= 0) {
+      const frame = pending.slice(0, boundary);
+      pending = pending.slice(boundary + 2);
+      const line = frame.split('\n').find((part) => part.startsWith('data: '));
+      if (!line) continue;
+      const event = JSON.parse(line.slice(6));
+      events.push(event);
+      await onEvent?.(event);
+    }
+    if (done) return events;
+  }
+}
+
+test('Termux startup preserves user settings while enabling native CLI tools', async () => {
+  const script = await readFile(new URL('./termux-acp-dev.sh', import.meta.url), 'utf8');
+  // Execute the actual startup configuration step against a disposable file.
+  const configScript = script.match(/proot-distro login ubuntu -- node - [^\n]+ <<'JS'\n([\s\S]*?)\nJS/)[1];
+  const dir = await mkdtemp(join(tmpdir(), 'conflux-acp-permissions-test-'));
+  const path = join(dir, 'config.local.json');
+  const runConfig = () => spawnSync(process.execPath, ['-', path], {
+    input: configScript, encoding: 'utf8'
+  });
+  try {
+    const original = {
+      theme: 'existing-user-setting',
+      permissions: {
+        allow: ['mcp__other__query', 'read'],
+        deny: ['Exec(sudo)', 'Write(.env*)'],
+        ask: ['Exec(git push)']
+      }
+    };
+    await writeFile(path, JSON.stringify(original));
+    assert.equal(runConfig().status, 0);
+    const mergedText = await readFile(path, 'utf8');
+    const merged = JSON.parse(mergedText);
+    assert.equal(merged.theme, original.theme);
+    assert.deepEqual(merged.permissions.deny, original.permissions.deny);
+    assert.deepEqual(merged.permissions.ask, original.permissions.ask);
+    assert.deepEqual(new Set(merged.permissions.allow), new Set([
+      'mcp__other__query', 'mcp__conflux__*', 'read', 'grep', 'glob', 'edit', 'exec'
+    ]));
+    assert.equal(merged.permissions.allow.length, new Set(merged.permissions.allow).size);
+    assert.equal(runConfig().status, 0);
+    assert.equal(await readFile(path, 'utf8'), mergedText, 'restart must be idempotent');
+
+    await rm(path);
+    assert.equal(runConfig().status, 0, 'new installations receive the same native tools');
+    assert.ok(JSON.parse(await readFile(path, 'utf8')).permissions.allow.includes('exec'));
+
+    for (const invalid of ['{broken-json', '[]', '{"permissions":[]}']) {
+      await writeFile(path, invalid);
+      assert.notEqual(runConfig().status, 0);
+      assert.equal(await readFile(path, 'utf8'), invalid, 'invalid user config must remain intact');
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-executed round trip', {
   timeout: 15000
@@ -392,6 +477,64 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
       body: JSON.stringify({ name: 'searchMemory', arguments: { query: 'outside session' } })
     });
     assert.equal(idleInvocation.status, 409);
+
+    for (const selected of ['allow-once', 'reject-once']) {
+      let permissionId;
+      const nativeEvents = await readEvents(await fetch(base + '/prompt', {
+        method: 'POST', headers,
+        body: JSON.stringify({
+          conversationId: 'mock-cli-' + selected, prompt: 'CHECK_CLI_PERMISSION', tools: []
+        })
+      }), async (event) => {
+        if (event.type !== 'permission_request') return;
+        permissionId = event.permissionId;
+        assert.equal(event.title, 'Use exec');
+        assert.match(event.description, /node --version/);
+        assert.deepEqual(event.options.map((option) => option.kind), ['allow_once', 'reject_once']);
+        const persistent = await fetch(base + '/permission/result', {
+          method: 'POST', headers,
+          body: JSON.stringify({ permissionId, optionId: 'allow-always' })
+        });
+        assert.equal(persistent.status, 400);
+        const reply = await fetch(base + '/permission/result', {
+          method: 'POST', headers, body: JSON.stringify({ permissionId, optionId: selected })
+        });
+        assert.equal(reply.status, 200);
+      });
+      assert.ok(permissionId, 'native CLI permissions must reach the existing browser card');
+      assert.ok(nativeEvents.some((event) => event.update?.content?.text?.includes(selected)));
+      assert.ok(nativeEvents.some((event) => event.type === 'done'));
+      const latePermission = await fetch(base + '/permission/result', {
+        method: 'POST', headers, body: JSON.stringify({ permissionId, optionId: selected })
+      });
+      assert.equal(latePermission.status, 409);
+    }
+
+    for (const prompt of ['CHECK_DISABLED_PERMISSION', 'CHECK_FOREIGN_PERMISSION']) {
+      const deniedEvents = await readEvents(await fetch(base + '/prompt', {
+        method: 'POST', headers,
+        body: JSON.stringify({ conversationId: 'mock-denied-' + prompt, prompt, tools: [] })
+      }));
+      assert.ok(!deniedEvents.some((event) => event.type === 'permission_request'));
+      assert.ok(deniedEvents.some((event) => event.update?.content?.text?.includes('cancelled')));
+    }
+
+    let cancelledPermissionId;
+    const cancelledEvents = await readEvents(await fetch(base + '/prompt', {
+      method: 'POST', headers,
+      body: JSON.stringify({ conversationId: 'mock-cli-cancel', prompt: 'CHECK_CLI_PERMISSION', tools: [] })
+    }), async (event) => {
+      if (event.type !== 'permission_request') return;
+      cancelledPermissionId = event.permissionId;
+      const reply = await fetch(base + '/cancel', { method: 'POST', headers, body: '{}' });
+      assert.equal(reply.status, 200);
+    });
+    assert.ok(cancelledEvents.some((event) => event.type === 'permission_request'));
+    const stalePermission = await fetch(base + '/permission/result', {
+      method: 'POST', headers,
+      body: JSON.stringify({ permissionId: cancelledPermissionId, optionId: 'allow-once' })
+    });
+    assert.equal(stalePermission.status, 409);
 
     // Devin may ignore session/cancel. A cancelled browser request must still
     // free the local prompt slot and allow another conversation to proceed.
