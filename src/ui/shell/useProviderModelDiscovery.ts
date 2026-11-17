@@ -9,7 +9,7 @@ const cache = new Map<string, { connection: ProviderProfile; models: ProviderMod
 const listeners = new Set<() => void>();
 const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
 function sameConnection(a: ProviderProfile, b: ProviderProfile) {
-  return a.id === b.id && a.baseUrl === b.baseUrl && a.path === b.path && a.protocol === b.protocol && a.apiKey === b.apiKey;
+  return a.id === b.id && a.agentTransport === b.agentTransport && a.baseUrl === b.baseUrl && a.path === b.path && a.protocol === b.protocol && a.apiKey === b.apiKey;
 }
 function getModels(api: ProviderProfile) {
   const entry = cache.get(api.id);
@@ -30,7 +30,7 @@ export function useProviderModelDiscovery(api: ProviderProfile) {
     }
     setState({ status: 'idle', error: null });
     return () => { request.current?.abort(); };
-  }, [api.id, api.baseUrl, api.path, api.protocol, api.apiKey]);
+  }, [api.id, api.agentTransport, api.baseUrl, api.path, api.protocol, api.apiKey]);
 
   async function refresh() {
     request.current?.abort();
@@ -45,7 +45,9 @@ export function useProviderModelDiscovery(api: ProviderProfile) {
       setState({ status: 'success', error: null });
       return true;
     }
-    setState({ status: 'error', error: '模型列表拉取失败，请检查地址、密钥和网络后重试；也可以手动填写模型。' });
+    setState({ status: 'error', error: api.agentTransport === 'devin-acp'
+      ? '模型列表拉取失败，请检查本机代理连接后重试；也可以使用默认模型。'
+      : '模型列表拉取失败，请检查地址、密钥和网络后重试；也可以手动填写模型。' });
     return false;
   }
 

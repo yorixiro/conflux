@@ -102,13 +102,22 @@ function normalizeGeminiModels(payload: ProviderModelListPayload): ProviderModel
 }
 
 export function normalizeProviderModelList(
-  api: Pick<ProviderProfile, 'protocol' | 'path'>,
+  api: Pick<ProviderProfile, 'protocol' | 'path' | 'agentTransport'>,
   payload: unknown
 ): ProviderModelOption[] {
   if (!payload || Array.isArray(payload) || typeof payload !== 'object') return [];
 
   const protocol = inferProviderProtocol(api);
   const body = payload as ProviderModelListPayload;
+  if (api.agentTransport === 'devin-acp') {
+    return uniqueModels(readObjectArray(body, 'models').flatMap((entry) => {
+      if (!entry || typeof entry !== 'object') return [];
+      const model = entry as Record<string, unknown>;
+      return typeof model.id === 'string'
+        ? [{ id: model.id, label: typeof model.label === 'string' ? model.label : undefined }]
+        : [];
+    }));
+  }
   if (protocol === 'anthropic-messages') return normalizeAnthropicModels(body);
   if (protocol === 'gemini-generate-content') return normalizeGeminiModels(body);
   return normalizeOpenAiCompatibleModels(body);
@@ -159,7 +168,8 @@ async function readProviderModelResponse(res: Response) {
 }
 
 export function canDiscoverProviderModels(api: ProviderProfile) {
-  return Boolean(isAbsoluteProviderBaseUrl(api.baseUrl) && api.apiKey.trim());
+  return api.agentTransport === 'devin-acp'
+    || Boolean(isAbsoluteProviderBaseUrl(api.baseUrl) && api.apiKey.trim());
 }
 
 export async function discoverProviderModels(params: {
@@ -167,13 +177,20 @@ export async function discoverProviderModels(params: {
   signal?: AbortSignal;
 }): Promise<ProviderModelDiscoveryResult> {
   const { api, signal } = params;
-  if (!api.baseUrl.trim()) return { ok: false, error: '未填写 API Base URL' };
-  if (!api.apiKey.trim()) return { ok: false, error: '未填写 API Key' };
-  if (!isAbsoluteProviderBaseUrl(api.baseUrl)) {
+  const acp = api.agentTransport === 'devin-acp';
+  if (!acp && !api.baseUrl.trim()) return { ok: false, error: '未填写 API Base URL' };
+  if (!acp && !api.apiKey.trim()) return { ok: false, error: '未填写 API Key' };
+  if (!acp && !isAbsoluteProviderBaseUrl(api.baseUrl)) {
     return { ok: false, error: '当前线路不是公开供应商 Base URL。' };
   }
 
   try {
+    if (acp) {
+      const response = await fetch('/devin-acp/models', { cache: 'no-store', signal });
+      const payload = await readProviderModelResponse(response);
+      // An agent may only expose its default model; an empty list is valid.
+      return { ok: true, models: normalizeProviderModelList(api, payload), source: 'live' };
+    }
     const endpoint = buildProviderModelListEndpoint(api);
     const upstreamHeaders = buildProviderModelHeaders(api);
     let res: Response;
@@ -187,11 +204,12 @@ export async function discoverProviderModels(params: {
       if (signal?.aborted || !canFallbackThroughProviderRelay(endpoint)) {
         throw error;
       }
-      res = await fetch(buildInternalApiEndpoint('/api/provider-models'), {
+      res = await fetch(buildInternalApiEndpoint('/api/provider-relay'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           endpoint,
+          method: 'GET',
           headers: sanitizeProviderRelayHeaders(upstreamHeaders)
         }),
         signal

@@ -21,7 +21,9 @@ export function getProviderModelDisplayLabel(
   fallback = '还没填模型',
   builtInLabel = POLARIS_BUILT_IN_MODEL_LABEL
 ) {
-  if (provider.agentTransport === 'devin-acp') return '模型由代理管理';
+  if (provider.agentTransport === 'devin-acp') {
+    return provider.model.trim() && provider.model !== 'Devin ACP' ? provider.model : 'Devin 默认模型';
+  }
   return isBuiltInProviderDisplay(provider)
     ? builtInLabel
     : (provider.model || fallback);

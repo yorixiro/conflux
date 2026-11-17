@@ -1,7 +1,7 @@
 import { once } from 'node:events';
 import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { hasProviderRelayAuthHeader, sanitizeProviderRelayHeaders } from '../src/engines/chat-api/providerRelay.js';
+import { hasProviderRelayAuthHeader, isProviderModelListRelayTarget, sanitizeProviderRelayHeaders } from '../src/engines/chat-api/providerRelay.js';
 import { isAllowedPolarisApiOrigin } from '../src/engines/server/corsOrigin.js';
 import { ProviderRelayTargetError, validateProviderRelayTarget } from '../server/providerRelayTarget.js';
 
@@ -18,6 +18,7 @@ function applyCors(req: VercelRequest, res: VercelResponse) {
 
 type RelayRequestBody = {
   endpoint?: unknown;
+  method?: unknown;
   headers?: unknown;
   body?: unknown;
 };
@@ -70,6 +71,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const payload = parseRelayBody(req);
     const endpoint = typeof payload.endpoint === 'string' ? payload.endpoint.trim() : '';
+    const method = payload.method ?? 'POST';
+    if (method !== 'POST' && (method !== 'GET' || !isProviderModelListRelayTarget(endpoint))) {
+      res.status(400).json({ error: { message: 'GET relay 仅用于公开模型列表。', type: 'invalid_request' } });
+      return;
+    }
     await validateProviderRelayTarget(endpoint);
 
     const relayHeaders = sanitizeProviderRelayHeaders(
@@ -90,9 +96,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const upstreamResponse = await fetch(endpoint, {
-      method: 'POST',
+      method,
       headers: relayHeaders,
-      body: JSON.stringify(payload.body ?? {})
+      ...(method === 'POST' ? { body: JSON.stringify(payload.body ?? {}) } : { redirect: 'error' as const })
     });
 
     res.status(upstreamResponse.status);

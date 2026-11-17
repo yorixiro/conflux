@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   buildProviderModelListEndpoint,
+  canDiscoverProviderModels,
   discoverProviderModels,
   normalizeProviderModelList
 } from './providerModelDiscovery';
@@ -143,10 +144,11 @@ describe('discoverProviderModels', () => {
     expect(result.ok).toBe(true);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const [url, init] = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
-    expect(url).toBe('https://selfhost.example.test/api/provider-models');
+    expect(url).toBe('https://selfhost.example.test/api/provider-relay');
     expect(init.method).toBe('POST');
     expect(JSON.parse(String(init.body))).toEqual({
       endpoint: 'https://api.example.com/v1/models',
+      method: 'GET',
       headers: {
         Accept: 'application/json',
         Authorization: 'Bearer sk-test'
@@ -182,5 +184,28 @@ describe('discoverProviderModels', () => {
       'anthropic-version': '2023-06-01',
       'x-api-key': 'sk-test'
     });
+  });
+
+  it('discovers ACP models without API credentials through the same model-list interface', async () => {
+    const api = createProvider({ agentTransport: 'devin-acp', baseUrl: '', apiKey: '', model: '' });
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      models: [{ id: 'swe', label: 'Default SWE' }, { id: 'swe', label: 'Duplicate' }, null]
+    })));
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(canDiscoverProviderModels(api)).toBe(true);
+    expect(await discoverProviderModels({ api })).toEqual({
+      ok: true, source: 'live', models: [{ id: 'swe', label: 'Default SWE' }]
+    });
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith('/devin-acp/models', {
+      cache: 'no-store', signal: undefined
+    });
+  });
+
+  it('keeps an agent with only its default model usable when no catalog is exposed', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ models: [] }))));
+    expect(await discoverProviderModels({
+      api: createProvider({ agentTransport: 'devin-acp', baseUrl: '', apiKey: '' })
+    })).toEqual({ ok: true, source: 'live', models: [] });
   });
 });

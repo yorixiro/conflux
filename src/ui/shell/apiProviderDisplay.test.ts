@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PROVIDER } from '../../stores/runtimeStoreProviders';
-import { isLegacyDevinAcpProvider } from './apiProviderDisplay';
+import { getProviderModelDisplayLabel, isLegacyDevinAcpProvider } from './apiProviderDisplay';
 
 describe('legacy Devin ACP profile detection', () => {
   const legacy = {
@@ -21,5 +21,10 @@ describe('legacy Devin ACP profile detection', () => {
     expect(isLegacyDevinAcpProvider({ ...legacy, agentTransport: 'devin-acp' })).toBe(false);
     expect(isLegacyDevinAcpProvider({ ...legacy, baseUrl: 'https://example.com/v1' })).toBe(false);
     expect(isLegacyDevinAcpProvider({ ...legacy, name: 'Different API' })).toBe(false);
+  });
+
+  it('shows the saved ACP model and distinguishes the agent default', () => {
+    expect(getProviderModelDisplayLabel({ ...legacy, agentTransport: 'devin-acp' })).toBe('swe-2-high');
+    expect(getProviderModelDisplayLabel({ ...legacy, agentTransport: 'devin-acp', model: '' })).toBe('Devin 默认模型');
   });
 });

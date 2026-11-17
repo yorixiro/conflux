@@ -28,12 +28,13 @@ export function ApiProviderModelSection({
 }: ApiProviderModelSectionProps) {
   const { t } = useI18n();
   const builtInProvider = isBuiltInProviderDisplay(api);
+  const acp = api.agentTransport === 'devin-acp';
   const modelValue = builtInProvider
     ? getProviderModelDisplayLabel(api, t('apiProvider.model.emptyFallback'), t('apiProvider.model.builtInPlaceholder'))
-    : api.model;
+    : acp && api.model === 'Devin ACP' ? '' : api.model;
   const discoveredModelIds = discoveredModels.map((model) => model.id);
   const displayedModels = discoveredModelIds.length > 0 ? discoveredModelIds : presetModels;
-  const canPickModels = displayedModels.length > 0;
+  const canPickModels = acp || displayedModels.length > 0;
   const canDiscoverModels = !builtInProvider && canDiscoverProviderModels(api);
   const discoveryLoading = modelDiscoveryStatus === 'loading';
   const modelPickerActionDisabled = builtInProvider || discoveryLoading || (!canPickModels && !canDiscoverModels);
@@ -56,7 +57,7 @@ export function ApiProviderModelSection({
           <input
             value={modelValue}
             onChange={(event) => onSetApiConfig({ model: event.target.value })}
-            placeholder={builtInProvider ? t('apiProvider.model.builtInPlaceholder') : 'gpt-5.2'}
+            placeholder={builtInProvider ? t('apiProvider.model.builtInPlaceholder') : acp ? 'Devin 默认模型' : 'gpt-5.2'}
             aria-label={t('apiProvider.model.ariaLabel')}
             autoCapitalize="none"
             autoCorrect="off"
@@ -83,6 +84,11 @@ export function ApiProviderModelSection({
         >{discoveryLoading ? '正在拉取…' : discoveredModels.length ? '刷新模型列表' : '拉取模型列表'}</button> : null}
         {!builtInProvider && modelPickerOpen && canPickModels ? (
           <div className="provider-model-list">
+            {acp ? <button
+              type="button"
+              className={`provider-model-chip ${!modelValue ? 'active' : ''}`}
+              onClick={() => onSetApiConfig({ model: '' })}
+            >Devin 默认模型</button> : null}
             {displayedModels.map((model) => (
               <button
                 key={model}
@@ -90,7 +96,7 @@ export function ApiProviderModelSection({
                 className={`provider-model-chip ${api.model === model ? 'active' : ''}`}
                 onClick={() => onSetApiConfig({ model })}
               >
-                {model}
+                {discoveredModels.find((option) => option.id === model)?.label || model}
               </button>
             ))}
           </div>
@@ -103,6 +109,9 @@ export function ApiProviderModelSection({
         ) : null}
         {!builtInProvider && modelDiscoveryStatus === 'error' && modelDiscoveryError ? (
           <p className="api-provider-inline-note">{modelDiscoveryError}</p>
+        ) : null}
+        {acp && modelDiscoveryStatus === 'success' && discoveredModels.length === 0 ? (
+          <p className="api-provider-inline-note">代理未公开可选模型，可使用默认模型聊天。</p>
         ) : null}
       </div>
     </section>

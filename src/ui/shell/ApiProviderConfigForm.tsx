@@ -3,7 +3,6 @@ import { resolveProviderCapability } from '../../engines/provider-runtime';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
 import { useI18n } from '../../i18n/useI18n';
 import { ApiProviderConnectionSection } from './ApiProviderConnectionSection';
-import { DevinAcpConnectionPanel } from './DevinAcpConnectionPanel';
 import { getProviderMissingFields, isLegacyDevinAcpProvider } from './apiProviderDisplay';
 import {
   ApiProviderCapabilitiesSection,
@@ -43,6 +42,7 @@ export function ApiProviderConfigForm({
   const modelDiscovery = useProviderModelDiscovery(api);
   const presetModels = publicTrialProvider ? [] : (matchedPreset?.models ?? []);
   const legacyAcp = isLegacyDevinAcpProvider(api);
+  const acp = api.agentTransport === 'devin-acp';
 
   useEffect(() => {
     setSelectedPresetId(matchedPreset?.id ?? '');
@@ -88,42 +88,24 @@ export function ApiProviderConfigForm({
 
   // A legacy ACP record must never fall through to the ordinary Base URL / API Key form.
   // Keep its stored data unchanged until the owner explicitly activates ACP transport.
-  if (api.agentTransport === 'devin-acp' || legacyAcp) {
+  if (legacyAcp) {
     return (
       <div className="api-provider-console">
-        {legacyAcp ? (
-          <div className="api-provider-setup-note" role="status">
-            <strong>旧 Devin ACP 连接等待启用本地代理</strong>
-            <p>这条连接不需要 Base URL 或 API Key。启用后保留连接 ID 和角色绑定，并使用本地 Devin 模型配置。</p>
-            <button type="button" className="btn-secondary compact"
-              onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
-              启用 Devin ACP 本地代理
-            </button>
-          </div>
-        ) : (
-          <>
-            <DevinAcpConnectionPanel
-              selectedModel={api.model === 'Devin ACP' ? '' : api.model}
-              onSelectModel={(modelId) => onSetApiConfig({ model: modelId })}
-            />
-            <details className="api-provider-more-settings">
-              <summary>图片理解（独立看图 API）</summary>
-              <ApiProviderImageUnderstandingSection
-                api={api}
-                providers={providers.filter((provider) => provider.agentTransport !== 'devin-acp')}
-                onSetApiConfig={onSetApiConfig}
-                requireExplicitProvider
-              />
-            </details>
-          </>
-        )}
+        <div className="api-provider-setup-note" role="status">
+          <strong>旧 Devin ACP 连接等待启用本地代理</strong>
+          <p>这条连接不需要 Base URL 或 API Key。启用后保留连接 ID 和角色绑定，并使用本地 Devin 模型配置。</p>
+          <button type="button" className="btn-secondary compact"
+            onClick={() => onSetApiConfig({ agentTransport: 'devin-acp', model: '' })}>
+            启用 Devin ACP 本地代理
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="api-provider-console">
-      {!builtInProvider ? (
+      {!builtInProvider && !acp ? (
         <div className="api-provider-setup-note" role="status">
           <strong>{missingFields.length
             ? t('apiProvider.setup.missing', { fields: missingFields.map(field => t(`apiProvider.setup.${field}`)).join(' / ') })
@@ -158,15 +140,20 @@ export function ApiProviderConfigForm({
 
       <details className="api-provider-more-settings">
         <summary>{t('apiProvider.setup.more')}</summary>
-        <ApiProviderSummarySection
+        {!acp ? <ApiProviderSummarySection
           apiTesting={apiTesting}
           apiTestResult={apiTestResult}
           onRunApiTest={onRunApiTest}
-        />
+        /> : null}
         {!builtInProvider ? (
           <>
-            <ApiProviderCapabilitiesSection api={api} onSetApiConfig={onSetApiConfig} />
-            <ApiProviderImageUnderstandingSection api={api} providers={providers} onSetApiConfig={onSetApiConfig} />
+            {!acp ? <ApiProviderCapabilitiesSection api={api} onSetApiConfig={onSetApiConfig} /> : null}
+            <ApiProviderImageUnderstandingSection
+              api={api}
+              providers={acp ? providers.filter((provider) => provider.agentTransport !== 'devin-acp') : providers}
+              onSetApiConfig={onSetApiConfig}
+              requireExplicitProvider={acp}
+            />
           </>
         ) : null}
         <ApiProviderDiagnosticsSection />

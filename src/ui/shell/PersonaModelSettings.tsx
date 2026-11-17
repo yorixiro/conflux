@@ -6,6 +6,7 @@ import { usePersonaStore } from '../../stores/personaStore';
 import { selectRuntimeApi, useRuntimeStore } from '../../stores/runtimeStore';
 import type { Persona } from '../../types/domain';
 import { useProviderModelDiscovery } from './useProviderModelDiscovery';
+import { getProviderModelDisplayLabel } from './apiProviderDisplay';
 import './PersonaModelSettings.css';
 
 export function PersonaModelSettings({
@@ -53,7 +54,7 @@ export function PersonaModelSettings({
 
   if (binding.api.agentTransport === 'devin-acp') {
     return <div className={settings ? 'persona-model-settings' : 'chat-model-toolbar'} aria-label="Devin ACP 代理连接">
-      <div className="model-effort-row"><span className="ps-footnote">Devin ACP · 模型由代理管理</span></div>
+      <div className="model-effort-row"><span className="ps-footnote">{getProviderModelDisplayLabel(binding.api)}</span></div>
     </div>;
   }
 
