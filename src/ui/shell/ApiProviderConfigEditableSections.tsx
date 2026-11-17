@@ -38,7 +38,7 @@ export function ApiProviderModelSection({
   const canDiscoverModels = !builtInProvider && canDiscoverProviderModels(api);
   const discoveryLoading = modelDiscoveryStatus === 'loading';
   const modelPickerActionDisabled = builtInProvider || discoveryLoading || (!canPickModels && !canDiscoverModels);
-  const shouldPullBeforeOpen = canDiscoverModels && discoveredModelIds.length === 0 && modelDiscoveryStatus !== 'error';
+  const shouldPullBeforeOpen = !acp && canDiscoverModels && discoveredModelIds.length === 0 && modelDiscoveryStatus !== 'error';
   const modelPickerActionLabel = discoveryLoading
     ? t('apiProvider.model.loadingList')
     : modelPickerOpen

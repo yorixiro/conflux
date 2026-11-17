@@ -74,7 +74,8 @@ export function ApiProviderConfigForm({
       return;
     }
     if (
-      modelDiscovery.models.length > 0
+      acp
+      || modelDiscovery.models.length > 0
       || (
         presetModels.length > 0
         && (!api.baseUrl.trim() || !api.apiKey.trim() || modelDiscovery.status === 'error')
