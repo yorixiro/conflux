@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { explainConnectivityFailure, normalizeProviderErrorMessage } from './providerErrorHandling';
 
 describe('normalizeProviderErrorMessage', () => {
+  it.each([
+    'rate_limit_error',
+    'HTTP 429: upstream rejected the request',
+    'API 429: too many requests',
+    '本次请求触发限额',
+    '当前额度用尽',
+    '上游已限流'
+  ])('recognizes CLI quota and rate errors without hiding the original: %s', (message) => {
+    expect(normalizeProviderErrorMessage(message)).toMatchObject({
+      code: 'rate_limited', rawMessage: message
+    });
+  });
+
   it('translates gateway 413 payload errors into a clear user message', () => {
     expect(
       normalizeProviderErrorMessage('API 413: <html><head><title>413 Request Entity Too Large</title></head></html>')

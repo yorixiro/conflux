@@ -1292,7 +1292,10 @@ describe('requestReply task activation', () => {
     });
   });
 
-  it('recovers visible workspace draft writes when the stream errors mid-file', async () => {
+  it.each([
+    { error: 'stream disconnected', calls: 2 },
+    { error: 'Rate limit exceeded: quota exhausted', calls: 1 }
+  ])('preserves workspace drafts and the actual failure after $error', async ({ error, calls }) => {
     vi.stubGlobal('window', {
       setTimeout,
       clearTimeout,
@@ -1337,7 +1340,7 @@ describe('requestReply task activation', () => {
         ].join('\n'),
         model: 'kimi-k2.6'
       });
-      throw new Error('stream disconnected');
+      throw new Error(error);
     }).mockResolvedValueOnce({
       content: '已接上刚才恢复写入的工作区文件，我会继续检查下一步。',
       finishReason: 'stop'
@@ -1426,14 +1429,17 @@ describe('requestReply task activation', () => {
     expect(executeToolActions.mock.calls[0]?.[2]?.beforeMessageId).toEqual(
       expect.stringMatching(/^assistant-/)
     );
-    expect(requestCollaboratorReplyMock).toHaveBeenCalledTimes(2);
+    expect(requestCollaboratorReplyMock).toHaveBeenCalledTimes(calls);
     expect(conversationMessages.some((message) =>
       message.role === 'assistant'
       && message.content.includes('已接上刚才恢复写入的工作区文件')
-    )).toBe(true);
+    )).toBe(calls === 2);
     expect(conversationMessages.some((message) =>
       message.role === 'system'
-      && message.content.includes('流式连接提前结束')
+      && message.content.includes(error)
     )).toBe(true);
+    expect(conversationMessages.some((message) =>
+      message.role === 'system' && message.content.includes('流式连接提前结束')
+    )).toBe(false);
   });
 });

@@ -85,6 +85,14 @@ function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) 
     || Number(req.headers['content-length'] || 0) > 12 * 1024 * 1024)) {
     json(res, 413, { error: 'ACP prompt must be JSON of at most 12 MiB.' }); return;
   }
+  const failUpstream = () => {
+    if (res.destroyed || res.writableEnded) return;
+    const error = '本地 ACP 代理与 CLI 桥接的连接中断，本轮未完成。';
+    if (!res.headersSent) json(res, 502, { error });
+    else if (endpoint === '/prompt' && String(res.getHeader('Content-Type')).includes('text/event-stream')) {
+      res.end(`data: ${JSON.stringify({ type: 'error', error })}\n\n`);
+    } else res.destroy();
+  };
   const upstream = httpRequest({
     hostname: '127.0.0.1', port, path: endpoint, method: req.method,
     headers: {
@@ -92,17 +100,14 @@ function proxyDevinAcp(req: IncomingMessage, res: ServerResponse, path: string) 
       ...(endpoint === '/prompt' ? { 'content-type': 'application/json' } : {})
     }
   }, (reply) => {
-    res.writeHead(reply.statusCode || 502, {
-      'Content-Type': reply.headers['content-type'] || 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff'
-    });
+    res.statusCode = reply.statusCode || 502;
+    res.setHeader('Content-Type', reply.headers['content-type'] || 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    reply.on('error', failUpstream);
     reply.pipe(res);
   });
-  upstream.on('error', () => {
-    if (!res.headersSent) json(res, 502, { error: 'Devin ACP bridge is unavailable.' });
-    else res.end();
-  });
+  upstream.on('error', failUpstream);
   req.on('aborted', () => upstream.destroy());
   res.on('close', () => { if (!res.writableEnded) upstream.destroy(); });
   req.pipe(upstream);

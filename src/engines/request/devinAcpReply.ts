@@ -61,6 +61,8 @@ export async function requestDevinAcpReply(params: {
   let selectedModelId: string | undefined;
   const replyModel = () => selectedModelId ? `Devin ACP · ${selectedModelId}` : 'Devin ACP';
   let finished = false;
+  let succeeded = false;
+  let stopReason: string | undefined;
   const validTokens = (value: unknown): value is number =>
     typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
   const readAgentUsage = (value: unknown) => {
@@ -79,6 +81,11 @@ export async function requestDevinAcpReply(params: {
       if (validTokens(fields[source])) result[target] = fields[source] as number;
     }
     if (Object.keys(result).length) reportedUsage = result;
+  };
+  const complete = (result?: { stopReason?: string; usage?: unknown }) => {
+    finished = true;
+    stopReason = result?.stopReason;
+    readAgentUsage(result?.usage);
   };
   try {
     while (true) {
@@ -101,7 +108,7 @@ export async function requestDevinAcpReply(params: {
             used?: number; size?: number;
             toolCallId?: string; title?: string; name?: string; status?: string;
           };
-          result?: { usage?: unknown };
+          result?: { stopReason?: string; usage?: unknown };
           error?: string;
           callId?: string;
           name?: string;
@@ -178,8 +185,7 @@ export async function requestDevinAcpReply(params: {
           selectedModelId = event.modelId;
         }
         if (event.type === 'done') {
-          finished = true;
-          readAgentUsage(event.result?.usage);
+          complete(event.result);
         }
         if (event.type === 'update' && event.update) {
           publishAcpToolUpdate(activityConversationId, event.update);
@@ -210,13 +216,12 @@ export async function requestDevinAcpReply(params: {
           if (data) {
             const event = JSON.parse(data) as {
               type: string; error?: string;
-              result?: { usage?: unknown };
+              result?: { stopReason?: string; usage?: unknown };
               update?: { sessionUpdate?: string; used?: number; size?: number };
             };
             if (event.type === 'error') throw new Error(event.error || 'ACP agent error');
             if (event.type === 'done') {
-              finished = true;
-              readAgentUsage(event.result?.usage);
+              complete(event.result);
             }
             if (event.type === 'update' && event.update?.sessionUpdate === 'usage_update'
               && validTokens(event.update.used) && validTokens(event.update.size)) {
@@ -227,17 +232,31 @@ export async function requestDevinAcpReply(params: {
         break;
       }
     }
-    if (!finished) throw new Error('Devin ACP stream ended without completion');
-    if (!content.trim()) throw new Error('Devin ACP returned no text');
+    if (!finished) throw new Error('Devin ACP stream ended without completion：连接在收到结束回执前中断，本轮未完成。');
+    if (stopReason === 'max_turn_requests') {
+      throw new Error('CLI 已达到本轮模型请求次数上限（max_turn_requests），本轮未完成。');
+    }
+    if (stopReason === 'cancelled') {
+      throw new Error('CLI 返回了取消状态（cancelled），本轮未完成。');
+    }
+    if (stopReason === 'refusal' && !content.trim()) {
+      throw new Error('CLI 拒绝继续本轮请求（refusal），没有返回正文。');
+    }
+    if (!content.trim()) throw new Error('CLI 已结束本轮请求，但没有返回正文；不能据此认定任务已完成。');
+    succeeded = true;
     return {
       content,
       model: replyModel(),
+      ...(stopReason ? {
+        finishReason: stopReason === 'max_tokens' ? 'length'
+          : stopReason === 'end_turn' ? 'stop' : stopReason
+      } : {}),
       ...(thinkingText ? { thinkingText } : {}),
       ...(contextUsage ? { acpContextUsage: contextUsage } : {}),
       ...(reportedUsage ? { acpTokenReport: reportedUsage } : {})
     };
   } finally {
-    finishAcpToolStream(activityConversationId, finished);
+    finishAcpToolStream(activityConversationId, succeeded);
     reader.releaseLock();
   }
 }

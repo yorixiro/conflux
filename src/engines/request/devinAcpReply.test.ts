@@ -108,4 +108,57 @@ describe('ACP chat reply over the existing request pipeline', () => {
     await expect(requestDevinAcpReply({ prompt: '测试' }))
       .rejects.toThrow('without completion');
   });
+
+  it.each([
+    ['end_turn', 'stop'],
+    ['max_tokens', 'length'],
+    ['refusal', 'refusal']
+  ])('preserves the %s stop reason for the existing reply lifecycle', async (stopReason, finishReason) => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"部分回复"}}}',
+      '', `data: ${JSON.stringify({ type: 'done', result: { stopReason } })}`, ''
+    ].join('\n') + '\n', { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: '继续' });
+    expect(answer.finishReason).toBe(finishReason);
+    expect(answer.acpTokenReport).toBeUndefined();
+    expect(answer.tokenUsage).toBeUndefined();
+  });
+
+  it.each(['max_turn_requests', 'cancelled'])('does not treat %s as completed work', async (stopReason) => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"已经改了一半"}}}',
+      '', `data: ${JSON.stringify({ type: 'done', result: { stopReason } })}`
+    ].join('\n'), { status: 200 }));
+    const progress = vi.fn();
+    await expect(requestDevinAcpReply({ prompt: '继续', onProgress: progress })).rejects.toThrow(stopReason);
+    expect(progress).toHaveBeenCalledWith(expect.objectContaining({ content: '已经改了一半' }));
+  });
+
+  it('preserves quota errors after partial output without retrying the request', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"正在修改"}}}',
+      '', 'data: {"type":"error","error":"Rate limit exceeded: quota exhausted"}', ''
+    ].join('\n') + '\n', { status: 200 }));
+    await expect(requestDevinAcpReply({ prompt: '继续' })).rejects.toThrow('quota exhausted');
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('retains cache usage actually reported by the CLI in the final receipt', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response([
+      'data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"完成"}}}',
+      '', `data: ${JSON.stringify({ type: 'done', result: {
+        stopReason: 'end_turn', usage: { inputTokens: 1200, outputTokens: 30, cachedReadTokens: 900 }
+      } })}`
+    ].join('\n'), { status: 200 }));
+    const answer = await requestDevinAcpReply({ prompt: '继续' });
+    expect(answer.finishReason).toBe('stop');
+    expect(answer.acpTokenReport).toEqual({ inputTokens: 1200, outputTokens: 30, cachedInputTokens: 900 });
+  });
+
+  it('reports an empty completed turn without inventing a successful reply', async () => {
+    globalThis.fetch = vi.fn<typeof fetch>(async () => new Response(
+      'data: {"type":"done","result":{"stopReason":"end_turn"}}\n\n', { status: 200 }
+    ));
+    await expect(requestDevinAcpReply({ prompt: '继续' })).rejects.toThrow('没有返回正文');
+  });
 });

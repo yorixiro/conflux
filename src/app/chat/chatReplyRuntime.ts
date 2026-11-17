@@ -212,14 +212,20 @@ function buildTaskActivationFollowupSystemMessage() {
 
 function appendPartialStreamNotice(
   chat: Pick<ChatReplyStoreBindings['chat'], 'addMessage'>,
-  writableConversation: WritableConversationBody
+  writableConversation: WritableConversationBody,
+  failure?: ReturnType<typeof normalizeProviderErrorMessage>
 ) {
+  const notice = failure
+    ? [
+        '本轮请求未完成，已保留已收到的部分回复。',
+        `原因：${failure.rawMessage}`,
+        failure.hintMessage && failure.hintMessage !== failure.rawMessage
+          ? `提示：${failure.hintMessage}` : ''
+      ].filter(Boolean).join('\n')
+    : '流式连接提前结束，已保留已收到的部分回复。这不是手动打断。';
   chat.addMessage(
     writableConversation,
-    createMessage(
-      'system',
-      '流式连接提前结束，已保留已收到的部分回复。这不是手动打断。'
-    )
+    createMessage('system', notice)
   );
 }
 
@@ -1064,8 +1070,8 @@ async function requestReplyRound({
       if (hasWorkspaceDraftShape && !recoveredInterruptedWorkspaceDraft) {
         appendInterruptedWorkspaceDraftFailure(chat, writableConversation, recoveryFailure);
       }
-      appendPartialStreamNotice(chat, writableConversation);
-      const recoveryFollowupPlan = recoveredInterruptedWorkspaceDraft
+      appendPartialStreamNotice(chat, writableConversation, normalized);
+      const recoveryFollowupPlan = recoveredInterruptedWorkspaceDraft && normalized.code !== 'rate_limited'
         ? resolveToolFollowupPlan({
             outcomes: recoveryOutcomes,
             seenExchangeFingerprints: seenToolExchangeFingerprints,

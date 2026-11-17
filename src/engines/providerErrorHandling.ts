@@ -279,9 +279,13 @@ export function normalizeProviderErrorMessage(message: string): {
 
   if (
     lower.includes('rate limit')
+    || lower.includes('rate_limit')
     || lower.includes('too many requests')
     || lower.includes('quota')
-    || /^api 429:/i.test(message)
+    || lower.includes('限流')
+    || lower.includes('限额')
+    || lower.includes('额度用尽')
+    || /^(?:api|http)\s+429\b/i.test(trimmed)
   ) {
     return {
       code: 'rate_limited',

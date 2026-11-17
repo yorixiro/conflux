@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
+import { createServer as createHttpServer } from 'node:http';
 import { mkdtemp, readFile, writeFile, chmod, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -135,6 +136,16 @@ createInterface({ input: process.stdin }).on('line', (line) => {
     }
     if (message.method === 'session/prompt') {
       const promptText = message.params?.prompt?.map((part) => part.text || '').join('') || '';
+      if (promptText.includes('CHECK_SESSION_CONTEXT')) {
+        send({ method: 'session/update', params: {
+          sessionId: message.params.sessionId,
+          update: { sessionUpdate: 'agent_message_chunk', content: {
+            type: 'text', text: JSON.stringify({ sessionId: message.params.sessionId, promptText })
+          } }
+        } });
+        send({ id: message.id, result: { stopReason: 'end_turn' } });
+        return;
+      }
       if (/CHECK_(CLI|DISABLED|FOREIGN)_PERMISSION/.test(promptText)) {
         const targetSession = message.params.sessionId + (promptText.includes('FOREIGN') ? '-other' : '');
         const name = promptText.includes('DISABLED') ? 'mcp__conflux__disabledTool' : 'exec';
@@ -536,6 +547,24 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
     });
     assert.equal(stalePermission.status, 409);
 
+    const contextReceipts = [];
+    for (const prompt of ['CHECK_SESSION_CONTEXT first turn', 'CHECK_SESSION_CONTEXT second turn']) {
+      const contextEvents = await readEvents(await fetch(base + '/prompt', {
+        method: 'POST', headers,
+        body: JSON.stringify({
+          conversationId: 'mock-context-reuse', prompt,
+          initialContext: 'CHECK_SESSION_CONTEXT full historical context', tools: []
+        })
+      }));
+      contextReceipts.push(JSON.parse(contextEvents.find((event) =>
+        event.update?.sessionUpdate === 'agent_message_chunk'
+      ).update.content.text));
+    }
+    assert.equal(contextReceipts[0].sessionId, contextReceipts[1].sessionId);
+    assert.equal(contextReceipts[0].promptText, 'CHECK_SESSION_CONTEXT full historical context');
+    assert.equal(contextReceipts[1].promptText, 'CHECK_SESSION_CONTEXT second turn',
+      'an existing CLI session must receive the latest turn without resending full history');
+
     // Devin may ignore session/cancel. A cancelled browser request must still
     // free the local prompt slot and allow another conversation to proceed.
     const hanging = await fetch(base + '/prompt', {
@@ -561,6 +590,64 @@ test('mock ACP native searchMemory and listEnvironmentNodes complete a browser-e
     if (bridge.exitCode === null && bridge.signalCode === null) {
       await new Promise((resolve) => bridge.once('exit', resolve));
     }
+    await rm(dir, { recursive: true, force: true });
+  }
+  assert.equal(logs, '');
+});
+
+test('local ACP proxy returns a stream error when its upstream disconnects and remains available', {
+  timeout: 15000
+}, async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'conflux-acp-proxy-test-'));
+  const mockBridge = createHttpServer((req, res) => {
+    if (req.url === '/health') {
+      res.setHeader('content-type', 'application/json');
+      res.end('{"running":true}');
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.write('data: {"type":"update","update":{"sessionUpdate":"agent_message_chunk","content":{"text":"half finished"}}}\n\n');
+    setTimeout(() => res.destroy(), 25);
+  });
+  await new Promise((resolve) => mockBridge.listen(0, '127.0.0.1', resolve));
+  const port = await reservePort();
+  const base = 'http://127.0.0.1:' + port;
+  let proxy;
+  let logs = '';
+  try {
+    await writeFile(join(dir, 'sw.js'), '// disposable test worker\n');
+    await writeFile(join(dir, 'index.html'), '<main>proxy test</main>');
+    const program = `
+      import { startLocalServer } from './tools/conflux-local-server.ts';
+      const app = await startLocalServer({ port: ${port}, root: ${JSON.stringify(dir)} });
+      process.once('SIGTERM', () => { void app.close().then(() => process.exit(0)); });
+    `;
+    proxy = spawn(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', program], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      env: { ...process.env, DEVIN_ACP_BRIDGE_PORT: String(mockBridge.address().port),
+        DEVIN_ACP_BRIDGE_TOKEN: token },
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    proxy.stderr.on('data', (chunk) => { logs += String(chunk); });
+    await waitForServer(base + '/devin-acp');
+    const response = await fetch(base + '/devin-acp/prompt', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ prompt: 'test disconnect' })
+    });
+    const events = await readEvents(response);
+    assert.ok(events.some((event) => event.update?.content?.text === 'half finished'));
+    assert.ok(events.some((event) => event.type === 'error' && event.error.includes('连接中断')));
+    assert.ok(!events.some((event) => event.type === 'done'));
+    const health = await fetch(base + '/devin-acp/health');
+    assert.equal(health.status, 200, 'a broken upstream stream must not crash the local server');
+  } finally {
+    if (proxy) {
+      proxy.kill('SIGTERM');
+      if (proxy.exitCode === null && proxy.signalCode === null) {
+        await new Promise((resolve) => proxy.once('exit', resolve));
+      }
+    }
+    await new Promise((resolve) => { mockBridge.close(resolve); mockBridge.closeAllConnections(); });
     await rm(dir, { recursive: true, force: true });
   }
   assert.equal(logs, '');
