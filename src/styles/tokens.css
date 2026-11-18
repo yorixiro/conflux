@@ -9,8 +9,8 @@
   --font-mono: 'SF Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, var(--font-emoji), monospace;
 
   /* ── Warm Palette (Collection World) ── */
-  --bg: linear-gradient(180deg, #ffffff 0%, #f7f7f7 58%, #ececec 100%);
-  --warm-bg: linear-gradient(180deg, #ffffff 0%, #f7f7f7 58%, #ececec 100%);
+  --bg: #f6f6f6;
+  --warm-bg: #f6f6f6;
   --warm-surface: rgba(255, 255, 255, 0.74);
   --warm-surface-solid: #ffffff;
   --warm-surface-deep: rgba(244, 244, 244, 0.9);
@@ -24,8 +24,8 @@
   --warm-accent-glow: rgba(17, 17, 17, 0.08);
 
   /* ── Cool Palette (Chat World) ── */
-  --chat-bg: linear-gradient(168deg, #ffffff 0%, #f4f4f4 42%, #e9e9e9 100%);
-  --cool-bg: linear-gradient(168deg, #ffffff 0%, #f4f4f4 42%, #e9e9e9 100%);
+  --chat-bg: #f6f6f6;
+  --cool-bg: #f6f6f6;
   --cool-surface: rgba(255, 255, 255, 0.72);
   --cool-surface-solid: #ffffff;
   --cool-surface-deep: rgba(245, 245, 245, 0.92);
@@ -48,13 +48,13 @@
   --accent: var(--warm-accent);
   --accent-soft: var(--warm-accent-soft);
   --accent-glow: var(--warm-accent-glow);
-  --card-bg: linear-gradient(140deg, #ffffff 0%, #f4f4f4 58%, #ebebeb 100%);
-  --shadow: 0 12px 28px rgba(17, 17, 17, 0.06), 0 0 0 1px rgba(17, 17, 17, 0.08);
-  --shadow-hover: 0 18px 42px rgba(17, 17, 17, 0.1), 0 0 0 1px rgba(17, 17, 17, 0.12);
+  --card-bg: #ffffff;
+  --shadow: 0 0 0 1px rgba(17, 17, 17, 0.08);
+  --shadow-hover: 0 4px 12px rgba(17, 17, 17, 0.06), 0 0 0 1px rgba(17, 17, 17, 0.14);
 
   /* ── Chat Bubbles ── */
-  --bubble-user: linear-gradient(135deg, rgba(24, 24, 24, 0.12) 0%, rgba(24, 24, 24, 0.04) 100%);
-  --bubble-ai: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 241, 241, 0.94) 100%);
+  --bubble-user: rgba(24, 24, 24, 0.07);
+  --bubble-ai: #ffffff;
   --chat-bubble-user-fill: var(--bubble-user);
   --chat-bubble-user-border: 1px solid color-mix(in srgb, var(--border-hover) 92%, transparent);
   --chat-bubble-user-shadow: var(--shadow-bubble);
@@ -65,47 +65,39 @@
   --chat-bubble-assistant-padding: 0;
   --chat-bubble-assistant-shadow: none;
   --chat-bubble-assistant-backdrop: none;
-  --chat-system-note-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 18%, transparent) 0%, color-mix(in srgb, var(--surface) 10%, transparent) 100%);
-  --chat-system-note-fill-hover: linear-gradient(180deg, color-mix(in srgb, var(--surface) 28%, transparent) 0%, color-mix(in srgb, var(--surface) 18%, transparent) 100%);
+  --chat-system-note-fill: color-mix(in srgb, var(--surface) 14%, transparent);
+  --chat-system-note-fill-hover: color-mix(in srgb, var(--surface) 24%, transparent);
   --chat-system-note-border: 1px solid color-mix(in srgb, var(--border) 32%, transparent);
   --chat-system-note-border-hover: 1px solid color-mix(in srgb, var(--border-hover) 46%, transparent);
-  --chat-system-note-shadow: 0 8px 18px color-mix(in srgb, var(--accent-soft) 6%, transparent);
-  --chat-system-note-shadow-hover: 0 10px 20px color-mix(in srgb, var(--accent-soft) 8%, transparent);
+  --chat-system-note-shadow: none;
+  --chat-system-note-shadow-hover: none;
   --chat-system-note-backdrop: blur(16px) saturate(118%);
-  --chat-composer-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 16%, transparent) 0%, color-mix(in srgb, var(--surface) 10%, transparent) 100%);
-  --chat-composer-fill-focus: linear-gradient(180deg, color-mix(in srgb, var(--surface) 20%, transparent) 0%, color-mix(in srgb, var(--surface) 12%, transparent) 100%);
+  --chat-composer-fill: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+  --chat-composer-fill-focus: var(--surface-solid);
   --chat-composer-border: 1px solid color-mix(in srgb, var(--border-hover) 62%, transparent);
   --chat-composer-border-focus: 1px solid color-mix(in srgb, var(--border-hover) 82%, transparent);
-  --chat-composer-shadow: 0 14px 24px color-mix(in srgb, var(--accent-soft) 8%, transparent);
-  --chat-composer-shadow-soft: 0 8px 14px color-mix(in srgb, var(--accent-soft) 7%, transparent);
-  --chat-composer-shadow-focus: 0 16px 28px color-mix(in srgb, var(--accent-soft) 10%, transparent);
+  --chat-composer-shadow: none;
+  --chat-composer-shadow-soft: none;
+  --chat-composer-shadow-focus: 0 0 0 2px color-mix(in srgb, var(--accent-soft) 60%, transparent);
   --chat-composer-backdrop: blur(20px) saturate(130%);
-  --chat-preview-strip-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 7%, transparent) 0%, color-mix(in srgb, var(--surface) 3%, var(--accent-soft) 2%) 100%);
+  --chat-preview-strip-fill: color-mix(in srgb, var(--surface) 6%, transparent);
   --chat-preview-strip-border: 1px solid color-mix(in srgb, var(--border-hover) 16%, transparent);
-  --chat-preview-strip-shadow: 0 5px 12px color-mix(in srgb, var(--accent-soft) 3%, transparent);
+  --chat-preview-strip-shadow: none;
   --chat-preview-strip-backdrop: blur(10px) saturate(1.01);
-  --chat-send-active-fill: linear-gradient(135deg, var(--accent), var(--accent));
+  --chat-send-active-fill: var(--accent);
   --chat-send-active-text: #fff;
 
   /* ── Panels ── */
   --sheet-surface-radius: 24px 24px 0 0;
-  --sheet-surface-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 98%, rgba(255,255,255,0.18)), color-mix(in srgb, var(--surface-solid) 94%, var(--surface-deep)));
+  --sheet-surface-fill: var(--surface-solid);
   --sheet-surface-border: 1px solid color-mix(in srgb, var(--border) 78%, rgba(255,255,255,0.18));
-  --sheet-surface-shadow: 0 20px 44px rgba(94, 80, 64, 0.14);
+  --sheet-surface-shadow: 0 -1px 0 rgba(17, 17, 17, 0.06), 0 -8px 24px rgba(17, 17, 17, 0.06);
   --sheet-surface-backdrop: blur(24px) saturate(1.2);
   --sheet-readable-text: color-mix(in srgb, var(--text) 86%, #1e2434 14%);
   --sheet-readable-soft: color-mix(in srgb, var(--text-soft) 56%, var(--sheet-readable-text) 44%);
   --sheet-readable-muted: color-mix(in srgb, var(--text-muted) 28%, var(--sheet-readable-text) 72%);
-  --control-surface: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--surface-solid) 78%, var(--surface-deep) 22%),
-    color-mix(in srgb, var(--surface) 78%, var(--surface-deep) 22%)
-  );
-  --control-surface-focus: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--surface-solid) 84%, var(--surface-deep) 16%),
-    color-mix(in srgb, var(--surface) 84%, var(--surface-deep) 16%)
-  );
+  --control-surface: color-mix(in srgb, var(--surface-solid) 86%, var(--surface-deep) 14%);
+  --control-surface-focus: var(--surface-solid);
   --control-surface-solid: color-mix(in srgb, var(--surface-solid) 74%, var(--surface) 26%);
   --control-border-color: color-mix(in srgb, var(--border) 66%, transparent);
   --control-border: 1px solid var(--control-border-color);
@@ -113,39 +105,32 @@
   --control-border-focus: 1px solid var(--control-border-focus-color);
   --control-text: var(--text);
   --control-placeholder: color-mix(in srgb, var(--text-muted) 74%, transparent);
-  --control-shadow: 0 10px 24px color-mix(in srgb, var(--surface-deep) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--surface-solid) 42%, transparent);
-  --control-focus-shadow: 0 0 0 2.5px color-mix(in srgb, var(--accent-soft) 38%, transparent), 0 14px 30px color-mix(in srgb, var(--surface-deep) 12%, transparent), inset 0 1px 0 color-mix(in srgb, var(--surface-solid) 48%, transparent);
+  --control-shadow: none;
+  --control-focus-shadow: 0 0 0 2.5px color-mix(in srgb, var(--accent-soft) 38%, transparent);
   --theme-studio-stage-radius: 24px;
   --theme-studio-stage-border: 1px solid var(--border);
-  --theme-studio-stage-fill:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-deep) 82%, transparent), color-mix(in srgb, var(--surface) 62%, transparent)),
-    radial-gradient(circle at top right, var(--accent-glow), transparent 34%);
-  --theme-studio-stage-shadow: 0 12px 36px rgba(96, 112, 156, 0.08);
+  --theme-studio-stage-fill: color-mix(in srgb, var(--surface-deep) 72%, transparent);
+  --theme-studio-stage-shadow: none;
   --theme-timeline-shell-radius: 24px;
   --theme-timeline-shell-border: 1px solid var(--border);
-  --theme-timeline-shell-fill:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-deep) 82%, transparent), color-mix(in srgb, var(--surface) 62%, transparent)),
-    radial-gradient(circle at top right, var(--accent-glow), transparent 34%);
-  --theme-timeline-shell-shadow: 0 12px 34px rgba(96, 112, 156, 0.08);
+  --theme-timeline-shell-fill: color-mix(in srgb, var(--surface-deep) 72%, transparent);
+  --theme-timeline-shell-shadow: none;
   --code-workshop-sheet-radius: 32px;
   --code-workshop-sheet-border: 1px solid color-mix(in srgb, var(--border-hover) 42%, rgba(255,255,255,0.22));
-  --code-workshop-sheet-fill:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--border-hover) 10%, transparent), transparent 32%),
-    radial-gradient(circle at 82% 16%, color-mix(in srgb, var(--surface) 8%, transparent), transparent 28%),
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 96%, rgba(255,255,255,0.14)), color-mix(in srgb, var(--surface-solid) 90%, var(--surface-deep)));
+  --code-workshop-sheet-fill: var(--surface-solid);
   --code-workshop-sheet-base-fill: color-mix(in srgb, var(--card-bg) 52%, transparent);
-  --code-workshop-sheet-shadow: 0 18px 42px rgba(127, 88, 55, 0.1), inset 0 1px 0 rgba(255,255,255,0.12);
+  --code-workshop-sheet-shadow: 0 8px 24px rgba(17, 17, 17, 0.06);
   --code-workshop-sheet-header-border: 1px solid color-mix(in srgb, var(--border) 42%, transparent);
-  --code-workshop-sheet-header-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 54%, rgba(255,255,255,0.14)), transparent);
+  --code-workshop-sheet-header-fill: transparent;
   --code-workshop-sheet-close-border: 1px solid color-mix(in srgb, var(--border-hover) 72%, transparent);
   --code-workshop-sheet-close-fill: color-mix(in srgb, var(--surface) 84%, rgba(255,255,255,0.24));
   --code-workshop-sheet-close-color: var(--text-soft);
   --code-workshop-source-bar-border: 1px solid color-mix(in srgb, var(--border) 36%, transparent);
-  --code-workshop-source-bar-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 18%, transparent), transparent);
+  --code-workshop-source-bar-fill: transparent;
   --code-workshop-board-radius: 24px;
   --code-workshop-board-border: 1px solid color-mix(in srgb, var(--border) 42%, transparent);
-  --code-workshop-board-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 18%, transparent), color-mix(in srgb, var(--surface-solid) 10%, transparent));
-  --code-workshop-board-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  --code-workshop-board-fill: color-mix(in srgb, var(--surface) 14%, transparent);
+  --code-workshop-board-shadow: none;
   --code-workshop-board-backdrop: blur(8px);
   --code-workshop-input-border: var(--control-border);
   --code-workshop-input-fill: var(--control-surface);
@@ -157,8 +142,8 @@
   --code-run-fullscreen-close-color: var(--text-soft);
   --code-run-fullscreen-stage-border: 1px solid color-mix(in srgb, var(--border-hover) 52%, transparent);
   --code-run-fullscreen-stage-fill: color-mix(in srgb, var(--surface-solid) 88%, transparent);
-  --shadow-panel: 0 18px 42px rgba(17, 17, 17, 0.1);
-  --shadow-bubble: 0 4px 14px rgba(17, 17, 17, 0.05);
+  --shadow-panel: 0 8px 24px rgba(17, 17, 17, 0.07);
+  --shadow-bubble: none;
 
   /* ── Status Colors ── */
   --color-success: #6baf7b;

@@ -13,28 +13,14 @@
   --accent: var(--warm-accent);
   --accent-soft: var(--warm-accent-soft);
   --accent-glow: var(--warm-accent-glow);
-  --card-bg: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--warm-surface-solid) 88%, var(--warm-accent-soft) 12%) 0%,
-    color-mix(in srgb, var(--warm-surface-solid) 72%, var(--warm-surface-deep) 28%) 100%
-  );
+  --card-bg: var(--warm-surface-solid);
   --collection-card-fill: var(--card-bg);
-  --collection-card-background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-glow) 72%, transparent), transparent 54%),
-    linear-gradient(145deg, color-mix(in srgb, var(--collection-card-fill) 92%, var(--warm-accent-soft) 8%), color-mix(in srgb, var(--surface-solid) 76%, var(--collection-card-fill) 24%));
+  --collection-card-background: var(--collection-card-fill);
   --collection-card-border-color: color-mix(in srgb, var(--border-hover) 36%, var(--border) 64%);
-  --collection-card-shadow: 0 10px 24px rgba(90, 104, 99, 0.07), 0 2px 8px rgba(90, 104, 99, 0.04), 0 0 0 1px rgba(134, 147, 143, 0.09);
-  --collection-card-hover-shadow: 0 16px 32px rgba(90, 104, 99, 0.1), 0 4px 12px rgba(90, 104, 99, 0.05), 0 0 0 1px rgba(134, 147, 143, 0.13);
-  --collection-code-card-shadow:
-    0 18px 32px color-mix(in srgb, var(--accent-glow) 16%, transparent),
-    0 10px 20px rgba(90, 104, 99, 0.08),
-    0 2px 8px rgba(90, 104, 99, 0.04),
-    0 0 0 1px rgba(134, 147, 143, 0.09);
-  --collection-code-card-hover-shadow:
-    0 24px 40px color-mix(in srgb, var(--accent-glow) 24%, transparent),
-    0 14px 26px rgba(90, 104, 99, 0.11),
-    0 4px 12px rgba(90, 104, 99, 0.05),
-    0 0 0 1px rgba(134, 147, 143, 0.13);
+  --collection-card-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 0 0 1px rgba(17, 17, 17, 0.06);
+  --collection-card-hover-shadow: 0 4px 12px rgba(17, 17, 17, 0.06), 0 0 0 1px rgba(17, 17, 17, 0.1);
+  --collection-code-card-shadow: var(--collection-card-shadow);
+  --collection-code-card-hover-shadow: var(--collection-card-hover-shadow);
   --collection-code-card-rest-scale: 1;
   --collection-card-pinned-shadow: 0 8px 20px rgba(102, 116, 111, 0.06), 0 0 0 1px rgba(166, 177, 172, 0.1);
   --collection-card-surface: color-mix(in srgb, var(--surface-solid) 92%, var(--surface) 8%);
@@ -68,14 +54,14 @@
   --collection-card-tool-border: 1px solid var(--collection-card-border);
   --collection-card-tool-fill: color-mix(in srgb, var(--collection-card-surface) 82%, transparent);
   --collection-card-tool-color: var(--collection-card-text-soft);
-  --collection-card-tool-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+  --collection-card-tool-shadow: none;
   --collection-card-tool-primary-border: color-mix(in srgb, var(--collection-card-border-hover) 76%, transparent);
   --collection-card-tool-primary-fill: color-mix(in srgb, var(--collection-card-surface-solid) 72%, var(--collection-card-accent-soft) 28%);
   --collection-card-tool-primary-color: color-mix(in srgb, var(--collection-card-accent) 78%, var(--collection-card-text) 22%);
   --collection-card-tool-primary-solid-border: color-mix(in srgb, var(--collection-card-border-hover) 78%, transparent);
-  --collection-card-tool-primary-solid-fill: linear-gradient(135deg, color-mix(in srgb, var(--collection-card-surface-solid) 78%, rgba(255,255,255,.24)), color-mix(in srgb, var(--collection-card-accent-soft) 38%, rgba(255,255,255,.1)));
+  --collection-card-tool-primary-solid-fill: color-mix(in srgb, var(--collection-card-surface-solid) 70%, var(--collection-card-accent-soft) 30%);
   --collection-card-tool-primary-solid-color: color-mix(in srgb, var(--collection-card-accent) 76%, var(--collection-card-text) 24%);
-  --collection-card-tool-primary-solid-shadow: 0 8px 16px color-mix(in srgb, var(--collection-card-border-hover) 12%, transparent), inset 0 1px 0 rgba(255,255,255,0.18);
+  --collection-card-tool-primary-solid-shadow: none;
   --collection-card-tool-secondary-color: var(--collection-card-text-muted);
   --collection-card-tool-danger-border: rgba(194, 92, 92, 0.26);
   --collection-card-tool-danger-color: #b45f5f;
@@ -88,25 +74,13 @@
   --collection-search-text: var(--control-text);
   --collection-search-placeholder: var(--control-placeholder);
   --collection-tab-border: 1px solid color-mix(in srgb, var(--border) 18%, transparent);
-  --collection-tab-row-fill: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--surface-solid) 34%, transparent),
-    color-mix(in srgb, var(--surface) 8%, transparent)
-  );
-  --collection-tab-row-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    inset 0 0 0 1px color-mix(in srgb, var(--border) 10%, transparent);
+  --collection-tab-row-fill: color-mix(in srgb, var(--surface-solid) 24%, transparent);
+  --collection-tab-row-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 10%, transparent);
   --collection-tab-text: color-mix(in srgb, var(--text-soft) 86%, var(--text-muted) 14%);
   --collection-tab-text-active: var(--text);
-  --collection-tab-active-fill: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--surface-solid) 18%, transparent),
-    color-mix(in srgb, var(--surface) 6%, transparent)
-  );
+  --collection-tab-active-fill: color-mix(in srgb, var(--surface-solid) 14%, transparent);
   --collection-tab-active-border: color-mix(in srgb, var(--border-hover) 14%, transparent);
-  --collection-tab-active-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 4px 14px color-mix(in srgb, var(--accent-glow) 6%, transparent);
+  --collection-tab-active-shadow: none;
   --collection-tab-indicator: color-mix(in srgb, var(--accent) 44%, transparent);
   --collection-tab-indicator-inset: 14px;
   --collection-tab-indicator-span: 28px;
@@ -138,10 +112,8 @@
   --collection-asset-card-date-color: rgba(84, 94, 91, 0.42);
   --collection-workshop-panel-radius: 26px;
   --collection-workshop-panel-border: 1px solid color-mix(in srgb, var(--border) 46%, transparent);
-  --collection-workshop-panel-fill:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--warm-accent) 10%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, rgba(255, 255, 255, 0.1) 100%, transparent), color-mix(in srgb, rgba(255, 255, 255, 0.04) 100%, transparent));
-  --collection-workshop-panel-shadow: 0 14px 30px rgba(92, 106, 101, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --collection-workshop-panel-fill: color-mix(in srgb, var(--surface-solid) 60%, transparent);
+  --collection-workshop-panel-shadow: 0 0 0 1px rgba(17, 17, 17, 0.05);
   --collection-workshop-panel-backdrop: blur(10px) saturate(1.03);
   --collection-workshop-panel-title-color: var(--text);
   --collection-workshop-panel-meta-color: color-mix(in srgb, var(--accent) 74%, var(--text-soft) 26%);
@@ -214,7 +186,7 @@
   --collection-dialogue-card-micro-border: color-mix(in srgb, var(--collection-card-border) 74%, transparent);
   --collection-dialogue-card-micro-fill: color-mix(in srgb, var(--collection-card-surface) 68%, transparent);
   --collection-dialogue-card-micro-color: color-mix(in srgb, var(--collection-card-text-muted) 82%, var(--collection-card-text-soft) 18%);
-  --collection-dialogue-card-micro-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  --collection-dialogue-card-micro-shadow: none;
   --collection-dialogue-card-micro-hover-border: color-mix(in srgb, var(--collection-card-border-hover) 76%, transparent);
   --collection-dialogue-card-micro-hover-fill: color-mix(in srgb, var(--collection-card-surface-solid) 72%, var(--collection-card-accent-soft) 28%);
   --collection-dialogue-card-micro-hover-color: color-mix(in srgb, var(--collection-card-accent) 72%, var(--collection-card-text) 28%);
@@ -231,14 +203,10 @@
   --collection-dialogue-card-collapsed-title-size: 13.5px;
   --collection-section-heading-color: color-mix(in srgb, var(--text) 76%, var(--text-soft) 24%);
   --collection-section-meta-color: color-mix(in srgb, var(--text-soft) 72%, var(--text-muted) 28%);
-  --theme-studio-stage-fill:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-deep) 82%, transparent), color-mix(in srgb, var(--surface) 62%, transparent)),
-    radial-gradient(circle at top left, var(--accent-glow), transparent 38%);
-  --theme-studio-stage-shadow: 0 12px 36px rgba(100, 114, 109, 0.09);
-  --theme-timeline-shell-fill:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-deep) 82%, transparent), color-mix(in srgb, var(--surface) 62%, transparent)),
-    radial-gradient(circle at top left, var(--accent-glow), transparent 38%);
-  --theme-timeline-shell-shadow: 0 12px 34px rgba(100, 114, 109, 0.09);
+  --theme-studio-stage-fill: color-mix(in srgb, var(--surface-deep) 72%, transparent);
+  --theme-studio-stage-shadow: none;
+  --theme-timeline-shell-fill: color-mix(in srgb, var(--surface-deep) 72%, transparent);
+  --theme-timeline-shell-shadow: none;
 }
 .world-collection,
 .collection-card-token-scope {
@@ -430,11 +398,8 @@
   margin: 0;
   padding: 7px var(--collection-shell-inline-pad) var(--collection-bottom-nav-padding-bottom);
   border-top: 1px solid color-mix(in srgb, var(--border) 38%, transparent);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 76%, #e9e5dc 24%), color-mix(in srgb, var(--surface-solid) 86%, #eee9df 14%));
-  box-shadow:
-    0 -10px 26px color-mix(in srgb, var(--surface-deep) 7%, transparent),
-    inset 0 1px 0 color-mix(in srgb, rgba(255,255,255,0.34) 100%, transparent);
+  background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+  box-shadow: none;
   backdrop-filter: blur(18px) saturate(1.06);
   -webkit-backdrop-filter: blur(18px) saturate(1.06);
 }
