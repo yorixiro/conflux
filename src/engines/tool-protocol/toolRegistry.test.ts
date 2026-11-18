@@ -19,6 +19,23 @@ describe('toolRegistry', () => {
     expect(memoryRules).toContain('敏感条目遵循现有待确认流程');
   });
 
+  it('shows the visible sticker catalog to the model so it can send stickers by id', () => {
+    const tool = POLARIS_TOOL_REGISTRY_BY_NAME.sendImageAttachment;
+    const context = {
+      activeCard: null,
+      visibleCards: [],
+      imageAssetSnapshot: {
+        available: [],
+        stickers: [{ id: 'sticker-hug', title: '抱抱猫', purpose: '安慰', moods: ['抱抱', '委屈'] }]
+      }
+    };
+    const withStickers = tool.buildRules?.(context).join('\n') ?? '';
+    expect(withStickers).toContain('主动调用 sendImageAttachment');
+    expect(withStickers).toContain('抱抱猫 id=sticker-hug：安慰；抱抱、委屈');
+    const empty = tool.buildRules?.({ activeCard: null, visibleCards: [] }).join('\n') ?? '';
+    expect(empty).toContain('还没有可用表情包');
+  });
+
   it('materializes one complete manifest receipt for invocation, replay, and executor consumers', () => {
     expect(Object.keys(POLARIS_TOOL_MANIFEST_BY_NAME)).toEqual(TOOL_INVOCATION_KINDS);
     for (const name of TOOL_INVOCATION_KINDS) {

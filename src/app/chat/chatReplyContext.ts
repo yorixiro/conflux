@@ -7,6 +7,7 @@ import {
 } from '../../engines/collectionOwnership';
 import { isGroupConversation } from '../../engines/conversationOwnership';
 import { buildRoomProjectTreeSnapshots } from '../../engines/roomProjects';
+import { listStickerCatalog } from '../../engines/stickerCatalog';
 import { getRunCodeSandboxProfile } from '../../infrastructure/runCodeSandboxMode';
 import { getNativePersonalDataToolAvailability } from '../../native/personalData';
 import type {
@@ -69,6 +70,9 @@ function buildImageAssetSnapshot(imageCards: ImageAssetCard[]) {
       tags: card.tags,
       source: card.source,
       cssUrl: `url("polaris-asset://${card.assetId}")`
+    })),
+    stickers: listStickerCatalog(imageCards).slice(0, 40).map(({ id, title, purpose, moods }) => ({
+      id, title, purpose, moods
     }))
   };
 }

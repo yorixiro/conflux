@@ -10,6 +10,7 @@ describe('buildDirectToolExecutionContext', () => {
       id, kind: 'image', name: 'image.png', mimeType: 'image/png', size: 20, createdAt: 1
     }));
     vi.spyOn(assets, 'getAssetBlob').mockResolvedValue(new Blob(['image'], { type: 'image/png' }));
+    let messages: unknown[] = [];
     const collectionState = {
       cards: [],
       imageCards: [
@@ -26,7 +27,7 @@ describe('buildDirectToolExecutionContext', () => {
       chat: {
         conversations: [],
         findConversation: () => null,
-        getConversationMessages: () => [],
+        getConversationMessages: () => messages,
         setConversationActiveProject: () => undefined,
         readLatestState: () => ({ conversations: [] })
       },
@@ -72,5 +73,13 @@ describe('buildDirectToolExecutionContext', () => {
     const image = await context.sendImageAttachment?.('image-card');
     expect(image).toMatchObject({ ok: true, attachment: { assetId: 'image-asset' } });
     if (image?.ok) expect(image.attachment.presentation).toBeUndefined();
+
+    messages = [{
+      id: 'message-1', role: 'user', content: '', createdAt: 1,
+      attachments: [{ id: 'chat-attachment', assetId: 'sticker-asset', kind: 'image', name: '抱抱.png',
+        mimeType: 'image/png', size: 20 }]
+    }];
+    const fromChat = await context.sendImageAttachment?.('抱抱.png');
+    expect(fromChat).toMatchObject({ ok: true, attachment: { assetId: 'sticker-asset', presentation: 'sticker' } });
   });
 });

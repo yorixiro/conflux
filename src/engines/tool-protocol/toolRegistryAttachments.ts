@@ -26,6 +26,13 @@ type AttachmentToolKind = Extract<
   | 'saveArchiveEntryAsCodeCard'
 >;
 
+const SEND_IMAGE_RULES = [
+  '4. sendImageAttachment：把已有图片发到聊天里，返回本地图片附件。',
+  '- 用户明确要图时直接发送；普通聊天中若现有表情包与语境自然契合，也可以主动调用 sendImageAttachment，不必先征求一次性发图指令。',
+  '- sendImageAttachment 只复用或导入已有图片，不需要生图模型，也不要改用 generateImage。',
+  '- 选择表情包时可按用途或情绪匹配；多张匹配时使用明确的表情包 ID，不要随意猜测，也不要为了刷存在感反复发图。'
+];
+
 export const ATTACHMENT_TOOL_DEFINITION_MAP = {
   inspectAttachments: {
     name: 'inspectAttachments',
@@ -116,12 +123,21 @@ export const ATTACHMENT_TOOL_DEFINITION_MAP = {
         targetLabel: stringProperty('可选目标说明。')
       })
     },
-    rules: [
-      '4. sendImageAttachment：把已有图片发到聊天里，返回本地图片附件。',
-      '- 用户明确要图时直接发送；普通聊天中若现有表情包与语境自然契合，也可以主动调用 sendImageAttachment，不必先征求一次性发图指令。',
-      '- sendImageAttachment 只复用或导入已有图片，不需要生图模型，也不要改用 generateImage。',
-      '- 选择表情包时可按用途或情绪匹配；多张匹配时使用明确的表情包 ID，不要随意猜测，也不要为了刷存在感反复发图。'
-    ]
+    rules: SEND_IMAGE_RULES,
+    buildRules: (context) => {
+      const stickers = context?.imageAssetSnapshot?.stickers ?? [];
+      if (!stickers.length) {
+        return [...SEND_IMAGE_RULES, '- 当前协作者还没有可用表情包；不要凭空猜表情包名字。'];
+      }
+      return [
+        ...SEND_IMAGE_RULES,
+        '- 当前可发的表情包（发送时 target 填 id）：',
+        ...stickers.map((sticker) => {
+          const detail = [sticker.purpose, sticker.moods.join('、')].filter(Boolean).join('；');
+          return `  - ${sticker.title} id=${sticker.id}${detail ? `：${detail}` : ''}`;
+        })
+      ];
+    }
   },
   inspectImageAsset: {
     name: 'inspectImageAsset',

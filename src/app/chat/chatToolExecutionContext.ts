@@ -278,10 +278,17 @@ export function buildDirectToolExecutionContext({
     );
   };
   const resolveImageMaterialTarget = async (target: string | undefined) => {
-    const attachmentResult = resolveAttachmentForSave(target, { kind: 'image', noun: '图片素材' });
-    if (attachmentResult.ok) return { ok: true as const, attachment: attachmentResult.entry.attachment };
-
     const imageCards = accessibleImageCards;
+    const attachmentResult = resolveAttachmentForSave(target, { kind: 'image', noun: '图片素材' });
+    if (attachmentResult.ok) {
+      const attachment = attachmentResult.entry.attachment;
+      const isSticker = imageCards.some((card) => card.sticker && card.assetId === attachment.assetId);
+      return {
+        ok: true as const,
+        attachment: isSticker ? { ...attachment, presentation: 'sticker' as const } : attachment
+      };
+    }
+
     if (!target?.trim()) {
       if (imageCards.length === 1) {
         return { ok: true as const, attachment: await imageCardToAttachment(imageCards[0]) };

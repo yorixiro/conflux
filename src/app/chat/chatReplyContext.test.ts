@@ -293,7 +293,8 @@ describe('createChatReplyRequestSnapshot', () => {
             source: 'imported',
             createdAt: 1,
             updatedAt: 2,
-            originConversationId: 'conv-1'
+            originConversationId: 'conv-1',
+            sticker: { purpose: '打招呼', moods: ['开心'] }
           },
           {
             id: 'image-other',
@@ -327,6 +328,9 @@ describe('createChatReplyRequestSnapshot', () => {
       tags: ['贴纸'],
       source: 'imported',
       cssUrl: 'url("polaris-asset://asset-toast")'
+    }]);
+    expect(result.toolContext.imageAssetSnapshot?.stickers).toEqual([{
+      id: 'image-toast', title: '吐司贴纸', purpose: '打招呼', moods: ['开心']
     }]);
   });
 

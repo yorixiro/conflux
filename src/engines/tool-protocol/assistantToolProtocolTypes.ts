@@ -139,6 +139,12 @@ export type AssistantToolContext = {
       source: ImageAssetCard['source'];
       cssUrl: string;
     }>;
+    stickers?: Array<{
+      id: string;
+      title: string;
+      purpose: string;
+      moods: string[];
+    }>;
   };
   mcpServers?: McpServerConfig[];
   mcpToolTimeoutSeconds?: number;
