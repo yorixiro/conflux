@@ -90,8 +90,11 @@ export function useAppRuntime({
   }, [appLanguage]);
 
   const retryPersistenceReadFailure = () => {
-    if (typeof window === 'undefined') return;
-    window.location.reload();
+    if (persistenceReadFailureNotice.reason === 'isolated-row') {
+      window.location.reload();
+      return;
+    }
+    persistentStoreLifecycle.retryPersistenceReadFailure();
   };
 
   return {

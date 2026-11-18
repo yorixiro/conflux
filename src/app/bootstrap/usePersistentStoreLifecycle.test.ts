@@ -16,8 +16,37 @@ import {
   hydrateSpaceThemeState
 } from './persistentStoreHydration';
 import type { SpaceThemeHydrationState } from './persistentStoreHydration';
+import { useChatStore } from '../../stores/chatStore';
+import { useCollectionStore } from '../../stores/collectionStore';
+import { usePersonaStore } from '../../stores/personaStore';
+import { useRuntimeStore } from '../../stores/runtimeStore';
 
 describe('persistent store lifecycle guards', () => {
+  it('retries failed store reads without reloading already loaded stores or rewriting their defaults', async () => {
+    const stores = [useChatStore, useCollectionStore, usePersonaStore, useRuntimeStore];
+    const previous = stores.map((store) => store.getState().hydrated);
+    try {
+      useChatStore.setState({ hydrated: true });
+      useRuntimeStore.setState({ hydrated: true });
+      usePersonaStore.setState({ hydrated: false });
+      useCollectionStore.setState({ hydrated: false });
+      const hydrateChat = vi.fn(async () => {});
+      const hydrateRuntime = vi.fn(async () => true);
+      const hydratePersona = vi.fn(async () => { usePersonaStore.setState({ hydrated: true }); return false; });
+      const hydrateCollection = vi.fn(async () => { useCollectionStore.setState({ hydrated: true }); });
+      const result = await hydrateStartupStores({ onlyUnhydrated: true, hydrateChat, hydratePersona, hydrateRuntime, hydrateCollection });
+      expect(hydrateChat).not.toHaveBeenCalled();
+      expect(hydrateRuntime).not.toHaveBeenCalled();
+      expect(hydratePersona).toHaveBeenCalledTimes(1);
+      expect(hydrateCollection).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ shouldPersistPersonaAfterHydration: false, shouldPersistRuntimeAfterHydration: false });
+    } finally {
+      useChatStore.setState({ hydrated: previous[0] });
+      useCollectionStore.setState({ hydrated: previous[1] });
+      usePersonaStore.setState({ hydrated: previous[2] });
+      useRuntimeStore.setState({ hydrated: previous[3] });
+    }
+  });
   it('flushes the latest state even when no debounce is pending', async () => {
     vi.useFakeTimers();
     const persist = vi.fn(async () => {});

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import { isDeveloperModeEnabled } from '../developer/developerModeRuntime';
 import { reportPersistenceError } from '../../infrastructure/persistenceDiagnostics';
@@ -14,6 +14,19 @@ import {
 
 export type SpaceThemeHydrationState = Awaited<ReturnType<typeof readPersistedSpaceThemeState>>;
 type StartupStoreName = 'chat' | 'collection' | 'persona' | 'runtime';
+
+function isStartupStoreHydrated(store: StartupStoreName) {
+  return {
+    chat: useChatStore,
+    collection: useCollectionStore,
+    persona: usePersonaStore,
+    runtime: useRuntimeStore
+  }[store].getState().hydrated;
+}
+
+function hasUnhydratedStartupStores() {
+  return (['chat', 'collection', 'persona', 'runtime'] as const).some((store) => !isStartupStoreHydrated(store));
+}
 
 export type StartupStoreHydrationResult = {
   shouldPersistPersonaAfterHydration: boolean;
@@ -87,6 +100,7 @@ async function hydrateStartupStore<T>(
 }
 
 export async function hydrateStartupStores({
+  onlyUnhydrated = false,
   hydrateChat = () => useChatStore.getState().hydrateFromDb(),
   hydratePersona = () => usePersonaStore.getState().hydrateFromDb(),
   hydrateRuntime = () => useRuntimeStore.getState().hydrateFromDb(),
@@ -95,6 +109,7 @@ export async function hydrateStartupStores({
     reportPersistenceError({ label: '[store:persist]', store, operation: 'hydrate-startup' }, error);
   }
 }: {
+  onlyUnhydrated?: boolean;
   hydrateChat?: () => Promise<unknown>;
   hydratePersona?: () => Promise<boolean>;
   hydrateRuntime?: () => Promise<boolean>;
@@ -106,10 +121,10 @@ export async function hydrateStartupStores({
     shouldPersistPersonaAfterHydration,
     shouldPersistRuntimeAfterHydration
   ] = await Promise.all([
-    hydrateStartupStore('chat', hydrateChat, null, reportError),
-    hydrateStartupStore('persona', hydratePersona, false, reportError),
-    hydrateStartupStore('runtime', hydrateRuntime, false, reportError),
-    hydrateStartupStore('collection', hydrateCollection, null, reportError)
+    onlyUnhydrated && isStartupStoreHydrated('chat') ? null : hydrateStartupStore('chat', hydrateChat, null, reportError),
+    onlyUnhydrated && isStartupStoreHydrated('persona') ? false : hydrateStartupStore('persona', hydratePersona, false, reportError),
+    onlyUnhydrated && isStartupStoreHydrated('runtime') ? false : hydrateStartupStore('runtime', hydrateRuntime, false, reportError),
+    onlyUnhydrated && isStartupStoreHydrated('collection') ? null : hydrateStartupStore('collection', hydrateCollection, null, reportError)
   ]);
 
   return {
@@ -121,24 +136,34 @@ export async function hydrateStartupStores({
 export function usePersistentStoreHydration(spaceThemeHydratedRef: MutableRefObject<boolean>) {
   const [startupThemeReady, setStartupThemeReady] = useState(false);
   const [startupStoresReady, setStartupStoresReady] = useState(false);
+  const retryHydrationRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     let cancelled = false;
+    let pending = false;
+    let retryCount = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
-    void (async () => {
+    const hydrate = async () => {
+      if (cancelled || pending) return;
+      pending = true;
       try {
-        const storeHydrationPromise = hydrateStartupStores().finally(() => {
+        const storeHydrationPromise = hydrateStartupStores({ onlyUnhydrated: true }).finally(() => {
           if (!cancelled) {
             setStartupStoresReady(true);
           }
         });
-        await hydrateSpaceThemeState({
-          setThemeHydrated: (hydrated) => {
-            spaceThemeHydratedRef.current = hydrated;
-          },
-          markThemeReady: () => setStartupThemeReady(true),
-          isCancelled: () => cancelled
-        });
+        if (!spaceThemeHydratedRef.current) {
+          await hydrateSpaceThemeState({
+            setThemeHydrated: (hydrated) => {
+              spaceThemeHydratedRef.current = hydrated;
+            },
+            markThemeReady: () => setStartupThemeReady(true),
+            isCancelled: () => cancelled
+          });
+        } else {
+          setStartupThemeReady(true);
+        }
         if (cancelled) return;
 
         const {
@@ -153,9 +178,11 @@ export function usePersistentStoreHydration(spaceThemeHydratedRef: MutableRefObj
         ]);
         if (cancelled) return;
 
-        useChatStore.getState().reconcileConversationWorkspaceBindings(
-          useCollectionStore.getState().roomProjects.map((project) => project.id)
-        );
+        if (isStartupStoreHydrated('chat') && isStartupStoreHydrated('collection')) {
+          useChatStore.getState().reconcileConversationWorkspaceBindings(
+            useCollectionStore.getState().roomProjects.map((project) => project.id)
+          );
+        }
         if (cancelled) return;
 
         if (shouldRunStartupAssetGovernanceDebug()) {
@@ -183,16 +210,39 @@ export function usePersistentStoreHydration(spaceThemeHydratedRef: MutableRefObj
         if (!cancelled) {
           reportPersistenceError({ label: '[store:persist]', store: 'startup', operation: 'hydrate-lifecycle' }, error);
         }
+      } finally {
+        pending = false;
+        const needsRetry = !spaceThemeHydratedRef.current || hasUnhydratedStartupStores();
+        if (!cancelled && needsRetry && retryCount < 3) {
+          retryTimer = setTimeout(() => { retryTimer = null; void hydrate(); }, 500 * 2 ** retryCount++);
+        }
       }
-    })();
+    };
+    const retry = () => {
+      if (spaceThemeHydratedRef.current && !hasUnhydratedStartupStores()) return;
+      if (retryTimer !== null) clearTimeout(retryTimer);
+      retryTimer = null;
+      retryCount = 0;
+      void hydrate();
+    };
+    retryHydrationRef.current = retry;
+    window.addEventListener('focus', retry);
+    const onVisible = () => { if (document.visibilityState === 'visible') retry(); };
+    document.addEventListener('visibilitychange', onVisible);
+    void hydrate();
 
     return () => {
       cancelled = true;
+      if (retryTimer !== null) clearTimeout(retryTimer);
+      window.removeEventListener('focus', retry);
+      document.removeEventListener('visibilitychange', onVisible);
+      retryHydrationRef.current = () => {};
     };
   }, [spaceThemeHydratedRef]);
 
   return {
     startupThemeReady,
-    startupStoresReady
+    startupStoresReady,
+    retryPersistenceReadFailure: () => retryHydrationRef.current()
   };
 }
