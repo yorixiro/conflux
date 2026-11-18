@@ -26,6 +26,8 @@ Conflux 是个人项目。用户决定功能和外观，AI 负责实现、检查
 - **请求、工具、存储**：在上述基础上针对实际变更验证开关/执行、写入/读取或失败路径；不无关扩展测试范围。
 - **构建/打包/发布或大范围整合**：按实际目标加 `npm run build`、对应平台或全量回归；**普通小改不跑 `npm run verify`、全量 `npm test` 或付费模型测试**。
 
+PRoot 里 Vitest 报 rolldown `dlopen failed ... not accessible for the namespace` 时：把 `node_modules/@rolldown/binding-android-arm64/rolldown-binding.android-arm64.node` 复制到 `/data/data/com.termux/files/usr/tmp/conflux-native/`，再用 `NAPI_RS_NATIVE_LIBRARY_PATH=<该文件路径> npx vitest run ...` 运行。
+
 若当前工具不能执行检查，明确说“未运行”，留给能执行的环境验证，不把这件事伪装成通过，也不反复要求用户重复已做的检查。
 
 ## 交付
