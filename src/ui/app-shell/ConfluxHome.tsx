@@ -21,7 +21,6 @@ const modules: { label: string; shelf: CollectionShelf }[] = [
   { label: '图片素材', shelf: 'image' }
 ];
 
-/** Fixed structural slots for Claude's visual layer; no invented records or extra navigation. */
 export function ConfluxHome({
   conversations, activeConversationId, collaboratorCount, onOpenConversation,
   onNewConversation, onOpenShelf, onOpenGroup
@@ -38,39 +37,44 @@ export function ConfluxHome({
 
   return (
     <section className="conflux-home" aria-label="Conflux 首页">
-      <header className="conflux-home-header">
-        <h1 aria-label="Conflux 主页" lang="en">Conflux</h1>
-        <button type="button" className="conflux-home-chat" onClick={() => resume ? onOpenConversation(resume.id) : onNewConversation()}>
-          {resume ? '继续对话' : '开始聊天'}
-        </button>
-      </header>
-      <div className="conflux-home-layout">
-        <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
-          <CosmosChart />
-          <PoetDial now={now} />
-          <h2>当地时间</h2>
-          <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
-        </section>
-        <dl className="home-index">
-          <div><dt>对话</dt><dd>{conversations.length}</dd></div>
-          <div><dt>角色</dt><dd>{collaboratorCount}</dd></div>
-          <div><dt>消息</dt><dd>{conversations.reduce((n, item) => n + item.messageCount, 0)}</dd></div>
-        </dl>
-        <div className="conflux-home-secondary-row">
-          <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
-            <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
+      <div className="home-sheet">
+        <CosmosChart />
+        <header className="conflux-home-header">
+          <h1 aria-label="Conflux 主页" lang="en">Conflux</h1>
+          <button type="button" className="conflux-home-chat" onClick={() => resume ? onOpenConversation(resume.id) : onNewConversation()}>
+            {resume ? '继续对话' : '开始聊天'}
+          </button>
+        </header>
+        <div className="conflux-home-layout">
+          <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
+            <PoetDial now={now} />
+            <h2>当地时间</h2>
+            <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
           </section>
-          <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
-            <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
+          <dl className="home-index">
+            <div><dt>对话</dt><dd>{conversations.length}</dd></div>
+            <div><dt>角色</dt><dd>{collaboratorCount}</dd></div>
+            <div><dt>消息</dt><dd>{conversations.reduce((n, item) => n + item.messageCount, 0)}</dd></div>
+          </dl>
+          <div className="conflux-home-secondary-row">
+            <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
+              <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
+            </section>
+            <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
+              <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
+            </section>
+          </div>
+          <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
+            <h2>小功能</h2>
+            <div className="conflux-home-module-grid">
+              <svg className="home-orbit-track global-cosmos-art" viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="47.5" fill="none" stroke="currentColor" strokeDasharray="1 4" vectorEffect="non-scaling-stroke"/>
+              </svg>
+              {modules.map(module => <button type="button" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>{module.label}</button>)}
+              <button type="button" onClick={onOpenGroup}>群组</button>
+            </div>
           </section>
         </div>
-        <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
-          <h2>小功能</h2>
-          <div className="conflux-home-module-grid">
-            {modules.map(module => <button type="button" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>{module.label}</button>)}
-            <button type="button" onClick={onOpenGroup}>群组</button>
-          </div>
-        </section>
       </div>
     </section>
   );
