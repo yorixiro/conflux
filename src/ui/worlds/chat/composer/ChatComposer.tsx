@@ -1,4 +1,4 @@
-import { KekeFieldDecor, KekeModeButton, KekeSendArt } from '../../../keke-original/KekeOriginalBar';
+import { KekeFieldDecor, KekeSendArt } from '../../../keke-original/KekeOriginalBar';
 import { ImpactStyle } from '@capacitor/haptics';
 import type { ClipboardEvent, KeyboardEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -312,16 +312,9 @@ export function ChatComposer() {
           query={slashCommandQuery}
           onPick={handlePickSlashCommand}
         />
-        {showKekeChrome || persona ? (
+        {persona ? (
           <div className="chat-composer-topline">
-            {showKekeChrome ? <div className="modes" role="group" aria-label="快捷工具">
-              <KekeModeButton k="s" word="pièce" label="附件" hit={attachmentPickerOpen} disabled={interactionLocked} onClick={() => { setAttachmentPickerOpen((open) => !open); setKaomojiOpen(false); }} />
-              <span>✦</span>
-              <KekeModeButton k="l" word="kaomoji" label="颜文字" hit={kaomojiOpen} disabled={interactionLocked} onClick={() => { setKaomojiOpen((open) => !open); setAttachmentPickerOpen(false); }} />
-              <span>✦</span>
-              <KekeModeButton k="b" word="outils" label="工具" disabled={interactionLocked} onClick={actions.openToolbox} />
-            </div> : null}
-            {persona ? <PersonaModelSettings key={persona.id} persona={persona} /> : null}
+            <PersonaModelSettings key={persona.id} persona={persona} />
           </div>
         ) : null}
         <div className="chat-submit-anchor">
@@ -359,7 +352,7 @@ export function ChatComposer() {
                 interactionLocked={interactionLocked}
                 onSetPickerOpen={open => { setAttachmentPickerOpen(open); if (open) setKaomojiOpen(false); }}
               />
-              {!showKekeChrome ? <button
+              <button
                 type="button"
                 className={`composer-slot-btn composer-kaomoji-toggle ${kaomojiOpen ? 'active' : ''}`}
                 aria-label="颜文字"
@@ -368,7 +361,9 @@ export function ChatComposer() {
                 aria-controls="composer-kaomoji-drawer"
                 disabled={interactionLocked}
                 onClick={() => { setAttachmentPickerOpen(false); setKaomojiOpen(open => !open); }}
-              ><KaomojiFaceIcon /></button> : null}
+              >
+                <KaomojiFaceIcon />
+              </button>
               <div className={showKekeChrome ? 'fd' : 'composer-text-input'}>
                 <textarea
                   ref={textareaRef}

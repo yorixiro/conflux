@@ -15,32 +15,6 @@ export function KekeBarDeco() {
   return <div className="fam deco" aria-hidden="true"><span>{DECO}</span><span>{DECO}</span></div>;
 }
 
-type ModeKey = 's' | 'l' | 'b';
-const MODE_ART: Record<ModeKey, { ic: CSSProperties; svg: ReactNode; fam: string }> = {
-  s: {
-    ic: icon('bubble', '15px'), fam: '˚₊',
-    svg: <svg className="dd ico" viewBox="0 0 16 16"><path d="M2.8 4.6Q2.8 3 4.4 3h7.2q1.6 0 1.6 1.6v4.3q0 1.6-1.6 1.6H8.2l-3 2.6.4-2.6h-1.2q-1.6 0-1.6-1.6Z" /><path d="M5.6 6.8h4.8" /></svg>
-  },
-  l: {
-    ic: icon('mail', '16px', '11px'), fam: '✲',
-    svg: <svg className="dd ico" viewBox="0 0 16 16"><path d="M2.4 4.4h11.2v8.2H2.4Z" /><path d="m2.6 4.7 5.4 4.1 5.4-4.1" /></svg>
-  },
-  b: {
-    ic: icon('cloud', '17px', '12px'), fam: '⊹',
-    svg: <svg className="dd ico" viewBox="0 0 16 16"><path d="M5.2 2.2l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8ZM11.3 7l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6Z" /><circle cx="5" cy="12.2" r="1.1" /></svg>
-  }
-};
-
-type ModeButtonProps = { k: ModeKey; word: string; label: string; hit?: boolean; disabled?: boolean; onClick: () => void };
-
-/** One `.mode` chip with the prototype's exact markup; the label text is the only real-app difference. */
-export function KekeModeButton({ k, word, label, hit, disabled, onClick }: ModeButtonProps) {
-  const art = MODE_ART[k];
-  return <button type="button" className={`mode${hit ? ' hit' : ''}`} data-k={k} disabled={disabled} onClick={onClick}>
-    <i className="pp ic" style={art.ic} />{art.svg}<i>{word}</i>{label}<b className="fam">{art.fam}</b>
-  </button>;
-}
-
 export function KekeFolderArt() {
   return <>
     <span className="pp fish"><i className="ic" style={icon('fish', '34px')} /><i className="ic fold" style={icon('folder', '19px', '16px')} /></span>

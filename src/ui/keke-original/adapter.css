@@ -26,42 +26,9 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 /* A single aligned footer layout for both sticker skins. The tape, paper,
    icons and bubble ornaments remain skin-owned; only geometry is shared. */
 :root[data-cf=sticker] #chat .chat-composer .chat-composer-topline{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));
-  align-items:center;
-  column-gap:10px;
-  row-gap:0;
   min-height:32px;
   padding:0 2px;
   box-sizing:border-box;
-}
-:root[data-cf=sticker] #chat .chat-composer-topline>.modes{
-  justify-self:start;
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-  margin:0;
-  padding:0;
-}
-:root[data-cf=sticker] #chat .chat-composer-topline .mode{
-  rotate:0deg;
-  flex:0 0 auto;
-}
-:root[data-cf=sticker] #chat .chat-composer-topline>.chat-model-toolbar{
-  justify-self:end;
-  align-self:center;
-  width:auto;
-  max-width:100%;
-  min-width:0;
-  margin:0;
-  padding:0;
-}
-:root[data-cf=sticker] #chat .chat-composer-topline .model-effort-row{
-  justify-content:flex-end;
-  width:auto;
-  min-width:0;
 }
 :root[data-cf=sticker] #chat .chat-composer-topline .ps-footnote{
   margin:0;
@@ -72,7 +39,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
 }
 :root[data-cf=sticker] #chat .chat-submit-anchor .keke-shell>.row.chat-composer-input-row{
   display:grid;
-  grid-template-columns:36px minmax(0,1fr) 36px;
+  grid-template-columns:36px 36px minmax(0,1fr) 36px;
   align-items:center;
   column-gap:10px;
   min-height:44px;
@@ -88,6 +55,7 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
   padding:0;
 }
 :root[data-cf=sticker] #chat .chat-composer-input-row .fb,
+:root[data-cf=sticker] #chat .chat-composer-input-row .composer-kaomoji-toggle,
 :root[data-cf=sticker] #chat .chat-composer-input-row .sd{
   width:36px;
   height:36px;
@@ -102,9 +70,6 @@ html[data-keyboard-open="true"][data-cf=sticker] #chat nav.tabs{display:none}
   margin:0;
 }
 @media(max-width:440px){
-  :root[data-cf=sticker] #chat .chat-composer-topline{column-gap:5px}
-  :root[data-cf=sticker] #chat .chat-composer-topline>.modes{gap:5px}
-  :root[data-cf=sticker] #chat .chat-composer-topline .mode{padding-inline:6px;font-size:10.5px}
   :root[data-cf=sticker] #chat .chat-composer-topline .ps-footnote{font-size:10px}
   :root[data-cf=sticker] #chat .chat-submit-anchor .keke-shell>.row.chat-composer-input-row{column-gap:8px}
 }

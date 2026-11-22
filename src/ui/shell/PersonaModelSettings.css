@@ -37,18 +37,11 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
 .chat-composer .chat-composer-topline {
   order: 19;
   display: flex;
-  flex-wrap: wrap;
+  position: relative;
   align-items: center;
   justify-content: flex-end;
-  column-gap: 10px;
-  row-gap: 4px;
   width: 100%;
   min-width: 0;
-}
-.chat-composer .chat-composer-topline > .modes {
-  flex: 0 0 auto;
-  margin-right: auto;
-  min-width: max-content;
 }
 .chat-composer .chat-composer-topline > .chat-model-toolbar {
   order: 0;
@@ -65,6 +58,7 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
   gap: 4px;
 }
 .chat-composer-topline .model-quick-picker {
+  position: static;
   max-width: clamp(72px, 22vw, 150px);
 }
 .chat-composer-topline .model-quick-trigger,
@@ -76,10 +70,6 @@ body[data-polaris-preset^='keke-'] .chat-model-toolbar { color:var(--keke-ink,#7
   left: auto;
   max-width: calc(100vw - 24px);
 }
-:root[data-cf=sticker] #chat .chat-composer-topline > .modes {
-  padding: 2px 2px 0;
-}
-
 /* Role connections deliberately reuse the existing Persona Studio controls. */
 .conflux-role-connection {
   display: flex;
