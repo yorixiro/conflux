@@ -4,6 +4,16 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Atlas Labels';
+  src: url('./fonts/atlas-labels.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Atlas Mono';
+  src: url('./fonts/atlas-mono.woff2') format('woff2');
+  font-display: swap;
+}
 .conflux-home {
   box-sizing: border-box;
   position: relative;
@@ -45,19 +55,39 @@
 .conflux-home-clock time { display: grid; justify-items: start; gap: 6px; }
 .conflux-home-clock time strong { font: 400 clamp(50px, 9vw, 96px)/1 Georgia, serif; letter-spacing: -.065em; font-variant-numeric: tabular-nums; }
 .conflux-home-clock time span { font-size: 13px; color: var(--global-muted); }
-.home-index { margin: 0; display: flex; justify-content: space-between; padding-block: 10px; border-block: 1px solid var(--global-rule); }
-.home-index div { display: flex; align-items: baseline; justify-content: center; flex: 1; gap: 7px; }
-.home-index div + div { border-left: 1px solid var(--global-rule); }
-.home-index dt { color: var(--global-muted); font: 14px var(--global-serif); }
-.home-index dd { margin: 0; font: 24px Georgia, serif; }
-.conflux-home-secondary-row { display: flex; gap: 16px; }
-.conflux-home-secondary-row > section { flex: 1; border-bottom: 1px solid var(--global-rule); padding: 11px 0 13px; }
-.conflux-home-slot > header { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
-.conflux-home-slot-label { color: var(--global-muted); font-size: 12px; }
-.conflux-home-functions { padding-top: 6px; }
-.conflux-home-module-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.conflux-home-module-grid button { min-height: 44px; padding: 7px 12px; font: 15px var(--global-serif); border: 1px solid var(--global-rule); background: var(--global-panel); }
-.conflux-home-module-grid button:hover { border-color: var(--global-accent); }
+.home-index { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: clamp(16px, 4vw, 52px); }
+.home-index div { display: flex; align-items: baseline; gap: 9px; }
+.home-index dt, .conflux-home-slot-label { color: var(--global-muted); font: 14px/1.5 var(--global-serif); }
+.home-index dd { margin: 0; font: 25px/1.2 Georgia, serif; font-variant-numeric: tabular-nums; }
+.conflux-home-secondary-row { display: flex; align-items: center; gap: 26px; }
+.conflux-home-slot > header { display: flex; align-items: baseline; gap: 8px; }
+.conflux-home-secondary-row h2 { font-size: 16px; }
+.conflux-home-slot-label { font-size: 12px; }
+.conflux-home-functions { padding-top: 8px; }
+.conflux-home-functions h2 { display: flex; align-items: center; gap: 12px; }
+.conflux-home-functions h2::after {
+  content: ''; flex: 1; height: 1px; background: var(--global-rule);
+}
+.conflux-home-module-grid { display: flex; flex-wrap: wrap; gap: 0 clamp(16px, 3vw, 40px); }
+.conflux-home-module-grid button {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 44px; padding: 0 2px; font: 16px/1.5 var(--global-serif);
+  border: 0; background: transparent;
+}
+.conflux-home-module-grid button::after, .conflux-home-chat::after {
+  content: ''; display: inline-block; width: .95em; height: .95em; flex: none;
+  background: currentColor;
+  mask: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black'%3E%3Cpath d='M3 12 12 3M4 3h8v8'/%3E%3C/svg%3E");
+}
+.conflux-home-module-grid button::after { opacity: .58; }
+.conflux-home-module-grid button:hover { text-decoration: underline; text-underline-offset: 5px; }
+.conflux-home-chat { display: inline-flex; align-items: center; gap: 12px; }
+@media (min-width: 740px) {
+  .conflux-home-layout { grid-template-columns: minmax(0,1fr) auto; align-items: center; row-gap: 24px; }
+  .conflux-home-clock, .conflux-home-functions { grid-column: 1 / -1; }
+  .conflux-home-module-grid { justify-content: space-between; gap: 8px 24px; }
+  .conflux-home-module-grid button { font-size: 18px; gap: 18px; }
+}
 .home-cosmos-chart { position: absolute; width: 100%; height: 100%; inset: 0; z-index: -2; }
 :root[data-polaris-appearance='dark'] .conflux-home {
   /* One continuous sky behind the header, clock and shortcuts. */
@@ -68,30 +98,49 @@
   background-position: center, 61% 28%;
   background-repeat: no-repeat, repeat;
 }
-:root[data-polaris-appearance='dark'] .conflux-home-header { border-bottom: 1px solid var(--global-rule); }
-:root[data-polaris-appearance='dark'] .conflux-home h1 { font: 650 clamp(34px, 6vw, 58px)/1.1 var(--global-mono); letter-spacing: -.07em; text-transform: uppercase; }
+:root[data-polaris-appearance='dark'] .conflux-home-header { border: 0; }
+:root[data-polaris-appearance='dark'] .conflux-home h1 {
+  font: 400 clamp(27px, 4vw, 44px)/1.15 'Atlas Mono', var(--global-mono);
+  text-transform: uppercase; letter-spacing: .08em;
+}
+:root[data-polaris-appearance='dark'] .conflux-home-chat {
+  font: 16px var(--global-serif); padding-inline: 10px 2px;
+  color: var(--global-ink); background: transparent; border: 0;
+}
+:root[data-polaris-appearance='dark'] .conflux-home-chat::after { color: var(--global-accent); }
+:root[data-polaris-appearance='dark'] .conflux-home-chat:hover { text-decoration: underline; text-underline-offset: 5px; }
 :root[data-polaris-appearance='dark'] .conflux-home-clock {
   /* EH-UI eventHorizon.homePanel and decor, scoped to the lunar chart. */
   container-type: inline-size;
   --chart-grid: rgba(112,116,120,.12);
   --chart-orbit: 128,132,136;
   min-height: clamp(242px, 36svh, 410px); background: rgba(4,4,4,.16);
-  border-color: rgba(176,184,192,.32);
+  border: 0;
+}
+:root[data-polaris-appearance='dark'] .conflux-home-clock::before {
+  content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  /* EH-UI Event Horizon: 8px arms, 2px inset, 1px stroke. */
+  border: 12px solid transparent;
+  border-image: url('./lunar-art/chart-corners.svg') 11 / 11px;
 }
 :root[data-polaris-appearance='dark'] .conflux-home-clock::after {
   content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, rgba(4,4,4,.75), transparent 44%), linear-gradient(0deg, rgba(4,4,4,.4), transparent 34%);
 }
-:root[data-polaris-appearance='dark'] .conflux-home-clock h2::before { content: '[ '; color: var(--global-accent); }
-:root[data-polaris-appearance='dark'] .conflux-home-clock h2::after { content: ' ]'; color: var(--global-accent); }
-:root[data-polaris-appearance='dark'] .conflux-home-clock time strong { font: 450 clamp(30px, 8cqw, 58px)/1 var(--global-mono); letter-spacing: -.06em; }
-:root[data-polaris-appearance='dark'] .conflux-home-slot h2,
-:root[data-polaris-appearance='dark'] .conflux-home button,
-:root[data-polaris-appearance='dark'] .home-index dt { font-family: var(--global-mono), sans-serif; }
-:root[data-polaris-appearance='dark'] .home-index { background: color-mix(in srgb, var(--global-panel) 72%, transparent); border: 1px solid var(--global-rule); }
-:root[data-polaris-appearance='dark'] .home-index dd { font: 23px var(--global-mono); color: var(--global-accent); }
-:root[data-polaris-appearance='dark'] .conflux-home-module-grid button::before { content: '> ' / ''; color: var(--global-accent); }
-
+:root[data-polaris-appearance='dark'] :is(.conflux-home-clock h2, .home-index dt, .conflux-home-clock time span, .conflux-home-slot-label) {
+  font: 12px/1.5 'Atlas Labels', var(--global-sans);
+  letter-spacing: .06em; color: #b0b8c0;
+}
+:root[data-polaris-appearance='dark'] .conflux-home-clock time strong {
+  font: 400 clamp(30px, 8cqw, 58px)/1 'Atlas Mono', var(--global-mono); letter-spacing: -.055em;
+}
+:root[data-polaris-appearance='dark'] .home-index dd { font: 400 23px/1.2 'Atlas Mono', var(--global-mono); color: var(--global-ink); }
+:root[data-polaris-appearance='dark'] .conflux-home-functions h2::after {
+  background: linear-gradient(90deg, rgba(176,184,192,.35), transparent);
+}
+:root[data-polaris-appearance='dark'] .conflux-home-functions h2::before {
+  content: ''; width: 5px; height: 5px; transform: rotate(45deg); border: 1px solid #9098a0;
+}
 .lunar-plate, .lunar-profile { position: absolute; pointer-events: none; }
 .lunar-plate {
   inset: -4%;
