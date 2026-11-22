@@ -13,6 +13,7 @@ import { useAppLayoutSurface, useDesktopSidebarAutoCollapse } from './useAppLayo
 import { blurChatWorldFocus } from './chatWorldFocusHandoff';
 import { isWorldFrameInteractive } from './worldFrameInteractivity';
 import type { PersistenceReadFailureNoticeState } from './usePersistenceReadFailureNotice';
+import { useThemeDomEffects } from '../useThemeDomEffects';
 import { useAppearanceDomEffects } from '../useAppearanceDomEffects';
 import type { World } from '../../types/domain';
 
@@ -122,7 +123,7 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
     activeChatDensity,
     customization,
     displayPreferences,
-    themeTransitionPhase,
+    theme,
     worldPresence,
     collectionCollaboratorSwitchOpen,
     setCollectionCollaboratorSwitchOpen,
@@ -147,6 +148,11 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
   const backgroundBlur = resolveBackgroundBlur(customization.backgroundBlur, activeChatDensity);
   const starStyle = buildStarStyle(customization);
   const appLayoutSurface = useAppLayoutSurface();
+  const [chatHubOpen, setChatHubOpen] = useState(true);
+  const showChatHub = appLayoutSurface !== 'desktop' && !homeOpen && activeWorld === 'chat' && chatHubOpen;
+  const chatSkinActive = activeWorld === 'chat' && !homeOpen && !showChatHub
+    && !props.topbarProps.state.menuOpen && !quickSettingsOpen;
+  const themeTransitionPhase = useThemeDomEffects(theme, activeWorld, chatSkinActive);
   const hasWideLayout = isWideLayoutSurface(appLayoutSurface);
   const hasSidebarLayout = isSidebarLayoutSurface(appLayoutSurface);
   const showDesktopSidebar = shouldShowDesktopSidebar(appLayoutSurface, activeWorld);
@@ -303,6 +309,10 @@ export function useAppShellViewController(props: AppShellViewControllerInput) {
 
   return {
     ...props,
+    showChatHub,
+    setChatHubOpen,
+    chatSkinActive,
+    themeTransitionPhase,
     isWorldSwitching,
     isCollaboratorTransitionActive,
     backgroundUrl,

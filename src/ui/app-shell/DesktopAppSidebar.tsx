@@ -98,7 +98,8 @@ export function DesktopAppSidebar({
   onOpenApi
 }: DesktopAppSidebarProps) {
   const { language, t } = useI18n();
-  const kekeThemeActive = useSpaceStore((state) => state.theme.activePresetId === 'keke-doodle' || state.theme.activePresetId === 'keke-pois');
+  const kekePresetSelected = useSpaceStore((state) => state.theme.activePresetId === 'keke-doodle' || state.theme.activePresetId === 'keke-pois');
+  const kekeThemeActive = kekePresetSelected && activeWorld === 'chat' && presentation !== 'hub';
   const [sidebarTab, setSidebarTab] = useState<'profile' | 'library'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [contactQuery, setContactQuery] = useState('');
@@ -229,7 +230,7 @@ export function DesktopAppSidebar({
   ) : null;
 
   return (
-    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive && presentation !== 'hub' ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : presentation === 'profile' ? '当前 AI 资料' : t('desktop.navLabel')}>
+    <aside className={`desktop-app-sidebar ${collapsed ? 'collapsed' : ''} ${presentation === 'hub' ? 'conflux-conversation-hub' : ''} ${kekeThemeActive ? 'keke-themed' : ''}`} aria-label={presentation === 'hub' ? '对话与 AI 通讯录' : presentation === 'profile' ? '当前 AI 资料' : t('desktop.navLabel')}>
       {presentation === 'hub' ? (
         <>
           <header className="conflux-hub-heading">

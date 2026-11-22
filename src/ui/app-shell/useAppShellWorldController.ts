@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ImpactStyle } from '@capacitor/haptics';
 import { buildChatWorldProps, buildTopbarProps } from '../../app/shell/buildAppShellProps';
-import { useThemeDomEffects } from '../useThemeDomEffects';
 import { useWorldFramePresence } from '../useWorldFramePresence';
 import { triggerImpactActionHaptic } from '../haptics';
 import type { ChatUiState } from '../worlds/chat/context/ChatUiState';
@@ -11,7 +10,6 @@ import type { World } from '../../types/domain';
 type UseAppShellWorldControllerArgs = {
   activeWorld: World;
   activeThemePreview: Parameters<typeof buildTopbarProps>[0]['activeThemePreview'];
-  theme: Parameters<typeof useThemeDomEffects>[0];
   collectionShelf: Parameters<typeof buildTopbarProps>[0]['collectionShelf'];
   toggleWorld: () => void;
   derived: {
@@ -47,7 +45,6 @@ type UseAppShellWorldControllerArgs = {
 export function useAppShellWorldController({
   activeWorld,
   activeThemePreview,
-  theme,
   collectionShelf,
   toggleWorld,
   derived,
@@ -59,7 +56,6 @@ export function useAppShellWorldController({
   openToolbox,
   openProviderSettings
 }: UseAppShellWorldControllerArgs) {
-  const themeTransitionPhase = useThemeDomEffects(theme, activeWorld);
   const worldPresence = useWorldFramePresence(activeWorld);
   const shellWorld = activeWorld;
   const previousWorldSwitchingRef = useRef(false);
@@ -131,7 +127,6 @@ export function useAppShellWorldController({
   };
 
   return {
-    themeTransitionPhase,
     worldPresence,
     shellWorld,
     topbarProps,

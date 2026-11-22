@@ -1,0 +1,74 @@
+/* Shared appearance is independent of the character's conversation skin. */
+:root {
+  --global-paper: #f6f3e9;
+  --global-panel: #fcfaf3;
+  --global-ink: #1e2c25;
+  --global-muted: #645e50;
+  --global-rule: #c7c2ae;
+  --global-accent: #214b3a;
+  --global-tint: #e4e9de;
+  --global-mono: 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace;
+  --global-sans: 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --global-serif: 'Conflux Home Serif', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
+}
+:root[data-polaris-appearance='dark'] {
+  --global-paper: #0d0d12;
+  --global-panel: #17171e;
+  --global-ink: #eeedf3;
+  --global-muted: #b2adbd;
+  --global-rule: #43404e;
+  --global-accent: #c0acf8;
+  --global-tint: #302b3e;
+}
+.global-cosmos-art { display: none; }
+:root[data-polaris-appearance='dark'] .global-poet-art { display: none; }
+:root[data-polaris-appearance='dark'] .global-cosmos-art { display: revert; }
+
+.app-shell:not([data-conflux-chat-theme]) {
+  --bg: var(--global-paper);
+  --shell-bg: var(--global-paper);
+  --surface: var(--global-panel);
+  --surface-solid: var(--global-panel);
+  --surface-deep: var(--global-tint);
+  --text: var(--global-ink);
+  --text-soft: var(--global-muted);
+  --text-muted: var(--global-muted);
+  --border: var(--global-rule);
+  --border-hover: var(--global-accent);
+  --accent: var(--global-accent);
+  --accent-soft: var(--global-tint);
+  --cool-bg: var(--global-paper);
+  --cool-text: var(--global-ink);
+  --cool-surface-solid: var(--global-panel);
+  --cool-accent: var(--global-accent);
+  --card-bg: var(--global-panel);
+  background: var(--global-paper);
+  color: var(--global-ink);
+}
+.app-shell:not([data-conflux-chat-theme]) :is(.desktop-app-sidebar,.menu-sheet,.conflux-conversation-hub) {
+  background-color: var(--global-panel);
+  color: var(--global-ink);
+}
+.app-shell:not([data-conflux-chat-theme]) :is(.menu-sheet-title h2,.conflux-sidebar-section-title) {
+  font-family: var(--global-serif);
+}
+:root[data-polaris-appearance='dark'] .app-shell:not([data-conflux-chat-theme]) :is(.menu-sheet-title h2,.conflux-sidebar-section-title) {
+  font-family: var(--global-mono), sans-serif;
+}
+.app-shell .mobile-bottom-navigation {
+  color: var(--global-muted);
+  background: color-mix(in srgb, var(--global-panel) 88%, transparent);
+  border-top: 1px solid var(--global-rule);
+}
+.app-shell .mobile-bottom-navigation::before { content: none; }
+.app-shell .mobile-bottom-navigation__item[aria-current='page'] { color: var(--global-accent); }
+.app-shell .mobile-bottom-navigation__item[aria-current='page'] .mobile-bottom-navigation__icon {
+  background: var(--global-tint);
+  border-radius: 3px;
+}
+.app-shell .mobile-bottom-navigation__label { font: 400 13px/1.3 var(--global-serif); }
+:root[data-polaris-appearance='dark'] .mobile-bottom-navigation__label { font-family: var(--global-sans); }
+:root[data-polaris-appearance='dark'] .mobile-bottom-navigation__icon svg { width: 24px; height: 24px; }
+:root[data-polaris-appearance='dark'] .mobile-bottom-navigation__item[aria-current='page']::after {
+  content: ''; position: absolute; bottom: 0; width: 16px; height: 2px; background: var(--global-accent);
+}

@@ -234,7 +234,6 @@ export function useAppShellController() {
   const world = useAppShellWorldController({
     activeWorld,
     activeThemePreview,
-    theme,
     collectionShelf,
     toggleWorld,
     derived,
@@ -331,7 +330,7 @@ export function useAppShellController() {
     activeChatDensity: derived.activeChatDensity,
     customization,
     displayPreferences,
-    themeTransitionPhase: world.themeTransitionPhase,
+    theme,
     worldPresence: world.worldPresence,
     collectionSearchOpen: collection.searchOpen,
     collectionCollaboratorSwitchOpen: collection.collaboratorSwitchOpen,

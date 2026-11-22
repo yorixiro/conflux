@@ -7,6 +7,7 @@ import { MobileBottomNavigation } from './MobileBottomNavigation';
 import type { CollectionShelf } from '../../types/domain';
 import { useSpaceStore } from '../../stores/spaceStore';
 import '../keke-original';
+import './GlobalAppearance.css';
 import type { AppTopbarActions } from '../shell/AppTopbar';
 import { DesktopAppShellFrame } from './DesktopAppShellFrame';
 import { DesktopAppSidebar } from './DesktopAppSidebar';
@@ -29,6 +30,9 @@ export function AppShellView({
   customization,
   displayPreferences,
   themeTransitionPhase,
+  showChatHub,
+  setChatHubOpen,
+  chatSkinActive,
   worldPresence,
   collectionSearchOpen,
   collectionCollaboratorSwitchOpen,
@@ -80,14 +84,12 @@ export function AppShellView({
   setQuickSettingsOpen
 }: AppShellViewProps) {
   const kekePresetId = useSpaceStore((space) => space.theme.activePresetId);
-  const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && activeWorld === 'chat' && !homeOpen;
+  const kekeOriginalActive = (kekePresetId === 'keke-doodle' || kekePresetId === 'keke-pois') && chatSkinActive;
   const useBottomNavigation = appLayoutSurface !== 'desktop';
   const useDesktopSidebar = showDesktopSidebar && !useBottomNavigation;
   // Omit the home action in chat rather than assigning undefined to an exact optional callback.
   const mobileTopbarActions: AppTopbarActions = { ...topbarProps.actions };
   if (activeWorld === 'chat') delete mobileTopbarActions.onOpenHome;
-  const [chatHubOpen, setChatHubOpen] = useState(true);
-  const showChatHub = useBottomNavigation && !homeOpen && activeWorld === 'chat' && chatHubOpen;
   const chatCollaborator = desktopSidebarProps.chatCollaborator;
   // Gear buttons edit their own AI, even when another conversation is active.
   const [roomSettingsTargetId, setRoomSettingsTargetId] = useState<string | null>(null);
@@ -187,11 +189,11 @@ export function AppShellView({
   return (
     <main
       id={kekeOriginalActive ? 'chat' : undefined}
-      data-conflux-chat-theme={activeWorld === 'chat' && !homeOpen ? 'active' : undefined}
+      data-conflux-chat-theme={chatSkinActive ? 'active' : undefined}
       className={`app-shell ${useBottomNavigation && !kekeOriginalActive ? 'has-mobile-bottom-navigation' : ''} app-layout-${appLayoutSurface} ${hasWideLayout ? 'app-layout-wide' : 'app-layout-compact'} ${useDesktopSidebar ? 'has-desktop-sidebar' : ''} ${useDesktopSidebar && effectiveDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''} ${homeOpen ? 'home' : activeWorld} world-chroma-${shellWorld} chat-render-${activeChatDensity} ${isWorldSwitching ? 'world-switching' : ''} ${isCollaboratorTransitionActive ? 'collaborator-transition-active' : ''} ${collectionScopeDrawerOpen ? 'collaborator-scope-drawer-active' : ''} ${themeTransitionPhase ? `theme-transition-${themeTransitionPhase}` : ''}`}
       style={starStyle}
     >
-      {backgroundUrl ? (
+      {backgroundUrl && chatSkinActive ? (
         <div className="app-shell-background-override" aria-hidden="true">
           <div
             className="app-shell-background-image"

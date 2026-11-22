@@ -179,6 +179,9 @@ function syncStyleTag(layer: string, cssText: string) {
     next.setAttribute('data-polaris', layer);
     return next;
   })();
+  if (layer === 'preset' || layer === 'custom' || layer === 'generated') {
+    styleTag.media = document.querySelector(CHAT_THEME_PALETTE_SELECTOR) ? 'all' : 'not all';
+  }
   ensureStyleTagOrder(styleTag, layer);
   const runtimeCss = normalizeThemeCssForRuntime(cssText);
   const nextCss = runtimeCss.trim() ? runtimeCss : '';
@@ -303,7 +306,7 @@ function recordAppliedThemeSnapshot({
   lastSyncAtRef.current = now;
 }
 
-export function useThemeDomEffects(theme: ThemeState, activeWorld: World) {
+export function useThemeDomEffects(theme: ThemeState, activeWorld: World, chatSkinActive: boolean) {
   const prevVarsRef = useRef<Record<string, string>>({});
   const appliedSnapshotRef = useRef<ThemeDomSnapshot | null>(null);
   const lastSyncAtRef = useRef<number | null>(null);
@@ -317,17 +320,21 @@ export function useThemeDomEffects(theme: ThemeState, activeWorld: World) {
     if (typeof document === 'undefined') return;
     document.documentElement.dataset.polarisWorld = activeWorld;
     document.body.dataset.polarisWorld = activeWorld;
-    if (hasCreativeBackgroundOverride(theme)) {
+    for (const layer of ['preset', 'custom', 'generated']) {
+      const style = document.head.querySelector<HTMLStyleElement>(`style[data-polaris="${layer}"]`);
+      if (style) style.media = chatSkinActive ? 'all' : 'not all';
+    }
+    if (chatSkinActive && hasCreativeBackgroundOverride(theme)) {
       document.body.dataset.polarisBackgroundOverride = 'true';
     } else {
       delete document.body.dataset.polarisBackgroundOverride;
     }
-    if (theme.activePresetId) {
+    if (chatSkinActive && theme.activePresetId) {
       document.body.dataset.polarisPreset = theme.activePresetId;
     } else {
       delete document.body.dataset.polarisPreset;
     }
-    if (theme.activePresetId === 'keke-doodle' || theme.activePresetId === 'keke-pois') {
+    if (chatSkinActive && (theme.activePresetId === 'keke-doodle' || theme.activePresetId === 'keke-pois')) {
       document.documentElement.dataset.ct = theme.activePresetId === 'keke-pois' ? 'pois' : 'doodle';
       document.documentElement.dataset.cf = 'sticker';
     } else {
@@ -342,7 +349,7 @@ export function useThemeDomEffects(theme: ThemeState, activeWorld: World) {
       delete document.body.dataset.polarisBackgroundOverride;
       delete document.body.dataset.polarisPreset;
     };
-  }, [activeWorld, theme.activePresetId, theme.customCSS, theme.generatedCSS]);
+  }, [activeWorld, chatSkinActive, theme.activePresetId, theme.customCSS, theme.generatedCSS]);
 
   useLayoutEffect(() => {
     syncStyleTag('blank-base', buildThemeBlankBaseCss());
