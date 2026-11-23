@@ -16,14 +16,14 @@ export function LeoPlate() {
           <path d="M3 7h.7m14 16h.6m9-12h1m8 17h.5m-24-14h.4" stroke="#c8b08a" strokeWidth=".65" opacity=".46"/>
         </pattern>
         <linearGradient id="leo-foil" x2=".85" y2="1">
-          <stop stopColor="#ac936d"/><stop offset=".42" stopColor="#ead2a0"/><stop offset="1" stopColor="#ab9472"/>
+          <stop stopColor="#87765e"/><stop offset=".42" stopColor="#bfab89"/><stop offset="1" stopColor="#998367"/>
         </linearGradient>
         <linearGradient id="leo-light">
           <stop stopColor="#e6d098" stopOpacity="0"/><stop offset=".96" stopColor="#e6d098" stopOpacity=".15"/>
           <stop offset="1" stopColor="#f6e7ba" stopOpacity=".46"/>
         </linearGradient>
       </defs>
-      <path fill="#211e1b" d="M0 0h300v170H0z"/>
+      <path fill="#171614" d="M0 0h300v170H0z"/>
       <path fill="url(#leo-paper)" d="M0 0h300v170H0z"/>
       <g fill="none" stroke="url(#leo-foil)">
         <path d="M9 11h114m48 0h120v150H9V11" strokeWidth="1"/>
@@ -34,8 +34,8 @@ export function LeoPlate() {
         <tspan fontFamily="Georgia, serif" fontStyle="italic">Leo</tspan>
       </text>
       <path d="M263 51 248 38 205 53 197 73 222 90 220 117 93 98 26 102 93 69 197 73M93 69v29"
-        fill="none" stroke="#c6ab70" strokeWidth="1.05" strokeLinejoin="round"/>
-      <g fill="#e8d297">{stars.map(([x,y,r])=><circle key={x+'-'+y} cx={x} cy={y} r={r}/>)}</g>
+        fill="none" stroke="#b09a71" strokeWidth="1.05" strokeLinejoin="round"/>
+      <g fill="#c6b591">{stars.map(([x,y,r])=><circle key={x+'-'+y} cx={x} cy={y} r={r}/>)}</g>
       <circle className="leo-regulus" cx="220" cy="117" r="5.8" fill="none" stroke="#e9d296" strokeWidth=".8"/>
       {identified && <g>
         <path className="leo-sweep" d="M-64 0H0v170h-64z" fill="url(#leo-light)"/>

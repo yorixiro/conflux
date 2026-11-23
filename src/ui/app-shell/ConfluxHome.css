@@ -90,11 +90,16 @@
 }
 :root[data-polaris-appearance='dark'] .conflux-home::after {
   content: ''; position: fixed; inset: 0; z-index: 3; pointer-events: none;
-  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.07) 2px 4px);
+  background: repeating-linear-gradient(0deg, transparent 0 2px, var(--eh-crt-ink) 2px 4px);
 }
 .home-cosmos-chart { position: absolute; width: 100%; height: 100%; inset: 0; z-index: -2; }
 :root[data-polaris-appearance='dark'] .conflux-home {
-  background: #090b10;
+  /* Event Horizon: decor and homePanel tokens, scoped to this instrument. */
+  --eh-crt-ink: rgba(0,0,0,.16);
+  --eh-divider: rgba(144,152,160,.18);
+  --eh-chart-bg: #040404;
+  --eh-focus: #b0b8c0;
+  background: #080808;
   contain: paint;
 }
 :root[data-polaris-appearance='dark'] .conflux-home-header { border: 0; }
@@ -114,8 +119,8 @@
   --chart-grid: rgba(112,116,120,.12);
   --chart-orbit: 128,132,136;
   min-height: clamp(212px, 36svh, 410px);
-  background: #090b11 center / cover url('./lunar-art/star-atlas.webp');
-  border: 0;
+  background: var(--eh-chart-bg) center / cover url('./lunar-art/star-atlas.webp');
+  border: 0; border-radius: 0; box-shadow: none;
 }
 :root[data-polaris-appearance='dark'] .conflux-home-clock::before {
   content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none;
@@ -149,15 +154,22 @@
 }
 .lunar-camera {
   position: absolute; width: min(96%, 128cqh); aspect-ratio: 1;
-  left: 62%; top: 52%; translate: -50% -50%;
-  animation: lunar-approach 24s cubic-bezier(.42,0,.38,1) infinite alternate;
+  left: 51%; top: 55%; translate: -50% -50%;
+
 }
 .home-cosmos-chart { container-type: size; pointer-events: none; overflow: hidden; }
 .lunar-disc {
-  position: absolute; inset: 18%;
+  position: absolute; inset: 10%;
+  filter: saturate(.65) brightness(.84);
+  mask-image: linear-gradient(117deg, #000 40%, rgba(0,0,0,.86) 56%, rgba(0,0,0,.25) 77%, transparent 90%);
   background: center / contain no-repeat url('./lunar-art/luna.webp');
 }
-.lunar-instrument { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.home-cosmos-chart::after {
+  content: ''; position: absolute; inset: -4%; pointer-events: none;
+  background: center / cover no-repeat url('./lunar-art/dust-folds.webp');
+  animation: dust-fold-drift 54s ease-in-out infinite alternate;
+}
+.lunar-instrument { mask-image: conic-gradient(from 18deg, #0001, #0008 27deg, #0001 68deg, #0001 166deg, #000 227deg, #0004 272deg, #0001 305deg); position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .lunar-scale { stroke: rgba(var(--chart-orbit),.59); stroke-width: .58; animation: lunar-revolve 160s linear infinite; }
 .lunar-reticle { stroke: rgba(var(--chart-orbit),.48); color: rgb(var(--chart-orbit)); stroke-width: .65; }
 .lunar-profile {
@@ -165,10 +177,7 @@
   opacity: .36; background: center / 100% 100% no-repeat url('./lunar-art/transect.svg');
   animation: lunar-transect 32s ease-in-out infinite alternate;
 }
-@keyframes lunar-approach {
-  from { transform: translate(1%, 1%) scale(.96); }
-  to { transform: translate(-3%, 1%) scale(1.14); }
-}
+@keyframes dust-fold-drift { to { transform: translate(2%, -.8%); } }
 @keyframes lunar-plate-drift { to { transform: translate(2%, 1%) scale(1.025); } }
 @keyframes lunar-revolve { to { transform: rotate(1turn); } }
 @keyframes lunar-transect { to { transform: translate(-6%, -9%); } }
@@ -180,17 +189,17 @@
     min-height: 0; height: clamp(270px, 32vw, 470px);
     padding: clamp(26px, 3vw, 44px);
   }
-  .lunar-camera { left: 60%; width: 145cqh; }
+  .lunar-camera { left: 49%; width: 154cqh; }
 }
 @container (max-width: 650px) {
-  .lunar-camera { left: 61%; top: 48%; width: min(85cqw, 139cqh); }
+  .lunar-camera { left: 53%; top: 49%; width: min(99cqw, 148cqh); }
 }
 .leo-plate, .lunar-frieze { display: none; }
 :root[data-polaris-appearance='dark'] .leo-plate {
   position: absolute; z-index: 1; right: 3%; bottom: 3%; width: clamp(108px, 21%, 216px);
-  display: block; padding: 0; border: 0; background: #211e1b; font-family: var(--global-serif);
+  display: block; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: #171614; font-family: var(--global-serif);
 }
-.conflux-home .leo-plate:focus-visible { outline-color: #e1c8a0; }
+:root[data-polaris-appearance='dark'] .conflux-home button:focus-visible { outline-color: var(--eh-focus); }
 .leo-plate svg { display: block; width: 100%; }
 .leo-plate[aria-pressed='true'] .leo-regulus { animation: leo-acquire .85s ease-out both; transform-origin: 220px 117px; }
 .leo-sweep { animation: leo-scan .9s linear forwards; }
@@ -202,7 +211,7 @@
 :root[data-polaris-appearance='dark'] .lunar-frieze {
   position: absolute; inset: 4px 12px auto; height: 26px;
   display: flex; align-items: center; gap: 7px; pointer-events: none;
-  color: #cab790;
+  color: #a99674;
 }
 .lunar-frieze::before, .lunar-frieze::after {
   content: ''; flex: 1; height: 1px;
@@ -212,9 +221,9 @@
 .lunar-frieze svg { flex: none; width: min(56%, 252px); height: 24px; }
 :root[data-polaris-appearance='dark'] :is(.conflux-home-clock h2, .conflux-home-secondary-row, .conflux-home-functions h2) { display: none; }
 :root[data-polaris-appearance='dark'] .conflux-home-clock { align-content: end; }
-:root[data-polaris-appearance='dark'] .conflux-home-functions { padding-top: 6px; border-top: 1px solid #a9b1bd29; }
+:root[data-polaris-appearance='dark'] .conflux-home-functions { padding-top: 6px; border-top: 1px solid var(--eh-divider); }
 @media (prefers-reduced-motion: reduce) {
   .leo-plate[aria-pressed='true'] .leo-regulus, .leo-note { animation: none; }
   .leo-sweep { display: none; }
-  .lunar-camera, .lunar-scale, .lunar-profile, .lunar-plate { animation: none; }
+  .home-cosmos-chart::after, .lunar-scale, .lunar-profile, .lunar-plate { animation: none; }
 }
