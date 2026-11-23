@@ -19,6 +19,21 @@ export function CosmosChart() {
   return <div className="home-cosmos-chart global-cosmos-art" aria-hidden="true">
     <div className="lunar-plate" />
     <div className="lunar-camera">
+      <svg className="atlas-orbits" viewBox="-240 -240 480 480" fill="none">
+        <g stroke="#83a3ce" strokeWidth="1">
+          <circle r="161"/><circle r="168" opacity=".65"/><circle r="71"/>
+          <ellipse rx="204" ry="67" transform="rotate(-36)" opacity=".58"/>
+          <ellipse rx="109" ry="178" transform="rotate(-18)" opacity=".45"/>
+          <path d="M-217 0h434M0 -215v426" opacity=".52"/>
+        </g>
+        <path fill="#7998c2" d="M0-143 7-25 20-10 139 0 19 9 7 25 0 143-7 25-19 9-139 0-20-10-7-25Z"/>
+        <circle r="57" stroke="#dbbf7c" strokeWidth="1.4"/>
+        <circle r="63" stroke="#c5ac72" strokeWidth=".65" strokeDasharray="52 7 1 4"/>
+        {Array.from({length: 8}, (_, i) => <g key={i} transform={`rotate(${i * 45}) translate(0 -164)`}>
+          <circle r={i % 2 ? 7 : 10} fill={i % 3 ? '#25385d' : '#819dc0'} stroke="#96b2d5"/>
+          {i % 2 === 1 && <path d="M0-7a7 7 0 0 0 0 14Z" fill="#c5b78f"/>}
+        </g>)}
+      </svg>
       <div className="lunar-disc" />
       <svg className="lunar-instrument" viewBox="-240 -240 480 480" fill="none">
         <g className="lunar-scale">
@@ -27,9 +42,9 @@ export function CosmosChart() {
           <circle r="230" strokeDasharray="1 7"/>
         </g>
         <g className="lunar-reticle">
-          <path d="M83 -51l24 -39h43" strokeWidth=".6"/>
-          <circle cx="83" cy="-51" r="2" />
-          <text x="111" y="-94" stroke="none" fill="currentColor" fontSize="8">晨昏线</text>
+          <path d="M31 -22l34 -43h52" strokeWidth=".6"/>
+          <circle cx="31" cy="-22" r="2" />
+          <text x="71" y="-70" stroke="none" fill="currentColor" fontSize="8">晨昏线</text>
           <path d="M-165 -36v-20l11 -11h29m-34 8 5 -5m-1 5 5 -5"/>
           <path d="M-21 166h42m-38 -3v6m7 -5v3m7 -3v3m7 -5v7m7 -5v3m7 -3v3"/>
 

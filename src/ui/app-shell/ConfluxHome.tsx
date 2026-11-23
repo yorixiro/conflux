@@ -22,6 +22,22 @@ const modules: { label: string; shelf: CollectionShelf }[] = [
   { label: '图片素材', shelf: 'image' }
 ];
 
+function AlmanacMonth({ now }: { now: Date }) {
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstColumn = (new Date(year, month, 1).getDay() + 6) % 7 + 1;
+  const count = new Date(year, month + 1, 0).getDate();
+  return <div className="atlas-month">
+    <time dateTime={`${year}-${String(month + 1).padStart(2, '0')}`}>{year} 年 {month + 1} 月</time>
+    <div className="atlas-dates">
+      {Array.from('一二三四五六日', day => <small key={day}>{day}</small>)}
+      {Array.from({length: count}, (_, i) => <span key={i}
+        style={i === 0 ? {gridColumnStart: firstColumn} : undefined}
+        aria-current={i + 1 === now.getDate() ? 'date' : undefined}>{i + 1}</span>)}
+    </div>
+  </div>;
+}
+
 export function ConfluxHome({
   conversations, activeConversationId, collaboratorCount, onOpenConversation,
   onNewConversation, onOpenShelf, onOpenGroup
@@ -46,6 +62,7 @@ export function ConfluxHome({
           </button>
         </header>
         <div className="home-observation">
+          <div className="atlas-caption"><i lang="la">Luna</i><span>月面观测图</span></div>
           <CosmosChart />
           <LeoPlate />
         </div>
@@ -64,8 +81,9 @@ export function ConfluxHome({
             <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
               <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
             </section>
-            <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
+            <section className="conflux-home-slot conflux-home-calendar" aria-label="日历">
               <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
+              <AlmanacMonth now={now} />
             </section>
           </div>
           <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">

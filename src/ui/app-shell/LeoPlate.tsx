@@ -12,24 +12,27 @@ export function LeoPlate() {
     aria-pressed={identified} onClick={() => setIdentified(value => !value)}>
     <svg viewBox="0 0 300 170" aria-hidden="true">
       <defs>
-        <pattern id="leo-graticule" width="28" height="25" patternUnits="userSpaceOnUse" patternTransform="rotate(-10)">
-          <path d="M28 0H0V25" fill="none" stroke="#d2bc83" opacity=".18" strokeWidth=".65"/>
+        <pattern id="leo-paper" width="37" height="31" patternUnits="userSpaceOnUse">
+          <path d="M3 7h.7m14 16h.6m9-12h1m8 17h.5m-24-14h.4" stroke="#c8b08a" strokeWidth=".65" opacity=".46"/>
         </pattern>
         <linearGradient id="leo-foil" x2=".85" y2="1">
-          <stop stopColor="#816942"/><stop offset=".34" stopColor="#e0cb92"/><stop offset=".6" stopColor="#95805a"/><stop offset="1" stopColor="#c5af78"/>
+          <stop stopColor="#ac936d"/><stop offset=".42" stopColor="#ead2a0"/><stop offset="1" stopColor="#ab9472"/>
         </linearGradient>
         <linearGradient id="leo-light">
           <stop stopColor="#e6d098" stopOpacity="0"/><stop offset=".96" stopColor="#e6d098" stopOpacity=".15"/>
           <stop offset="1" stopColor="#f6e7ba" stopOpacity=".46"/>
         </linearGradient>
       </defs>
-      <path fill="#101622" d="M0 0h300v170H0z"/>
-      <path fill="url(#leo-graticule)" d="M8 8h284v154H8z"/>
+      <path fill="#211e1b" d="M0 0h300v170H0z"/>
+      <path fill="url(#leo-paper)" d="M0 0h300v170H0z"/>
       <g fill="none" stroke="url(#leo-foil)">
-        <path d="M33 5h252q0 10 10 10v140q-10 0-10 10H15q0-10-10-10V21" strokeWidth=".9"/>
-        <path d="M38 9h244l9 9v134l-9 9H18l-9-9V26" strokeWidth=".43"/>
-        <path d="M15 133Q90 65 182 33M71 147Q147 77 281 49" strokeWidth=".46" strokeDasharray="2 3" opacity=".54"/>
+        <path d="M9 11h78m124 0h80v150H9V11" strokeWidth="1"/>
+        <path d="M14 34h4m-4 24h2m-2 24h4m-4 24h2m-2 24h4m25 27v-3m30 3v-2m30 2v-3m30 3v-2m30 2v-3m30 3v-2m30 2v-3m30 3v-2"
+          strokeWidth=".7" opacity=".7"/>
       </g>
+      <text x="146" y="17" textAnchor="middle" fill="#dfc598" fontSize="15">
+        狮子座 <tspan fontFamily="Georgia, serif" fontStyle="italic">· Leo</tspan>
+      </text>
       <path d="M263 51 248 38 205 53 197 73 222 90 220 117 93 98 26 102 93 69 197 73M93 69v29"
         fill="none" stroke="#c6ab70" strokeWidth="1.05" strokeLinejoin="round"/>
       <g fill="#e8d297">{stars.map(([x,y,r])=><circle key={x+'-'+y} cx={x} cy={y} r={r}/>)}</g>
@@ -44,8 +47,7 @@ export function LeoPlate() {
           <text x="149" y="151" fill="#e7d9b1" fontSize="13">轩辕十四 · Regulus</text>
         </g>
       </g>}
-      <text x="19" y="151" fill="#e7d9b1" fontSize="16">狮子座</text>
-      <text x="74" y="151" fill="#cfb884" fontFamily="Georgia, serif" fontStyle="italic" fontSize="15">Leo</text>
+      <path d="m220 110 1.5 5.5 5.5 1.5-5.5 1.5-1.5 5.5-1.5-5.5-5.5-1.5 5.5-1.5Z" fill="#e8cf9e"/>
     </svg>
   </button>;
 }
