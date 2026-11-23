@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CollectionShelf } from '../../types/domain';
 import type { ConversationCardSummary } from '../../app/collection/conversationCardSummary';
 import { CosmosChart, PoetDial } from './HomeClockArt';
+import { LeoPlate } from './LeoPlate';
 import './ConfluxHome.css';
 
 type ConfluxHomeProps = {
@@ -38,13 +39,16 @@ export function ConfluxHome({
   return (
     <section className="conflux-home" aria-label="Conflux 首页">
       <div className="home-sheet">
-        <CosmosChart />
         <header className="conflux-home-header">
           <h1 aria-label="Conflux 主页" lang="en">Conflux</h1>
           <button type="button" className="conflux-home-chat" onClick={() => resume ? onOpenConversation(resume.id) : onNewConversation()}>
             {resume ? '继续对话' : '开始聊天'}
           </button>
         </header>
+        <div className="home-observation">
+          <CosmosChart />
+          <LeoPlate />
+        </div>
         <div className="conflux-home-layout">
           <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
             <PoetDial now={now} />
@@ -67,9 +71,6 @@ export function ConfluxHome({
           <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
             <h2>小功能</h2>
             <div className="conflux-home-module-grid">
-              <svg className="home-orbit-track global-cosmos-art" viewBox="0 0 100 100" aria-hidden="true">
-                <circle cx="50" cy="50" r="47.5" fill="none" stroke="currentColor" strokeDasharray="1 4" vectorEffect="non-scaling-stroke"/>
-              </svg>
               {modules.map(module => <button type="button" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>{module.label}</button>)}
               <button type="button" onClick={onOpenGroup}>群组</button>
             </div>

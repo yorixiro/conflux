@@ -27,6 +27,12 @@ export function CosmosChart() {
           <circle r="230" strokeDasharray="1 7"/>
         </g>
         <g className="lunar-reticle">
+          <path d="M83 -51l24 -39h43" strokeWidth=".6"/>
+          <circle cx="83" cy="-51" r="2" />
+          <text x="111" y="-94" stroke="none" fill="currentColor" fontSize="8">晨昏线</text>
+          <path d="M-165 -36v-20l11 -11h29m-34 8 5 -5m-1 5 5 -5"/>
+          <path d="M-21 166h42m-38 -3v6m7 -5v3m7 -3v3m7 -5v7m7 -5v3m7 -3v3"/>
+
           <path d="M-235 0h89m292 0h89M0 -234v82m0 304v82"/>
           <path d="M-4 -195l4 7 4-7zM-4 195l4-7 4 7z" fill="currentColor" stroke="none"/>
         </g>
