@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CollectionShelf } from '../../types/domain';
 import type { ConversationCardSummary } from '../../app/collection/conversationCardSummary';
-import { CosmosChart, PoetDial } from './HomeClockArt';
+import { CosmosChart, LunarFrieze, PoetDial } from './HomeClockArt';
 import { LeoPlate } from './LeoPlate';
 import './ConfluxHome.css';
 
@@ -22,22 +22,6 @@ const modules: { label: string; shelf: CollectionShelf }[] = [
   { label: '图片素材', shelf: 'image' }
 ];
 
-function AlmanacMonth({ now }: { now: Date }) {
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const firstColumn = (new Date(year, month, 1).getDay() + 6) % 7 + 1;
-  const count = new Date(year, month + 1, 0).getDate();
-  return <div className="atlas-month">
-    <time dateTime={`${year}-${String(month + 1).padStart(2, '0')}`}>{year} 年 {month + 1} 月</time>
-    <div className="atlas-dates">
-      {Array.from('一二三四五六日', day => <small key={day}>{day}</small>)}
-      {Array.from({length: count}, (_, i) => <span key={i}
-        style={i === 0 ? {gridColumnStart: firstColumn} : undefined}
-        aria-current={i + 1 === now.getDate() ? 'date' : undefined}>{i + 1}</span>)}
-    </div>
-  </div>;
-}
-
 export function ConfluxHome({
   conversations, activeConversationId, collaboratorCount, onOpenConversation,
   onNewConversation, onOpenShelf, onOpenGroup
@@ -54,46 +38,41 @@ export function ConfluxHome({
 
   return (
     <section className="conflux-home" aria-label="Conflux 首页">
-      <div className="home-sheet">
-        <header className="conflux-home-header">
-          <h1 aria-label="Conflux 主页" lang="en">Conflux</h1>
-          <button type="button" className="conflux-home-chat" onClick={() => resume ? onOpenConversation(resume.id) : onNewConversation()}>
-            {resume ? '继续对话' : '开始聊天'}
-          </button>
-        </header>
-        <div className="home-observation">
-          <div className="atlas-caption"><i lang="la">Luna</i><span>月面观测图</span></div>
+      <header className="conflux-home-header">
+        <h1 aria-label="Conflux 主页" lang="en">Conflux</h1>
+        <button type="button" className="conflux-home-chat" onClick={() => resume ? onOpenConversation(resume.id) : onNewConversation()}>
+          {resume ? '继续对话' : '开始聊天'}
+        </button>
+      </header>
+      <div className="conflux-home-layout">
+        <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
+          <LunarFrieze />
           <CosmosChart />
           <LeoPlate />
-        </div>
-        <div className="conflux-home-layout">
-          <section className="conflux-home-slot conflux-home-clock" aria-label="时钟展示">
-            <PoetDial now={now} />
-            <h2>当地时间</h2>
-            <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
+          <PoetDial now={now} />
+          <h2>当地时间</h2>
+          <time dateTime={now.toISOString()}><strong>{time}</strong><span>{date}</span></time>
+        </section>
+        <dl className="home-index">
+          <div><dt>对话</dt><dd>{conversations.length}</dd></div>
+          <div><dt>角色</dt><dd>{collaboratorCount}</dd></div>
+          <div><dt>消息</dt><dd>{conversations.reduce((n, item) => n + item.messageCount, 0)}</dd></div>
+        </dl>
+        <div className="conflux-home-secondary-row">
+          <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
+            <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
           </section>
-          <dl className="home-index">
-            <div><dt>对话</dt><dd>{conversations.length}</dd></div>
-            <div><dt>角色</dt><dd>{collaboratorCount}</dd></div>
-            <div><dt>消息</dt><dd>{conversations.reduce((n, item) => n + item.messageCount, 0)}</dd></div>
-          </dl>
-          <div className="conflux-home-secondary-row">
-            <section className="conflux-home-slot conflux-home-todo" aria-label="待办占位区域">
-              <header><h2>待办</h2><span className="conflux-home-slot-label">预留</span></header>
-            </section>
-            <section className="conflux-home-slot conflux-home-calendar" aria-label="日历">
-              <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
-              <AlmanacMonth now={now} />
-            </section>
+          <section className="conflux-home-slot conflux-home-calendar" aria-label="日历占位区域">
+            <header><h2>日历</h2><span className="conflux-home-slot-label">预留</span></header>
+          </section>
+        </div>
+        <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
+          <h2>小功能</h2>
+          <div className="conflux-home-module-grid">
+            {modules.map(module => <button type="button" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>{module.label}</button>)}
+            <button type="button" onClick={onOpenGroup}>群组</button>
           </div>
-          <section className="conflux-home-slot conflux-home-functions" aria-label="小功能区域">
-            <h2>小功能</h2>
-            <div className="conflux-home-module-grid">
-              {modules.map(module => <button type="button" key={module.shelf} onClick={() => onOpenShelf(module.shelf)}>{module.label}</button>)}
-              <button type="button" onClick={onOpenGroup}>群组</button>
-            </div>
-          </section>
-        </div>
+        </section>
       </div>
     </section>
   );

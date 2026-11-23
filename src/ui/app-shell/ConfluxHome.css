@@ -88,73 +88,106 @@
   .conflux-home-module-grid { justify-content: space-between; gap: 8px 24px; }
   .conflux-home-module-grid button { font-size: 18px; gap: 18px; }
 }
-.home-sheet { position: relative; }
-.home-observation, .atlas-month { display: none; }
-:root[data-polaris-appearance='dark'] .conflux-home {
-  --atlas-ink: #e0d4b5; --atlas-faint: #b0b7c9; --atlas-rule: #a79978;
-  background: #202743; color: var(--atlas-ink); contain: paint;
-}
 :root[data-polaris-appearance='dark'] .conflux-home::after {
   content: ''; position: fixed; inset: 0; z-index: 3; pointer-events: none;
   background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.07) 2px 4px);
 }
-:root[data-polaris-appearance='dark'] .home-sheet {
-  width: min(960px, 86%); margin: 0 auto; padding: clamp(24px, 4vw, 56px) 0 36px;
-  display: grid; grid-template-columns: minmax(156px, .36fr) minmax(0, 1fr);
-  grid-template-areas: "mast mast" "clock chart" "calendar chart" "counts chart" "links links" "todo todo";
-  grid-template-rows: auto auto 1fr auto auto auto; gap: 14px clamp(12px, 2.3vw, 30px);
-  --chart-orbit: 132,163,204;
+.home-cosmos-chart { position: absolute; width: 100%; height: 100%; inset: 0; z-index: -2; }
+:root[data-polaris-appearance='dark'] .conflux-home {
+  background: #090b10;
+  contain: paint;
 }
-:root[data-polaris-appearance='dark'] .conflux-home-layout,
-:root[data-polaris-appearance='dark'] .conflux-home-secondary-row { display: contents; }
-:root[data-polaris-appearance='dark'] .conflux-home-header {
-  grid-area: mast; width: 100%; padding: 0 0 10px; margin: 0;
-  border-bottom: 1px solid #ac9b7659;
+:root[data-polaris-appearance='dark'] .conflux-home-header { border: 0; }
+:root[data-polaris-appearance='dark'] .conflux-home h1 {
+  font: 400 clamp(27px, 4vw, 44px)/1.15 'Atlas Mono', var(--global-mono);
+  text-transform: uppercase; letter-spacing: .08em;
 }
-:root[data-polaris-appearance='dark'] .conflux-home h1 { font: italic 400 clamp(32px, 4vw, 54px)/1 Georgia,serif; letter-spacing: -.055em; }
 :root[data-polaris-appearance='dark'] .conflux-home-chat {
-  padding: 0 3px; background: transparent; border: 0; color: var(--atlas-ink); font: 16px var(--global-serif);
+  font: 16px var(--global-serif); padding-inline: 10px 2px;
+  color: var(--global-ink); background: transparent; border: 0;
 }
-:root[data-polaris-appearance='dark'] .home-observation {
-  display: block; grid-area: chart; position: relative; container-type: size;
-  align-self: center; height: clamp(365px, 42vw, 480px); border: 1px solid #b9a880;
-  overflow: hidden; isolation: isolate; background: #273559;
-  --moon-x: 48%; --moon-y: 42%; --orbit-size: min(87cqw, 95cqh);
-}
-.home-observation::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: center / cover url('./lunar-art/star-atlas.webp'); mix-blend-mode: screen; opacity: .85;
-}
-.atlas-caption { position: absolute; z-index: 1; top: 4.5%; left: 4.5%; color: #dfc99a; display: grid; gap: 3px; }
-.atlas-caption i { font: italic clamp(22px, 5cqw, 34px)/1 Georgia,serif; }
-.atlas-caption span { font: 13px var(--global-serif); }
+:root[data-polaris-appearance='dark'] .conflux-home-chat::after { color: var(--global-accent); }
+:root[data-polaris-appearance='dark'] .conflux-home-chat:hover { text-decoration: underline; text-underline-offset: 5px; }
 :root[data-polaris-appearance='dark'] .conflux-home-clock {
-  grid-area: clock; min-height: 0; gap: 10px; padding: 15px 0 5px; border: 0; background: transparent;
+  /* EH-UI eventHorizon.homePanel and decor, scoped to the lunar chart. */
+  container-type: inline-size;
+  --chart-grid: rgba(112,116,120,.12);
+  --chart-orbit: 128,132,136;
+  min-height: clamp(212px, 36svh, 410px);
+  background: #090b11 center / cover url('./lunar-art/star-atlas.webp');
+  border: 0;
 }
-:root[data-polaris-appearance='dark'] .conflux-home-clock h2,
-:root[data-polaris-appearance='dark'] .home-index dt,
-:root[data-polaris-appearance='dark'] .conflux-home-clock time span,
-:root[data-polaris-appearance='dark'] .conflux-home-slot-label { font: 13px/1.5 var(--global-serif); color: var(--atlas-faint); }
+:root[data-polaris-appearance='dark'] .conflux-home-clock::before {
+  content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  /* EH-UI Event Horizon: 8px arms, 2px inset, 1px stroke. */
+  border: 12px solid transparent;
+  border-image: url('./lunar-art/chart-corners.svg') 11 / 11px;
+}
+:root[data-polaris-appearance='dark'] .conflux-home-clock::after {
+  content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(4,4,4,.75), transparent 44%), linear-gradient(0deg, rgba(4,4,4,.4), transparent 34%);
+}
+:root[data-polaris-appearance='dark'] :is(.home-index dt, .conflux-home-clock time span) {
+  font: 12px/1.5 'Atlas Labels', var(--global-sans);
+  letter-spacing: .06em; color: #b0b8c0;
+}
 :root[data-polaris-appearance='dark'] .conflux-home-clock time strong {
-  font: 400 clamp(36px, 4vw, 57px)/1 Georgia,serif; letter-spacing: -.04em;
+  font: 400 clamp(30px, 8cqw, 58px)/1 'Atlas Mono', var(--global-mono); letter-spacing: -.055em;
 }
-:root[data-polaris-appearance='dark'] .conflux-home-calendar {
-  grid-area: calendar; align-self: start; border-block: 1px solid #a7997870; padding-block: 12px;
+:root[data-polaris-appearance='dark'] .home-index dd { font: 400 23px/1.2 'Atlas Mono', var(--global-mono); color: var(--global-ink); }
+.lunar-plate, .lunar-profile { position: absolute; pointer-events: none; }
+.lunar-plate {
+  inset: -4%;
+  mask-image: radial-gradient(ellipse at 68% 47%, #0009, transparent 73%);
+  background: center / cover url('./lunar-art/plate.webp');
+  animation: lunar-plate-drift 36s ease-in-out infinite alternate;
 }
-:root[data-polaris-appearance='dark'] .conflux-home-calendar header { display: none; }
-:root[data-polaris-appearance='dark'] .atlas-month { display: grid; gap: 10px; }
-.atlas-month time { font: 15px var(--global-serif); }
-.atlas-dates { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 0; text-align: center; font: 13px/1.5 Georgia,serif; }
-.atlas-dates small { font-size: 10px; color: var(--atlas-faint); }
-.atlas-dates [aria-current] { color: #252b45; border-radius: 50%; background: #d9c59a; justify-self: center; width: 1.6em; }
-:root[data-polaris-appearance='dark'] .home-index { grid-area: counts; display: grid; gap: 3px; }
-:root[data-polaris-appearance='dark'] .home-index div { justify-content: space-between; }
-:root[data-polaris-appearance='dark'] .home-index dd { font: 18px Georgia,serif; }
-:root[data-polaris-appearance='dark'] .conflux-home-todo { grid-area: todo; }
-:root[data-polaris-appearance='dark'] .conflux-home-functions { grid-area: links; }
-:root[data-polaris-appearance='dark'] .conflux-home-functions h2::after { background: #a799785e; }
-.leo-plate {
-  position: absolute; z-index: 1; right: 3%; bottom: 3%; width: clamp(170px, 38%, 245px);
+.home-cosmos-chart::before {
+  content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), var(--chart-grid) 12.5%),
+    linear-gradient(0deg, transparent calc(50% - 1px), var(--chart-grid) 50%, transparent calc(50% + 1px));
+}
+.lunar-camera {
+  position: absolute; width: min(96%, 128cqh); aspect-ratio: 1;
+  left: 62%; top: 52%; translate: -50% -50%;
+  animation: lunar-approach 24s cubic-bezier(.42,0,.38,1) infinite alternate;
+}
+.home-cosmos-chart { container-type: size; pointer-events: none; overflow: hidden; }
+.lunar-disc {
+  position: absolute; inset: 18%;
+  background: center / contain no-repeat url('./lunar-art/luna.webp');
+}
+.lunar-instrument { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lunar-scale { stroke: rgba(var(--chart-orbit),.59); stroke-width: .58; animation: lunar-revolve 160s linear infinite; }
+.lunar-reticle { stroke: rgba(var(--chart-orbit),.48); color: rgb(var(--chart-orbit)); stroke-width: .65; }
+.lunar-profile {
+  height: 27%; bottom: 4%; left: -7%; width: 116%;
+  opacity: .36; background: center / 100% 100% no-repeat url('./lunar-art/transect.svg');
+  animation: lunar-transect 32s ease-in-out infinite alternate;
+}
+@keyframes lunar-approach {
+  from { transform: translate(1%, 1%) scale(.96); }
+  to { transform: translate(-3%, 1%) scale(1.14); }
+}
+@keyframes lunar-plate-drift { to { transform: translate(2%, 1%) scale(1.025); } }
+@keyframes lunar-revolve { to { transform: rotate(1turn); } }
+@keyframes lunar-transect { to { transform: translate(-6%, -9%); } }
+@media (min-width: 900px) {
+  :root[data-polaris-appearance='dark'] :is(.conflux-home-header, .conflux-home-layout) {
+    width: min(calc(100% - 64px), 1440px);
+  }
+  :root[data-polaris-appearance='dark'] .conflux-home-clock {
+    min-height: 0; height: clamp(270px, 32vw, 470px);
+    padding: clamp(26px, 3vw, 44px);
+  }
+  .lunar-camera { left: 60%; width: 145cqh; }
+}
+@container (max-width: 650px) {
+  .lunar-camera { left: 61%; top: 48%; width: min(85cqw, 139cqh); }
+}
+.leo-plate, .lunar-frieze { display: none; }
+:root[data-polaris-appearance='dark'] .leo-plate {
+  position: absolute; z-index: 1; right: 3%; bottom: 3%; width: clamp(108px, 21%, 216px);
   display: block; padding: 0; border: 0; background: #211e1b; font-family: var(--global-serif);
 }
 .conflux-home .leo-plate:focus-visible { outline-color: #e1c8a0; }
@@ -165,46 +198,23 @@
 @keyframes leo-scan { to { transform: translateX(365px); } }
 @keyframes leo-acquire { 0%, 65% { opacity: .45; } 80% { transform: scale(1.7); opacity: 1; } 100% { transform: scale(1.12); } }
 @keyframes leo-identify { from { opacity: 0; } to { opacity: 1; } }
-.home-cosmos-chart {
-  position: absolute; inset: 0; pointer-events: none;
+
+:root[data-polaris-appearance='dark'] .lunar-frieze {
+  position: absolute; inset: 4px 12px auto; height: 26px;
+  display: flex; align-items: center; gap: 7px; pointer-events: none;
+  color: #cab790;
 }
-.lunar-plate {
-  position: absolute; inset: -4%;
-  mask-image: radial-gradient(ellipse at 69% 44%, #0006, transparent 66%);
-  background: center / cover url('./lunar-art/plate.webp');
-  animation: lunar-plate-drift 36s ease-in-out infinite alternate;
+.lunar-frieze::before, .lunar-frieze::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, transparent, #a895715f);
 }
-.lunar-camera {
-  position: absolute; left: var(--moon-x); top: var(--moon-y); width: var(--orbit-size);
-  aspect-ratio: 1; translate: -50% -50%; animation: lunar-approach 24s ease-in-out infinite alternate;
-}
-.atlas-orbits { position: absolute; inset: 0; width: 100%; height: 100%; }
-.lunar-disc { position: absolute; inset: 39.2%; background: center / contain no-repeat url('./lunar-art/luna.webp'); }
-.lunar-instrument { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.lunar-scale { stroke: rgba(var(--chart-orbit),.48); stroke-width: .58; animation: lunar-revolve 160s linear infinite; }
-.lunar-reticle { stroke: rgba(var(--chart-orbit),.48); color: rgb(var(--chart-orbit)); stroke-width: .65; }
-.lunar-profile {
-  position: absolute; height: 22%; bottom: 14%; left: -4%; width: 112%;
-  opacity: .24; mask-image: linear-gradient(90deg, transparent, #000 24% 82%, transparent);
-  background: center / 100% 100% no-repeat url('./lunar-art/transect.svg'); animation: lunar-transect 32s ease-in-out infinite alternate;
-}
-@keyframes lunar-approach { from { transform: scale(.98); } to { transform: scale(1.035) rotate(-1deg); } }
-@keyframes lunar-plate-drift { to { transform: translate(2%, 1%) scale(1.025); } }
-@keyframes lunar-revolve { to { transform: rotate(1turn); } }
-@keyframes lunar-transect { to { transform: translate(-6%, -9%); } }
-@media (max-width: 620px) {
-  :root[data-polaris-appearance='dark'] .home-sheet {
-    width: calc(100% - 36px); grid-template-columns: 1fr 1fr;
-    grid-template-areas: "mast mast" "clock counts" "chart chart" "links links" "calendar todo";
-    grid-template-rows: auto; gap: 12px;
-  }
-  :root[data-polaris-appearance='dark'] .home-index { align-content: center; justify-self: end; min-width: 76px; }
-  :root[data-polaris-appearance='dark'] .home-observation { height: auto; aspect-ratio: 1 / 1.06; --moon-y: 39%; }
-  :root[data-polaris-appearance='dark'] .conflux-home-clock { padding: 0; }
-  .leo-plate { width: clamp(147px, 42%, 200px); }
-}
+.lunar-frieze::after { transform: scaleX(-1); }
+.lunar-frieze svg { flex: none; width: min(56%, 252px); height: 24px; }
+:root[data-polaris-appearance='dark'] :is(.conflux-home-clock h2, .conflux-home-secondary-row, .conflux-home-functions h2) { display: none; }
+:root[data-polaris-appearance='dark'] .conflux-home-clock { align-content: end; }
+:root[data-polaris-appearance='dark'] .conflux-home-functions { padding-top: 6px; border-top: 1px solid #a9b1bd29; }
 @media (prefers-reduced-motion: reduce) {
-  .lunar-camera, .lunar-scale, .lunar-profile, .lunar-plate,
   .leo-plate[aria-pressed='true'] .leo-regulus, .leo-note { animation: none; }
   .leo-sweep { display: none; }
+  .lunar-camera, .lunar-scale, .lunar-profile, .lunar-plate { animation: none; }
 }

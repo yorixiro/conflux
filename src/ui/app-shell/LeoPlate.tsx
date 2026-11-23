@@ -26,25 +26,22 @@ export function LeoPlate() {
       <path fill="#211e1b" d="M0 0h300v170H0z"/>
       <path fill="url(#leo-paper)" d="M0 0h300v170H0z"/>
       <g fill="none" stroke="url(#leo-foil)">
-        <path d="M9 11h78m124 0h80v150H9V11" strokeWidth="1"/>
+        <path d="M9 11h114m48 0h120v150H9V11" strokeWidth="1"/>
         <path d="M14 34h4m-4 24h2m-2 24h4m-4 24h2m-2 24h4m25 27v-3m30 3v-2m30 2v-3m30 3v-2m30 2v-3m30 3v-2m30 2v-3m30 3v-2"
           strokeWidth=".7" opacity=".7"/>
       </g>
       <text x="146" y="17" textAnchor="middle" fill="#dfc598" fontSize="15">
-        狮子座 <tspan fontFamily="Georgia, serif" fontStyle="italic">· Leo</tspan>
+        <tspan fontFamily="Georgia, serif" fontStyle="italic">Leo</tspan>
       </text>
       <path d="M263 51 248 38 205 53 197 73 222 90 220 117 93 98 26 102 93 69 197 73M93 69v29"
         fill="none" stroke="#c6ab70" strokeWidth="1.05" strokeLinejoin="round"/>
       <g fill="#e8d297">{stars.map(([x,y,r])=><circle key={x+'-'+y} cx={x} cy={y} r={r}/>)}</g>
-      <g fill="#b8aa8d" fontFamily="Georgia, serif" fontSize="10" fontStyle="italic">
-        <text x="25" y="93">β</text><text x="87" y="60">δ</text><text x="184" y="71">γ</text><text x="229" y="117">α</text>
-      </g>
       <circle className="leo-regulus" cx="220" cy="117" r="5.8" fill="none" stroke="#e9d296" strokeWidth=".8"/>
       {identified && <g>
         <path className="leo-sweep" d="M-64 0H0v170h-64z" fill="url(#leo-light)"/>
         <g className="leo-note">
           <path d="M220 124v7l-8 7h-46" fill="none" stroke="#c3aa75" strokeWidth=".7"/>
-          <text x="149" y="151" fill="#e7d9b1" fontSize="13">轩辕十四 · Regulus</text>
+          <text x="166" y="151" fill="#e7d9b1" fontSize="13">轩辕十四</text>
         </g>
       </g>}
       <path d="m220 110 1.5 5.5 5.5 1.5-5.5 1.5-1.5 5.5-1.5-5.5-5.5-1.5 5.5-1.5Z" fill="#e8cf9e"/>
